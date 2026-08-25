@@ -1,342 +1,331 @@
 <!DOCTYPE html>
-<html lang="ua" data-lang="ua">
+<html lang="uk" data-lang="uk">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MILIPSTORE — Digital Space for Your Setup</title>
-    <!-- Google Fonts & Material Symbols -->
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
     <link rel="stylesheet" href="style.css">
-    <!-- Telegram WebApp API -->
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
     <!-- LOADING SCREEN -->
-    <div id="loadingScreen" class="loading-screen">
-        <div class="loading-content">
-            <span class="loading-brand">MILIPSTORE</span>
-            <div class="loading-bar-wrap">
-                <div id="loadingBar" class="loading-bar"></div>
+    <div id="loader" class="loader-screen">
+        <div class="loader-content">
+            <div class="loader-logo">MILIPSTORE</div>
+            <div class="loader-sub" data-i18n="loader_sub">DIGITAL EXPERIENCE</div>
+            <div class="loader-bar-wrap">
+                <div id="loader-bar" class="loader-bar"></div>
             </div>
-            <span id="loadingPercent" class="loading-percent">0%</span>
+            <div id="loader-percent" class="loader-percent">0%</div>
         </div>
     </div>
 
-    <!-- FILM GRAIN & AMBIENT LAYERS -->
-    <div class="film-grain"></div>
-    <div class="ambient-layer">
-        <div class="ambient-blur-spot spot-1"></div>
-        <div class="ambient-blur-spot spot-2"></div>
-        <div class="digital-butterfly-canvas"></div>
+    <!-- BACKGROUND EFFECTS -->
+    <div class="bg-noise"></div>
+    <div class="bg-gradient-shapes">
+        <div class="ambient-shape shape-1"></div>
+        <div class="ambient-shape shape-2"></div>
     </div>
+    <div class="bg-grid"></div>
+    <div class="bg-particles" id="particles"></div>
 
-    <!-- FLOATING GLASS HEADER -->
-    <header class="header" id="mainHeader">
-        <div class="header-inner">
-            <div class="logo-area" onclick="switchView('home')">
-                <img src="logo-milipstore.png" alt="MILIPSTORE" class="brand-logo">
-                <span class="brand-name">MILIPSTORE</span>
+    <!-- HEADER / NAVIGATION -->
+    <header id="header" class="header">
+        <div class="header-container">
+            <div class="logo-area">
+                <a href="#" class="logo-link">
+                    <span class="logo-text">MilipStore</span>
+                    <span class="logo-butterfly">🦋</span>
+                </a>
             </div>
-
-            <nav class="nav-floating">
-                <a href="#" onclick="switchView('home')" data-i18n="shop">Магазин</a>
-                <a href="#" onclick="scrollToSection('newArrivalsSection')" data-i18n="new">Новинки</a>
-                <a href="#" onclick="filterCategory('mice')" data-i18n="mice">Мишки</a>
-                <a href="#" onclick="filterCategory('keyboards')" data-i18n="keyboards">Клавіатури</a>
-                <a href="#" onclick="filterCategory('headsets')" data-i18n="headsets">Навушники</a>
-                <a href="#" onclick="filterCategory('accessories')" data-i18n="accessories">Інше</a>
+            
+            <nav class="nav-links">
+                <a href="#catalog" data-i18n="nav_catalog">МАГАЗИН</a>
+                <a href="#new" data-i18n="nav_new">НОВИНКИ</a>
+                <a href="#mice" data-i18n="nav_mice">МИШКИ</a>
+                <a href="#setup-lab" data-i18n="nav_setup">SETUP LAB</a>
+                <a href="#delivery" data-i18n="nav_delivery">ДОСТАВКА</a>
             </nav>
 
             <div class="header-actions">
-                <div class="lang-switcher">
-                    <button class="lang-btn active" id="btnUA" onclick="setLanguage('ua')">UA</button>
-                    <span class="lang-divider">/</span>
-                    <button class="lang-btn" id="btnRU" onclick="setLanguage('ru')">RU</button>
-                </div>
-                <button class="icon-btn" id="searchToggleBtn" title="Search"><span class="material-symbols-outlined">search</span></button>
-                <button class="icon-btn" onclick="openWishlistModal()" title="Saved"><span class="material-symbols-outlined">favorite</span></button>
-                <button class="icon-btn" id="cartToggleBtn" title="Cart">
-                    <span class="material-symbols-outlined">shopping_bag</span>
-                    <span id="cartBadge" class="cart-badge" style="display: none;">0</span>
+                <button id="search-btn" class="icon-btn" title="Пошук">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                 </button>
+                <button id="wishlist-btn" class="icon-btn" title="Обране">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                    <span class="badge" id="wishlist-count">0</span>
+                </button>
+                <button id="cart-btn" class="icon-btn" title="Кошик">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                    <span class="badge" id="cart-count">0</span>
+                </button>
+                <div class="lang-switcher">
+                    <button class="lang-btn active" data-lang-switch="uk">UA</button>
+                    <span class="lang-sep">/</span>
+                    <button class="lang-btn" data-lang-switch="ru">RU</button>
+                </div>
             </div>
         </div>
     </header>
 
-    <!-- SEARCH OVERLAY -->
-    <div id="searchOverlay" class="search-overlay">
-        <div class="search-overlay-inner">
-            <div class="search-input-box">
-                <span class="material-symbols-outlined search-big-icon">search</span>
-                <input type="text" id="searchInput" placeholder="What are you looking for?" data-i18n-placeholder="searchPlaceholder" autocomplete="off">
-                <button class="close-search-btn" onclick="closeSearch()"><span class="material-symbols-outlined">close</span></button>
-            </div>
-            <div class="search-trending">
-                <span data-i18n="trending">Trending:</span>
-                <button onclick="quickSearch('Attack Shark')">Attack Shark X3</button>
-                <button onclick="quickSearch('PAW3395')">PAW3395</button>
-                <button onclick="quickSearch('Wireless')">Wireless</button>
-            </div>
-            <div id="searchResultsLive" class="search-live-results"></div>
+    <!-- STATUS BAR -->
+    <div class="system-status-bar">
+        <div class="status-item">
+            <span class="status-dot"></span>
+            <span data-i18n="sys_online">MILIPSTORE SYSTEM ONLINE</span>
         </div>
+        <div class="status-item">KYIV / UA <span id="live-clock">15:42</span></div>
     </div>
 
-    <!-- MAIN APP CONTAINER -->
-    <main class="main-container">
+    <main>
+        <!-- HERO SECTION -->
+        <section class="hero-section">
+            <div class="outline-bg-text">SETUP SETUP SETUP</div>
+            
+            <div class="hero-content">
+                <div class="hero-label" data-i18n="hero_label">MILIPSTORE / DIGITAL PERIPHERALS</div>
+                <h1 class="hero-title">
+                    <span class="title-build">BUILD</span>
+                    <span class="title-your">YOUR</span>
+                    <span class="title-setup">SETUP.</span>
+                </h1>
 
-        <!-- HOME VIEW -->
-        <div id="homeView" class="view-section active">
+                <!-- ORBIT & PRODUCT SYSTEM -->
+                <div class="orbit-container" id="orbitContainer">
+                    <div class="orbit-ring"></div>
+                    <div class="orbit-item item-1" data-orbit="54G">54G</div>
+                    <div class="orbit-item item-2" data-orbit="8000HZ">8000HZ</div>
+                    <div class="orbit-item item-3" data-orbit="WIRELESS">WIRELESS</div>
+                    <div class="orbit-item item-4" data-orbit="PAW3395">PAW3395</div>
+                    <div class="orbit-item item-5" data-orbit="NEW">NEW 2026</div>
+                    <div class="orbit-item item-6" data-orbit="EXPLORE">EXPLORE →</div>
 
-            <!-- HERO SECTION WITH ORBIT SYSTEM -->
-            <section class="hero-digital-space">
-                <div class="hero-status-bar">
-                    <span>MILIPSTORE SYSTEM ONLINE</span>
-                    <span>PRODUCTS 24</span>
-                    <span>NEW 06</span>
-                    <span id="liveClock">15:42</span>
+                    <!-- HERO CENTER PRODUCT -->
+                    <div class="hero-product-float" id="heroProductCard" onclick="openProductModal()">
+                        <div class="product-glow"></div>
+                        <img src="attack-shark-x3-box.jpg" alt="Attack Shark X3 Box" id="heroImage" class="floating-img">
+                        <div class="product-tag-float">
+                            <span class="model">ATTACK SHARK X3</span>
+                            <span class="action" data-i18n="click_to_open">ВІДКРИТИ ПРОСТІР →</span>
+                        </div>
+                    </div>
                 </div>
+            </div>
+        </section>
 
-                <div class="hero-content-center" id="heroOrbitArea">
-                    <span class="hero-top-label">MILIPSTORE / DIGITAL PERIPHERALS</span>
-                    <h1 class="hero-giant-title">
-                        <span class="t-line-1">BUILD</span>
-                        <span class="t-line-2">YOUR</span>
-                        <span class="t-line-3 outline-text">SETUP.</span>
-                    </h1>
+        <!-- CATALOG / EXPLORE SECTION -->
+        <section id="catalog" class="catalog-section">
+            <div class="section-header">
+                <span class="section-tag">01 / CATALOG</span>
+                <h2 data-i18n="cat_title">DIGITAL SPACE CATALOGUE</h2>
+            </div>
 
-                    <!-- ORBIT ELEMENTS -->
-                    <div class="orbit-system">
-                        <div class="orbit-item orbit-1">54G</div>
-                        <div class="orbit-item orbit-2">8000HZ</div>
-                        <div class="orbit-item orbit-3">WIRELESS</div>
-                        <div class="orbit-item orbit-4">PAW3395</div>
+            <div class="catalog-grid">
+                <!-- PRODUCT CARD: ATTACK SHARK X3 -->
+                <div class="product-module" onclick="openProductModal()">
+                    <div class="module-top">
+                        <span class="index">01 / 01</span>
+                        <button class="wishlist-toggle" onclick="event.stopPropagation(); toggleWishlist(this)">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                        </button>
                     </div>
-
-                    <div class="hero-center-product" id="heroProductRender">
-                        <img src="attack-shark-x3-box.jpg" alt="Attack Shark X3" class="floating-box-img">
+                    <div class="module-image-wrap">
+                        <img src="attack-shark-x3-box.jpg" alt="Attack Shark X3" class="module-img">
+                        <div class="module-specs-overlay">
+                            <span>54G</span>
+                            <span>8K</span>
+                            <span>WIRELESS</span>
+                        </div>
                     </div>
+                    <div class="module-bottom">
+                        <div class="module-info">
+                            <span class="brand">ATTACK SHARK</span>
+                            <h3 class="name">X3 WIRELESS GAMING MOUSE</h3>
+                        </div>
+                        <div class="module-price-block">
+                            <span class="price">₴ 2,499</span>
+                            <span class="view-link" data-i18n="view_product">ПЕРЕГЛЯНУТИ →</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
 
-                    <div class="hero-bottom-action">
-                        <button class="btn-digital-space" onclick="scrollToSection('categoriesSection')">
-                            <span data-i18n="exploreSpace">EXPLORE DIGITAL SPACE</span> →
+    <!-- PRODUCT EXPERIENCE MODAL / PAGE -->
+    <div id="productModal" class="product-modal">
+        <div class="modal-backdrop" onclick="closeProductModal()"></div>
+        <div class="modal-container">
+            <button class="modal-close" onclick="closeProductModal()">×</button>
+            
+            <div class="modal-breadcrumb">
+                MILIPSTORE / <span data-i18n="bread_mice">MICE</span> / ATTACK SHARK X3
+            </div>
+
+            <div class="modal-content-grid">
+                <!-- LEFT GALLERY -->
+                <div class="gallery-side">
+                    <div class="gallery-main-view">
+                        <img id="mainGalleryImg" src="attack-shark-x3-box.jpg" alt="Attack Shark X3 Box">
+                        <div class="gallery-progress">01 / 04</div>
+                    </div>
+                    <div class="thumbnails-grid">
+                        <button class="thumb-btn active" onclick="switchImage('attack-shark-x3-box.jpg', 0)">
+                            <img src="attack-shark-x3-box.jpg" alt="Box">
+                            <span data-i18n="thumb_box">Коробка</span>
+                        </button>
+                        <button class="thumb-btn" onclick="switchImage('attack-shark-x3-black.jpg', 1)">
+                            <img src="attack-shark-x3-black.jpg" alt="Black">
+                            <span data-i18n="thumb_black">Black</span>
+                        </button>
+                        <button class="thumb-btn" onclick="switchImage('attack-shark-x3-white.jpg', 2)">
+                            <img src="attack-shark-x3-white.jpg" alt="White">
+                            <span data-i18n="thumb_white">White</span>
                         </button>
                     </div>
                 </div>
 
-                <div class="bg-outline-ticker">
-                    <span>SETUP SETUP SETUP SETUP SETUP SETUP SETUP</span>
-                </div>
-            </section>
-
-            <!-- CATEGORY ORBIT NAVIGATION -->
-            <section id="categoriesSection" class="categories-orbit-section">
-                <div class="section-heading-block">
-                    <span class="sec-tag">INTERACTIVE CATALOG</span>
-                    <h2 data-i18n="exploreCategories">EXPLORE YOUR SETUP</h2>
-                </div>
-                <div class="category-interactive-grid">
-                    <div class="cat-node" onmouseenter="previewCategory('mice')" onclick="filterCategory('mice')">
-                        <span class="node-count">08</span>
-                        <h3>МИШКИ</h3>
-                        <span class="node-arrow">→</span>
-                    </div>
-                    <div class="cat-node" onmouseenter="previewCategory('keyboards')" onclick="filterCategory('keyboards')">
-                        <span class="node-count">06</span>
-                        <h3>КЛАВІАТУРИ</h3>
-                        <span class="node-arrow">→</span>
-                    </div>
-                    <div class="cat-node" onmouseenter="previewCategory('headsets')" onclick="filterCategory('headsets')">
-                        <span class="node-count">05</span>
-                        <h3>НАВУШНИКИ</h3>
-                        <span class="node-arrow">→</span>
-                    </div>
-                    <div class="cat-node" onmouseenter="previewCategory('accessories')" onclick="filterCategory('accessories')">
-                        <span class="node-count">05</span>
-                        <h3>АКСЕСУАРИ</h3>
-                        <span class="node-arrow">→</span>
-                    </div>
-                </div>
-            </section>
-
-            <!-- FEATURED PRODUCT POSTER -->
-            <section class="featured-poster-section">
-                <div class="section-heading-block">
-                    <span class="sec-tag">CURATED SHOWROOM</span>
-                    <h2>FEATURED PRODUCT</h2>
-                </div>
-                <div class="featured-digital-card" onclick="openProduct(0)">
-                    <div class="feat-left-img">
-                        <img src="attack-shark-x3-box.jpg" alt="Attack Shark X3">
-                    </div>
-                    <div class="feat-right-info">
-                        <span class="feat-brand">ATTACK SHARK</span>
-                        <h3 class="feat-title">X3</h3>
-                        <p class="feat-desc" data-i18n="x3Desc">Wireless Gaming Mouse. Флагманський сенсор PAW3395 та ультралегкий корпус 54г.</p>
-                        <div class="feat-meta-row">
-                            <span class="feat-price">1549 ₴</span>
-                            <span class="feat-stock" data-i18n="inStock">В наявності</span>
-                        </div>
-                        <button class="btn-digital-outline" data-i18n="viewDetails">VIEW PRODUCT →</button>
-                    </div>
-                </div>
-            </section>
-
-            <!-- NEW ARRIVALS EDITORIAL MASONRY -->
-            <section id="newArrivalsSection" class="new-arrivals-editorial">
-                <div class="section-heading-block">
-                    <span class="sec-tag">NEW / 2026</span>
-                    <h2 data-i18n="newArrivals">NEW ARRIVALS</h2>
-                </div>
-                <div id="productsGrid" class="editorial-masonry-grid">
-                    <!-- Dynamic Render via script.js -->
-                </div>
-            </section>
-
-            <!-- SETUP LAB & CONFIGURATOR -->
-            <section class="setup-lab-section">
-                <div class="section-heading-block">
-                    <span class="sec-tag">BUILD YOUR SETUP</span>
-                    <h2 data-i18n="setupLabTitle">SETUP LAB.</h2>
-                </div>
-                <div class="setup-lab-box">
-                    <div class="lab-visual-canvas">
-                        <img src="attack-shark-x3-box.jpg" alt="Setup Lab">
-                        <div class="lab-hotspot" style="top: 50%; left: 50%;" onclick="openProduct(0)">
-                            <span class="hotspot-pulse"></span>
-                            <div class="hotspot-tip">Attack Shark X3 — 1549 ₴</div>
+                <!-- RIGHT INFO & ARCHITECTURE -->
+                <div class="info-side">
+                    <div class="product-header-info">
+                        <span class="badge-new" data-i18n="tag_bestseller">BESTSELLER 2026</span>
+                        <h2>ATTACK SHARK X3</h2>
+                        <p class="subtitle" data-i18n="prod_subtitle">Ультралегка бездротова ігрова миша трирежимного підключення</p>
+                        <div class="price-row">
+                            <span class="current-price">₴ 2,499</span>
+                            <span class="stock-status" data-i18n="in_stock">● В наявності (18 шт)</span>
                         </div>
                     </div>
-                    <div class="lab-configurator-panel">
-                        <h3 data-i18n="configuratorTitle">YOUR SETUP SUMMARY</h3>
-                        <div class="config-rows">
-                            <div class="config-row"><span>Mouse (Attack Shark X3)</span><span>1549 ₴</span></div>
-                            <div class="config-row"><span>Keyboard</span><span>—</span></div>
-                            <div class="config-row"><span>Headset</span><span>—</span></div>
+
+                    <!-- COLOR SELECTOR -->
+                    <div class="config-block">
+                        <label class="config-label">
+                            <span data-i18n="label_color">КОЛІР:</span> 
+                            <span id="selectedColorLabel" class="selected-val" data-i18n="color_not_selected">НЕ ВИБРАНО</span>
+                        </label>
+                        <div class="color-options">
+                            <button class="color-option black" onclick="selectColor('black')" title="Black">
+                                <span class="dot"></span> Black
+                            </button>
+                            <button class="color-option white" onclick="selectColor('white')" title="White">
+                                <span class="dot"></span> White
+                            </button>
                         </div>
-                        <div class="config-total">
-                            <span data-i18n="totalSum">TOTAL</span>
-                            <span>1549 ₴</span>
+                    </div>
+
+                    <!-- ACTIONS -->
+                    <div class="action-buttons-row">
+                        <button class="btn-primary" onclick="addToCart()" data-i18n="btn_add_cart">ДОДАТИ В КОШИК</button>
+                        <button class="btn-secondary" onclick="toggleModalWishlist()" id="modalWishBtn">♡</button>
+                    </div>
+
+                    <!-- DATA TABS / SECTIONS -->
+                    <div class="data-modules-container">
+                        <!-- 1. Description -->
+                        <div class="data-accordion">
+                            <button class="accordion-header" onclick="toggleAccordion(this)">
+                                <span data-i18n="acc_desc">01. ОПИС ТОВАРУ</span>
+                                <span class="icon">+</span>
+                            </button>
+                            <div class="accordion-body">
+                                <p data-i18n="desc_text">Attack Shark X3 створена для кіберспорту та професійного геймінгу. Ергономічний корпус вагою всього 54 грами, флагманський сенсор PAW3395 та підтримка частоти опитування 8000 Гц забезпечують блискавичну реакцію без затримок.</p>
+                            </div>
                         </div>
-                        <button class="btn-digital-space" style="width: 100%; margin-top: 20px;" onclick="openCheckoutModal()" data-i18n="orderSetupBtn">ORDER SETUP →</button>
+
+                        <!-- 2. Specifications -->
+                        <div class="data-accordion">
+                            <button class="accordion-header" onclick="toggleAccordion(this)">
+                                <span data-i18n="acc_specs">02. ХАРАКТЕРИСТИКИ</span>
+                                <span class="icon">+</span>
+                            </button>
+                            <div class="accordion-body">
+                                <ul class="specs-list">
+                                    <li><span>Сенсор:</span> <strong>PixArt PAW3395</strong></li>
+                                    <li><span>Вага:</span> <strong>54 г</strong></li>
+                                    <li><span>Частота опитування:</span> <strong>До 8000 Гц</strong></li>
+                                    <li><span>Підключение:</span> <strong>Wired / 2.4G / Bluetooth 5.4</strong></li>
+                                    <li><span>Максимальний DPI:</span> <strong>26,000 DPI</strong></li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- 3. Inside the Box -->
+                        <div class="data-accordion">
+                            <button class="accordion-header" onclick="toggleAccordion(this)">
+                                <span data-i18n="acc_box">03. КОМПЛЕКТАЦІЯ (INSIDE THE BOX)</span>
+                                <span class="icon">+</span>
+                            </button>
+                            <div class="accordion-body">
+                                <p data-i18n="box_text">Фірмова коробка, миша Attack Shark X3, бездротовий приймач 2.4G (донгл), кабель USB Type-C в м'якому обплетенні, інструкція користувача.</p>
+                            </div>
+                        </div>
+
+                        <!-- 4. Warranty -->
+                        <div class="data-accordion">
+                            <button class="accordion-header" onclick="toggleAccordion(this)">
+                                <span data-i18n="acc_warranty">04. ГАРАНТІЯ</span>
+                                <span class="icon">+</span>
+                            </button>
+                            <div class="accordion-body">
+                                <p data-i18n="warranty_text">Офіційна гарантія від виробника та магазину MILIPSTORE — 12 місяців з повною підтримкою та сервісом.</p>
+                            </div>
+                        </div>
+
+                        <!-- 5. Delivery -->
+                        <div class="data-accordion">
+                            <button class="accordion-header" onclick="toggleAccordion(this)">
+                                <span data-i18n="acc_delivery">05. ДОСТАВКА ТА ОПЛАТА</span>
+                                <span class="icon">+</span>
+                            </button>
+                            <div class="accordion-body">
+                                <p data-i18n="delivery_text">Нова Пошта по Україні (1-2 дні), кур'єрська доставка, оплата при отриманні або на картку/рахунок ФОП.</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </section>
-
-            <!-- BRAND STATEMENT TYPOGRAPHY -->
-            <section class="brand-statement-digital">
-                <div class="statement-wrap">
-                    <h2>YOUR SETUP.<br>YOUR STYLE.</h2>
-                    <div class="statement-bg-butterfly"></div>
-                </div>
-            </section>
-
-        </div>
-
-        <!-- PRODUCT DETAIL VIEW -->
-        <div id="productDetailView" class="view-section">
-            <div class="product-detail-nav">
-                <button onclick="switchView('home')" class="back-link-btn"><span class="material-symbols-outlined">arrow_back</span> <span data-i18n="backToSpace">Назад до простору</span></button>
-            </div>
-            <div id="productDetailContent" class="product-showroom-layout">
-                <!-- Dynamic Render via script.js -->
-            </div>
-        </div>
-
-    </main>
-
-    <!-- CART SIDEBAR DRAWER -->
-    <div id="cartBackdrop" class="drawer-backdrop" onclick="closeCartDrawer()"></div>
-    <div id="cartDrawer" class="digital-drawer">
-        <div class="drawer-header">
-            <h3 data-i18n="cartTitle">КОШИК</h3>
-            <button class="icon-btn" onclick="closeCartDrawer()"><span class="material-symbols-outlined">close</span></button>
-        </div>
-        <div id="cartDrawerItems" class="drawer-body">
-            <!-- Items rendered dynamically -->
-        </div>
-        <div class="drawer-footer">
-            <div class="drawer-subtotal">
-                <span data-i18n="subtotal">Разом</span>
-                <span id="cartTotalPrice">0 ₴</span>
-            </div>
-            <button class="btn-digital-space" style="width: 100%; text-align: center; padding: 18px;" onclick="openCheckoutModal()" data-i18n="checkoutBtn">ОФОРМИТИ ЗАМОВЛЕННЯ →</button>
-        </div>
-    </div>
-
-    <!-- SAVED / WISHLIST MODAL -->
-    <div id="wishlistModal" class="digital-modal-backdrop" onclick="closeWishlistModal()">
-        <div class="digital-modal-box" onclick="event.stopPropagation()">
-            <div class="modal-header">
-                <h3 data-i18n="savedTitle">SAVED ITEMS</h3>
-                <button class="icon-btn" onclick="closeWishlistModal()"><span class="material-symbols-outlined">close</span></button>
-            </div>
-            <div id="wishlistModalItems" class="modal-body-list">
-                <!-- Rendered dynamically -->
             </div>
         </div>
     </div>
 
-    <!-- CHECKOUT MODAL -->
-    <div id="checkoutModal" class="digital-modal-backdrop" onclick="closeCheckoutModal()">
-        <div class="digital-modal-box" onclick="event.stopPropagation()">
-            <div class="modal-header">
-                <h3 data-i18n="checkoutTitle">ОФОРМЛЕННЯ ЗАМОВЛЕННЯ</h3>
-                <button class="icon-btn" onclick="closeCheckoutModal()"><span class="material-symbols-outlined">close</span></button>
+    <!-- CART DRAWER -->
+    <div id="cartDrawer" class="cart-drawer">
+        <div class="cart-backdrop" onclick="closeCart()"></div>
+        <div class="cart-panel">
+            <div class="cart-header">
+                <h3 data-i18n="cart_title">КОШИК</h3>
+                <button onclick="closeCart()">×</button>
             </div>
-            <div class="checkout-form-box">
-                <div class="f-group">
-                    <label data-i18n="nameLabel">Ваше ім'я *</label>
-                    <input type="text" id="orderName" placeholder="Олександр">
+            <div class="cart-body" id="cartItemsList">
+                <div class="empty-cart" data-i18n="cart_empty">Ваш кошик наразі порожній</div>
+            </div>
+            <div class="cart-footer">
+                <div class="cart-total">
+                    <span data-i18n="cart_total">Разом:</span>
+                    <strong id="cartTotalPrice">₴ 0</strong>
                 </div>
-                <div class="f-group">
-                    <label data-i18n="contactLabel">Telegram / Телефон *</label>
-                    <input type="text" id="orderContact" placeholder="@username або номер">
-                </div>
-                <div class="f-group">
-                    <label data-i18n="commentLabel">Коментар</label>
-                    <textarea id="orderComment" placeholder="Деталі замовлення..."></textarea>
-                </div>
-                <button class="btn-digital-space" style="width: 100%; padding: 16px; text-align: center;" onclick="submitOrder()" data-i18n="confirmOrderBtn">ПІДТВЕРДИТИ ЗАМОВЛЕННЯ</button>
+                <button class="btn-primary full" onclick="checkout()" data-i18n="cart_checkout">ОФОРМИТИ ЗАМОВЛЕННЯ</button>
             </div>
         </div>
     </div>
 
-    <!-- MINIMALIST FOOTER -->
-    <footer class="digital-footer">
-        <div class="footer-inner">
-            <div class="footer-top-row">
-                <div class="footer-logo-area">
-                    <img src="logo-milipstore.png" alt="MILIPSTORE" class="brand-logo">
-                    <span class="brand-name">MILIPSTORE</span>
-                </div>
-                <h2 class="footer-ready-text" data-i18n="readyToUpgrade">READY TO<br>UPGRADE?</h2>
+    <!-- SEARCH OVERLAY -->
+    <div id="searchOverlay" class="search-overlay">
+        <button class="modal-close" onclick="closeSearch()">×</button>
+        <div class="search-box-wrap">
+            <h3 data-i18n="search_title">WHAT ARE YOU LOOKING FOR?</h3>
+            <input type="text" id="searchInput" placeholder="Введіть назву девайса..." oninput="handleSearch(this.value)">
+            <div class="trending-tags">
+                <span data-i18n="trend_label">TRENDING:</span>
+                <span onclick="setSearchQuery('X3')">Attack Shark X3</span>
+                <span onclick="setSearchQuery('Mice')">Mice</span>
+                <span onclick="setSearchQuery('PAW3395')">PAW3395</span>
             </div>
-            <div class="footer-nav-grid">
-                <div class="f-col">
-                    <h4 data-i18n="shop">Магазин</h4>
-                    <a href="#" onclick="filterCategory('mice')" data-i18n="mice">Мишки</a>
-                    <a href="#" onclick="filterCategory('keyboards')" data-i18n="keyboards">Клавіатури</a>
-                    <a href="#" onclick="filterCategory('headsets')" data-i18n="headsets">Навушники</a>
-                    <a href="#" onclick="filterCategory('accessories')" data-i18n="accessories">Аксесуари</a>
-                </div>
-                <div class="f-col">
-                    <h4 data-i18n="support">Підтримка</h4>
-                    <a href="#" data-i18n="warranty">Гарантія</a>
-                    <a href="#" data-i18n="delivery">Доставка</a>
-                </div>
-                <div class="f-col">
-                    <h4>MILIPSTORE</h4>
-                    <a href="https://t.me/" target="_blank">Telegram</a>
-                    <a href="#" data-i18n="contacts">Контакти</a>
-                </div>
-            </div>
-            <div class="footer-bottom-row">
-                <p>&copy; 2026 MILIPSTORE. Digital Space for Your Setup. All rights reserved.</p>
-            </div>
+            <div id="searchResults" class="search-results-list"></div>
         </div>
-    </footer>
+    </div>
 
     <script src="script.js"></script>
 </body>
