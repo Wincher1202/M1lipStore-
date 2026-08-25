@@ -1252,7 +1252,6 @@
 
             localStorage.setItem('milip_wishlist', JSON.stringify(wishlist));
             
-            // Оновлюємо стан конкретної кнопки в каталозі без повного перерендеру всього списку, щоб не збивати анімацію
             const btnEl = document.getElementById(`wishlist-btn-${productId}`);
             if (btnEl) {
                 btnEl.classList.toggle('active', isAdding);
@@ -1480,7 +1479,7 @@
         function addCurrentProductToCart() {
             if (currentModalProduct) {
                 const activeColors = currentModalProduct.colors || [{ name: 'білий', available: true }];
-                const colorObj = activeColors[selectedColorIndex] гарний || activeColors[0];
+                const colorObj = activeColors[selectedColorIndex] || activeColors[0];
                 if (!colorObj.available) return;
                 
                 addToCartFull(currentModalProduct, colorObj.name, modalQty);
