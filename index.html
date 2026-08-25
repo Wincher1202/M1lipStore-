@@ -525,7 +525,7 @@
         /* ИСПРАВЛЕННЫЙ СТАНДАРТ: Рамка под пропорцию 4х3 для каждого товара */
         .product-img-wrap {
             width: 100%;
-            aspect-ratio: 4 / 3; /* Фиксирует пропорцию рамки ровно 4 к 3 */
+            aspect-ratio: 4 / 3;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -533,14 +533,14 @@
             position: relative;
             padding: 10px;
             margin: 20px 0;
-            background: var(--bg-primary); /* Единый фон рамки для аккуратного заполнения пустот */
+            background: var(--bg-primary);
             border-radius: var(--radius-sm);
         }
 
         .product-img-wrap img {
             width: 100%;
             height: 100%;
-            object-fit: contain; /* Картинка всегда полностью помещается в рамку без деформаций и обрезаний */
+            object-fit: contain;
             transition: transform 0.3s ease;
         }
 
