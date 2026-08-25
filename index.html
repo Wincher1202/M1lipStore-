@@ -464,7 +464,32 @@
             opacity: 1;
         }
 
-        /* CATALOG SECTION */
+        /* CATALOG SECTION & FILTERS */
+        .catalog-filters {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-light);
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .filter-btn:hover, .filter-btn.active {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+
         .catalog-grid {
             display: grid;
             grid-template-columns: repeat(12, 1fr);
@@ -1004,22 +1029,22 @@
             </div>
         </div>
         <div class="categories-grid">
-            <a class="category-card" onclick="scrollToSection('catalog')">
+            <a class="category-card" onclick="filterByCategory('Миші'); scrollToSection('catalog')">
                 <h3 id="tr-cat-mice">Миші</h3>
                 <span class="explore-link">Смотреть →</span>
                 <img src="https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?auto=format&fit=crop&w=400&q=80" alt="Миші">
             </a>
-            <a class="category-card" onclick="scrollToSection('catalog')">
+            <a class="category-card" onclick="filterByCategory('Клавіатури'); scrollToSection('catalog')">
                 <h3 id="tr-cat-keyboards">Клавіатури</h3>
                 <span class="explore-link">Смотреть →</span>
                 <img src="https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=400&q=80" alt="Клавіатури">
             </a>
-            <a class="category-card" onclick="scrollToSection('catalog')">
+            <a class="category-card" onclick="filterByCategory('Гарнітури'); scrollToSection('catalog')">
                 <h3 id="tr-cat-headsets">Гарнітури</h3>
                 <span class="explore-link">Смотреть →</span>
                 <img src="https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&w=400&q=80" alt="Гарнітури">
             </a>
-            <a class="category-card" onclick="scrollToSection('catalog')">
+            <a class="category-card" onclick="filterByCategory('Аксесуари'); scrollToSection('catalog')">
                 <h3 id="tr-cat-accessories">Аксесуари</h3>
                 <span class="explore-link">Смотреть →</span>
                 <img src="https://images.unsplash.com/photo-1618384887929-16ec33fab9ef?auto=format&fit=crop&w=400&q=80" alt="Аксесуари">
@@ -1034,6 +1059,14 @@
                 <h2 class="section-title" id="tr-catalog-title">Каталог</h2>
                 <p class="section-subtitle" id="tr-catalog-subtitle">Топові девайси в наявності</p>
             </div>
+        </div>
+        <!-- Фільтри категорії (Оновлення) -->
+        <div class="catalog-filters" id="catalog-filters">
+            <button class="filter-btn active" onclick="filterByCategory('All')">Всі товари</button>
+            <button class="filter-btn" onclick="filterByCategory('Миші')">Миші</button>
+            <button class="filter-btn" onclick="filterByCategory('Клавіатури')">Клавіатури</button>
+            <button class="filter-btn" onclick="filterByCategory('Гарнітури')">Гарнітури</button>
+            <button class="filter-btn" onclick="filterByCategory('Аксесуари')">Аксесуари</button>
         </div>
         <div class="catalog-grid" id="catalog-container">
             <!-- Dynamically rendered products -->
@@ -1266,6 +1299,7 @@
         let currentModalProduct = null;
         let modalQty = 1;
         let currentCurrency = 'UAH';
+        let currentCategoryFilter = 'All'; // Змінна для фільтрації каталогів (оновлення)
 
         function formatPrice(price) {
             if (currentCurrency === 'USD') return '$ ' + Math.round(price / 41);
@@ -1278,6 +1312,23 @@
             renderCatalog();
             renderCartItems();
             if (currentModalProduct) document.getElementById('modal-price').innerText = formatPrice(currentModalProduct.price);
+        }
+
+        // Функція фільтрації товарів за категорією (оновлення)
+        function filterByCategory(category) {
+            currentCategoryFilter = category;
+            
+            // Оновлення активного класу на кнопках фільтрів
+            const filterButtons = document.querySelectorAll('.filter-btn');
+            filterButtons.forEach(btn => {
+                if ((category === 'All' && btn.innerText.includes('Всі')) || btn.innerText.includes(category)) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+
+            renderCatalog();
         }
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -1304,8 +1355,19 @@
 
         function renderCatalog() {
             const container = document.getElementById('catalog-container');
-            container.innerHTML = products.map((p, idx) => `
-                <div class="product-card ${p.colClass}" id="product-card-${p.id}" onclick="openProductModal(products[${idx}])">
+            
+            // Фільтрація товарів на основі вибраної категорії
+            const filteredProducts = currentCategoryFilter === 'All' 
+                ? products 
+                : products.filter(p => p.category === currentCategoryFilter);
+
+            if (filteredProducts.length === 0) {
+                container.innerHTML = `<p style="color: var(--text-secondary); grid-column: span 12; text-align: center; padding: 40px;">Товарів у цій категорії поки немає</p>`;
+                return;
+            }
+
+            container.innerHTML = filteredProducts.map((p, idx) => `
+                <div class="product-card ${p.colClass}" id="product-card-${p.id}" onclick="openProductModal(products.find(x => x.id === '${p.id}'))">
                     <span class="product-tag new">${p.tag}</span>
                     <button class="wishlist-btn ${wishlist.includes(p.id) ? 'active' : ''}" onclick="event.stopPropagation(); toggleWishlist('${p.id}')">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="${wishlist.includes(p.id) ? '#FF3B30' : 'none'}" stroke="${wishlist.includes(p.id) ? '#FF3B30' : 'currentColor'}" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
@@ -1476,6 +1538,7 @@
             document.getElementById('backdrop').classList.remove('active');
         }
 
+        function modalQty = (change) => {} // fallback placeholder if needed, using standard function below:
         function adjustModalQty(change) {
             modalQty = Math.max(1, modalQty + change);
             document.getElementById('modal-qty').innerText = modalQty;
