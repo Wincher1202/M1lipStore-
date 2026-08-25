@@ -1114,7 +1114,7 @@
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
                 <span class="badge-count" id="cart-count">0</span>
             </button>
-            <button class="lang-switch" id="lang-switch-btn">UA / RU</button>
+            <button class="lang-switch" id="lang-switch-btn" onclick="toggleLanguage()">UA / RU</button>
             <button class="icon-btn" id="theme-toggle-btn" aria-label="Тема">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
             </button>
@@ -1125,28 +1125,28 @@
     <section class="hero">
         <div class="hero-content">
             <div class="hero-badge">MILIPSTORE / 2026</div>
-            <h1>ТЕХНИКА,<br>КОТОРАЯ СОЗДАЁТ<br>ТВОЙ SETUP</h1>
-            <p>Gaming mice, keyboards and accessories для современного игрового пространства высочайшего уровня.</p>
+            <h1 id="tr-hero-title">ТЕХНИКА,<br>КОТОРАЯ СОЗДАЁТ<br>ТВОЙ SETUP</h1>
+            <p id="tr-hero-desc">Gaming mice, keyboards and accessories для современного игрового пространства высочайшего уровня.</p>
             <div class="hero-actions">
-                <a class="btn-primary" onclick="scrollToSection('catalog')">Смотреть каталог →</a>
+                <a class="btn-primary" id="tr-btn-catalog" onclick="scrollToSection('catalog')">Смотреть каталог →</a>
                 <a class="btn-outline" onclick="openProductModal(products[0])">MCHOSE A7 V2 PRO</a>
             </div>
         </div>
         <div class="hero-visual">
             <div class="hero-card-3d" id="hero-tilt-card" onclick="openProductModal(products[0])">
-                <span class="product-tag new">BESTSELLER</span>
+                <span class="product-tag new" id="tr-bestseller-tag">BESTSELLER</span>
                 <img src="https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?auto=format&fit=crop&w=800&q=80" alt="MCHOSE A7 V2 PRO">
                 <div class="hero-specs-float">
                     <div class="spec-item">
-                        <span>Sensor</span>
+                        <span id="tr-spec-sensor">Sensor</span>
                         <span>PAW3395</span>
                     </div>
                     <div class="spec-item">
-                        <span>Weight</span>
+                        <span id="tr-spec-weight">Weight</span>
                         <span>54G</span>
                     </div>
                     <div class="spec-item">
-                        <span>Polling</span>
+                        <span id="tr-spec-polling">Polling</span>
                         <span>8000Hz</span>
                     </div>
                 </div>
@@ -1158,29 +1158,29 @@
     <section class="section-padding" id="categories">
         <div class="section-header">
             <div>
-                <h2 class="section-title">Категории</h2>
-                <p class="section-subtitle">Исследуйте профессиональное игровое железо</p>
+                <h2 class="section-title" id="tr-cat-title">Категории</h2>
+                <p class="section-subtitle" id="tr-cat-subtitle">Исследуйте профессиональное игровое железо</p>
             </div>
         </div>
         <div class="categories-grid">
             <a class="category-card" onclick="scrollToSection('catalog')">
-                <h3>Мыши</h3>
-                <span class="explore-link">Смотреть →</span>
+                <h3 id="tr-cat-mice">Мыши</h3>
+                <span class="explore-link" id="tr-explore-1">Смотреть →</span>
                 <img src="https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?auto=format&fit=crop&w=400&q=80" alt="Мыши">
             </a>
             <a class="category-card" onclick="scrollToSection('catalog')">
-                <h3>Клавиатуры</h3>
-                <span class="explore-link">Смотреть →</span>
+                <h3 id="tr-cat-keyboards">Клавиатуры</h3>
+                <span class="explore-link" id="tr-explore-2">Смотреть →</span>
                 <img src="https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=400&q=80" alt="Клавиатуры">
             </a>
             <a class="category-card" onclick="scrollToSection('catalog')">
-                <h3>Гарнитуры</h3>
-                <span class="explore-link">Смотреть →</span>
+                <h3 id="tr-cat-headsets">Гарнитуры</h3>
+                <span class="explore-link" id="tr-explore-3">Смотреть →</span>
                 <img src="https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&w=400&q=80" alt="Гарнитуры">
             </a>
             <a class="category-card" onclick="scrollToSection('catalog')">
-                <h3>Аксессуары</h3>
-                <span class="explore-link">Смотреть →</span>
+                <h3 id="tr-cat-accessories">Аксессуары</h3>
+                <span class="explore-link" id="tr-explore-4">Смотреть →</span>
                 <img src="https://images.unsplash.com/photo-1618384887929-16ec33fab9ef?auto=format&fit=crop&w=400&q=80" alt="Аксессуары">
             </a>
         </div>
@@ -1190,8 +1190,8 @@
     <section class="section-padding" id="catalog">
         <div class="section-header">
             <div>
-                <h2 class="section-title">Каталог</h2>
-                <p class="section-subtitle">Топовые девайсы в наличии</p>
+                <h2 class="section-title" id="tr-catalog-title">Каталог</h2>
+                <p class="section-subtitle" id="tr-catalog-subtitle">Топовые девайсы в наличии</p>
             </div>
         </div>
         <div class="catalog-grid" id="catalog-container">
@@ -1203,15 +1203,15 @@
     <section class="section-padding">
         <div class="featured-banner">
             <div class="featured-content">
-                <span class="product-tag new">FLAGSHIP GEAR</span>
+                <span class="product-tag new" id="tr-flagship-tag">FLAGSHIP GEAR</span>
                 <h2>MCHOSE A7 V2 PRO</h2>
-                <p style="color: var(--text-secondary);">Бескомпромиссная игровая мышь для киберспорта с передовым сенсором и рекордным временем автономной работы.</p>
+                <p id="tr-banner-desc" style="color: var(--text-secondary);">Бескомпромиссная игровая мышь для киберспорта с передовым сенсором и рекордным временем автономной работы.</p>
                 <div class="feature-chips">
                     <span class="feature-chip">PAW3395</span>
                     <span class="feature-chip">8K HYPERPOLL</span>
                     <span class="feature-chip">54 GRAMS</span>
                 </div>
-                <button class="btn-primary" onclick="openProductModal(products[0])">Подробнее →</button>
+                <button class="btn-primary" id="tr-banner-btn" onclick="openProductModal(products[0])">Подробнее →</button>
             </div>
             <div class="featured-visual">
                 <img src="https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?auto=format&fit=crop&w=800&q=80" alt="Featured">
@@ -1224,38 +1224,38 @@
         <div class="footer-grid">
             <div class="footer-col">
                 <a class="logo" style="margin-bottom: 20px;">MILIP<span>STORE</span></a>
-                <p style="color: var(--text-secondary); max-width: 300px; font-size: 0.95rem;">Gaming hardware for your ultimate setup. Премиальный выбор для энтузиастов.</p>
+                <p id="tr-footer-desc" style="color: var(--text-secondary); max-width: 300px; font-size: 0.95rem;">Gaming hardware for your ultimate setup. Премиальный выбор для энтузиастов.</p>
             </div>
             <div class="footer-col">
-                <h4>Каталог</h4>
+                <h4 id="tr-fcol-catalog">Каталог</h4>
                 <ul>
-                    <li><a onclick="scrollToSection('catalog')">Мыши</a></li>
-                    <li><a onclick="scrollToSection('catalog')">Клавиатуры</a></li>
-                    <li><a onclick="scrollToSection('catalog')">Гарнитуры</a></li>
-                    <li><a onclick="scrollToSection('catalog')">Аксессуары</a></li>
+                    <li><a onclick="scrollToSection('catalog')" id="tr-fcat-mice">Мыши</a></li>
+                    <li><a onclick="scrollToSection('catalog')" id="tr-fcat-keyboards">Клавиатуры</a></li>
+                    <li><a onclick="scrollToSection('catalog')" id="tr-fcat-headsets">Гарнитуры</a></li>
+                    <li><a onclick="scrollToSection('catalog')" id="tr-fcat-accessories">Аксессуары</a></li>
                 </ul>
             </div>
             <div class="footer-col">
-                <h4>Покупателям</h4>
+                <h4 id="tr-fcol-buyers">Покупателям</h4>
                 <ul>
-                    <li><a>Доставка</a></li>
-                    <li><a>Оплата</a></li>
-                    <li><a>Гарантия</a></li>
-                    <li><a>Контакты</a></li>
+                    <li><a id="tr-buy-delivery">Доставка</a></li>
+                    <li><a id="tr-buy-payment">Оплата</a></li>
+                    <li><a id="tr-buy-warranty">Гарантия</a></li>
+                    <li><a id="tr-buy-contacts">Контакты</a></li>
                 </ul>
             </div>
             <div class="footer-col">
-                <h4>Контакты</h4>
+                <h4 id="tr-fcol-contacts">Контакты</h4>
                 <ul>
                     <li><a>support@milipstore.com</a></li>
                     <li><a>Telegram Support</a></li>
-                    <li><a>Киев, Украина</a></li>
+                    <li id="tr-city">Киев, Украина</li>
                 </ul>
             </div>
         </div>
         <div class="footer-bottom">
             <span>MILIPSTORE © 2026. All rights reserved.</span>
-            <span>Premium Gaming Hardware</span>
+            <span id="tr-footer-sub">Premium Gaming Hardware</span>
         </div>
     </footer>
 
@@ -1265,7 +1265,7 @@
     <!-- CART DRAWER -->
     <div class="drawer" id="cart-drawer">
         <div class="drawer-header">
-            <h3>Корзина</h3>
+            <h3 id="tr-cart-title">Корзина</h3>
             <button class="close-drawer" onclick="toggleCart(false)">✕</button>
         </div>
         <div class="drawer-body" id="cart-items-container">
@@ -1273,10 +1273,10 @@
         </div>
         <div class="drawer-footer">
             <div class="cart-total">
-                <span>Итого:</span>
+                <span id="tr-cart-total">Итого:</span>
                 <span id="cart-total-price">₴ 0</span>
             </div>
-            <button class="btn-primary" style="width: 100%; justify-content: center;" onclick="checkout()">Оформить заказ →</button>
+            <button class="btn-primary" id="tr-checkout-btn" style="width: 100%; justify-content: center;" onclick="checkout()">Оформить заказ →</button>
         </div>
     </div>
 
@@ -1308,14 +1308,14 @@
                 <p id="modal-desc" style="color: var(--text-secondary); margin: 15px 0; font-size: 0.95rem;"></p>
                 <div class="modal-price" id="modal-price">₴ 0</div>
                 
-                <div style="font-weight: 700; font-size: 0.9rem; margin-bottom: 8px;">Выберите цвет</div>
+                <div id="tr-modal-color-title" style="font-weight: 700; font-size: 0.9rem; margin-bottom: 8px;">Выберите цвет</div>
                 <div class="color-options" id="modal-colors">
                     <button class="color-btn selected">WHITE</button>
                     <button class="color-btn">BLACK</button>
                     <button class="color-btn">PINK</button>
                 </div>
 
-                <div style="font-weight: 700; font-size: 0.9rem; margin: 20px 0 8px;">Количество</div>
+                <div id="tr-modal-qty-title" style="font-weight: 700; font-size: 0.9rem; margin: 20px 0 8px;">Количество</div>
                 <div class="quantity-controls" style="margin-bottom: 25px;">
                     <button onclick="adjustModalQty(-1)">−</button>
                     <span id="modal-qty" style="font-weight: 700; padding: 0 10px;">1</span>
@@ -1323,7 +1323,7 @@
                 </div>
 
                 <div style="display: flex; gap: 12px;">
-                    <button class="btn-primary" style="flex-grow: 1; justify-content: center;" id="modal-add-cart-btn" onclick="addCurrentProductToCart()">Добавить в корзину</button>
+                    <button class="btn-primary" id="tr-modal-add-btn" style="flex-grow: 1; justify-content: center;" onclick="addCurrentProductToCart()">Добавить в корзину</button>
                     <button class="wishlist-btn" id="modal-wishlist-btn" onclick="toggleCurrentWishlist()" style="position: static; width: 54px; height: 54px;">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
                     </button>
@@ -1337,6 +1337,131 @@
     </div>
 
     <script>
+        // Dictionary for Multi-language support (UA / RU)
+        let currentLang = 'ua';
+        const translations = {
+            ua: {
+                heroTitle: "ТЕХНІКА,<br>ЯКА СТВОРЮЄ<br>МІЙ SETUP",
+                heroDesc: "Gaming mice, keyboards and accessories для сучасного ігрового простору найвищого рівня.",
+                btnCatalog: "Дивитися каталог →",
+                catTitle: "Категорії",
+                catSubtitle: "Досліджуйте професійне ігрове залізо",
+                mice: "Миші",
+                keyboards: "Клавіатури",
+                headsets: "Гарнітури",
+                accessories: "Аксесуари",
+                explore: "Дивитися →",
+                catalogTitle: "Каталог",
+                catalogSubtitle: "Топові девайсы в наявності",
+                bannerDesc: "Безкомпромісна ігрова миша для кіберспорту з передовим сенсором та рекордним часом автономної роботи.",
+                bannerBtn: "Детальніше →",
+                footerDesc: "Gaming hardware for your ultimate setup. Преміальний вибір для ентузіастів.",
+                fcolCatalog: "Каталог",
+                fcolBuyers: "Покупцям",
+                fcolContacts: "Контакти",
+                delivery: "Доставка",
+                payment: "Оплата",
+                warranty: "Гарантія",
+                contacts: "Контакти",
+                city: "Київ, Україна",
+                cartTitle: "Кошик",
+                cartTotal: "Разом:",
+                checkoutBtn: "Оформити замовлення →",
+                searchPlaceholder: "Що ви шукаєте?",
+                emptyCart: "Кошик порожній",
+                emptySearch: "Нічого не знайдено",
+                colorTitle: "Виберіть колір",
+                qtyTitle: "Кількість",
+                addCartBtn: "Додати в кошик",
+                alertOrder: "Замовлення успішно оформлено! Дякуємо за покупку в MILIPSTORE."
+            },
+            ru: {
+                heroTitle: "ТЕХНИКА,<br>КОТОРАЯ СОЗДАЁТ<br>ТВОЙ SETUP",
+                heroDesc: "Gaming mice, keyboards and accessories для современного игрового пространства высочайшего уровня.",
+                btnCatalog: "Смотреть каталог →",
+                catTitle: "Категории",
+                catSubtitle: "Исследуйте профессиональное игровое железо",
+                mice: "Мыши",
+                keyboards: "Клавиатуры",
+                headsets: "Гарнитуры",
+                accessories: "Аксессуары",
+                explore: "Смотреть →",
+                catalogTitle: "Каталог",
+                catalogSubtitle: "Топовые девайсы в наличии",
+                bannerDesc: "Бескомпромиссная игровая мышь для киберспорта с передовым сенсором и рекордным временем автономной работы.",
+                bannerBtn: "Подробнее →",
+                footerDesc: "Gaming hardware for your ultimate setup. Премиальный выбор для энтузиастов.",
+                fcolCatalog: "Каталог",
+                fcolBuyers: "Покупателям",
+                fcolContacts: "Контакты",
+                delivery: "Доставка",
+                payment: "Оплата",
+                warranty: "Гарантия",
+                contacts: "Контакты",
+                city: "Киев, Украина",
+                cartTitle: "Корзина",
+                cartTotal: "Итого:",
+                checkoutBtn: "Оформить заказ →",
+                searchPlaceholder: "Что вы ищете?",
+                emptyCart: "Корзина пуста",
+                emptySearch: "Ничего не найдено",
+                colorTitle: "Выберите цвет",
+                qtyTitle: "Количество",
+                addCartBtn: "Добавить в корзину",
+                alertOrder: "Заказ успешно оформлен! Спасибо за покупку в MILIPSTORE."
+            }
+        };
+
+        function toggleLanguage() {
+            currentLang = currentLang === 'ua' ? 'ru' : 'ua';
+            document.getElementById('lang-switch-btn').innerText = currentLang === 'ua' ? 'UA / RU' : 'RU / UA';
+            updateStaticTexts();
+            renderCatalog();
+            renderCartItems();
+        }
+
+        function updateStaticTexts() {
+            const t = translations[currentLang];
+            document.getElementById('tr-hero-title').innerHTML = t.heroTitle;
+            document.getElementById('tr-hero-desc').innerText = t.heroDesc;
+            document.getElementById('tr-btn-catalog').innerText = t.btnCatalog;
+            document.getElementById('tr-cat-title').innerText = t.catTitle;
+            document.getElementById('tr-cat-subtitle').innerText = t.catSubtitle;
+            document.getElementById('tr-cat-mice').innerText = t.mice;
+            document.getElementById('tr-cat-keyboards').innerText = t.keyboards;
+            document.getElementById('tr-cat-headsets').innerText = t.headsets;
+            document.getElementById('tr-cat-accessories').innerText = t.accessories;
+            
+            for(let i=1; i<=4; i++) {
+                document.getElementById(`tr-explore-${i}`).innerHTML = `${t.explore}`;
+            }
+
+            document.getElementById('tr-catalog-title').innerText = t.catalogTitle;
+            document.getElementById('tr-catalog-subtitle').innerText = t.catalogSubtitle;
+            document.getElementById('tr-banner-desc').innerText = t.bannerDesc;
+            document.getElementById('tr-banner-btn').innerText = t.bannerBtn;
+            document.getElementById('tr-footer-desc').innerText = t.footerDesc;
+            document.getElementById('tr-fcol-catalog').innerText = t.fcolCatalog;
+            document.getElementById('tr-fcol-buyers').innerText = t.fcolBuyers;
+            document.getElementById('tr-fcol-contacts').innerText = t.fcolContacts;
+            document.getElementById('tr-fcat-mice').innerText = t.mice;
+            document.getElementById('tr-fcat-keyboards').innerText = t.keyboards;
+            document.getElementById('tr-fcat-headsets').innerText = t.headsets;
+            document.getElementById('tr-fcat-accessories').innerText = t.accessories;
+            document.getElementById('tr-buy-delivery').innerText = t.delivery;
+            document.getElementById('tr-buy-payment').innerText = t.payment;
+            document.getElementById('tr-buy-warranty').innerText = t.warranty;
+            document.getElementById('tr-buy-contacts').innerText = t.contacts;
+            document.getElementById('tr-city').innerText = t.city;
+            document.getElementById('tr-cart-title').innerText = t.cartTitle;
+            document.getElementById('tr-cart-total').innerText = t.cartTotal;
+            document.getElementById('tr-checkout-btn').innerText = t.checkoutBtn;
+            document.getElementById('search-input').placeholder = t.searchPlaceholder;
+            document.getElementById('tr-modal-color-title').innerText = t.colorTitle;
+            document.getElementById('tr-modal-qty-title').innerText = t.qtyTitle;
+            document.getElementById('tr-modal-add-btn').innerText = t.addCartBtn;
+        }
+
         // Data Store
         const products = [
             {
@@ -1346,7 +1471,10 @@
                 category: 'Мыши',
                 tag: 'BESTSELLER',
                 price: 4599,
-                desc: 'Wireless Gaming Mouse с беспрецедентной точностью и киберспортивным сенсором.',
+                desc: {
+                    ua: 'Wireless Gaming Mouse з безпрецедентною точністю та кіберспортивним сенсором.',
+                    ru: 'Wireless Gaming Mouse с беспрецедентной точностью и киберспортивным сенсором.'
+                },
                 img: 'https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?auto=format&fit=crop&w=800&q=80',
                 specs: [
                     { label: 'SENSOR', value: 'PAW3395' },
@@ -1363,7 +1491,10 @@
                 category: 'Аксессуары',
                 tag: 'NEW',
                 price: 1499,
-                desc: 'Профессиональный игровой коврик с ультрагладкой поверхностью для идеального скольжения.',
+                desc: {
+                    ua: 'Професійний ігровий килимок з ультрагладкою поверхнею для ідеального ковзання.',
+                    ru: 'Профессиональный игровой коврик с ультрагладкой поверхностью для идеального скольжения.'
+                },
                 img: 'https://images.unsplash.com/photo-1618384887929-16ec33fab9ef?auto=format&fit=crop&w=800&q=80',
                 specs: [
                     { label: 'SURFACE', value: 'SPEED / CONTROL' },
@@ -1380,7 +1511,10 @@
                 category: 'Клавиатуры',
                 tag: 'POPULAR',
                 price: 3899,
-                desc: 'Беспроводная механическая клавиатура с тактильными свитчами и хот-свапом.',
+                desc: {
+                    ua: 'Бездротова механічна клавіатура з тактильними світчами та хот-свапом.',
+                    ru: 'Беспроводная механическая клавиатура с тактильными свитчами и хот-свапом.'
+                },
                 img: 'https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=800&q=80',
                 specs: [
                     { label: 'SWITCHES', value: 'LEOBOG REAPER' },
@@ -1397,7 +1531,10 @@
                 category: 'Гарнитуры',
                 tag: 'NEW',
                 price: 5299,
-                desc: 'Игровая гарнитура студийного качества с пространственным звуком и активным шумоподавлением.',
+                desc: {
+                    ua: 'Ігрова гарнітура студійної якості з просторовим звуком та активним шумозаглушенням.',
+                    ru: 'Игровая гарнитура студийного качества с пространственным звуком и активным шумоподавлением.'
+                },
                 img: 'https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&w=800&q=80',
                 specs: [
                     { label: 'DRIVERS', value: '50MM TITANIUM' },
@@ -1477,6 +1614,7 @@
 
         function renderCatalog() {
             const container = document.getElementById('catalog-container');
+            const t = translations[currentLang];
             container.innerHTML = products.map((p, idx) => `
                 <div class="product-card ${p.colClass}" id="product-card-${p.id}" onclick="openProductModal(products[${idx}])">
                     <span class="product-tag ${p.tag === 'NEW' || p.tag === 'BESTSELLER' ? 'new' : ''}">${p.tag}</span>
@@ -1496,7 +1634,7 @@
                         </div>
                     </div>
                     <div class="product-action-hover">
-                        <button class="btn-primary" style="padding: 10px 20px; font-size: 0.85rem;" onclick="event.stopPropagation(); addToCart('${p.id}')">В корзину</button>
+                        <button class="btn-primary" style="padding: 10px 20px; font-size: 0.85rem;" onclick="event.stopPropagation(); addToCart('${p.id}')">${currentLang === 'ua' ? 'В кошик' : 'В корзину'}</button>
                     </div>
                 </div>
             `).join('');
@@ -1580,8 +1718,9 @@
 
         function renderCartItems() {
             const container = document.getElementById('cart-items-container');
+            const t = translations[currentLang];
             if (cart.length === 0) {
-                container.innerHTML = `<p style="color: var(--text-secondary); text-align: center; margin-top: 40px;">Корзина пуста</p>`;
+                container.innerHTML = `<p style="color: var(--text-secondary); text-align: center; margin-top: 40px;">${t.emptyCart}</p>`;
                 document.getElementById('cart-total-price').innerText = formatPrice(0);
                 return;
             }
@@ -1648,6 +1787,7 @@
 
         function handleSearch(query) {
             const resultsContainer = document.getElementById('search-results');
+            const t = translations[currentLang];
             if (!query.trim()) {
                 resultsContainer.innerHTML = '';
                 return;
@@ -1660,7 +1800,7 @@
             );
 
             if (filtered.length === 0) {
-                resultsContainer.innerHTML = `<p style="color: var(--text-secondary); text-align: center; padding: 20px;">Ничего не найдено</p>`;
+                resultsContainer.innerHTML = `<p style="color: var(--text-secondary); text-align: center; padding: 20px;">${t.emptySearch}</p>`;
                 return;
             }
 
@@ -1685,7 +1825,7 @@
             document.getElementById('modal-tag').innerText = product.tag;
             document.getElementById('modal-brand').innerText = product.brand;
             document.getElementById('modal-title').innerText = product.title;
-            document.getElementById('modal-desc').innerText = product.desc;
+            document.getElementById('modal-desc').innerText = product.desc[currentLang];
             document.getElementById('modal-price').innerText = formatPrice(product.price);
             document.getElementById('modal-qty').innerText = modalQty;
 
@@ -1721,7 +1861,8 @@
         }
 
         function checkout() {
-            alert('Заказ успешно оформлен! Спасибо за покупку в MILIPSTORE.');
+            const t = translations[currentLang];
+            alert(t.alertOrder);
             cart = [];
             localStorage.setItem('milip_cart', JSON.stringify(cart));
             updateBadges();
