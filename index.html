@@ -522,22 +522,29 @@
 
         .wishlist-btn:hover { background: var(--bg-tertiary); transform: scale(1.05); }
 
+        /* Оновлені стилі для контейнера та самої картинки в каталозі */
         .product-img-wrap {
+            width: 100%;
             height: 260px;
             display: flex;
             align-items: center;
             justify-content: center;
+            overflow: hidden;
+            position: relative;
+            padding: 10px;
             margin: 20px 0;
         }
 
         .product-img-wrap img {
-            max-height: 100%;
-            max-width: 100%;
+            width: 100%;
+            height: 100%;
             object-fit: contain;
-            transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: transform 0.3s ease;
         }
 
-        .product-card:hover .product-img-wrap img { transform: scale(1.06); }
+        .product-card:hover .product-img-wrap img { 
+            transform: scale(1.05); 
+        }
 
         /* ВЫБОР ЦВЕТА (КРУЖКИ) В КАРТОЧКЕ */
         .color-picker-preview {
@@ -558,12 +565,10 @@
         .color-dot.white { background-color: #FFFFFF; }
         .color-dot.black { background-color: #1a1a1a; }
 
-        /* Если цвет выбран / активен */
         .color-dot.active {
             box-shadow: 0 0 0 2px var(--accent);
         }
 
-        /* Если товара в другом цвете нет в наличии */
         .color-dot.out-of-stock {
             opacity: 0.3;
             cursor: not-allowed;
@@ -726,7 +731,6 @@
         .product-modal.active { opacity: 1; visibility: visible; transform: translate(-50%, -50%) scale(1); }
         .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 50px; padding: 60px; }
         
-        /* ГАЛЕРЕЯ МОДАЛКИ С МИНИАТЮРАМИ */
         .modal-gallery { display: flex; flex-direction: column; gap: 16px; }
         .modal-main-img { width: 100%; height: 380px; object-fit: contain; background: var(--bg-primary); border-radius: var(--radius-md); padding: 30px; }
         .modal-thumbs { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px; }
@@ -941,7 +945,6 @@
                 <p id="modal-desc" style="color: var(--text-secondary); margin: 15px 0; font-size: 0.95rem;"></p>
                 <div class="product-price" id="modal-price" style="font-size: 1.8rem; color: var(--accent); margin: 20px 0;">₴ 0</div>
 
-                <!-- Выбор цвета в модалке -->
                 <div style="font-weight: 700; font-size: 0.9rem; margin: 15px 0 6px;">Колір (Color)</div>
                 <div class="color-picker-preview" style="margin-bottom: 20px;">
                     <div class="color-dot white active" title="White (В наявності)"></div>
@@ -1034,37 +1037,32 @@
         }
 
         const products = [
-      {
-    id: 'attack-shark-r5-ultra',
-    brand: 'ATTACK SHARK',
-    title: 'R5 ULTRA',
-    category: 'Миші',
-    tag: 'NEW / 8KHZ',
-    price: 2945,
-    desc: { ua: 'Carbon Fiber Lightweight Gaming Mouse з частотою опитування 8KHz та сенсором PAW3900MAX.', ru: 'Carbon Fiber Lightweight Gaming Mouse с частотой опроса 8KHz и сенсором PAW3900MAX.' },
-    
-    // Головна картинка для каталогу
-    img: 'attack-shark-r5-ultra-colors-price.jpg',
-    
-    // Галерея на 7 фоток (перша — головна, далі ще 6)
-    gallery: [
-        'images/attack-shark-r5-ultra-colors-price.jpg',
-        'images/attack-shark-r5-ultra-in-hand-setup.jpg',
-        'images/attack-shark-r5-ultra-top-angle.jpg',
-        'images/attack-shark-r5-ultra-side-buttons.jpg',
-        'images/attack-shark-r5-ultra-back-grip.jpg',
-        'images/attack-shark-r5-ultra-box-bundle-contents.jpg',
-        'images/attack-shark-r5-ultra-dongle-receiver.jpg'
-    ],
-
-    specs: [
-        { label: 'SENSOR', value: 'PAW3900MAX' },
-        { label: 'POLLING', value: '8KHZ' },
-        { label: 'CONNECTION', value: 'TRI-MODE' },
-        { label: 'MATERIAL', value: 'CARBON FIBER' }
-    ],
-    colClass: 'col-7'
-},
+            {
+                id: 'attack-shark-r5-ultra',
+                brand: 'ATTACK SHARK',
+                title: 'R5 ULTRA',
+                category: 'Миші',
+                tag: 'NEW / 8KHZ',
+                price: 2945,
+                desc: { ua: 'Carbon Fiber Lightweight Gaming Mouse з частотою опитування 8KHz та сенсором PAW3900MAX.', ru: 'Carbon Fiber Lightweight Gaming Mouse с частотой опроса 8KHz и сенсором PAW3900MAX.' },
+                img: 'images/attack-shark-r5-ultra-colors-price.jpg',
+                gallery: [
+                    'images/attack-shark-r5-ultra-colors-price.jpg',
+                    'images/attack-shark-r5-ultra-in-hand-setup.jpg',
+                    'images/attack-shark-r5-ultra-top-angle.jpg',
+                    'images/attack-shark-r5-ultra-side-buttons.jpg',
+                    'images/attack-shark-r5-ultra-back-grip.jpg',
+                    'images/attack-shark-r5-ultra-box-bundle-contents.jpg',
+                    'images/attack-shark-r5-ultra-dongle-receiver.jpg'
+                ],
+                specs: [
+                    { label: 'SENSOR', value: 'PAW3900MAX' },
+                    { label: 'POLLING', value: '8KHZ' },
+                    { label: 'CONNECTION', value: 'TRI-MODE' },
+                    { label: 'MATERIAL', value: 'CARBON FIBER' }
+                ],
+                colClass: 'col-7'
+            },
             {
                 id: 'mchose-a7-v2',
                 brand: 'MCHOSE',
@@ -1178,7 +1176,6 @@
                         <img src="${p.img}" alt="${p.title}">
                     </div>
                     
-                    <!-- Индикатор цветов прямо в каталоге -->
                     <div class="color-picker-preview">
                         <div class="color-dot white active" title="White"></div>
                         <div class="color-dot black out-of-stock" title="Black (Out of stock)"></div>
@@ -1328,7 +1325,6 @@
             currentModalProduct = product;
             modalQty = 1;
             
-            // Настройка галереи с миниатюрами
             const galleryImages = product.gallery && product.gallery.length > 0 ? product.gallery : [product.img];
             document.getElementById('modal-img').src = galleryImages[0];
             
@@ -1387,4 +1383,3 @@
     </script>
 </body>
 </html>
-```[cite: 5]
