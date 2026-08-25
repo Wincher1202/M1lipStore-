@@ -1,7 +1,7 @@
 html {
     scroll-behavior: smooth;
-    background-color: #050B14;
-    color: #E0F2FE;
+    background-color: #F8FAFC;
+    color: #0F172A;
 }
 
 ::-webkit-scrollbar {
@@ -9,16 +9,16 @@ html {
 }
 
 ::-webkit-scrollbar-track {
-    background: #050B14;
+    background: #F8FAFC;
 }
 
 ::-webkit-scrollbar-thumb {
-    background: #1F3554;
+    background: #CBD5E1;
     border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: #38BDF8;
+    background: #0284C7;
 }
 
 @keyframes floatingLogo {
@@ -33,7 +33,7 @@ html {
 
 @keyframes heartbeat {
     0% { transform: scale(1); }
-    15% { transform: scale(1.35); }
+    15% { transform: scale(1.4); }
     30% { transform: scale(1); }
     45% { transform: scale(1.25); }
     60% { transform: scale(1); }
@@ -43,18 +43,19 @@ html {
     animation: heartbeat 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
 }
 
-@keyframes skyGlow {
-    0% { box-shadow: 0 0 0 rgba(56, 189, 248, 0); border-color: #1F3554; }
-    50% { box-shadow: 0 0 40px rgba(56, 189, 248, 0.3); border-color: #38BDF8; }
-    100% { box-shadow: 0 0 20px rgba(56, 189, 248, 0.15); border-color: rgba(56, 189, 248, 0.6); }
+/* Пульсуюча червона рамка для каталогу при натисканні на сердечко */
+@keyframes cardPulseRed {
+    0% { box-shadow: 0 0 0 rgba(239, 68, 68, 0); border-color: #CBD5E1; }
+    50% { box-shadow: 0 0 25px rgba(239, 68, 68, 0.4); border-color: #EF4444; }
+    100% { box-shadow: 0 0 15px rgba(239, 68, 68, 0.2); border-color: rgba(239, 68, 68, 0.7); }
 }
 
 .card-active-glow {
-    animation: skyGlow 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation: cardPulseRed 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .glass-sky {
-    background: rgba(13, 23, 38, 0.8);
+    background: rgba(255, 255, 255, 0.85);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
 }
