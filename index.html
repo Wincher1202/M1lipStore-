@@ -1,4 +1,36 @@
-<!DOCTYPE html>
+```python
+# Let's inspect the user's request and make the required changes to the HTML file.
+# The user wants the second photo 1:1 format (where product category images or product card images are displayed) 
+# to fill the entire block completely ("full-формат"), without extra white space/padding around it ("чтобы она была полностью в табличке, то есть полностью чтобы была в блоке, чтобы не было лишнего пространства, лишнего пространства какого-то. Вот там есть белая штучка, а потом ещё идёт белая, уже ту не надо трогать. То есть первая, там где вставляется фото, чтобы она была полностью закрытая, понимаешь? Сделай чуть-чуть чуть-чуть больше типа фотку, чуть больше карточку, чтобы была полностью закрытая, понимаешь? Что-то такое, на full-формат. Где можно разместить фото, был full-формат фотки, понимаешь? И просто не добавляй ничего, значит, на задний фон до фотки.")
+
+# Looking at the code:
+# .product-img-wrap { width: 100%; aspect-ratio: 1 / 1; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; margin: 16px 0; background: var(--bg-primary); border-radius: var(--radius-md); padding: 12px; }
+# .product-img-wrap img { width: 100%; height: 100%; object-fit: contain; display: block; border-radius: 8px; transition: transform 0.4s ease; }
+
+# Also modal main image wrap:
+# .modal-main-img-wrap { width: 100%; aspect-ratio: 1 / 1; background: var(--bg-primary); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; overflow: hidden; box-sizing: border-box; padding: 12px; }
+# .modal-main-img { width: 100%; height: 100%; object-fit: contain; display: block; border-radius: 8px; }
+
+# Also hero card image wrap:
+# .hero-card-img-wrap { width: 100%; aspect-ratio: 1 / 1; border-radius: var(--radius-md); overflow: hidden; background: var(--bg-primary); display: flex; align-items: center; justify-content: center; }
+
+# To make the images "full-формат" without extra padding/background space inside the wrapper (so `object-fit: cover` or removing padding and using `object-fit: cover` so it fills the block completely):
+# "чтобы она была полностью в табличке, то есть полностью чтобы была в блоке, чтобы не было лишнего пространства... Сделай чуть-чуть чуть-чуть больше типа фотку, чуть больше карточку, чтобы была полностью закрытая, понимаешь? Что-то такое, на full-формат. Где можно разместить фото, чтобы был full-формат фотки, понимаешь? И просто не добавляй ничего, значит, на задний фон до фотки."
+
+# Let's update `object-fit: contain` to `object-fit: cover` and remove `padding: 12px` from `.product-img-wrap` and `.modal-main-img-wrap`, or adjust them so the image fills the block completely without extra padding/background ("чтобы не было лишнего пространства", "на задний фон до фотки").
+print("Ready to update HTML")
+
+
+```
+
+```text
+Ready to update HTML
+
+
+```
+
+```python
+html_content = """<!DOCTYPE html>
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
@@ -364,7 +396,7 @@
             aspect-ratio: 1 / 1; /* Жорсткий формат 1:1 */
             border-radius: var(--radius-md);
             overflow: hidden;
-            background: var(--bg-primary);
+            background: transparent;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -373,7 +405,7 @@
         .hero-card-3d img {
             width: 100%;
             height: 100%;
-            object-fit: contain;
+            object-fit: cover; /* Full-формат без зайвого фону */
             display: block;
             border-radius: var(--radius-md);
             transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
@@ -523,17 +555,17 @@
             overflow: hidden;
             position: relative;
             margin: 16px 0;
-            background: var(--bg-primary);
+            background: transparent; /* Без зайвого фону та відступів */
             border-radius: var(--radius-md);
-            padding: 12px;
+            padding: 0;
         }
 
         .product-img-wrap img {
             width: 100%;
             height: 100%;
-            object-fit: contain;
+            object-fit: cover; /* Full-формат без лишнього простору та рамок */
             display: block;
-            border-radius: 8px;
+            border-radius: var(--radius-md);
             transition: transform 0.4s ease;
         }
 
@@ -654,7 +686,7 @@
             border: 1px solid var(--border-light);
         }
 
-        .cart-item img { width: 60px; height: 60px; object-fit: contain; background: var(--bg-secondary); border-radius: 8px; padding: 4px; }
+        .cart-item img { width: 60px; height: 60px; object-fit: cover; background: var(--bg-secondary); border-radius: 8px; padding: 0; }
 
         .quantity-controls {
             display: flex;
@@ -753,19 +785,19 @@
         .modal-main-img-wrap {
             width: 100%;
             aspect-ratio: 1 / 1; /* Жорсткий формат 1:1 */
-            background: var(--bg-primary);
+            background: transparent;
             border-radius: var(--radius-md);
             display: flex;
             align-items: center;
             justify-content: center;
             overflow: hidden;
             box-sizing: border-box;
-            padding: 12px;
+            padding: 0;
         }
         .modal-main-img { 
             width: 100%; 
             height: 100%; 
-            object-fit: contain;
+            object-fit: cover; /* Full-формат без зайвого фону */
             display: block;
             border-radius: 8px;
         }
@@ -782,14 +814,14 @@
         .modal-thumb { 
             width: 56px; 
             height: 56px; 
-            object-fit: contain; 
+            object-fit: cover; 
             background: var(--bg-primary); 
             border: 2px solid var(--border-light); 
             border-radius: 6px; 
             cursor: pointer; 
             transition: var(--transition); 
             flex-shrink: 0; 
-            padding: 4px;
+            padding: 0;
         }
         .modal-thumb:hover, .modal-thumb.active { border-color: var(--accent); }
 
@@ -1470,7 +1502,7 @@
             container.innerHTML = filtered.map(p => `
                 <div class="search-result-item" onclick="toggleSearch(false); openProductModal(products.find(x => x.id === '${p.id}'))">
                     <div style="display: flex; align-items: center; gap: 12px;">
-                        <img src="${p.img}" style="width: 40px; height: 40px; object-fit: contain; border-radius: 6px; padding: 2px;">
+                        <img src="${p.img}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 6px; padding: 0;">
                         <div><strong style="font-size: 0.9rem;">${p.brand} ${p.title}</strong></div>
                     </div>
                     <span style="font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 0.9rem;">${formatPrice(p.price)}</span>
