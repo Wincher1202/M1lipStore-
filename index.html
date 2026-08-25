@@ -1,320 +1,210 @@
 <!DOCTYPE html>
-<html lang="uk" data-lang="uk">
+<html lang="uk" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MILIPSTORE — Digital Space for Your Setup</title>
-    <link rel="stylesheet" href="style.css">
+    <title>MILIPSTORE — Heavenly Hardware Experience</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        skybrand: {
+                            bg: '#050B14',
+                            surface: '#0D1726',
+                            card: '#132238',
+                            border: '#1F3554',
+                            blue: '#38BDF8',
+                            glow: '#0EA5E9',
+                            light: '#E0F2FE'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Підключення окремого CSS файлу -->
+    <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="font-sans antialiased selection:bg-skybrand-blue selection:text-skybrand-bg">
 
-    <!-- LOADING SCREEN -->
-    <div id="loader" class="loader-screen">
-        <div class="loader-content">
-            <div class="loader-logo bouncing-logo">MILIPSTORE</div>
-            <div class="loader-sub" data-i18n="loader_sub">CELESTIAL EXPERIENCE</div>
-            <div class="loader-bar-wrap">
-                <div id="loader-bar" class="loader-bar"></div>
+    <!-- Loading Screen -->
+    <div id="loader" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-skybrand-bg transition-opacity duration-700">
+        <div class="flex flex-col items-center space-y-6">
+            <svg class="w-12 h-12 text-skybrand-blue animate-pulse animate-float" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M12 3c-4 4-8 3-8 8 0 5 4 6 8 10 4-4 8-5 8-10 0-5-4-4-8-10z"/>
+                <path d="M12 3v18"/>
+            </svg>
+            <span class="text-xs uppercase tracking-[0.4em] text-skybrand-blue font-medium">SKY HEAVEN SHOWROOM</span>
+            <div class="w-40 h-[2px] bg-skybrand-border overflow-hidden rounded-full">
+                <div id="loader-bar" class="w-full h-full bg-skybrand-blue -translate-x-full transition-transform duration-700"></div>
             </div>
-            <div id="loader-percent" class="loader-percent">0%</div>
         </div>
     </div>
 
-    <!-- BACKGROUND EFFECTS -->
-    <div class="bg-noise"></div>
-    <div class="bg-gradient-shapes">
-        <div class="ambient-shape shape-1"></div>
-        <div class="ambient-shape shape-2"></div>
-        <div class="ambient-shape shape-3"></div>
-    </div>
-    <div class="bg-grid"></div>
-    <div class="bg-particles" id="particles"></div>
+    <!-- Header -->
+    <header id="header" class="fixed top-0 left-0 right-0 z-40 transition-all duration-300 glass-sky border-b border-skybrand-border/40">
+        <div class="max-w-7xl mx-auto px-6 h-20 grid grid-cols-3 items-center">
+            
+            <!-- Ліва частина: Навігація -->
+            <nav class="hidden md:flex items-center space-x-6">
+                <a href="#catalog" class="text-xs uppercase tracking-wider text-skybrand-light/70 hover:text-skybrand-blue transition-colors">Каталог</a>
+                <a href="#catalog" onclick="filterCategory('mice')" class="text-xs uppercase tracking-wider text-skybrand-light/70 hover:text-skybrand-blue transition-colors">Миші</a>
+                <a href="#catalog" onclick="filterCategory('keyboards')" class="text-xs uppercase tracking-wider text-skybrand-light/70 hover:text-skybrand-blue transition-colors">Клавіатури</a>
+            </nav>
+            <div class="md:hidden"></div>
 
-    <!-- HEADER / NAVIGATION -->
-    <header id="header" class="header">
-        <div class="header-container">
-            <div class="logo-area">
-                <a href="#" class="logo-link">
-                    <span class="logo-text bouncing-logo">MilipStore</span>
-                    <span class="logo-butterfly">🦋</span>
+            <!-- Центральна частина: Плаваючий логотип -->
+            <div class="flex justify-center">
+                <a href="#top" class="group flex items-center justify-center focus:outline-none animate-float">
+                    <div class="w-10 h-10 rounded-full bg-skybrand-surface border border-skybrand-border flex items-center justify-center shadow-[0_0_20px_rgba(56,189,248,0.2)] group-hover:scale-110 transition-transform duration-300">
+                        <svg class="w-5 h-5 text-skybrand-blue" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                            <path d="M12 3c-4 4-8 3-8 8 0 5 4 6 8 10 4-4 8-5 8-10 0-5-4-4-8-10z"/>
+                            <path d="M12 3v18"/>
+                        </svg>
+                    </div>
                 </a>
             </div>
-            
-            <nav class="nav-links">
-                <a href="#catalog" data-i18n="nav_catalog">МАГАЗИН</a>
-                <a href="#new" data-i18n="nav_new">НОВИНКИ</a>
-                <a href="#mice" data-i18n="nav_mice">МИШКИ</a>
-                <a href="#setup-lab" data-i18n="nav_setup">SETUP LAB</a>
-                <a href="#delivery" data-i18n="nav_delivery">ДОСТАВКА</a>
-            </nav>
 
-            <div class="header-actions">
-                <button id="search-btn" class="icon-btn" title="Пошук">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <!-- Права частина: Кнопки кошика та обраного -->
+            <div class="flex items-center justify-end space-x-4">
+                <button onclick="openWishlistDrawer()" class="relative p-2.5 rounded-xl bg-skybrand-surface border border-skybrand-border text-skybrand-light/80 hover:text-white hover:border-skybrand-blue transition-all focus:outline-none" aria-label="Обране">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"/>
+                    </svg>
+                    <span id="wishlist-counter" class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-skybrand-blue rounded-full scale-0 transition-transform duration-300"></span>
                 </button>
-                <button id="wishlist-btn" class="icon-btn" title="Обране">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-                    <span class="badge" id="wishlist-count">0</span>
+                <button onclick="openCartDrawer()" class="relative p-2.5 rounded-xl bg-skybrand-surface border border-skybrand-border text-skybrand-light/80 hover:text-white hover:border-skybrand-blue transition-all focus:outline-none" aria-label="Кошик">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.120-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"/>
+                    </svg>
+                    <span id="cart-counter" class="absolute -top-1 -right-1 w-4 h-4 bg-skybrand-blue text-[9px] font-bold text-skybrand-bg rounded-full flex items-center justify-center scale-0 transition-transform duration-300">0</span>
                 </button>
-                <button id="cart-btn" class="icon-btn" title="Кошик" onclick="openCart()">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-                    <span class="badge" id="cart-count">0</span>
-                </button>
-                <div class="lang-switcher">
-                    <button class="lang-btn active" data-lang-switch="uk">UA</button>
-                    <span class="lang-sep">/</span>
-                    <button class="lang-btn" data-lang-switch="ru">RU</button>
-                </div>
             </div>
+
         </div>
     </header>
 
-    <!-- STATUS BAR -->
-    <div class="system-status-bar">
-        <div class="status-item">
-            <span class="status-dot"></span>
-            <span data-i18n="sys_online">MILIPSTORE CELESTIAL SYSTEM ONLINE</span>
-        </div>
-        <div class="status-item">KYIV / UA <span id="live-clock">15:42</span></div>
-    </div>
+    <div id="top"></div>
 
-    <main>
-        <!-- HERO SECTION -->
-        <section class="hero-section">
-            <div class="outline-bg-text">CELESTIAL SETUP</div>
-            
-            <div class="hero-content">
-                <div class="hero-label" data-i18n="hero_label">MILIPSTORE / CELESTIAL EDITION</div>
-                <h1 class="hero-title">
-                    <span class="title-build">BEYOND</span>
-                    <span class="title-your">THE</span>
-                    <span class="title-setup">CLOUDS.</span>
+    <!-- Hero Section -->
+    <section class="relative min-h-screen flex items-center pt-28 overflow-hidden bg-skybrand-bg">
+        <div class="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[450px] bg-skybrand-blue/15 blur-[160px] pointer-events-none rounded-full"></div>
+
+        <div class="max-w-7xl mx-auto px-6 w-full grid grid-cols-1 lg:grid-cols-12 gap-12 items-center py-20 z-10">
+            <div class="lg:col-span-6 space-y-8">
+                <div class="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-skybrand-surface border border-skybrand-border shadow-lg">
+                    <span class="w-2 h-2 rounded-full bg-skybrand-blue animate-ping"></span>
+                    <span class="text-[11px] uppercase tracking-widest text-skybrand-blue font-semibold">HEAVEN DROP / EXCLUSIVE 2026</span>
+                </div>
+                
+                <h1 class="text-5xl lg:text-7xl font-light tracking-tight text-white leading-[1.08]">
+                    AORUS SHARK <br><span class="font-bold text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-sky-200">R5 ULTRA</span>
                 </h1>
 
-                <!-- ORBIT & PRODUCT SYSTEM -->
-                <div class="orbit-container" id="orbitContainer">
-                    <div class="orbit-ring"></div>
-                    <div class="orbit-item item-1" data-orbit="R5 ULTRA">R5 ULTRA</div>
-                    <div class="orbit-item item-2" data-orbit="8000HZ">8000HZ</div>
-                    <div class="orbit-item item-3" data-orbit="CELESTIAL WHITE">PURE WHITE</div>
-                    <div class="orbit-item item-4" data-orbit="PAW3395">PAW3395</div>
-                    <div class="orbit-item item-5" data-orbit="NEW">NEW 2026</div>
-                    <div class="orbit-item item-6" data-orbit="EXPLORE">EXPLORE →</div>
+                <p class="text-skybrand-light/70 text-sm lg:text-base max-w-md font-light leading-relaxed">
+                    Флагманська бездротова миша в чистому білому кольорі. Створена для максимальної швидкості, має революційний сенсор та небесну ергономіку.
+                </p>
 
-                    <!-- HERO CENTER PRODUCT -->
-                    <div class="hero-product-float" id="heroProductCard" onclick="openProductModal('r5-ultra')">
-                        <div class="product-glow"></div>
-                        <img src="attack-shark-r5-ultra-top-angle.jpg" alt="Attack Shark R5 Ultra" id="heroImage" class="floating-img">
-                        <div class="product-tag-float">
-                            <span class="model">ATTACK SHARK R5 ULTRA</span>
-                            <span class="action" data-i18n="click_to_open">ВІДКРИТИ НЕБЕСНИЙ ПРОСТІР →</span>
-                        </div>
+                <div class="flex items-center space-x-6 pt-4">
+                    <a href="#catalog" class="px-8 py-4 bg-gradient-to-r from-sky-500 to-blue-600 text-skybrand-bg font-bold text-xs uppercase tracking-widest rounded-full hover:brightness-110 transition-all shadow-[0_0_30px_rgba(56,189,248,0.4)]">
+                        Обрати девайс
+                    </a>
+                    <div class="text-2xl font-semibold tracking-tight text-white">
+                        ₴ 4,199
                     </div>
                 </div>
             </div>
-        </section>
 
-        <!-- CATALOG / EXPLORE SECTION -->
-        <section id="catalog" class="catalog-section">
-            <div class="section-header">
-                <span class="section-tag">01 / CATALOGUE</span>
-                <h2 data-i18n="cat_title">CELESTIAL SPACE CATALOGUE</h2>
-            </div>
-
-            <div class="catalog-grid">
-                <!-- PRODUCT MODULE 1: ATTACK SHARK R5 ULTRA -->
-                <div class="product-module" onclick="openProductModal('r5-ultra')">
-                    <div class="module-top">
-                        <span class="index">01 / 02</span>
-                        <button class="wishlist-toggle" onclick="event.stopPropagation(); toggleWishlist('Attack Shark R5 Ultra', this)">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-                        </button>
+            <div class="lg:col-span-6 relative flex items-center justify-center">
+                <div class="relative w-full aspect-square max-w-[520px] bg-skybrand-surface/60 border border-skybrand-border/80 rounded-3xl p-8 flex items-center justify-center overflow-hidden group shadow-2xl">
+                    <div class="absolute inset-0 bg-gradient-to-t from-sky-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+                    <img src="https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?q=80&w=1000&auto=format&fit=crop" alt="Aorus Shark R5 Ultra" class="w-4/5 h-auto object-contain drop-shadow-[0_25px_35px_rgba(56,189,248,0.25)] transform group-hover:scale-110 transition-transform duration-700">
+                    
+                    <div class="absolute bottom-6 left-6 px-3.5 py-2 rounded-xl bg-skybrand-card/90 backdrop-blur-md border border-skybrand-border text-[10px] tracking-widest text-skybrand-blue uppercase font-bold">
+                        PURE WHITE EDITION
                     </div>
-                    <div class="module-image-wrap">
-                        <img src="attack-shark-r5-ultra-top-angle.jpg" alt="Attack Shark R5 Ultra" class="module-img">
-                        <div class="module-specs-overlay">
-                            <span>ULTRA</span>
-                            <span>8K</span>
-                            <span>WHITE</span>
-                        </div>
-                    </div>
-                    <div class="module-bottom">
-                        <div class="module-info">
-                            <span class="brand">ATTACK SHARK</span>
-                            <h3 class="name">R5 ULTRA WIRELESS MOUSE</h3>
-                        </div>
-                        <div class="module-price-block">
-                            <span class="price">₴ 3,299</span>
-                            <span class="view-link" data-i18n="view_product">ПЕРЕГЛЯНУТИ →</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- PRODUCT MODULE 2: ESPORTS PAD -->
-                <div class="product-module" onclick="openProductModal('pad')">
-                    <div class="module-top">
-                        <span class="index">02 / 02</span>
-                        <button class="wishlist-toggle" onclick="event.stopPropagation(); toggleWishlist('Milipstore Celestial Mat', this)">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-                        </button>
-                    </div>
-                    <div class="module-image-wrap">
-                        <img src="attack-shark-r5-ultra-in-hand-setup.jpg" alt="Esports Pad" class="module-img">
-                        <div class="module-specs-overlay">
-                            <span>SKY CONTROL</span>
-                            <span>PURE</span>
-                        </div>
-                    </div>
-                    <div class="module-bottom">
-                        <div class="module-info">
-                            <span class="brand">MILIPSTORE LAB</span>
-                            <h3 class="name">CELESTIAL ESPORTS MOUSEPAD</h3>
-                        </div>
-                        <div class="module-price-block">
-                            <span class="price">₴ 999</span>
-                            <span class="view-link" data-i18n="view_product">ПЕРЕГЛЯНУТИ →</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <!-- PRODUCT EXPERIENCE MODAL / PAGE -->
-    <div id="productModal" class="product-modal">
-        <div class="modal-backdrop" onclick="closeProductModal()"></div>
-        <div class="modal-container">
-            <button class="modal-close" onclick="closeProductModal()">×</button>
-            
-            <div class="modal-breadcrumb" id="modalBreadcrumb">
-                MILIPSTORE / <span data-i18n="bread_mice">MICE</span> / ATTACK SHARK R5 ULTRA
-            </div>
-
-            <div class="modal-content-grid">
-                <!-- LEFT GALLERY -->
-                <div class="gallery-side">
-                    <div class="gallery-main-view">
-                        <img id="mainGalleryImg" src="attack-shark-r5-ultra-top-angle.jpg" alt="Product View">
-                        <div class="gallery-progress" id="galleryProgress">01 / 07</div>
-                    </div>
-                    <div class="thumbnails-grid" id="thumbnailsContainer">
-                        <!-- Динамически заполнится из скрипта согласно вашему списку фотографий -->
-                    </div>
-                </div>
-
-                <!-- RIGHT INFO & ARCHITECTURE -->
-                <div class="info-side">
-                    <div class="product-header-info">
-                        <span class="badge-new" data-i18n="tag_bestseller">CELESTIAL EDITION 2026</span>
-                        <h2 id="modalTitle">ATTACK SHARK R5 ULTRA</h2>
-                        <p class="subtitle" id="modalSubtitle" data-i18n="prod_subtitle">Флагманська ультралегка ігрова миша у небесному білому виконанні</p>
-                        <div class="price-row">
-                            <span class="current-price" id="modalPrice">₴ 3,299</span>
-                            <span class="stock-status" data-i18n="in_stock">● В наявності (24 шт)</span>
-                        </div>
-                    </div>
-
-                    <!-- COLOR CONFIG (Один цвет - Белый на выбор) -->
-                    <div class="config-block" id="colorConfigBlock">
-                        <label class="config-label">
-                            <span data-i18n="label_color">КОЛІР:</span> 
-                            <span id="selectedColorLabel" class="selected-val">CELESTIAL WHITE</span>
-                        </label>
-                        <div class="color-options">
-                            <button class="color-option white active" onclick="selectColor('white')" title="Celestial White">
-                                <span class="dot"></span> Celestial White
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- ACTIONS -->
-                    <div class="action-buttons-row">
-                        <button class="btn-primary" onclick="addToCart()" data-i18n="btn_add_cart">ДОДАТИ В КОШИК</button>
-                        <button class="btn-secondary" onclick="toggleModalWishlist()" id="modalWishBtn">♡</button>
-                    </div>
-
-                    <!-- DATA TABS / SECTIONS -->
-                    <div class="data-modules-container">
-                        <div class="data-accordion active">
-                            <button class="accordion-header" onclick="toggleAccordion(this)">
-                                <span data-i18n="acc_desc">01. ОПИС ТОВАРУ</span>
-                                <span class="icon">+</span>
-                            </button>
-                            <div class="accordion-body" id="modalDescText" data-i18n="desc_text">
-                                Attack Shark R5 Ultra створена для безкомпромісного геймінгу у витонченому білому дизайні. Небесна легкість корпусу, флагманський сенсор нового покоління та підтримка частоти 8000 Гц дарують абсолютний контроль над кожним рухом.
-                            </div>
-                        </div>
-
-                        <div class="data-accordion">
-                            <button class="accordion-header" onclick="toggleAccordion(this)">
-                                <span data-i18n="acc_specs">02. ХАРАКТЕРИСТИКИ</span>
-                                <span class="icon">+</span>
-                            </button>
-                            <div class="accordion-body">
-                                <ul class="specs-list" id="modalSpecsList">
-                                    <li><span>Сенсор:</span> <strong>Flagship PAW3395 Ultra</strong></li>
-                                    <li><span>Вага:</span> <strong>Ультралегкий корпус</strong></li>
-                                    <li><span>Частота опитування:</span> <strong>8000 Гц Hyper-Polling</strong></li>
-                                    <li><span>Підключення:</span> <strong>Tri-Mode Wireless / Type-C</strong></li>
-                                </ul>
-                            </div>
-                        </div>
-
-                        <div class="data-accordion">
-                            <button class="accordion-header" onclick="toggleAccordion(this)">
-                                <span data-i18n="acc_delivery">03. ДОСТАВКА ТА ОПЛАТА</span>
-                                <span class="icon">+</span>
-                            </button>
-                            <div class="accordion-body" data-i18n="delivery_text">
-                                Швидка доставка Новою Поштою по Україні (1-2 дні), кур'єр до дверей, оплата при отриманні або на рахунок ФОП.
-                            </div>
-                        </div>
+                    <div class="absolute top-6 right-6 px-3.5 py-2 rounded-xl bg-skybrand-card/90 backdrop-blur-md border border-skybrand-border text-[10px] tracking-widest text-skybrand-light uppercase">
+                        8K HYPERPOLL
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+    </section>
 
-    <!-- CART DRAWER -->
-    <div id="cartDrawer" class="cart-drawer">
-        <div class="cart-backdrop" onclick="closeCart()"></div>
-        <div class="cart-panel">
-            <div class="cart-header">
-                <h3 data-i18n="cart_title">КОШИК</h3>
-                <button onclick="closeCart()">×</button>
-            </div>
-            <div class="cart-body" id="cartItemsList">
-                <div class="empty-cart" data-i18n="cart_empty">Ваш кошик наразі порожній</div>
-            </div>
-            <div class="cart-footer">
-                <div class="cart-total">
-                    <span data-i18n="cart_total">Разом:</span>
-                    <strong id="cartTotalPrice">₴ 0</strong>
+    <!-- Catalog Section -->
+    <section id="catalog" class="py-32 bg-skybrand-surface/30 border-t border-skybrand-border/40">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="flex flex-col md:flex-row md:items-end justify-between mb-12">
+                <div>
+                    <span class="text-xs uppercase tracking-[0.25em] text-skybrand-blue font-semibold block mb-3">Heavenly Marketplace</span>
+                    <h2 class="text-3xl lg:text-4xl font-light tracking-tight text-white">КАТАЛОГ ОБЛАДНАННЯ</h2>
                 </div>
-                <button class="btn-primary full" onclick="checkout()" data-i18n="cart_checkout">ОФОРМИТИ ЗАМОВЛЕННЯ</button>
+                
+                <div class="flex flex-wrap gap-2 mt-6 md:mt-0">
+                    <button onclick="filterCategory('all')" id="filter-all" class="cat-btn px-5 py-2.5 rounded-full text-xs uppercase tracking-wider bg-skybrand-blue text-skybrand-bg font-bold transition-all shadow-md">Усі товари</button>
+                    <button onclick="filterCategory('mice')" id="filter-mice" class="cat-btn px-5 py-2.5 rounded-full text-xs uppercase tracking-wider bg-skybrand-card text-skybrand-light/70 border border-skybrand-border hover:text-white transition-all">Миші</button>
+                    <button onclick="filterCategory('keyboards')" id="filter-keyboards" class="cat-btn px-5 py-2.5 rounded-full text-xs uppercase tracking-wider bg-skybrand-card text-skybrand-light/70 border border-skybrand-border hover:text-white transition-all">Клавіатури</button>
+                    <button onclick="filterCategory('headsets')" id="filter-headsets" class="cat-btn px-5 py-2.5 rounded-full text-xs uppercase tracking-wider bg-skybrand-card text-skybrand-light/70 border border-skybrand-border hover:text-white transition-all">Навушники</button>
+                </div>
+            </div>
+
+            <div id="products-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
+        </div>
+    </section>
+
+    <!-- Cart Drawer -->
+    <div id="cart-drawer" class="fixed inset-0 z-50 pointer-events-none transition-opacity duration-300 opacity-0">
+        <div class="absolute inset-0 bg-black/70 backdrop-blur-sm pointer-events-auto" onclick="closeCartDrawer()"></div>
+        <div class="absolute top-0 right-0 bottom-0 w-full max-w-md bg-skybrand-card border-l border-skybrand-border p-6 flex flex-col justify-between pointer-events-auto transform translate-x-full transition-transform duration-500 shadow-2xl" id="cart-panel">
+            <div>
+                <div class="flex items-center justify-between pb-6 border-b border-skybrand-border">
+                    <h3 class="text-sm font-bold tracking-widest text-white uppercase">Кошик замовлення</h3>
+                    <button onclick="closeCartDrawer()" class="p-2 text-skybrand-light/60 hover:text-white font-bold">✕</button>
+                </div>
+                <div id="cart-items" class="py-6 space-y-4 max-h-[60vh] overflow-y-auto"></div>
+            </div>
+            <div class="pt-6 border-t border-skybrand-border">
+                <div class="flex items-center justify-between mb-5">
+                    <span class="text-xs uppercase tracking-wider text-skybrand-light/70">Разом до сплати:</span>
+                    <span id="cart-total" class="text-xl font-bold text-skybrand-blue">₴ 0</span>
+                </div>
+                <button onclick="checkout()" class="w-full py-4 bg-gradient-to-r from-sky-500 to-blue-600 text-skybrand-bg text-xs uppercase tracking-widest font-bold rounded-xl hover:brightness-110 transition-all shadow-lg">
+                    Оформити замовлення →
+                </button>
             </div>
         </div>
     </div>
 
-    <!-- SEARCH OVERLAY -->
-    <div id="searchOverlay" class="search-overlay">
-        <button class="modal-close" onclick="closeSearch()">×</button>
-        <div class="search-box-wrap">
-            <h3 data-i18n="search_title">WHAT ARE YOU LOOKING FOR?</h3>
-            <input type="text" id="searchInput" placeholder="Введіть назву девайса..." oninput="handleSearch(this.value)">
-            <div class="trending-tags">
-                <span data-i18n="trend_label">TRENDING:</span>
-                <span onclick="setSearchQuery('R5 Ultra')">R5 Ultra</span>
-                <span onclick="setSearchQuery('White')">Celestial White</span>
-                <span onclick="setSearchQuery('8000Hz')">8000Hz</span>
+    <!-- Wishlist Drawer -->
+    <div id="wishlist-drawer" class="fixed inset-0 z-50 pointer-events-none transition-opacity duration-300 opacity-0">
+        <div class="absolute inset-0 bg-black/70 backdrop-blur-sm pointer-events-auto" onclick="closeWishlistDrawer()"></div>
+        <div class="absolute top-0 right-0 bottom-0 w-full max-w-md bg-skybrand-card border-l border-skybrand-border p-6 flex flex-col justify-between pointer-events-auto transform translate-x-full transition-transform duration-500 shadow-2xl" id="wishlist-panel">
+            <div>
+                <div class="flex items-center justify-between pb-6 border-b border-skybrand-border">
+                    <h3 class="text-sm font-bold tracking-widest text-white uppercase">Обране обладнання</h3>
+                    <button onclick="closeWishlistDrawer()" class="p-2 text-skybrand-light/60 hover:text-white font-bold">✕</button>
+                </div>
+                <div id="wishlist-items" class="py-6 space-y-4 max-h-[70vh] overflow-y-auto"></div>
             </div>
-            <div id="searchResults" class="search-results-list"></div>
         </div>
     </div>
 
+    <!-- Footer -->
+    <footer class="py-12 bg-skybrand-bg border-t border-skybrand-border/40 text-center text-xs text-skybrand-light/50">
+        <p>&copy; 2026 MILIPSTORE. Heavenly Hardware Experience. All rights reserved.</p>
+    </footer>
+
+    <!-- Підключення окремого JS файлу -->
     <script src="script.js"></script>
 </body>
 </html>
