@@ -689,6 +689,19 @@
             .footer-grid { grid-template-columns: 1fr 1fr; gap: 40px; }
             .modal-grid { grid-template-columns: 1fr; padding: 30px; }
         }
+        .ticker-move span {
+    display: inline-flex;
+    align-items: center;
+    gap: 15px; /* Расстояние между логотипом и текстом */
+    margin-right: 40px;
+}
+
+.ticker-logo {
+    height: 24px; /* Высота логотипа в строке, можете настроить под себя */
+    width: auto;
+    object-fit: contain;
+    border-radius: 4px; /* Если хотите скругленные углы */
+}
     </style>
 </head>
 <body data-theme="light">
@@ -720,15 +733,16 @@
 
     <!-- TICKER -->
     <div class="ticker-wrap">
-        <div class="ticker-move">
-            <span>⚡ Безкоштовна доставка від 3000 грн</span>
-            <span>🔥 Нова категорія товарів вже доступна</span>
-            <span>🎮 Офіційне преміальне ігрове залізо</span>
-            <span>⚡ Безкоштовна доставка від 3000 грн</span>
-            <span>🔥 Нова категорія товарів вже доступна</span>
-            <span>🎮 Офіційне преміальне ігрове залізо</span>
-        </div>
+    <div class="ticker-move">
+        <span><img src="logo-milipstore.png" alt="MilipStore" class="ticker-logo"> Безкоштовна доставка від 3000 грн</span>
+        <span><img src="logo-milipstore.png" alt="MilipStore" class="ticker-logo"> Нова категорія товарів вже доступна</span>
+        <span><img src="logo-milipstore.png" alt="MilipStore" class="ticker-logo"> Офіційне преміальне ігрове залізо</span>
+        <span><img src="logo-milipstore.png" alt="MilipStore" class="ticker-logo"> Безкоштовна доставка від 3000 грн</span>
+        <span><img src="logo-milipstore.png" alt="MilipStore" class="ticker-logo"> Безкоштовна доставка від 3000 грн</span>
+        <span><img src="logo-milipstore.png" alt="MilipStore" class="ticker-logo"> Нова категорія товарів вже доступна</span>
+        <span><img src="logo-milipstore.png" alt="MilipStore" class="ticker-logo"> Офіційне преміальне ігрове залізо</span>
     </div>
+</div>
 
     <!-- HERO SECTION -->
     <section class="hero">
