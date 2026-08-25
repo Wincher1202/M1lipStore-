@@ -497,7 +497,7 @@
         }
 
         .wishlist-btn svg {
-            transition: transform 0.3s ease, fill 0.3s ease, stroke 0.3s ease;
+            transition: fill 0.3s ease, stroke 0.3s ease;
         }
 
         .wishlist-btn.active svg {
@@ -545,6 +545,8 @@
             border: 1px solid var(--border-hover);
         }
         .color-dot.white { background-color: #FFFFFF; }
+        .color-dot.black { background-color: #1a1a1a; }
+        .color-dot.pink { background-color: #ff2a85; }
         .color-dot.active { box-shadow: 0 0 0 2px var(--accent); }
 
         .product-info {
@@ -631,7 +633,7 @@
         .close-drawer { background: transparent; border: none; font-size: 1.1rem; font-weight: 800; cursor: pointer; color: var(--text-primary); }
         .drawer-body { padding: 20px; flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
         
-        .cart-item {
+        .cart-item, .wishlist-item-card {
             display: flex;
             align-items: center;
             gap: 12px;
@@ -641,7 +643,7 @@
             border: 1px solid var(--border-light);
         }
 
-        .cart-item img { width: 50px; height: 50px; object-fit: cover; border-radius: 6px; }
+        .cart-item img, .wishlist-item-card img { width: 50px; height: 50px; object-fit: cover; border-radius: 6px; cursor: pointer; }
 
         .quantity-controls {
             display: flex;
@@ -948,6 +950,15 @@
         </div>
     </div>
 
+    <!-- WISHLIST DRAWER -->
+    <div class="drawer" id="wishlist-drawer">
+        <div class="drawer-header">
+            <h3 style="font-weight: 800;">Обране</h3>
+            <button class="close-drawer" onclick="toggleWishlistDrawer(false)">✕</button>
+        </div>
+        <div class="drawer-body" id="wishlist-items-container"></div>
+    </div>
+
     <!-- SEARCH MODAL -->
     <div class="search-modal" id="search-modal">
         <div class="search-container">
@@ -1175,7 +1186,7 @@
             });
 
             document.getElementById('search-open-btn').addEventListener('click', () => toggleSearch(true));
-            document.getElementById('wishlist-open-btn').addEventListener('click', () => scrollToSection('catalog'));
+            document.getElementById('wishlist-open-btn').addEventListener('click', () => toggleWishlistDrawer(true));
             document.getElementById('cart-open-btn').addEventListener('click', () => toggleCart(true));
         });
 
@@ -1256,11 +1267,15 @@
             if (btnEl) {
                 btnEl.classList.toggle('active', isAdding);
                 const svg = btnEl.querySelector('svg');
+                svg.style.animation = 'none';
+                svg.offsetHeight; // trigger reflow
+                svg.style.animation = '';
                 svg.setAttribute('fill', isAdding ? '#FF3B30' : 'none');
                 svg.setAttribute('stroke', isAdding ? '#FF3B30' : 'currentColor');
             }
 
             updateBadges();
+            renderWishlistItems();
             if (currentModalProduct && currentModalProduct.id === productId) updateModalWishlistBtn();
         }
 
@@ -1276,6 +1291,49 @@
             btn.classList.toggle('active', isFav);
             btn.querySelector('svg').setAttribute('fill', isFav ? '#FF3B30' : 'none');
             btn.querySelector('svg').setAttribute('stroke', isFav ? '#FF3B30' : 'currentColor');
+        }
+
+        function renderWishlistItems() {
+            const container = document.getElementById('wishlist-items-container');
+            if (wishlist.length === 0) {
+                container.innerHTML = `<p style="color: var(--text-secondary); text-align: center; margin-top: 30px;">Список обраного порожній</p>`;
+                return;
+            }
+            container.innerHTML = wishlist.map((item, index) => `
+                <div class="wishlist-item-card">
+                    <img src="${item.img}" alt="${item.title}" onclick="toggleWishlistDrawer(false); openProductModal(products.find(x => x.id === '${item.id}'))" title="Перейти до опису">
+                    <div style="flex-grow: 1;">
+                        <h4 style="font-size: 0.9rem; font-weight: 700; cursor: pointer;" onclick="toggleWishlistDrawer(false); openProductModal(products.find(x => x.id === '${item.id}'))">${item.brand} ${item.title}</h4>
+                        <p style="font-size: 0.75rem; color: var(--text-secondary);">Колір: <strong>${item.color}</strong></p>
+                        <p style="font-size: 0.85rem; font-weight: 700;">${formatPrice(item.price)}</p>
+                        <div style="display: flex; gap: 8px; margin-top: 6px;">
+                            <button class="btn-primary" style="padding: 4px 10px; font-size: 0.75rem;" onclick="addWishlistItemToCart('${item.id}', '${item.color}')">В кошик</button>
+                            <button class="filter-btn" style="padding: 4px 10px; font-size: 0.75rem; color: #FF3B30; border-color: #FF3B30;" onclick="removeWishlistItem(${index})">Видалити</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function removeWishlistItem(index) {
+            const removed = wishlist.splice(index, 1)[0];
+            localStorage.setItem('milip_wishlist', JSON.stringify(wishlist));
+            renderWishlistItems();
+            updateBadges();
+            if (removed) {
+                const btnEl = document.getElementById(`wishlist-btn-${removed.id}`);
+                if (btnEl) {
+                    btnEl.classList.remove('active');
+                    btnEl.querySelector('svg').setAttribute('fill', 'none');
+                    btnEl.querySelector('svg').setAttribute('stroke', 'currentColor');
+                }
+            }
+        }
+
+        function addWishlistItemToCart(productId, colorName) {
+            const product = products.find(p => p.id === productId);
+            if (!product) return;
+            addToCartFull(product, colorName, 1);
         }
 
         function addDirectToCart(productId) {
@@ -1372,6 +1430,12 @@
             if (open) renderCartItems();
         }
 
+        function toggleWishlistDrawer(open) {
+            document.getElementById('wishlist-drawer').classList.toggle('active', open);
+            document.getElementById('backdrop').classList.toggle('active', open);
+            if (open) renderWishlistItems();
+        }
+
         function toggleSearch(open) {
             document.getElementById('search-modal').classList.toggle('active', open);
             document.getElementById('backdrop').classList.toggle('active', open);
@@ -1380,6 +1444,7 @@
 
         function closeAllDrawers() {
             toggleCart(false);
+            toggleWishlistDrawer(false);
             toggleSearch(false);
             closeProductModal();
         }
