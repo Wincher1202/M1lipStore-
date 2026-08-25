@@ -1027,22 +1027,36 @@
 
         const products = [
       {
-                id: 'attack-shark-r5-ultra',
-                brand: 'ATTACK SHARK',
-                title: 'R5 ULTRA',
-                category: 'Миші',
-                tag: 'NEW / 8KHZ',
-                price: 2945,
-                desc: { ua: 'Carbon Fiber Lightweight Gaming Mouse з частотою опитування 8KHz та сенсором PAW3900MAX.', ru: 'Carbon Fiber Lightweight Gaming Mouse с частотой опроса 8KHz и сенсором PAW3900MAX.' },
-                img: 'attack-shark-r5-ultra-colors-price.jpg',
-                specs: [
-                    { label: 'SENSOR', value: 'PAW3900MAX' },
-                    { label: 'POLLING', value: '8KHZ' },
-                    { label: 'CONNECTION', value: 'TRI-MODE' },
-                    { label: 'MATERIAL', value: 'CARBON FIBER' }
-                ],
-                colClass: 'col-7'
-            },
+    id: 'attack-shark-r5-ultra',
+    brand: 'ATTACK SHARK',
+    title: 'R5 ULTRA',
+    category: 'Миші',
+    tag: 'NEW / 8KHZ',
+    price: 2945,
+    desc: { ua: 'Carbon Fiber Lightweight Gaming Mouse з частотою опитування 8KHz та сенсором PAW3900MAX.', ru: 'Carbon Fiber Lightweight Gaming Mouse с частотой опроса 8KHz и сенсором PAW3900MAX.' },
+    
+    // Головна картинка для каталогу
+    img: 'images/attack-shark-r5-ultra-colors-price.jpg',
+    
+    // Галерея на 7 фоток (перша — головна, далі ще 6)
+    gallery: [
+        'images/attack-shark-r5-ultra-colors-price.jpg',
+        'attack-shark-r5-ultra-in-hand-setup.jpg',
+        'attack-shark-r5-ultra-top-angle.jpg',
+        'attack-shark-r5-ultra-side-buttons.jpg', // замени на свои названия
+        'attack-shark-r5-ultra-back-grip.jpg', // замени на свои названия
+        'attack-shark-r5-ultra-box-bundle-contents.jpg', // замени на свои названия
+        'attack-shark-r5-ultra-dongle-receiver.jpg'  // замени на свои названия
+    ],
+
+    specs: [
+        { label: 'SENSOR', value: 'PAW3900MAX' },
+        { label: 'POLLING', value: '8KHZ' },
+        { label: 'CONNECTION', value: 'TRI-MODE' },
+        { label: 'MATERIAL', value: 'CARBON FIBER' }
+    ],
+    colClass: 'col-7'
+},
             {
                 id: 'mchose-a7-v2',
                 brand: 'MCHOSE',
