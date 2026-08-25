@@ -25,11 +25,7 @@ const translations = {
         acc_desc: "01. ОПИС ТОВАРУ",
         desc_text: "Attack Shark X3 створена для кіберспорту та професійного геймінгу. Ергономічний корпус вагою всього 54 грами, флагманський сенсор PAW3395 та підтримка частоти опитування 8000 Гц забезпечують блискавичну реакцію без затримок.",
         acc_specs: "02. ХАРАКТЕРИСТИКИ",
-        acc_box: "03. КОМПЛЕКТАЦІЯ (INSIDE THE BOX)",
-        box_text: "Фірмова коробка, миша Attack Shark X3, бездротовий приймач 2.4G (донгл), кабель USB Type-C в м'якому обплетенні, інструкція користувача.",
-        acc_warranty: "04. ГАРАНТІЯ",
-        warranty_text: "Офіційна гарантія від виробника та магазину MILIPSTORE — 12 місяців з повною підтримкою та сервісом.",
-        acc_delivery: "05. ДОСТАВКА ТА ОПЛАТА",
+        acc_delivery: "03. ДОСТАВКА ТА ОПЛАТА",
         delivery_text: "Нова Пошта по Україні (1-2 дні), кур'єрська доставка, оплата при отриманні або на картку/рахунок ФОП.",
         cart_title: "КОШИК",
         cart_empty: "Ваш кошик наразі порожній",
@@ -63,11 +59,7 @@ const translations = {
         acc_desc: "01. ОПИСАНИЕ ТОВАРА",
         desc_text: "Attack Shark X3 создана для киберспорта и профессионального гейминга. Эргономичный корпус весом всего 54 грамма, флагманский сенсор PAW3395 и поддержка частоты опроса 8000 Гц обеспечивают молниеносную реакцию без задержек.",
         acc_specs: "02. ХАРАКТЕРИСТИКИ",
-        acc_box: "03. КОМПЛЕКТАЦИЯ (INSIDE THE BOX)",
-        box_text: "Фирменная коробка, мышь Attack Shark X3, беспроводной приемник 2.4G (донгл), кабель USB Type-C в мягкой оплетке, инструкция пользователя.",
-        acc_warranty: "04. ГАРАНТИЯ",
-        warranty_text: "Официальная гарантия от производителя и магазина MILIPSTORE — 12 месяцев с полной поддержкой и сервисом.",
-        acc_delivery: "05. ДОСТАВКА И ОПЛАТА",
+        acc_delivery: "03. ДОСТАВКА И ОПЛАТА",
         delivery_text: "Новая Почта по Украине (1-2 дня), курьерская доставка, оплата при получении или на карту/счет ФЛП.",
         cart_title: "КОРЗИНА",
         cart_empty: "Ваша корзина пока пуста",
@@ -78,10 +70,46 @@ const translations = {
     }
 };
 
+// Database of products for dynamic modal switching
+const productsData = {
+    'x3': {
+        name: 'ATTACK SHARK X3',
+        subtitle: 'Ультралегка бездротова ігрова миша трирежимного підключення',
+        price: 2499,
+        rawPrice: 2499,
+        category: 'MICE',
+        images: ['attack-shark-x3-box.jpg', 'attack-shark-x3-black.jpg', 'attack-shark-x3-white.jpg'],
+        hasColors: true,
+        specs: `
+            <li><span>Сенсор:</span> <strong>PixArt PAW3395</strong></li>
+            <li><span>Вага:</span> <strong>54 г</strong></li>
+            <li><span>Частота опитування:</span> <strong>До 8000 Гц</strong></li>
+            <li><span>Підключення:</span> <strong>Wired / 2.4G / Bluetooth 5.4</strong></li>
+        `,
+        desc: 'Attack Shark X3 створена для кіберспорту та професійного геймінгу. Ергономічний корпус вагою всього 54 грами, флагманський сенсор PAW3395 та підтримка частоти опитування 8000 Гц забезпечують блискавичну реакцію без затримок.'
+    },
+    'pad': {
+        name: 'ESPORTS CONTROL MOUSEPAD',
+        subtitle: 'Професійний ігровий килимок з контролюючим покриттям Cordura',
+        price: 899,
+        rawPrice: 899,
+        category: 'SETUP LAB',
+        images: ['attack-shark-x3-white.jpg'],
+        hasColors: false,
+        specs: `
+            <li><span>Матеріал:</span> <strong>Cordura / Natural Rubber</strong></li>
+            <li><span>Розмір:</span> <strong>480 x 400 x 4 мм</strong></li>
+            <li><span>База:</span> <strong>Протиковзка гумова основа</strong></li>
+        `,
+        desc: 'Високоякісний ігровий килимок, що забезпечує ідеальний баланс між швидкістю ковзання миші та зупинкою під час точного прицілювання в шутерах.'
+    }
+};
+
 // State Management
 let currentLang = localStorage.getItem('milipstore_lang') || 'uk';
 let selectedColor = null;
-let cart = [];
+let currentProductId = 'x3';
+let cart = JSON.parse(localStorage.getItem('milipstore_cart')) || [];
 let wishlist = [];
 
 // DOM Loaded Initialization
@@ -90,6 +118,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initClock();
     setLanguage(currentLang);
     initParallax();
+    updateCartUI();
 });
 
 // Loader simulation
@@ -104,9 +133,7 @@ function initLoader() {
         if (progress >= 100) {
             progress = 100;
             clearInterval(interval);
-            setTimeout(() => {
-                loader.classList.add('hidden');
-            }, 300);
+            setTimeout(() => { loader.classList.add('hidden'); }, 300);
         }
         bar.style.width = progress + '%';
         percent.textContent = progress + '%';
@@ -120,7 +147,7 @@ function initClock() {
         const now = new Date();
         const hours = String(now.getHours()).padStart(2, '0');
         const minutes = String(now.getMinutes()).padStart(2, '0');
-        clockEl.textContent = `${hours}:${minutes}`;
+        if(clockEl) clockEl.textContent = `${hours}:${minutes}`;
     }, 1000);
 }
 
@@ -144,7 +171,7 @@ function setLanguage(lang) {
     
     document.querySelectorAll('[data-i18n]').forEach(el => {
         const key = el.getAttribute('data-i18n');
-        if (translations[lang][key]) {
+        if (translations[lang] && translations[lang][key]) {
             el.textContent = translations[lang][key];
         }
     });
@@ -170,7 +197,6 @@ function initParallax() {
     document.addEventListener('mousemove', (e) => {
         const x = (e.clientX / window.innerWidth - 0.5) * 20;
         const y = (e.clientY / window.innerHeight - 0.5) * 20;
-        
         const floatCard = document.getElementById('heroProductCard');
         if (floatCard) {
             floatCard.style.transform = `translate(${x}px, ${y}px)`;
@@ -179,7 +205,47 @@ function initParallax() {
 }
 
 // Product Modal Operations
-function openProductModal() {
+function openProductModal(productId = 'x3') {
+    currentProductId = productId;
+    const prod = productsData[productId];
+    if (!prod) return;
+
+    // Populate Modal Data
+    document.getElementById('modalTitle').textContent = prod.name;
+    document.getElementById('modalSubtitle').textContent = prod.subtitle;
+    document.getElementById('modalPrice').textContent = `₴ ${prod.price}`;
+    document.getElementById('modalDescText').textContent = prod.desc;
+    document.getElementById('modalSpecsList').innerHTML = prod.specs;
+    document.getElementById('modalBreadcrumb').innerHTML = `MILIPSTORE / <span>${prod.category}</span> / ${prod.name}`;
+
+    // Handle Color options block display
+    const colorBlock = document.getElementById('colorConfigBlock');
+    if (prod.hasColors) {
+        colorBlock.style.display = 'block';
+        selectedColor = null;
+        document.getElementById('selectedColorLabel').textContent = currentLang === 'uk' ? 'НЕ ВИБРАНО' : 'НЕ ВЫБРАНО';
+        document.querySelectorAll('.color-option').forEach(b => b.classList.remove('active'));
+    } else {
+        colorBlock.style.display = 'none';
+        selectedColor = 'default';
+    }
+
+    // Render gallery thumbnails dynamically
+    const thumbsContainer = document.getElementById('thumbnailsContainer');
+    let thumbsHtml = '';
+    prod.images.forEach((img, idx) => {
+        const thumbName = idx === 0 ? (currentLang === 'uk' ? 'Вигляд' : 'Вид') : (idx === 1 ? 'Black' : 'White');
+        thumbsHtml += `
+            <button class="thumb-btn ${idx === 0 ? 'active' : ''}" onclick="switchImage('${img}', ${idx})">
+                <img src="${img}" alt="Thumb">
+                <span>${thumbName}</span>
+            </button>
+        `;
+    });
+    thumbsContainer.innerHTML = thumbsHtml;
+    document.getElementById('mainGalleryImg').src = prod.images[0];
+    document.getElementById('galleryProgress').textContent = `01 / 0${prod.images.length}`;
+
     document.getElementById('productModal').classList.add('active');
     document.body.style.overflow = 'hidden';
 }
@@ -201,11 +267,12 @@ function switchImage(src, index) {
         mainImg.style.transform = 'scale(1)';
     }, 200);
 
+    const prod = productsData[currentProductId];
     document.querySelectorAll('.thumb-btn').forEach((btn, idx) => {
         btn.classList.toggle('active', idx === index);
     });
 
-    document.querySelector('.gallery-progress').textContent = `0${index + 1} / 04`;
+    document.getElementById('galleryProgress').textContent = `0${index + 1} / 0${prod.images.length}`;
 }
 
 // Color Selector
@@ -218,11 +285,9 @@ function selectColor(color) {
     const colorLabel = document.getElementById('selectedColorLabel');
     colorLabel.textContent = color.toUpperCase();
 
-    // Auto-switch image based on color
-    if (color === 'black') {
-        switchImage('attack-shark-x3-black.jpg', 1);
-    } else if (color === 'white') {
-        switchImage('attack-shark-x3-white.jpg', 2);
+    if (currentProductId === 'x3') {
+        if (color === 'black') switchImage('attack-shark-x3-black.jpg', 1);
+        else if (color === 'white') switchImage('attack-shark-x3-white.jpg', 2);
     }
 }
 
@@ -233,40 +298,48 @@ function toggleAccordion(btn) {
 }
 
 // Wishlist Logic
-function toggleWishlist(btn) {
+function toggleWishlist(itemName, btn) {
     btn.classList.toggle('active');
     const countEl = document.getElementById('wishlist-count');
     if (btn.classList.contains('active')) {
-        wishlist.push('Attack Shark X3');
+        wishlist.push(itemName);
     } else {
-        wishlist = wishlist.filter(item => item !== 'Attack Shark X3');
+        wishlist = wishlist.filter(item => item !== itemName);
     }
     countEl.textContent = wishlist.length;
 }
 
 function toggleModalWishlist() {
     const btn = document.getElementById('modalWishBtn');
+    const prod = productsData[currentProductId];
     btn.style.color = btn.style.color === 'rgb(255, 51, 102)' ? '' : '#FF3366';
     btn.style.borderColor = btn.style.color;
+    toggleWishlist(prod.name, btn);
 }
 
 // Cart Logic
 function addToCart() {
-    if (!selectedColor) {
+    const prod = productsData[currentProductId];
+    if (prod.hasColors && !selectedColor) {
         alert(currentLang === 'uk' ? 'Будь ласка, виберіть колір миші!' : 'Пожалуйста, выберите цвет мыши!');
         return;
     }
 
     const item = {
-        name: 'Attack Shark X3',
-        color: selectedColor,
-        price: 2499,
-        image: selectedColor === 'black' ? 'attack-shark-x3-black.jpg' : 'attack-shark-x3-white.jpg'
+        name: prod.name,
+        color: selectedColor && selectedColor !== 'default' ? selectedColor : '',
+        price: prod.price,
+        image: prod.images[0]
     };
 
     cart.push(item);
+    saveCart();
     updateCartUI();
     openCart();
+}
+
+function saveCart() {
+    localStorage.setItem('milipstore_cart', JSON.stringify(cart));
 }
 
 function updateCartUI() {
@@ -277,7 +350,7 @@ function updateCartUI() {
     countEl.textContent = cart.length;
 
     if (cart.length === 0) {
-        listEl.innerHTML = `<div class="empty-cart" data-i18n="cart_empty">${translations[currentLang].cart_empty}</div>`;
+        listEl.innerHTML = `<div class="empty-cart">${translations[currentLang].cart_empty}</div>`;
         totalEl.textContent = '₴ 0';
         return;
     }
@@ -292,10 +365,10 @@ function updateCartUI() {
                 <img src="${item.image}" alt="${item.name}">
                 <div class="cart-item-info">
                     <h4>${item.name}</h4>
-                    <p>Колір: ${item.color.toUpperCase()}</p>
+                    ${item.color ? `<p>${currentLang === 'uk' ? 'Колір' : 'Цвет'}: ${item.color.toUpperCase()}</p>` : ''}
                     <strong>₴ ${item.price}</strong>
                 </div>
-                <button onclick="removeFromCart(${index})" style="background:none;border:none;cursor:pointer;margin-left:auto;color:#999;">×</button>
+                <button onclick="removeFromCart(${index})" style="background:none;border:none;cursor:pointer;margin-left:auto;color:#999;font-size:1.2rem;">×</button>
             </div>
         `;
     });
@@ -306,6 +379,7 @@ function updateCartUI() {
 
 function removeFromCart(index) {
     cart.splice(index, 1);
+    saveCart();
     updateCartUI();
 }
 
@@ -320,7 +394,11 @@ function closeCart() {
 }
 
 function checkout() {
-    alert(currentLang === 'uk' ? 'Дякуємо! Система оформлення замовлення готова до інтеграції з Firebase / Telegram Bot.' : 'Спасибо! Система оформления заказа готова к интеграции с Firebase / Telegram Bot.');
+    alert(currentLang === 'uk' ? 'Дякуємо! Замовлення успішно сформовано.' : 'Спасибо! Заказ успешно сформирован.');
+    cart = [];
+    saveCart();
+    updateCartUI();
+    closeCart();
 }
 
 // Search Overlay Logic
@@ -347,9 +425,12 @@ function handleSearch(query) {
         return;
     }
 
-    if ('attack shark x3 mice paw3395'.includes(query.toLowerCase())) {
-        resultsEl.innerHTML = `
-            <div class="search-result-item" onclick="closeSearch(); openProductModal();">
+    const q = query.toLowerCase();
+    let resultsHtml = '';
+
+    if ('attack shark x3 mice paw3395'.includes(q)) {
+        resultsHtml += `
+            <div class="search-result-item" onclick="closeSearch(); openProductModal('x3');">
                 <div>
                     <strong>Attack Shark X3 Wireless Gaming Mouse</strong>
                     <p style="font-size:0.75rem; color:#666;">Mice / PAW3395 / 54G</p>
@@ -357,7 +438,18 @@ function handleSearch(query) {
                 <span style="font-weight:700;">₴ 2,499 →</span>
             </div>
         `;
-    } else {
-        resultsEl.innerHTML = `<div style="padding: 20px; color: #666;">Нічого не знайдено / Ничего не найдено</div>`;
     }
+    if ('pad mat килимок cordura'.includes(q)) {
+        resultsHtml += `
+            <div class="search-result-item" onclick="closeSearch(); openProductModal('pad');">
+                <div>
+                    <strong>Esports Control Mousepad</strong>
+                    <p style="font-size:0.75rem; color:#666;">Setup Lab / Control</p>
+                </div>
+                <span style="font-weight:700;">₴ 899 →</span>
+            </div>
+        `;
+    }
+
+    resultsEl.innerHTML = resultsHtml || `<div style="padding: 20px; color: #666;">${currentLang === 'uk' ? 'Нічого не знайдено' : 'Ничего не найдено'}</div>`;
 }

@@ -58,7 +58,7 @@
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
                     <span class="badge" id="wishlist-count">0</span>
                 </button>
-                <button id="cart-btn" class="icon-btn" title="Кошик">
+                <button id="cart-btn" class="icon-btn" title="Кошик" onclick="openCart()">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
                     <span class="badge" id="cart-count">0</span>
                 </button>
@@ -104,7 +104,7 @@
                     <div class="orbit-item item-6" data-orbit="EXPLORE">EXPLORE →</div>
 
                     <!-- HERO CENTER PRODUCT -->
-                    <div class="hero-product-float" id="heroProductCard" onclick="openProductModal()">
+                    <div class="hero-product-float" id="heroProductCard" onclick="openProductModal('x3')">
                         <div class="product-glow"></div>
                         <img src="attack-shark-x3-box.jpg" alt="Attack Shark X3 Box" id="heroImage" class="floating-img">
                         <div class="product-tag-float">
@@ -124,11 +124,11 @@
             </div>
 
             <div class="catalog-grid">
-                <!-- PRODUCT CARD: ATTACK SHARK X3 -->
-                <div class="product-module" onclick="openProductModal()">
+                <!-- PRODUCT MODULE 1: ATTACK SHARK X3 -->
+                <div class="product-module" onclick="openProductModal('x3')">
                     <div class="module-top">
-                        <span class="index">01 / 01</span>
-                        <button class="wishlist-toggle" onclick="event.stopPropagation(); toggleWishlist(this)">
+                        <span class="index">01 / 02</span>
+                        <button class="wishlist-toggle" onclick="event.stopPropagation(); toggleWishlist('Attack Shark X3', this)">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
                         </button>
                     </div>
@@ -151,6 +151,33 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- PRODUCT MODULE 2: GLASS SKATES /PAD -->
+                <div class="product-module" onclick="openProductModal('pad')">
+                    <div class="module-top">
+                        <span class="index">02 / 02</span>
+                        <button class="wishlist-toggle" onclick="event.stopPropagation(); toggleWishlist('Milipstore Esports Mat', this)">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                        </button>
+                    </div>
+                    <div class="module-image-wrap">
+                        <img src="attack-shark-x3-white.jpg" alt="Esports Pad" class="module-img">
+                        <div class="module-specs-overlay">
+                            <span>CONTROL</span>
+                            <span>CORDURA</span>
+                        </div>
+                    </div>
+                    <div class="module-bottom">
+                        <div class="module-info">
+                            <span class="brand">MILIPSTORE LAB</span>
+                            <h3 class="name">ESPORTS CONTROL MOUSEPAD</h3>
+                        </div>
+                        <div class="module-price-block">
+                            <span class="price">₴ 899</span>
+                            <span class="view-link" data-i18n="view_product">ПЕРЕГЛЯНУТИ →</span>
+                        </div>
+                    </div>
+                </div>
             </div>
         </section>
     </main>
@@ -161,7 +188,7 @@
         <div class="modal-container">
             <button class="modal-close" onclick="closeProductModal()">×</button>
             
-            <div class="modal-breadcrumb">
+            <div class="modal-breadcrumb" id="modalBreadcrumb">
                 MILIPSTORE / <span data-i18n="bread_mice">MICE</span> / ATTACK SHARK X3
             </div>
 
@@ -169,10 +196,10 @@
                 <!-- LEFT GALLERY -->
                 <div class="gallery-side">
                     <div class="gallery-main-view">
-                        <img id="mainGalleryImg" src="attack-shark-x3-box.jpg" alt="Attack Shark X3 Box">
-                        <div class="gallery-progress">01 / 04</div>
+                        <img id="mainGalleryImg" src="attack-shark-x3-box.jpg" alt="Product View">
+                        <div class="gallery-progress" id="galleryProgress">01 / 03</div>
                     </div>
-                    <div class="thumbnails-grid">
+                    <div class="thumbnails-grid" id="thumbnailsContainer">
                         <button class="thumb-btn active" onclick="switchImage('attack-shark-x3-box.jpg', 0)">
                             <img src="attack-shark-x3-box.jpg" alt="Box">
                             <span data-i18n="thumb_box">Коробка</span>
@@ -192,16 +219,16 @@
                 <div class="info-side">
                     <div class="product-header-info">
                         <span class="badge-new" data-i18n="tag_bestseller">BESTSELLER 2026</span>
-                        <h2>ATTACK SHARK X3</h2>
-                        <p class="subtitle" data-i18n="prod_subtitle">Ультралегка бездротова ігрова миша трирежимного підключення</p>
+                        <h2 id="modalTitle">ATTACK SHARK X3</h2>
+                        <p class="subtitle" id="modalSubtitle" data-i18n="prod_subtitle">Ультралегка бездротова ігрова миша трирежимного підключення</p>
                         <div class="price-row">
-                            <span class="current-price">₴ 2,499</span>
+                            <span class="current-price" id="modalPrice">₴ 2,499</span>
                             <span class="stock-status" data-i18n="in_stock">● В наявності (18 шт)</span>
                         </div>
                     </div>
 
                     <!-- COLOR SELECTOR -->
-                    <div class="config-block">
+                    <div class="config-block" id="colorConfigBlock">
                         <label class="config-label">
                             <span data-i18n="label_color">КОЛІР:</span> 
                             <span id="selectedColorLabel" class="selected-val" data-i18n="color_not_selected">НЕ ВИБРАНО</span>
@@ -224,64 +251,38 @@
 
                     <!-- DATA TABS / SECTIONS -->
                     <div class="data-modules-container">
-                        <!-- 1. Description -->
-                        <div class="data-accordion">
+                        <div class="data-accordion active">
                             <button class="accordion-header" onclick="toggleAccordion(this)">
                                 <span data-i18n="acc_desc">01. ОПИС ТОВАРУ</span>
                                 <span class="icon">+</span>
                             </button>
-                            <div class="accordion-body">
-                                <p data-i18n="desc_text">Attack Shark X3 створена для кіберспорту та професійного геймінгу. Ергономічний корпус вагою всього 54 грами, флагманський сенсор PAW3395 та підтримка частоти опитування 8000 Гц забезпечують блискавичну реакцію без затримок.</p>
+                            <div class="accordion-body" id="modalDescText" data-i18n="desc_text">
+                                Attack Shark X3 створена для кіберспорту та професійного геймінгу. Ергономічний корпус вагою всього 54 грами, флагманський сенсор PAW3395 та підтримка частоти опитування 8000 Гц забезпечують блискавичну реакцію без затримок.
                             </div>
                         </div>
 
-                        <!-- 2. Specifications -->
                         <div class="data-accordion">
                             <button class="accordion-header" onclick="toggleAccordion(this)">
                                 <span data-i18n="acc_specs">02. ХАРАКТЕРИСТИКИ</span>
                                 <span class="icon">+</span>
                             </button>
                             <div class="accordion-body">
-                                <ul class="specs-list">
+                                <ul class="specs-list" id="modalSpecsList">
                                     <li><span>Сенсор:</span> <strong>PixArt PAW3395</strong></li>
                                     <li><span>Вага:</span> <strong>54 г</strong></li>
                                     <li><span>Частота опитування:</span> <strong>До 8000 Гц</strong></li>
-                                    <li><span>Підключение:</span> <strong>Wired / 2.4G / Bluetooth 5.4</strong></li>
-                                    <li><span>Максимальний DPI:</span> <strong>26,000 DPI</strong></li>
+                                    <li><span>Підключення:</span> <strong>Wired / 2.4G / Bluetooth 5.4</strong></li>
                                 </ul>
                             </div>
                         </div>
 
-                        <!-- 3. Inside the Box -->
                         <div class="data-accordion">
                             <button class="accordion-header" onclick="toggleAccordion(this)">
-                                <span data-i18n="acc_box">03. КОМПЛЕКТАЦІЯ (INSIDE THE BOX)</span>
+                                <span data-i18n="acc_delivery">03. ДОСТАВКА ТА ОПЛАТА</span>
                                 <span class="icon">+</span>
                             </button>
-                            <div class="accordion-body">
-                                <p data-i18n="box_text">Фірмова коробка, миша Attack Shark X3, бездротовий приймач 2.4G (донгл), кабель USB Type-C в м'якому обплетенні, інструкція користувача.</p>
-                            </div>
-                        </div>
-
-                        <!-- 4. Warranty -->
-                        <div class="data-accordion">
-                            <button class="accordion-header" onclick="toggleAccordion(this)">
-                                <span data-i18n="acc_warranty">04. ГАРАНТІЯ</span>
-                                <span class="icon">+</span>
-                            </button>
-                            <div class="accordion-body">
-                                <p data-i18n="warranty_text">Офіційна гарантія від виробника та магазину MILIPSTORE — 12 місяців з повною підтримкою та сервісом.</p>
-                            </div>
-                        </div>
-
-                        <!-- 5. Delivery -->
-                        <div class="data-accordion">
-                            <button class="accordion-header" onclick="toggleAccordion(this)">
-                                <span data-i18n="acc_delivery">05. ДОСТАВКА ТА ОПЛАТА</span>
-                                <span class="icon">+</span>
-                            </button>
-                            <div class="accordion-body">
-                                <p data-i18n="delivery_text">Нова Пошта по Україні (1-2 дні), кур'єрська доставка, оплата при отриманні або на картку/рахунок ФОП.</p>
+                            <div class="accordion-body" data-i18n="delivery_text">
+                                Нова Пошта по Україні (1-2 дні), кур'єрська доставка, оплата при отриманні або на картку/рахунок ФОП.
                             </div>
                         </div>
                     </div>
