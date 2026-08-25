@@ -8,7 +8,7 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg-primary: #F8F9FA;
@@ -24,11 +24,12 @@
             --border-hover: rgba(0, 0, 0, 0.16);
             --shadow-subtle: 0 4px 24px rgba(0, 0, 0, 0.04);
             --shadow-card: 0 10px 30px rgba(0, 0, 0, 0.06);
-            --shadow-hover: 0 20px 40px rgba(0, 102, 255, 0.12);
-            --radius-lg: 24px;
-            --radius-md: 16px;
-            --radius-sm: 10px;
-            --transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            /* Адаптивное сияние для светлой темы */
+            --shadow-hover: 0 20px 40px rgba(0, 102, 255, 0.15);
+            --radius-lg: 20px;
+            --radius-md: 14px;
+            --radius-sm: 8px;
+            --transition: all 0.25s ease;
         }
 
         [data-theme="dark"] {
@@ -45,7 +46,8 @@
             --border-hover: rgba(255, 255, 255, 0.16);
             --shadow-subtle: 0 4px 24px rgba(0, 0, 0, 0.2);
             --shadow-card: 0 10px 30px rgba(0, 0, 0, 0.3);
-            --shadow-hover: 0 20px 40px rgba(43, 127, 255, 0.2);
+            /* Сияние для темной темы */
+            --shadow-hover: 0 20px 40px rgba(43, 127, 255, 0.25);
         }
 
         *, *::before, *::after {
@@ -61,8 +63,8 @@
         }
 
         body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            font-weight: 650;
+            font-family: 'Inter', sans-serif;
+            font-weight: 500;
             background-color: var(--bg-primary);
             color: var(--text-primary);
             line-height: 1.5;
@@ -71,16 +73,6 @@
             min-height: 100%;
             display: flex;
             flex-direction: column;
-        }
-
-        @keyframes fadeUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        @keyframes scaleIn {
-            from { opacity: 0; transform: scale(0.95); }
-            to { opacity: 1; transform: scale(1); }
         }
 
         ::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -121,9 +113,9 @@
         }
 
         .logo {
-            font-size: 1.25rem;
-            font-weight: 900;
-            letter-spacing: -0.03em;
+            font-size: 1.2rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
             color: var(--text-primary);
             cursor: pointer;
             text-decoration: none;
@@ -169,7 +161,7 @@
             background: var(--accent);
             color: white;
             font-size: 0.6rem;
-            font-weight: 800;
+            font-weight: 700;
             width: 16px;
             height: 16px;
             border-radius: 50%;
@@ -184,13 +176,13 @@
             padding: 6px 10px;
             border-radius: 20px;
             font-size: 0.75rem;
-            font-weight: 800;
+            font-weight: 700;
             color: var(--text-primary);
             cursor: pointer;
             transition: var(--transition);
         }
 
-        /* TICKER (БЕГУЩАЯ СТРОКА С БЕСКОНЕЧНЫМ ВРАЩЕНИЕМ ЛОГОТИПА) */
+        /* TICKER */
         .ticker-wrap {
             background: var(--accent);
             color: white;
@@ -200,38 +192,31 @@
             position: relative;
             top: 70px;
             z-index: 999;
-            font-size: 0.8rem;
-            font-weight: 800;
-            letter-spacing: 0.05em;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
             text-transform: uppercase;
         }
 
         .ticker-move {
             display: inline-block;
-            animation: ticker 25s linear infinite;
+            animation: ticker 30s linear infinite;
         }
 
         .ticker-move span {
             display: inline-flex;
             align-items: center;
             gap: 12px;
-            margin-right: 40px;
-        }
-
-        /* Анимация бесконечного вращения логотипа вокруг себя в строке */
-        @keyframes spinLogo {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            margin-right: 50px;
         }
 
         .ticker-logo {
-            height: 22px;
-            width: 22px;
+            height: 18px;
+            width: 18px;
             object-fit: contain;
             border-radius: 50%;
             display: inline-block;
             vertical-align: middle;
-            animation: spinLogo 4s linear infinite; /* Бесконечно крутится вокруг себя */
         }
 
         @keyframes ticker {
@@ -264,7 +249,7 @@
         .hero-content {
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 16px;
             align-items: center;
         }
 
@@ -280,32 +265,25 @@
             color: var(--accent);
             padding: 6px 12px;
             border-radius: 30px;
-            font-size: 0.75rem;
-            font-weight: 800;
+            font-size: 0.7rem;
+            font-weight: 700;
             letter-spacing: 0.05em;
             text-transform: uppercase;
             width: fit-content;
-            opacity: 0;
-            animation: fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards 0.2s;
         }
 
         .hero h1 {
-            font-size: clamp(2.2rem, 7vw, 3.8rem);
-            font-weight: 900;
-            line-height: 1.08;
+            font-size: clamp(2.2rem, 6vw, 3.5rem);
+            font-weight: 800;
+            line-height: 1.1;
             letter-spacing: -0.03em;
-            opacity: 0;
-            animation: fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards 0.4s;
         }
 
         .hero p {
-            font-size: 1.05rem;
-            font-weight: 600;
+            font-size: 1rem;
             color: var(--text-secondary);
             max-width: 480px;
             line-height: 1.5;
-            opacity: 0;
-            animation: fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards 0.6s;
         }
 
         .hero-actions {
@@ -313,22 +291,20 @@
             align-items: center;
             gap: 15px;
             margin-top: 10px;
-            opacity: 0;
-            animation: fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards 0.8s;
         }
 
         .btn-primary {
             background: var(--text-primary);
             color: var(--bg-secondary);
             border: none;
-            padding: 14px 28px;
+            padding: 12px 24px;
             border-radius: var(--radius-sm);
-            font-weight: 800;
-            font-size: 0.95rem;
+            font-weight: 700;
+            font-size: 0.9rem;
             cursor: pointer;
             display: inline-flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
             text-decoration: none;
             transition: var(--transition);
         }
@@ -344,8 +320,6 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            opacity: 0;
-            animation: scaleIn 1s cubic-bezier(0.16, 1, 0.3, 1) forwards 0.5s;
             width: 100%;
         }
 
@@ -363,6 +337,12 @@
             overflow: hidden;
         }
 
+        .hero-card-3d:hover {
+            border-color: var(--accent);
+            box-shadow: var(--shadow-hover);
+            transform: translateY(-4px);
+        }
+
         .hero-card-3d .product-tag {
             position: absolute;
             top: 28px;
@@ -375,7 +355,6 @@
             aspect-ratio: 1 / 1;
             border-radius: var(--radius-md);
             overflow: hidden;
-            background: transparent;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -387,11 +366,11 @@
             object-fit: cover;
             display: block;
             border-radius: var(--radius-md);
-            transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: transform 0.4s ease;
         }
 
         .hero-card-3d:hover img {
-            transform: scale(1.03);
+            transform: scale(1.04);
         }
 
         /* SECTIONS & CATALOG */
@@ -406,19 +385,18 @@
             display: flex;
             justify-content: space-between;
             align-items: flex-end;
-            margin-bottom: 30px;
+            margin-bottom: 24px;
         }
 
         .section-title {
-            font-size: clamp(1.6rem, 4vw, 2.4rem);
-            font-weight: 900;
-            letter-spacing: -0.03em;
+            font-size: clamp(1.5rem, 3.5vw, 2.2rem);
+            font-weight: 800;
+            letter-spacing: -0.02em;
         }
 
         .section-subtitle {
             color: var(--text-secondary);
-            font-size: 0.95rem;
-            font-weight: 650;
+            font-size: 0.9rem;
         }
 
         .catalog-filters {
@@ -435,7 +413,7 @@
             padding: 8px 16px;
             border-radius: 30px;
             font-size: 0.85rem;
-            font-weight: 800;
+            font-weight: 600;
             color: var(--text-secondary);
             cursor: pointer;
             white-space: nowrap;
@@ -451,7 +429,7 @@
         .catalog-grid {
             display: grid;
             grid-template-columns: 1fr;
-            gap: 24px;
+            gap: 20px;
         }
 
         @media(min-width: 768px) {
@@ -462,11 +440,12 @@
             .catalog-grid { grid-template-columns: repeat(3, 1fr); }
         }
 
+        /* КАРТОЧКА ТОВАРА: плавное приближение и сияние для обеих тем */
         .product-card {
             background: var(--bg-secondary);
             border: 1px solid var(--border-light);
             border-radius: var(--radius-lg);
-            padding: 24px;
+            padding: 20px;
             display: flex;
             flex-direction: column;
             position: relative;
@@ -474,28 +453,20 @@
             box-shadow: var(--shadow-subtle);
             cursor: pointer;
             height: 100%;
-            min-height: 480px;
+            min-height: 450px;
         }
-
-        @keyframes cardGlowPulse {
-            0% { background-color: var(--bg-secondary); box-shadow: 0 0 0 0 rgba(255, 59, 48, 0.4), var(--shadow-subtle); }
-            50% { background-color: rgba(255, 59, 48, 0.12); box-shadow: 0 0 25px 5px rgba(255, 59, 48, 0.3), var(--shadow-subtle); }
-            100% { background-color: var(--bg-secondary); box-shadow: 0 0 0 0 rgba(255, 59, 48, 0), var(--shadow-subtle); }
-        }
-
-        .product-card.liked-pulse { animation: cardGlowPulse 0.9s cubic-bezier(0.16, 1, 0.3, 1); }
 
         .product-card:hover {
             transform: translateY(-4px);
-            border-color: var(--border-hover);
+            border-color: var(--accent);
             box-shadow: var(--shadow-hover);
         }
 
         .product-tag {
             background: var(--bg-tertiary);
             color: var(--text-primary);
-            font-size: 0.7rem;
-            font-weight: 900;
+            font-size: 0.65rem;
+            font-weight: 700;
             padding: 4px 10px;
             border-radius: 20px;
             width: fit-content;
@@ -507,12 +478,12 @@
 
         .wishlist-btn {
             position: absolute;
-            top: 20px;
-            right: 20px;
+            top: 18px;
+            right: 18px;
             background: var(--bg-secondary);
             border: 1px solid var(--border-light);
-            width: 38px;
-            height: 38px;
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -530,10 +501,8 @@
             justify-content: center;
             overflow: hidden;
             position: relative;
-            margin: 16px 0;
-            background: transparent;
+            margin: 14px 0;
             border-radius: var(--radius-md);
-            padding: 0;
         }
 
         .product-img-wrap img {
@@ -545,7 +514,9 @@
             transition: transform 0.4s ease;
         }
 
-        .product-card:hover .product-img-wrap img { transform: scale(1.03); }
+        .product-card:hover .product-img-wrap img { 
+            transform: scale(1.04); 
+        }
 
         .color-picker-preview {
             display: flex;
@@ -555,15 +526,12 @@
         }
 
         .color-dot {
-            width: 14px;
-            height: 14px;
+            width: 12px;
+            height: 12px;
             border-radius: 50%;
             border: 1px solid var(--border-hover);
-            position: relative;
         }
-
         .color-dot.white { background-color: #FFFFFF; }
-        .color-dot.black { background-color: #1a1a1a; }
         .color-dot.active { box-shadow: 0 0 0 2px var(--accent); }
 
         .product-info {
@@ -572,24 +540,22 @@
             align-items: flex-end;
             margin-top: auto;
             border-top: 1px solid var(--border-light);
-            padding-top: 14px;
+            padding-top: 12px;
         }
 
-        .product-title-group h4 { font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; font-weight: 800; }
-        .product-title-group h3 { font-size: 1.2rem; font-weight: 900; margin-top: 2px; }
-        .product-price { font-size: 1.25rem; font-weight: 900; font-family: 'JetBrains Mono', monospace; }
+        .product-title-group h4 { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; }
+        .product-title-group h3 { font-size: 1.1rem; font-weight: 800; margin-top: 2px; }
+        .product-price { font-size: 1.2rem; font-weight: 800; font-family: 'JetBrains Mono', monospace; }
 
         .product-action-hover {
             margin-top: 12px;
-            display: flex;
-            gap: 10px;
         }
 
         /* FOOTER */
         footer {
             background: var(--bg-secondary);
             border-top: 1px solid var(--border-light);
-            padding: 60px 20px 40px;
+            padding: 50px 20px 30px;
             max-width: 1440px;
             margin: 0 auto;
             width: 100%;
@@ -599,7 +565,7 @@
             display: grid;
             grid-template-columns: 1fr;
             gap: 30px;
-            margin-bottom: 40px;
+            margin-bottom: 30px;
         }
 
         @media(min-width: 768px) {
@@ -607,18 +573,18 @@
         }
 
         .footer-col h4 {
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             text-transform: uppercase;
             letter-spacing: 0.05em;
             color: var(--text-muted);
-            margin-bottom: 16px;
-            font-weight: 900;
+            margin-bottom: 14px;
+            font-weight: 800;
         }
 
-        .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
-        .footer-col a { text-decoration: none; color: var(--text-secondary); font-weight: 700; font-size: 0.95rem; transition: var(--transition); cursor: pointer; }
+        .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+        .footer-col a { text-decoration: none; color: var(--text-secondary); font-weight: 600; font-size: 0.9rem; transition: var(--transition); cursor: pointer; }
         .footer-col a:hover { color: var(--text-primary); }
-        .footer-bottom { border-top: 1px solid var(--border-light); padding-top: 20px; display: flex; flex-direction: column; gap: 10px; align-items: center; text-align: center; color: var(--text-muted); font-size: 0.85rem; font-weight: 700; }
+        .footer-bottom { border-top: 1px solid var(--border-light); padding-top: 20px; display: flex; flex-direction: column; gap: 8px; align-items: center; text-align: center; color: var(--text-muted); font-size: 0.8rem; }
         @media(min-width: 768px) { .footer-bottom { flex-direction: row; justify-content: space-between; } }
 
         /* OVERLAYS & MODALS */
@@ -643,61 +609,61 @@
             box-shadow: -10px 0 40px rgba(0,0,0,0.15);
             display: flex;
             flex-direction: column;
-            transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: right 0.35s cubic-bezier(0.16, 1, 0.3, 1);
         }
-        @media(min-width: 500px) { .drawer { width: 440px; right: -440px; } }
+        @media(min-width: 500px) { .drawer { width: 420px; right: -420px; } }
 
         .drawer.active { right: 0; }
         .drawer-header { padding: 20px; border-bottom: 1px solid var(--border-light); display: flex; justify-content: space-between; align-items: center; }
-        .close-drawer { background: transparent; border: none; font-size: 1.2rem; font-weight: 900; cursor: pointer; color: var(--text-primary); }
-        .drawer-body { padding: 20px; flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
+        .close-drawer { background: transparent; border: none; font-size: 1.1rem; font-weight: 800; cursor: pointer; color: var(--text-primary); }
+        .drawer-body { padding: 20px; flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
         
         .cart-item {
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 12px;
             background: var(--bg-primary);
-            padding: 12px;
+            padding: 10px;
             border-radius: var(--radius-sm);
             border: 1px solid var(--border-light);
         }
 
-        .cart-item img { width: 60px; height: 60px; object-fit: cover; background: var(--bg-secondary); border-radius: 8px; padding: 0; }
+        .cart-item img { width: 50px; height: 50px; object-fit: cover; border-radius: 6px; }
 
         .quantity-controls {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
             background: var(--bg-secondary);
             border: 1px solid var(--border-light);
             border-radius: 6px;
-            padding: 2px 8px;
+            padding: 2px 6px;
             width: fit-content;
         }
 
-        .quantity-controls button { background: transparent; border: none; cursor: pointer; font-weight: 900; color: var(--text-primary); }
+        .quantity-controls button { background: transparent; border: none; cursor: pointer; font-weight: 800; color: var(--text-primary); }
 
         .drawer-footer { padding: 20px; border-top: 1px solid var(--border-light); background: var(--bg-primary); }
-        .cart-total { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; font-size: 1.15rem; font-weight: 900; }
+        .cart-total { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; font-size: 1.1rem; font-weight: 800; }
 
         .search-modal {
             position: fixed;
             top: -100%; left: 0; width: 100%;
             background: var(--bg-secondary);
             z-index: 2002;
-            padding: 40px 20px;
+            padding: 30px 20px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            transition: top 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: top 0.35s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .search-modal.active { top: 0; }
         .search-container { max-width: 800px; margin: 0 auto; }
-        .search-input-wrap { display: flex; align-items: center; border-bottom: 2px solid var(--text-primary); padding-bottom: 12px; gap: 15px; }
-        .search-input-wrap input { width: 100%; background: transparent; border: none; font-size: 1.4rem; font-weight: 800; color: var(--text-primary); outline: none; }
-        .search-results { margin-top: 20px; max-height: 350px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
-        .search-result-item { display: flex; align-items: center; justify-content: space-between; padding: 12px; background: var(--bg-primary); border-radius: var(--radius-sm); text-decoration: none; color: var(--text-primary); cursor: pointer; }
+        .search-input-wrap { display: flex; align-items: center; border-bottom: 2px solid var(--text-primary); padding-bottom: 10px; gap: 12px; }
+        .search-input-wrap input { width: 100%; background: transparent; border: none; font-size: 1.2rem; font-weight: 700; color: var(--text-primary); outline: none; }
+        .search-results { margin-top: 16px; max-height: 320px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+        .search-result-item { display: flex; align-items: center; justify-content: space-between; padding: 10px; background: var(--bg-primary); border-radius: var(--radius-sm); text-decoration: none; color: var(--text-primary); cursor: pointer; }
 
-        /* МОДАЛЬНЕ ОКНО ТОВАРА */
+        /* PRODUCT MODAL */
         .product-modal {
             position: fixed;
             top: 50%; left: 50%;
@@ -708,10 +674,8 @@
             max-height: 100vh;
             background: var(--bg-secondary);
             z-index: 2005;
-            border-radius: 0;
             box-shadow: 0 30px 60px rgba(0,0,0,0.25);
             overflow-y: auto;
-            overflow-x: hidden !important;
             opacity: 0;
             visibility: hidden;
             transition: var(--transition);
@@ -719,8 +683,8 @@
 
         @media(min-width: 768px) {
             .product-modal {
-                width: 92%;
-                max-width: 850px;
+                width: 90%;
+                max-width: 820px;
                 height: auto;
                 max-height: 85vh;
                 border-radius: var(--radius-lg);
@@ -734,87 +698,48 @@
             flex-direction: column;
             gap: 16px; 
             padding: 20px 16px 40px; 
-            width: 100%;
-            box-sizing: border-box;
-            overflow-x: hidden;
         }
 
         @media(min-width: 768px) { 
             .modal-grid { 
                 display: grid;
                 grid-template-columns: 1fr 1fr; 
-                padding: 40px; 
-                gap: 30px; 
+                padding: 35px; 
+                gap: 25px; 
             } 
         }
         
-        .modal-gallery { 
-            display: flex; 
-            flex-direction: column; 
-            gap: 10px; 
-            width: 100%;
-            max-width: 100%;
-            box-sizing: border-box;
-            overflow-x: hidden;
-        }
-        
+        .modal-gallery { display: flex; flex-direction: column; gap: 10px; }
         .modal-main-img-wrap {
             width: 100%;
             aspect-ratio: 1 / 1;
-            background: transparent;
             border-radius: var(--radius-md);
             display: flex;
             align-items: center;
             justify-content: center;
             overflow: hidden;
-            box-sizing: border-box;
-            padding: 0;
         }
-        .modal-main-img { 
-            width: 100%; 
-            height: 100%; 
-            object-fit: cover;
-            display: block;
-            border-radius: 8px;
-        }
+        .modal-main-img { width: 100%; height: 100%; object-fit: cover; border-radius: var(--radius-md); }
         
-        .modal-thumbs { 
-            display: flex; 
-            flex-wrap: wrap; 
-            gap: 8px; 
-            overflow: visible; 
-            width: 100%;
-            max-width: 100%;
-            box-sizing: border-box;
-        }
+        .modal-thumbs { display: flex; flex-wrap: wrap; gap: 8px; }
         .modal-thumb { 
-            width: 56px; 
-            height: 56px; 
+            width: 52px; 
+            height: 52px; 
             object-fit: cover; 
             background: var(--bg-primary); 
             border: 2px solid var(--border-light); 
             border-radius: 6px; 
             cursor: pointer; 
             transition: var(--transition); 
-            flex-shrink: 0; 
-            padding: 0;
         }
         .modal-thumb:hover, .modal-thumb.active { border-color: var(--accent); }
-
-        .modal-details {
-            width: 100%;
-            max-width: 100%;
-            box-sizing: border-box;
-            overflow-x: hidden;
-        }
 
         .modal-options-row {
             display: flex;
             align-items: center;
             justify-content: flex-start;
-            gap: 35px;
-            margin: 15px 0;
-            padding-left: 5px;
+            gap: 30px;
+            margin: 14px 0;
         }
 
         .option-group {
@@ -824,7 +749,7 @@
         }
 
         .option-group label {
-            font-weight: 900;
+            font-weight: 700;
             font-size: 0.75rem;
             color: var(--text-muted);
             text-transform: uppercase;
@@ -833,7 +758,7 @@
         .color-selector-large {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
         }
 
         .color-option-item {
@@ -844,53 +769,33 @@
         }
 
         .color-circle-big {
-            width: 22px;
-            height: 22px;
+            width: 20px;
+            height: 20px;
             border-radius: 50%;
             border: 2px solid var(--border-hover);
-            position: relative;
             transition: var(--transition);
         }
 
         .color-circle-big.white { background-color: #FFFFFF; }
-        
-        /* Черный цвет зачеркнут красной линией */
-        .color-circle-big.black { 
-            background-color: #1a1a1a; 
-            position: relative;
-        }
-        .color-circle-big.black::after {
-            content: '';
-            position: absolute;
-            top: 50%; left: -2px; right: -2px;
-            height: 2px;
-            background-color: #ff3b30;
-            transform: translateY(-50%) rotate(45deg);
+        .color-circle-big.black { background-color: #1a1a1a; }
+        .color-circle-big.pink { background-color: #ff2a85; }
+
+        .color-circle-big.disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+            border-style: dashed;
         }
 
-        /* Насыщенный розовый цвет (#ff2a85) тоже зачеркнут красной линией */
-        .color-circle-big.pink { 
-            background-color: #ff2a85; 
-            position: relative;
-        }
-        .color-circle-big.pink::after {
-            content: '';
-            position: absolute;
-            top: 50%; left: -2px; right: -2px;
-            height: 2px;
-            background-color: #ff3b30;
-            transform: translateY(-50%) rotate(45deg);
-        }
-        
         .color-circle-big.active {
             box-shadow: 0 0 0 3px var(--accent);
             border-color: var(--accent);
+            opacity: 1;
         }
 
-        .specs-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 15px 0; }
-        .spec-box { background: var(--bg-primary); padding: 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-light); }
-        .spec-box span { display: block; font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; font-weight: 900; }
-        .spec-box strong { font-size: 0.95rem; font-weight: 800; font-family: 'JetBrains Mono', monospace; }
+        .specs-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin: 12px 0; }
+        .spec-box { background: var(--bg-primary); padding: 8px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-light); }
+        .spec-box span { display: block; font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; }
+        .spec-box strong { font-size: 0.9rem; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
     </style>
 </head>
 <body data-theme="light">
@@ -919,13 +824,13 @@
         </div>
     </header>
 
-    <!-- TICKER С БЕСКОНЕЧНЫМ ВРАЩЕНИЕМ ЛОГОТИПА ПО СЕРЕДИНЕ -->
+    <!-- TICKER -->
     <div class="ticker-wrap">
         <div class="ticker-move">
-            <span><img src="logo-milipstore.png" alt="MilipStore" class="ticker-logo"> Безкоштовна доставка від 3000 грн</span>
-            <span><img src="logo-milipstore.png" alt="MilipStore" class="ticker-logo"> Нова категорія товарів вже доступна</span>
-            <span><img src="logo-milipstore.png" alt="MilipStore" class="ticker-logo"> Офіційне преміальне ігрове залізо</span>
-            <span><img src="logo-milipstore.png" alt="MilipStore" class="ticker-logo"> Безкоштовна доставка від 3000 грн</span>
+            <span><img src="logo-milipstore_4.png" alt="MilipStore" class="ticker-logo"> Top Gaming Gear & Accessories</span>
+            <span><img src="logo-milipstore_4.png" alt="MilipStore" class="ticker-logo"> High Performance Sensors & 8KHz Polling</span>
+            <span><img src="logo-milipstore_4.png" alt="MilipStore" class="ticker-logo"> Official Warranty & Fast Dispatch</span>
+            <span><img src="logo-milipstore_4.png" alt="MilipStore" class="ticker-logo"> Ultimate Setup for Pro Gamers</span>
         </div>
     </div>
 
@@ -971,8 +876,8 @@
     <footer>
         <div class="footer-grid">
             <div class="footer-col">
-                <a class="logo" style="margin-bottom: 15px;">MILIP<span>STORE</span></a>
-                <p style="color: var(--text-secondary); max-width: 300px; font-size: 0.95rem; font-weight: 650;">Gaming hardware for your ultimate setup. Преміальний вибір для ентузіастів.</p>
+                <a class="logo" style="margin-bottom: 12px;">MILIP<span>STORE</span></a>
+                <p style="color: var(--text-secondary); max-width: 280px; font-size: 0.9rem;">Gaming hardware for your ultimate setup. Преміальний вибір для ентузіастів.</p>
             </div>
             <div class="footer-col">
                 <h4>Каталог</h4>
@@ -1011,7 +916,7 @@
     <!-- CART DRAWER -->
     <div class="drawer" id="cart-drawer">
         <div class="drawer-header">
-            <h3 id="tr-cart-title" style="font-weight: 900;">Кошик</h3>
+            <h3 id="tr-cart-title" style="font-weight: 800;">Кошик</h3>
             <button class="close-drawer" onclick="toggleCart(false)">✕</button>
         </div>
         <div class="drawer-body" id="cart-items-container"></div>
@@ -1048,10 +953,10 @@
             </div>
             <div class="modal-details">
                 <span class="product-tag new" id="modal-tag">NEW</span>
-                <h4 id="modal-brand" style="color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; font-weight: 900; margin-top: 6px;">BRAND</h4>
-                <h2 id="modal-title" style="font-size: 1.5rem; font-weight: 900; margin: 6px 0;"></h2>
-                <p id="modal-desc" style="color: var(--text-secondary); margin: 8px 0; font-size: 0.9rem; font-weight: 650;"></p>
-                <div class="product-price" id="modal-price" style="font-size: 1.35rem; color: var(--accent); margin: 10px 0;">₴ 0</div>
+                <h4 id="modal-brand" style="color: var(--text-muted); text-transform: uppercase; font-size: 0.7rem; font-weight: 800; margin-top: 6px;">BRAND</h4>
+                <h2 id="modal-title" style="font-size: 1.4rem; font-weight: 800; margin: 4px 0;"></h2>
+                <p id="modal-desc" style="color: var(--text-secondary); margin: 6px 0; font-size: 0.85rem;"></p>
+                <div class="product-price" id="modal-price" style="font-size: 1.3rem; color: var(--accent); margin: 8px 0;">₴ 0</div>
 
                 <div class="modal-options-row">
                     <div class="option-group">
@@ -1063,15 +968,15 @@
                         <label>Кількість</label>
                         <div class="quantity-controls">
                             <button onclick="adjustModalQty(-1)">−</button>
-                            <span id="modal-qty" style="font-weight: 900; padding: 0 8px;">1</span>
+                            <span id="modal-qty" style="font-weight: 800; padding: 0 6px;">1</span>
                             <button onclick="adjustModalQty(1)">+</button>
                         </div>
                     </div>
                 </div>
 
-                <div style="display: flex; gap: 10px; margin-top: 15px; align-items: center;">
+                <div style="display: flex; gap: 10px; margin-top: 14px; align-items: center;">
                     <button class="btn-primary" style="flex-grow: 1; justify-content: center; padding: 12px;" onclick="addCurrentProductToCart()">Додати в кошик</button>
-                    <button class="wishlist-btn" id="modal-wishlist-btn" onclick="toggleCurrentWishlist()" style="position: static; width: 44px; height: 44px; flex-shrink: 0;">
+                    <button class="wishlist-btn" id="modal-wishlist-btn" onclick="toggleCurrentWishlist()" style="position: static; width: 42px; height: 42px; flex-shrink: 0;">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
                     </button>
                 </div>
@@ -1094,7 +999,7 @@
         let currentLang = 'ua';
         const translations = {
             ua: {
-                heroTitle: "ТЕХНІКА,<br>ЯКА СТВОРЮЄ<br>МІЙ SETUP",
+                heroTitle: "ТЕХНІКА,<br>ЯКА СТВОРЮЄ<br>ТВОЙ SETUP",
                 heroDesc: "Gaming mice, keyboards and accessories для сучасного ігрового простору найвищого рівня.",
                 btnCatalog: "Дивитися каталог →",
                 catalogTitle: "Каталог",
@@ -1297,14 +1202,14 @@
                 : products.filter(p => p.category === currentCategoryFilter);
 
             if (filteredProducts.length === 0) {
-                container.innerHTML = `<p style="color: var(--text-secondary); grid-column: span 12; text-align: center; padding: 30px; font-weight: 700;">Товарів у цій категорії поки немає</p>`;
+                container.innerHTML = `<p style="color: var(--text-secondary); grid-column: span 12; text-align: center; padding: 30px;">Товарів у цій категорії поки немає</p>`;
                 return;
             }
 
             container.innerHTML = filteredProducts.map((p) => {
                 const firstColorClass = p.colors && p.colors[0] ? p.colors[0].class : 'white';
                 return `
-                    <div class="product-card" id="product-card-${p.id}" onclick="openProductModal(products.find(x => x.id === '${p.id}'))">
+                    <div class="product-card" onclick="openProductModal(products.find(x => x.id === '${p.id}'))">
                         <span class="product-tag new">${p.tag}</span>
                         <button class="wishlist-btn ${wishlist.some(item => item.id === p.id) ? 'active' : ''}" onclick="event.stopPropagation(); toggleWishlist('${p.id}')">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="${wishlist.some(item => item.id === p.id) ? '#FF3B30' : 'none'}" stroke="${wishlist.some(item => item.id === p.id) ? '#FF3B30' : 'currentColor'}" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
@@ -1325,7 +1230,7 @@
                             <div class="product-price">${formatPrice(p.price)}</div>
                         </div>
                         <div class="product-action-hover">
-                            <button class="btn-primary" style="width: 100%; justify-content: center; padding: 10px; font-size: 0.9rem;" onclick="event.stopPropagation(); addDirectToCart('${p.id}')">${currentLang === 'ua' ? 'В кошик' : 'В корзину'}</button>
+                            <button class="btn-primary" style="width: 100%; justify-content: center; padding: 10px; font-size: 0.85rem;" onclick="event.stopPropagation(); addDirectToCart('${p.id}')">${currentLang === 'ua' ? 'В кошик' : 'В корзину'}</button>
                         </div>
                     </div>
                 `;
@@ -1359,15 +1264,6 @@
             localStorage.setItem('milip_wishlist', JSON.stringify(wishlist));
             renderCatalog();
             updateBadges();
-
-            if (isAdding) {
-                const cardEl = document.getElementById(`product-card-${productId}`);
-                if (cardEl) {
-                    cardEl.classList.remove('liked-pulse');
-                    void cardEl.offsetWidth;
-                    cardEl.classList.add('liked-pulse');
-                }
-            }
             if (currentModalProduct && currentModalProduct.id === productId) updateModalWishlistBtn();
         }
 
@@ -1432,7 +1328,7 @@
             const container = document.getElementById('cart-items-container');
             const t = translations[currentLang];
             if (cart.length === 0) {
-                container.innerHTML = `<p style="color: var(--text-secondary); text-align: center; margin-top: 30px; font-weight: 700;">${t.emptyCart}</p>`;
+                container.innerHTML = `<p style="color: var(--text-secondary); text-align: center; margin-top: 30px;">${t.emptyCart}</p>`;
                 document.getElementById('cart-total-price').innerText = formatPrice(0);
                 if (tg && tg.MainButton) tg.MainButton.hide();
                 return;
@@ -1441,12 +1337,12 @@
                 <div class="cart-item">
                     <img src="${item.img}" alt="${item.title}">
                     <div style="flex-grow: 1;">
-                        <h4 style="font-size: 0.95rem; font-weight: 800;">${item.brand} ${item.title}</h4>
-                        <p style="font-size: 0.8rem; color: var(--text-secondary); font-weight: 700;">Колір: <strong>${item.color}</strong></p>
-                        <p style="font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; font-weight: 800;">${formatPrice(item.price)}</p>
+                        <h4 style="font-size: 0.9rem; font-weight: 700;">${item.brand} ${item.title}</h4>
+                        <p style="font-size: 0.75rem; color: var(--text-secondary);">Колір: <strong>${item.color}</strong></p>
+                        <p style="font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; font-weight: 700;">${formatPrice(item.price)}</p>
                         <div class="quantity-controls" style="margin-top: 4px;">
                             <button onclick="updateCartQty('${item.id}', '${item.color}', -1)">−</button>
-                            <span style="font-weight: 900;">${item.qty}</span>
+                            <span style="font-weight: 700;">${item.qty}</span>
                             <button onclick="updateCartQty('${item.id}', '${item.color}', 1)">+</button>
                         </div>
                     </div>
@@ -1498,16 +1394,16 @@
             if (!query.trim()) { container.innerHTML = ''; return; }
             const filtered = products.filter(p => p.title.toLowerCase().includes(query.toLowerCase()) || p.brand.toLowerCase().includes(query.toLowerCase()));
             if (filtered.length === 0) {
-                container.innerHTML = `<p style="color: var(--text-secondary); text-align: center; padding: 15px; font-weight: 700;">${t.emptySearch}</p>`;
+                container.innerHTML = `<p style="color: var(--text-secondary); text-align: center; padding: 15px;">${t.emptySearch}</p>`;
                 return;
             }
             container.innerHTML = filtered.map(p => `
                 <div class="search-result-item" onclick="toggleSearch(false); openProductModal(products.find(x => x.id === '${p.id}'))">
-                    <div style="display: flex; align-items: center; gap: 12px;">
-                        <img src="${p.img}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 6px; padding: 0;">
-                        <div><strong style="font-size: 0.95rem; font-weight: 800;">${p.brand} ${p.title}</strong></div>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <img src="${p.img}" style="width: 38px; height: 38px; object-fit: cover; border-radius: 6px;">
+                        <div><strong style="font-size: 0.9rem;">${p.brand} ${p.title}</strong></div>
                     </div>
-                    <span style="font-family: 'JetBrains Mono', monospace; font-weight: 900; font-size: 0.95rem;">${formatPrice(p.price)}</span>
+                    <span style="font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 0.9rem;">${formatPrice(p.price)}</span>
                 </div>
             `).join('');
         }
@@ -1561,7 +1457,7 @@
             const selectorContainer = document.getElementById('modal-color-selector');
             selectorContainer.innerHTML = currentModalProduct.colors.map((c, idx) => `
                 <div class="color-option-item" onclick="selectModalColor(${idx})">
-                    <div class="color-circle-big ${c.class} ${idx === selectedColorIndex ? 'active' : ''}"></div>
+                    <div class="color-circle-big ${c.class} ${!c.available ? 'disabled' : ''} ${idx === selectedColorIndex ? 'active' : ''}" title="${c.name} ${!c.available ? '(Немає в наявності)' : ''}"></div>
                 </div>
             `).join('');
 
