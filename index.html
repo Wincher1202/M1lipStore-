@@ -65,7 +65,7 @@
             background-color: var(--bg-primary);
             color: var(--text-primary);
             line-height: 1.5;
-            overflow-x: hidden; /* Жесткий запрет горизонтального скролла на странице */
+            overflow-x: hidden;
             -webkit-font-smoothing: antialiased;
             min-height: 100%;
             display: flex;
@@ -352,10 +352,9 @@
 
         .hero-card-3d img {
             width: 100%;
-            height: auto;
-            max-height: 300px;
-            object-fit: contain;
-            filter: drop-shadow(0 15px 25px rgba(0,0,0,0.1));
+            height: 280px;
+            object-fit: cover; /* Убрано черное пространство */
+            border-radius: var(--radius-sm);
             transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
@@ -546,18 +545,16 @@
             justify-content: center;
             overflow: hidden;
             position: relative;
-            padding: 10px;
+            padding: 0;
             margin: 16px 0;
             background: var(--bg-primary);
             border-radius: var(--radius-sm);
         }
 
         .product-img-wrap img {
-            max-width: 100%;
-            max-height: 100%;
-            width: auto;
-            height: auto;
-            object-fit: contain;
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Заполняет всю рамку карточки без черных полей */
             transition: transform 0.3s ease;
         }
 
@@ -687,7 +684,7 @@
             border: 1px solid var(--border-light);
         }
 
-        .cart-item img { width: 60px; height: 60px; object-fit: contain; background: var(--bg-secondary); border-radius: 8px; padding: 4px; }
+        .cart-item img { width: 60px; height: 60px; object-fit: cover; background: var(--bg-secondary); border-radius: 8px; }
 
         .quantity-controls {
             display: flex;
@@ -723,7 +720,7 @@
         .search-results { margin-top: 20px; max-height: 350px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
         .search-result-item { display: flex; align-items: center; justify-content: space-between; padding: 12px; background: var(--bg-primary); border-radius: var(--radius-sm); text-decoration: none; color: var(--text-primary); }
 
-        /* ИДЕАЛЬНО ОПТИМИЗИРОВАННОЕ МОДАЛЬНОЕ ОКНО ДЛЯ ТЕЛЕФОНОВ (БЕЗ ГОРИЗОНТАЛЬНОГО СКРОЛЛА) */
+        /* МОДАЛЬНОЕ ОКНО ТОВАРА */
         .product-modal {
             position: fixed;
             top: 50%; left: 50%;
@@ -737,7 +734,7 @@
             border-radius: 0;
             box-shadow: 0 30px 60px rgba(0,0,0,0.25);
             overflow-y: auto;
-            overflow-x: hidden !important; /* Гарантированно убирает боковой скролл */
+            overflow-x: hidden !important;
             opacity: 0;
             visibility: hidden;
             transition: var(--transition);
@@ -790,7 +787,7 @@
             max-height: 260px;
             background: var(--bg-primary);
             border-radius: var(--radius-md);
-            padding: 10px;
+            padding: 0; /* Убрано внутреннее поле, чтобы картинка заполнила рамку полностью */
             display: flex;
             align-items: center;
             justify-content: center;
@@ -800,13 +797,12 @@
         .modal-main-img { 
             width: 100%; 
             height: 100%; 
-            object-fit: contain; 
+            object-fit: cover; /* Убраны черные полосы в галерее модалки */
         }
         
-        /* ПРЕВЬЮШКИ ТЕПЕРЬ ПЕРЕНОСЯТСЯ ВНИЗ БЕЗ ГОРИЗОНТАЛЬНОГО СКРОЛЛА */
         .modal-thumbs { 
             display: flex; 
-            flex-wrap: wrap; /* Автоматический перенос фоток вниз на новую строку */
+            flex-wrap: wrap; 
             gap: 8px; 
             overflow: visible; 
             width: 100%;
@@ -816,11 +812,10 @@
         .modal-thumb { 
             width: 50px; 
             height: 50px; 
-            object-fit: contain; 
+            object-fit: cover; /* Превью тоже заполняют свои квадраты без полей */
             background: var(--bg-primary); 
             border: 2px solid var(--border-light); 
             border-radius: 6px; 
-            padding: 4px; 
             cursor: pointer; 
             transition: var(--transition); 
             flex-shrink: 0; 
@@ -1417,7 +1412,7 @@
             container.innerHTML = filtered.map(p => `
                 <a class="search-result-item" onclick="toggleSearch(false); openProductModal(products.find(x => x.id === '${p.id}'))">
                     <div style="display: flex; align-items: center; gap: 12px;">
-                        <img src="${p.img}" style="width: 40px; height: 40px; object-fit: contain;">
+                        <img src="${p.img}" style="width: 40px; height: 40px; object-fit: cover;">
                         <div><strong style="font-size: 0.9rem;">${p.brand} ${p.title}</strong></div>
                     </div>
                     <span style="font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 0.9rem;">${formatPrice(p.price)}</span>
