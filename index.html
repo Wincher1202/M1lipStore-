@@ -488,6 +488,34 @@
             cursor: pointer;
         }
 
+        /* Анимация двойной пульсации и мерцания карточки (лайк) */
+        @keyframes cardGlowPulse {
+            0% {
+                background-color: var(--bg-secondary);
+                box-shadow: 0 0 0 0 rgba(255, 59, 48, 0.4), var(--shadow-subtle);
+            }
+            25% {
+                background-color: rgba(255, 59, 48, 0.12);
+                box-shadow: 0 0 25px 5px rgba(255, 59, 48, 0.3), var(--shadow-subtle);
+            }
+            50% {
+                background-color: var(--bg-secondary);
+                box-shadow: 0 0 0 0 rgba(255, 59, 48, 0), var(--shadow-subtle);
+            }
+            75% {
+                background-color: rgba(255, 59, 48, 0.08);
+                box-shadow: 0 0 15px 3px rgba(255, 59, 48, 0.2), var(--shadow-subtle);
+            }
+            100% {
+                background-color: var(--bg-secondary);
+                box-shadow: 0 0 0 0 rgba(255, 59, 48, 0), var(--shadow-subtle);
+            }
+        }
+
+        .product-card.liked-pulse {
+            animation: cardGlowPulse 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
         .product-card.col-7 { grid-column: span 7; }
         .product-card.col-5 { grid-column: span 5; }
         .product-card.col-6 { grid-column: span 6; }
@@ -537,9 +565,20 @@
             transform: scale(1.05);
         }
 
+        /* Плавная анимация двойной пульсации для иконки сердца */
+        @keyframes doublePulseHeart {
+            0% { transform: scale(1); }
+            20% { transform: scale(1.35); }
+            40% { transform: scale(0.92); }
+            65% { transform: scale(1.2); }
+            85% { transform: scale(0.97); }
+            100% { transform: scale(1); }
+        }
+
         .wishlist-btn.active svg {
             fill: #FF3B30;
             stroke: #FF3B30;
+            animation: doublePulseHeart 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
 
         .product-img-wrap {
@@ -1059,17 +1098,10 @@
     <header id="site-header">
         <a class="logo" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">MILIP<span>STORE</span></a>
         
-        <ul class="nav-center">
-            <li><a onclick="scrollToSection('catalog')">Каталог</a></li>
-            <li><a onclick="scrollToSection('arrivals')">Новинки</a></li>
-            <li><a onclick="scrollToSection('categories')">Мыши</a></li>
-            <li><a onclick="scrollToSection('categories')">Клавиатуры</a></li>
-            <li><a onclick="scrollToSection('categories')">Гарнитуры</a></li>
-            <li><a onclick="scrollToSection('categories')">Аксессуары</a></li>
-        </ul>
+        <!-- Ссылки на категории сверху убраны по вашему запросу -->
+        <ul class="nav-center" style="display: none;"></ul>
 
         <div class="nav-right">
-            <!-- ДОПИСАНО: Новая кнопка быстрого переключения валют без удаления старых -->
             <button class="lang-switch" id="currency-switch-btn" onclick="toggleCurrency()" title="Валюта">UAH / USD</button>
             <button class="icon-btn" id="search-open-btn" aria-label="Поиск">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
@@ -1305,7 +1337,7 @@
     </div>
 
     <script>
-        // Data Store (Firebase compatible structure)
+        // Data Store
         const products = [
             {
                 id: 'mchose-a7-v2',
@@ -1314,7 +1346,7 @@
                 category: 'Мыши',
                 tag: 'BESTSELLER',
                 price: 4599,
-                desc: 'Wireless Gaming Mouse с беспрецедентной точностью и киберспортивным сензором.',
+                desc: 'Wireless Gaming Mouse с беспрецедентной точностью и киберспортивным сенсором.',
                 img: 'https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?auto=format&fit=crop&w=800&q=80',
                 specs: [
                     { label: 'SENSOR', value: 'PAW3395' },
@@ -1382,11 +1414,10 @@
         let currentModalProduct = null;
         let modalQty = 1;
         
-        // ДОПИСАНО: Переменная и функция для конвертации валюты (ничего не удалялось)
         let currentCurrency = 'UAH';
         function formatPrice(price) {
             if (currentCurrency === 'USD') {
-                return '$ ' + Math.round(price / 41); // Условный курс обмена
+                return '$ ' + Math.round(price / 41);
             }
             return '₴ ' + price.toLocaleString();
         }
@@ -1400,12 +1431,10 @@
             }
         }
 
-        // Initialize App
         document.addEventListener('DOMContentLoaded', () => {
             renderCatalog();
             updateBadges();
 
-            // Header scroll effect
             window.addEventListener('scroll', () => {
                 const header = document.getElementById('site-header');
                 if (window.scrollY > 40) {
@@ -1415,7 +1444,6 @@
                 }
             });
 
-            // Hero 3D Tilt Effect
             const tiltCard = document.getElementById('hero-tilt-card');
             if (tiltCard) {
                 document.addEventListener('mousemove', (e) => {
@@ -1428,7 +1456,6 @@
                 });
             }
 
-            // Theme Toggle
             const themeBtn = document.getElementById('theme-toggle-btn');
             themeBtn.addEventListener('click', () => {
                 const currentTheme = document.body.getAttribute('data-theme');
@@ -1436,7 +1463,6 @@
                 document.body.setAttribute('data-theme', newTheme);
             });
 
-            // Search Trigger
             document.getElementById('search-open-btn').addEventListener('click', () => toggleSearch(true));
             document.getElementById('wishlist-open-btn').addEventListener('click', () => toggleWishlistDrawer());
             document.getElementById('cart-open-btn').addEventListener('click', () => toggleCart(true));
@@ -1449,11 +1475,10 @@
             }
         }
 
-        // Render Catalog Grid
         function renderCatalog() {
             const container = document.getElementById('catalog-container');
             container.innerHTML = products.map((p, idx) => `
-                <div class="product-card ${p.colClass}" onclick="openProductModal(products[${idx}])">
+                <div class="product-card ${p.colClass}" id="product-card-${p.id}" onclick="openProductModal(products[${idx}])">
                     <span class="product-tag ${p.tag === 'NEW' || p.tag === 'BESTSELLER' ? 'new' : ''}">${p.tag}</span>
                     <button class="wishlist-btn ${wishlist.includes(p.id) ? 'active' : ''}" onclick="event.stopPropagation(); toggleWishlist('${p.id}')">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="${wishlist.includes(p.id) ? '#FF3B30' : 'none'}" stroke="${wishlist.includes(p.id) ? '#FF3B30' : 'currentColor'}" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
@@ -1477,17 +1502,29 @@
             `).join('');
         }
 
-        // Wishlist logic
         function toggleWishlist(productId) {
             const index = wishlist.indexOf(productId);
-            if (index > -1) {
-                wishlist.splice(index, 1);
-            } else {
+            const isAdding = index === -1;
+            
+            if (isAdding) {
                 wishlist.push(productId);
+            } else {
+                wishlist.splice(index, 1);
             }
             localStorage.setItem('milip_wishlist', JSON.stringify(wishlist));
             renderCatalog();
             updateBadges();
+
+            // Запуск эффекта мерцания/пульсации красным для выбранной карточки
+            if (isAdding) {
+                const cardEl = document.getElementById(`product-card-${productId}`);
+                if (cardEl) {
+                    cardEl.classList.remove('liked-pulse');
+                    void cardEl.offsetWidth; // сброс анимации
+                    cardEl.classList.add('liked-pulse');
+                }
+            }
+
             if (currentModalProduct && currentModalProduct.id === productId) {
                 updateModalWishlistBtn();
             }
@@ -1513,7 +1550,6 @@
             }
         }
 
-        // Cart logic
         function addToCart(productId, qty = 1) {
             const product = products.find(p => p.id === productId);
             if (!product) return;
@@ -1574,7 +1610,6 @@
             document.getElementById('wishlist-count').innerText = wishlist.length;
         }
 
-        // Drawers and Modals
         function toggleCart(open) {
             const drawer = document.getElementById('cart-drawer');
             const backdrop = document.getElementById('backdrop');
@@ -1611,7 +1646,6 @@
             closeProductModal();
         }
 
-        // Search live filter
         function handleSearch(query) {
             const resultsContainer = document.getElementById('search-results');
             if (!query.trim()) {
@@ -1644,7 +1678,6 @@
             `).join('');
         }
 
-        // Product Modal
         function openProductModal(product) {
             currentModalProduct = product;
             modalQty = 1;
@@ -1696,7 +1729,6 @@
             toggleCart(false);
         }
 
-        // Escape key listener
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 closeAllDrawers();
