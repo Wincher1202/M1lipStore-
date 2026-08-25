@@ -28,7 +28,7 @@
             --radius-lg: 20px;
             --radius-md: 14px;
             --radius-sm: 8px;
-            --transition: all 0.25s ease;
+            --transition-smooth: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
         }
 
         [data-theme="dark"] {
@@ -96,7 +96,7 @@
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
             border-bottom: 1px solid transparent;
-            transition: var(--transition);
+            transition: var(--transition-smooth);
         }
 
         [data-theme="dark"] header {
@@ -147,13 +147,14 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: var(--transition);
+            transition: var(--transition-smooth);
             border: 1px solid var(--border-light);
         }
 
         .icon-btn:hover {
             background: var(--bg-tertiary);
             border-color: var(--border-hover);
+            transform: scale(1.05);
         }
 
         .badge-count {
@@ -302,12 +303,12 @@
             align-items: center;
             gap: 8px;
             text-decoration: none;
-            transition: var(--transition);
+            transition: var(--transition-smooth);
         }
 
         .btn-primary:hover {
             background: var(--accent);
-            transform: translateY(-2px);
+            transform: translateY(-3px) scale(1.02);
             box-shadow: var(--shadow-hover);
         }
 
@@ -329,14 +330,15 @@
             max-width: 520px;
             position: relative;
             cursor: pointer;
-            transition: var(--transition);
+            transition: var(--transition-smooth);
             overflow: hidden;
+            will-change: transform;
         }
 
         .hero-card-3d:hover {
             border-color: var(--accent);
             box-shadow: var(--shadow-hover);
-            transform: translateY(-4px);
+            transform: translateY(-6px) scale(1.01);
         }
 
         .hero-card-3d .product-tag {
@@ -362,11 +364,11 @@
             object-fit: cover;
             display: block;
             border-radius: var(--radius-md);
-            transition: transform 0.4s ease;
+            transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
         }
 
         .hero-card-3d:hover img {
-            transform: scale(1.04);
+            transform: scale(1.06);
         }
 
         /* SECTIONS & CATALOG */
@@ -413,13 +415,14 @@
             color: var(--text-secondary);
             cursor: pointer;
             white-space: nowrap;
-            transition: var(--transition);
+            transition: var(--transition-smooth);
         }
 
         .filter-btn:hover, .filter-btn.active {
             background: var(--accent);
             color: white;
             border-color: var(--accent);
+            transform: translateY(-2px);
         }
 
         .catalog-grid {
@@ -436,6 +439,7 @@
             .catalog-grid { grid-template-columns: repeat(3, 1fr); }
         }
 
+        /* КАРТКА ТОВАРУ */
         .product-card {
             background: var(--bg-secondary);
             border: 1px solid var(--border-light);
@@ -444,15 +448,18 @@
             display: flex;
             flex-direction: column;
             position: relative;
-            transition: var(--transition);
             box-shadow: var(--shadow-subtle);
             cursor: pointer;
             height: 100%;
             min-height: 450px;
+            will-change: transform;
+            transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1), 
+                        box-shadow 0.5s cubic-bezier(0.25, 1, 0.5, 1),
+                        border-color 0.5s ease;
         }
 
         .product-card:hover {
-            transform: translateY(-4px);
+            transform: translateY(-8px) scale(1.015);
             border-color: var(--accent);
             box-shadow: var(--shadow-hover);
         }
@@ -493,11 +500,16 @@
             justify-content: center;
             cursor: pointer;
             z-index: 10;
-            transition: var(--transition);
+            transition: var(--transition-smooth);
+        }
+
+        .wishlist-btn:hover {
+            transform: scale(1.1);
+            border-color: var(--border-hover);
         }
 
         .wishlist-btn svg {
-            transition: fill 0.3s ease, stroke 0.3s ease;
+            transition: fill 0.4s ease, stroke 0.4s ease;
         }
 
         .wishlist-btn.active svg {
@@ -524,11 +536,11 @@
             object-fit: cover;
             display: block;
             border-radius: var(--radius-md);
-            transition: transform 0.4s ease;
+            transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
         }
 
         .product-card:hover .product-img-wrap img { 
-            transform: scale(1.04); 
+            transform: scale(1.06); 
         }
 
         .color-picker-preview {
@@ -597,8 +609,8 @@
         }
 
         .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 8px; }
-        .footer-col a { text-decoration: none; color: var(--text-secondary); font-weight: 600; font-size: 0.9rem; transition: var(--transition); cursor: pointer; }
-        .footer-col a:hover { color: var(--text-primary); }
+        .footer-col a { text-decoration: none; color: var(--text-secondary); font-weight: 600; font-size: 0.9rem; transition: var(--transition-smooth); cursor: pointer; }
+        .footer-col a:hover { color: var(--text-primary); transform: translateX(2px); }
         .footer-bottom { border-top: 1px solid var(--border-light); padding-top: 20px; display: flex; flex-direction: column; gap: 8px; align-items: center; text-align: center; color: var(--text-muted); font-size: 0.8rem; }
         @media(min-width: 768px) { .footer-bottom { flex-direction: row; justify-content: space-between; } }
 
@@ -607,11 +619,12 @@
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.4);
-            backdrop-filter: blur(4px);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
             z-index: 2000;
             opacity: 0;
             visibility: hidden;
-            transition: var(--transition);
+            transition: opacity 0.4s ease, visibility 0.4s ease;
         }
 
         .overlay-backdrop.active { opacity: 1; visibility: visible; }
@@ -624,13 +637,14 @@
             box-shadow: -10px 0 40px rgba(0,0,0,0.15);
             display: flex;
             flex-direction: column;
-            transition: right 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
         @media(min-width: 500px) { .drawer { width: 420px; right: -420px; } }
 
         .drawer.active { right: 0; }
         .drawer-header { padding: 20px; border-bottom: 1px solid var(--border-light); display: flex; justify-content: space-between; align-items: center; }
-        .close-drawer { background: transparent; border: none; font-size: 1.1rem; font-weight: 800; cursor: pointer; color: var(--text-primary); }
+        .close-drawer { background: transparent; border: none; font-size: 1.1rem; font-weight: 800; cursor: pointer; color: var(--text-primary); transition: var(--transition-smooth); }
+        .close-drawer:hover { transform: rotate(90deg) scale(1.1); color: var(--accent); }
         .drawer-body { padding: 20px; flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
         
         .cart-item, .wishlist-item-card {
@@ -641,9 +655,16 @@
             padding: 10px;
             border-radius: var(--radius-sm);
             border: 1px solid var(--border-light);
+            transition: var(--transition-smooth);
         }
 
-        .cart-item img, .wishlist-item-card img { width: 50px; height: 50px; object-fit: cover; border-radius: 6px; cursor: pointer; }
+        .cart-item:hover, .wishlist-item-card:hover {
+            border-color: var(--border-hover);
+            transform: translateY(-2px);
+        }
+
+        .cart-item img, .wishlist-item-card img { width: 50px; height: 50px; object-fit: cover; border-radius: 6px; cursor: pointer; transition: transform 0.3s ease; }
+        .cart-item img:hover, .wishlist-item-card img:hover { transform: scale(1.05); }
 
         .quantity-controls {
             display: flex;
@@ -656,7 +677,8 @@
             width: fit-content;
         }
 
-        .quantity-controls button { background: transparent; border: none; cursor: pointer; font-weight: 800; color: var(--text-primary); }
+        .quantity-controls button { background: transparent; border: none; cursor: pointer; font-weight: 800; color: var(--text-primary); transition: transform 0.2s ease; }
+        .quantity-controls button:hover { transform: scale(1.2); color: var(--accent); }
 
         .drawer-footer { padding: 20px; border-top: 1px solid var(--border-light); background: var(--bg-primary); }
         .cart-total { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; font-size: 1.1rem; font-weight: 800; }
@@ -668,7 +690,7 @@
             z-index: 2002;
             padding: 30px 20px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            transition: top 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: top 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .search-modal.active { top: 0; }
@@ -676,7 +698,8 @@
         .search-input-wrap { display: flex; align-items: center; border-bottom: 2px solid var(--text-primary); padding-bottom: 10px; gap: 12px; }
         .search-input-wrap input { width: 100%; background: transparent; border: none; font-size: 1.2rem; font-weight: 700; color: var(--text-primary); outline: none; }
         .search-results { margin-top: 16px; max-height: 320px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
-        .search-result-item { display: flex; align-items: center; justify-content: space-between; padding: 10px; background: var(--bg-primary); border-radius: var(--radius-sm); text-decoration: none; color: var(--text-primary); cursor: pointer; }
+        .search-result-item { display: flex; align-items: center; justify-content: space-between; padding: 10px; background: var(--bg-primary); border-radius: var(--radius-sm); text-decoration: none; color: var(--text-primary); cursor: pointer; transition: var(--transition-smooth); }
+        .search-result-item:hover { background: var(--accent-light); transform: translateX(4px); }
 
         /* PRODUCT MODAL */
         .product-modal {
@@ -693,7 +716,7 @@
             overflow-y: auto;
             opacity: 0;
             visibility: hidden;
-            transition: var(--transition);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         @media(min-width: 768px) {
@@ -734,7 +757,8 @@
             justify-content: center;
             overflow: hidden;
         }
-        .modal-main-img { width: 100%; height: 100%; object-fit: cover; border-radius: var(--radius-md); }
+        .modal-main-img { width: 100%; height: 100%; object-fit: cover; border-radius: var(--radius-md); transition: transform 0.5s ease; }
+        .modal-main-img:hover { transform: scale(1.03); }
         
         .modal-thumbs { display: flex; flex-wrap: wrap; gap: 8px; }
         .modal-thumb { 
@@ -745,9 +769,9 @@
             border: 2px solid var(--border-light); 
             border-radius: 6px; 
             cursor: pointer; 
-            transition: var(--transition); 
+            transition: var(--transition-smooth); 
         }
-        .modal-thumb:hover, .modal-thumb.active { border-color: var(--accent); }
+        .modal-thumb:hover, .modal-thumb.active { border-color: var(--accent); transform: scale(1.05); }
 
         .modal-options-row {
             display: flex;
@@ -788,9 +812,10 @@
             height: 20px;
             border-radius: 50%;
             border: 2px solid var(--border-hover);
-            transition: var(--transition);
+            transition: var(--transition-smooth);
         }
 
+        .color-circle-big:hover { transform: scale(1.15); }
         .color-circle-big.white { background-color: #FFFFFF; }
         .color-circle-big.black { background-color: #1a1a1a; }
         .color-circle-big.pink { background-color: #ff2a85; }
@@ -805,10 +830,12 @@
             box-shadow: 0 0 0 3px var(--accent);
             border-color: var(--accent);
             opacity: 1;
+            transform: scale(1.1);
         }
 
         .specs-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin: 12px 0; }
-        .spec-box { background: var(--bg-primary); padding: 8px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-light); }
+        .spec-box { background: var(--bg-primary); padding: 8px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-light); transition: var(--transition-smooth); }
+        .spec-box:hover { border-color: var(--border-hover); transform: translateY(-2px); }
         .spec-box span { display: block; font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; }
         .spec-box strong { font-size: 0.9rem; font-weight: 700; }
     </style>
@@ -990,7 +1017,7 @@
 
                 <div class="modal-options-row">
                     <div class="option-group">
-                        <label>Колір (<span id="modal-color-name" style="text-transform: capitalize;">білий</span>)</label>
+                        <label>Колір (<span id="modal-color-name">White</span>)</label>
                         <div class="color-selector-large" id="modal-color-selector"></div>
                     </div>
 
@@ -1054,9 +1081,9 @@
                     { label: 'МАТЕРІАЛ', value: 'КАРБОН' }
                 ],
                 colors: [
-                    { name: 'білий', class: 'white', available: true },
-                    { name: 'чорний', class: 'black', available: false },
-                    { name: 'рожевий', class: 'pink', available: false }
+                    { name: 'White', class: 'white', available: true },
+                    { name: 'Black', class: 'black', available: false },
+                    { name: 'Pink', class: 'pink', available: false }
                 ]
             },
             {
@@ -1076,8 +1103,8 @@
                     { label: 'АКУМУЛЯТОР', value: 'ДО 80 ГОД' }
                 ],
                 colors: [
-                    { name: 'білий', class: 'white', available: true },
-                    { name: 'чорний', class: 'black', available: true }
+                    { name: 'White', class: 'white', available: true },
+                    { name: 'Black', class: 'black', available: true }
                 ]
             },
             {
@@ -1096,7 +1123,7 @@
                     { label: 'ОСНОВА', value: 'КАУЧУК' }
                 ],
                 colors: [
-                    { name: 'чорний', class: 'black', available: true }
+                    { name: 'Black', class: 'black', available: true }
                 ]
             },
             {
@@ -1116,9 +1143,9 @@
                     { label: 'ПІДСВІЧУВАННЯ', value: 'RGB' }
                 ],
                 colors: [
-                    { name: 'білий', class: 'white', available: true },
-                    { name: 'чорний', class: 'black', available: true },
-                    { name: 'рожевий', class: 'pink', available: true }
+                    { name: 'White', class: 'white', available: true },
+                    { name: 'Black', class: 'black', available: true },
+                    { name: 'Pink', class: 'pink', available: true }
                 ]
             }
         ];
@@ -1144,7 +1171,7 @@
                 imgEl.src = p.img;
                 tagEl.innerText = p.tag;
                 imgEl.style.opacity = '1';
-            }, 200);
+            }, 300);
 
             heroIndex = (heroIndex + 1) % heroProducts.length;
         }
@@ -1174,7 +1201,7 @@
             renderCatalog();
             updateBadges();
 
-            setInterval(updateHeroBanner, 4000);
+            setInterval(updateHeroBanner, 4500);
 
             window.addEventListener('scroll', () => {
                 document.getElementById('site-header').classList.toggle('scrolled', window.scrollY > 30);
@@ -1241,7 +1268,7 @@
             const product = products.find(p => p.id === productId);
             if (!product) return;
 
-            const activeColors = product.colors || [{ name: 'білий', available: true }];
+            const activeColors = product.colors || [{ name: 'White', available: true }];
             const colorObj = activeColors[selectedColorIndex] || activeColors[0];
 
             const existingIndex = wishlist.findIndex(item => item.id === productId && item.color === colorObj.name);
@@ -1268,7 +1295,7 @@
                 btnEl.classList.toggle('active', isAdding);
                 const svg = btnEl.querySelector('svg');
                 svg.style.animation = 'none';
-                svg.offsetHeight; // trigger reflow
+                svg.offsetHeight; 
                 svg.style.animation = '';
                 svg.setAttribute('fill', isAdding ? '#FF3B30' : 'none');
                 svg.setAttribute('stroke', isAdding ? '#FF3B30' : 'currentColor');
@@ -1285,7 +1312,7 @@
 
         function updateModalWishlistBtn() {
             const btn = document.getElementById('modal-wishlist-btn');
-            const activeColors = currentModalProduct.colors || [{ name: 'білий' }];
+            const activeColors = currentModalProduct.colors || [{ name: 'White' }];
             const colorObj = activeColors[selectedColorIndex] || activeColors[0];
             const isFav = wishlist.some(item => item.id === currentModalProduct.id && item.color === colorObj.name);
             btn.classList.toggle('active', isFav);
@@ -1339,7 +1366,7 @@
         function addDirectToCart(productId) {
             const product = products.find(p => p.id === productId);
             if (!product) return;
-            const defaultColor = product.colors && product.colors.find(c => c.available) ? product.colors.find(c => c.available).name : 'білий';
+            const defaultColor = product.colors && product.colors.find(c => c.available) ? product.colors.find(c => c.available).name : 'White';
             addToCartFull(product, defaultColor, 1);
         }
 
@@ -1517,12 +1544,12 @@
             const selectorContainer = document.getElementById('modal-color-selector');
             selectorContainer.innerHTML = currentModalProduct.colors.map((c, idx) => `
                 <div class="color-option-item" onclick="selectModalColor(${idx})">
-                    <div class="color-circle-big ${c.class} ${!c.available ? 'disabled' : ''} ${idx === selectedColorIndex ? 'active' : ''}" title="${c.name} ${!c.available ? '(Немає в наявності)' : ''}"></div>
+                    <div class="color-circle-big ${c.class} ${!c.available ? 'disabled' : ''} ${idx === selectedColorIndex ? 'active' : ''}" title="${c.name} ${!c.available ? '(Out of stock)' : ''}"></div>
                 </div>
             `).join('');
 
             const activeColorObj = currentModalProduct.colors[selectedColorIndex];
-            document.getElementById('modal-color-name').innerText = activeColorObj ? activeColorObj.name : 'білий';
+            document.getElementById('modal-color-name').innerText = activeColorObj ? activeColorObj.name : 'White';
         }
 
         function changeModalMainImage(src, thumbElement) {
@@ -1543,7 +1570,7 @@
 
         function addCurrentProductToCart() {
             if (currentModalProduct) {
-                const activeColors = currentModalProduct.colors || [{ name: 'білий', available: true }];
+                const activeColors = currentModalProduct.colors || [{ name: 'White', available: true }];
                 const colorObj = activeColors[selectedColorIndex] || activeColors[0];
                 if (!colorObj.available) return;
                 
