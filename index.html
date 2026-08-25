@@ -725,7 +725,14 @@
 
         .product-modal.active { opacity: 1; visibility: visible; transform: translate(-50%, -50%) scale(1); }
         .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 50px; padding: 60px; }
-        .modal-gallery img { width: 100%; height: auto; object-fit: contain; background: var(--bg-primary); border-radius: var(--radius-md); padding: 40px; }
+        
+        /* ГАЛЕРЕЯ МОДАЛКИ С МИНИАТЮРАМИ */
+        .modal-gallery { display: flex; flex-direction: column; gap: 16px; }
+        .modal-main-img { width: 100%; height: 380px; object-fit: contain; background: var(--bg-primary); border-radius: var(--radius-md); padding: 30px; }
+        .modal-thumbs { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px; }
+        .modal-thumb { width: 70px; height: 70px; object-fit: contain; background: var(--bg-primary); border: 2px solid var(--border-light); border-radius: 8px; padding: 6px; cursor: pointer; transition: var(--transition); flex-shrink: 0; }
+        .modal-thumb:hover, .modal-thumb.active { border-color: var(--accent); }
+
         .specs-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin: 30px 0; }
         .spec-box { background: var(--bg-primary); padding: 16px; border-radius: var(--radius-sm); border: 1px solid var(--border-light); }
         .spec-box span { display: block; font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; }
@@ -793,7 +800,7 @@
         <div class="hero-visual">
             <div class="hero-card-3d" onclick="openProductModal(products[0])">
                 <span class="product-tag new">HOT NOVELTY</span>
-                <img src="https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?auto=format&fit=crop&w=800&q=80" alt="ATTACK SHARK R5 ULTRA">
+                <img src="images/attack-shark-r5-ultra-colors-price.jpg" alt="ATTACK SHARK R5 ULTRA">
             </div>
         </div>
     </section>
@@ -924,7 +931,8 @@
         <button class="close-drawer" style="position: absolute; top: 24px; right: 24px; z-index: 10;" onclick="closeProductModal()">✕</button>
         <div class="modal-grid">
             <div class="modal-gallery">
-                <img id="modal-img" src="" alt="Product">
+                <img class="modal-main-img" id="modal-img" src="" alt="Product">
+                <div class="modal-thumbs" id="modal-thumbs"></div>
             </div>
             <div class="modal-details">
                 <span class="product-tag new" id="modal-tag">NEW</span>
@@ -1041,12 +1049,12 @@
     // Галерея на 7 фоток (перша — головна, далі ще 6)
     gallery: [
         'images/attack-shark-r5-ultra-colors-price.jpg',
-        'attack-shark-r5-ultra-in-hand-setup.jpg',
-        'attack-shark-r5-ultra-top-angle.jpg',
-        'attack-shark-r5-ultra-side-buttons.jpg', // замени на свои названия
-        'attack-shark-r5-ultra-back-grip.jpg', // замени на свои названия
-        'attack-shark-r5-ultra-box-bundle-contents.jpg', // замени на свои названия
-        'attack-shark-r5-ultra-dongle-receiver.jpg'  // замени на свои названия
+        'images/attack-shark-r5-ultra-in-hand-setup.jpg',
+        'images/attack-shark-r5-ultra-top-angle.jpg',
+        'images/attack-shark-r5-ultra-side-buttons.jpg',
+        'images/attack-shark-r5-ultra-back-grip.jpg',
+        'images/attack-shark-r5-ultra-box-bundle-contents.jpg',
+        'images/attack-shark-r5-ultra-dongle-receiver.jpg'
     ],
 
     specs: [
@@ -1066,6 +1074,9 @@
                 price: 4599,
                 desc: { ua: 'Wireless Gaming Mouse з безпрецедентною точністю.', ru: 'Wireless Gaming Mouse с беспрецедентной точностью.' },
                 img: 'https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?auto=format&fit=crop&w=800&q=80',
+                gallery: [
+                    'https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?auto=format&fit=crop&w=800&q=80'
+                ],
                 specs: [{ label: 'SENSOR', value: 'PAW3395' }, { label: 'WEIGHT', value: '54G' }],
                 colClass: 'col-5'
             },
@@ -1078,6 +1089,9 @@
                 price: 1499,
                 desc: { ua: 'Професійний ігровий килимок.', ru: 'Профессиональный игровой коврик.' },
                 img: 'https://images.unsplash.com/photo-1618384887929-16ec33fab9ef?auto=format&fit=crop&w=800&q=80',
+                gallery: [
+                    'https://images.unsplash.com/photo-1618384887929-16ec33fab9ef?auto=format&fit=crop&w=800&q=80'
+                ],
                 specs: [{ label: 'SURFACE', value: 'SPEED' }, { label: 'THICKNESS', value: '4MM' }],
                 colClass: 'col-5'
             },
@@ -1090,6 +1104,9 @@
                 price: 3899,
                 desc: { ua: 'Бездротова механічна клавіатура.', ru: 'Беспроводная механическая клавиатура.' },
                 img: 'https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=800&q=80',
+                gallery: [
+                    'https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=800&q=80'
+                ],
                 specs: [{ label: 'SWITCHES', value: 'REAPER' }, { label: 'LAYOUT', value: '75%' }],
                 colClass: 'col-7'
             }
@@ -1161,7 +1178,7 @@
                         <img src="${p.img}" alt="${p.title}">
                     </div>
                     
-                    <!-- Индикатор цветов прямо в карточке каталога -->
+                    <!-- Индикатор цветов прямо в каталоге -->
                     <div class="color-picker-preview">
                         <div class="color-dot white active" title="White"></div>
                         <div class="color-dot black out-of-stock" title="Black (Out of stock)"></div>
@@ -1310,7 +1327,16 @@
         function openProductModal(product) {
             currentModalProduct = product;
             modalQty = 1;
-            document.getElementById('modal-img').src = product.img;
+            
+            // Настройка галереи с миниатюрами
+            const galleryImages = product.gallery && product.gallery.length > 0 ? product.gallery : [product.img];
+            document.getElementById('modal-img').src = galleryImages[0];
+            
+            const thumbsContainer = document.getElementById('modal-thumbs');
+            thumbsContainer.innerHTML = galleryImages.map((imgSrc, index) => `
+                <img class="modal-thumb ${index === 0 ? 'active' : ''}" src="${imgSrc}" onclick="changeModalMainImage('${imgSrc}', this)">
+            `).join('');
+
             document.getElementById('modal-tag').innerText = product.tag;
             document.getElementById('modal-brand').innerText = product.brand;
             document.getElementById('modal-title').innerText = product.title;
@@ -1323,6 +1349,12 @@
             updateModalWishlistBtn();
             document.getElementById('product-modal').classList.add('active');
             document.getElementById('backdrop').classList.add('active');
+        }
+
+        function changeModalMainImage(src, thumbElement) {
+            document.getElementById('modal-img').src = src;
+            document.querySelectorAll('.modal-thumb').forEach(t => t.classList.remove('active'));
+            thumbElement.classList.add('active');
         }
 
         function closeProductModal() {
@@ -1355,3 +1387,4 @@
     </script>
 </body>
 </html>
+```[cite: 5]
