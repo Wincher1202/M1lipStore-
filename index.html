@@ -353,7 +353,7 @@
         .hero-card-3d img {
             width: 100%;
             height: 280px;
-            object-fit: contain; /* Картинка полностью помещается без обрезки */
+            object-fit: contain;
             border-radius: var(--radius-sm);
             display: block;
             transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
@@ -383,62 +383,6 @@
         .section-subtitle {
             color: var(--text-secondary);
             font-size: 0.9rem;
-        }
-
-        .categories-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 16px;
-        }
-
-        @media(min-width: 768px) {
-            .categories-grid { grid-template-columns: repeat(4, 1fr); }
-        }
-
-        .category-card {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-light);
-            border-radius: var(--radius-md);
-            padding: 24px 20px;
-            text-decoration: none;
-            color: var(--text-primary);
-            position: relative;
-            overflow: hidden;
-            height: 180px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            transition: var(--transition);
-            box-shadow: var(--shadow-subtle);
-            cursor: pointer;
-        }
-
-        .category-card:hover {
-            transform: translateY(-4px);
-            border-color: var(--border-hover);
-            box-shadow: var(--shadow-hover);
-        }
-
-        .category-card h3 { font-size: 1.15rem; font-weight: 700; z-index: 2; }
-        .category-card .explore-link {
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: var(--accent);
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            z-index: 2;
-        }
-
-        .category-card img {
-            position: absolute;
-            right: -10px;
-            bottom: -10px;
-            width: 110px;
-            height: 110px;
-            object-fit: cover;
-            opacity: 0.85;
-            transition: var(--transition);
         }
 
         .catalog-filters {
@@ -539,7 +483,6 @@
             transition: var(--transition);
         }
 
-        /* Контейнер картинки под размер рамки карточки (высота увеличена для полного помещения картинки) */
         .product-img-wrap {
             width: 100%;
             height: 250px; 
@@ -556,7 +499,7 @@
         .product-img-wrap img {
             width: 100%;
             height: 100%;
-            object-fit: contain; /* Картинка полностью помещается внутри рамки */
+            object-fit: contain;
             transition: transform 0.3s ease;
         }
 
@@ -785,7 +728,7 @@
         
         .modal-main-img-wrap {
             width: 100%;
-            height: 350px; /* Увеличено для полноценного размещения фото */
+            height: 350px;
             background: var(--bg-primary);
             border-radius: var(--radius-md);
             display: flex;
@@ -797,7 +740,7 @@
         .modal-main-img { 
             width: 100%; 
             height: 100%; 
-            object-fit: contain; /* Картинка полностью помещается в модалке */
+            object-fit: contain;
         }
         
         .modal-thumbs { 
@@ -886,38 +829,6 @@
                 <span class="product-tag new">HOT NOVELTY</span>
                 <img src="attack-shark-r5-ultra-colors-price.jpg" alt="ATTACK SHARK R5 ULTRA">
             </div>
-        </div>
-    </section>
-
-    <!-- CATEGORIES -->
-    <section class="section-padding" id="categories">
-        <div class="section-header">
-            <div>
-                <h2 class="section-title" id="tr-cat-title">Категорії</h2>
-                <p class="section-subtitle" id="tr-cat-subtitle">Професійне ігрове залізо</p>
-            </div>
-        </div>
-        <div class="categories-grid">
-            <a class="category-card" onclick="filterByCategory('Миші'); scrollToSection('catalog')">
-                <h3 id="tr-cat-mice">Миші</h3>
-                <span class="explore-link">Дивитися →</span>
-                <img src="https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?auto=format&fit=crop&w=400&q=80" alt="Миші">
-            </a>
-            <a class="category-card" onclick="filterByCategory('Клавіатури'); scrollToSection('catalog')">
-                <h3 id="tr-cat-keyboards">Клавіатури</h3>
-                <span class="explore-link">Дивитися →</span>
-                <img src="https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=400&q=80" alt="Клавіатури">
-            </a>
-            <a class="category-card" onclick="filterByCategory('Гарнітури'); scrollToSection('catalog')">
-                <h3 id="tr-cat-headsets">Гарнітури</h3>
-                <span class="explore-link">Дивитися →</span>
-                <img src="https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&w=400&q=80" alt="Гарнітури">
-            </a>
-            <a class="category-card" onclick="filterByCategory('Аксесуари'); scrollToSection('catalog')">
-                <h3 id="tr-cat-accessories">Аксесуари</h3>
-                <span class="explore-link">Дивитися →</span>
-                <img src="https://images.unsplash.com/photo-1618384887929-16ec33fab9ef?auto=format&fit=crop&w=400&q=80" alt="Аксесуари">
-            </a>
         </div>
     </section>
 
@@ -1051,7 +962,6 @@
     </div>
 
     <script>
-        // Инициализация Telegram Web App
         let tg = window.Telegram.WebApp;
         if (tg) {
             tg.expand();
@@ -1067,12 +977,6 @@
                 heroTitle: "ТЕХНІКА,<br>ЯКА СТВОРЮЄ<br>МІЙ SETUP",
                 heroDesc: "Gaming mice, keyboards and accessories для сучасного ігрового простору найвищого рівня.",
                 btnCatalog: "Дивитися каталог →",
-                catTitle: "Категорії",
-                catSubtitle: "Професійне ігрове залізо",
-                mice: "Миші",
-                keyboards: "Клавіатури",
-                headsets: "Гарнітури",
-                accessories: "Аксесуари",
                 catalogTitle: "Каталог",
                 catalogSubtitle: "Топові девайси в наявності",
                 cartTitle: "Кошик",
@@ -1085,12 +989,6 @@
                 heroTitle: "ТЕХНИКА,<br>КОТОРАЯ СОЗДАЁТ<br>ТВОЙ SETUP",
                 heroDesc: "Gaming mice, keyboards and accessories для современного игрового пространства высочайшего уровня.",
                 btnCatalog: "Смотреть каталог →",
-                catTitle: "Категории",
-                catSubtitle: "Профессиональное игровое железо",
-                mice: "Мыши",
-                keyboards: "Клавиатуры",
-                headsets: "Гарнитуры",
-                accessories: "Аксесуари",
                 catalogTitle: "Каталог",
                 catalogSubtitle: "Топовые девайсы в наличии",
                 cartTitle: "Корзина",
@@ -1114,12 +1012,6 @@
             document.getElementById('tr-hero-title').innerHTML = t.heroTitle;
             document.getElementById('tr-hero-desc').innerText = t.heroDesc;
             document.getElementById('tr-btn-catalog').innerText = t.btnCatalog;
-            document.getElementById('tr-cat-title').innerText = t.catTitle;
-            document.getElementById('tr-cat-subtitle').innerText = t.catSubtitle;
-            document.getElementById('tr-cat-mice').innerText = t.mice;
-            document.getElementById('tr-cat-keyboards').innerText = t.keyboards;
-            document.getElementById('tr-cat-headsets').innerText = t.headsets;
-            document.getElementById('tr-cat-accessories').innerText = t.accessories;
             document.getElementById('tr-catalog-title').innerText = t.catalogTitle;
             document.getElementById('tr-catalog-subtitle').innerText = t.catalogSubtitle;
             document.getElementById('tr-cart-title').innerText = t.cartTitle;
