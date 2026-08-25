@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MILIPSTORE — Premium Gaming Hardware</title>
+    <title>M1lipStore — Premium Gaming Hardware</title>
     <!-- Telegram Web App SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -843,7 +843,7 @@
 <body data-theme="light">
     <!-- HEADER -->
     <header id="site-header">
-        <a class="logo" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">MILIP<span>STORE</span></a>
+        <a class="logo" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">M1lip<span>Store</span></a>
 
         <div class="nav-right">
             <button class="icon-btn" id="theme-toggle-btn" aria-label="Тема">
@@ -868,16 +868,16 @@
     <div class="ticker-wrap">
         <div class="ticker-move">
             <div class="ticker-group">
-                <span><img src="logo-milipstore.png" alt="MilipStore" class="ticker-logo"> Топові ігрові девайси та аксесуари</span>
-                <span><img src="logo-milipstore.png" alt="MilipStore" class="ticker-logo"> Сенсори найвищої продуктивності та опитування 8KHz</span>
-                <span><img src="logo-milipstore.png" alt="MilipStore" class="ticker-logo"> Офіційна гарантія та швидка відправка</span>
-                <span><img src="logo-milipstore.png" alt="MilipStore" class="ticker-logo"> Ідеальний сетап для справжніх геймерів</span>
+                <span><img src="logo-milipstore.png" alt="M1lipStore" class="ticker-logo"> Топові ігрові девайси та аксесуари</span>
+                <span><img src="logo-milipstore.png" alt="M1lipStore" class="ticker-logo"> Сенсори найвищої продуктивності та опитування 8KHz</span>
+                <span><img src="logo-milipstore.png" alt="M1lipStore" class="ticker-logo"> Офіційна гарантія та швидка відправка</span>
+                <span><img src="logo-milipstore.png" alt="M1lipStore" class="ticker-logo"> Ідеальний сетап для справжніх геймерів</span>
             </div>
             <div class="ticker-group">
-                <span><img src="logo-milipstore.png" alt="MilipStore" class="ticker-logo"> Топові ігрові девайси та аксесуари</span>
-                <span><img src="logo-milipstore.png" alt="MilipStore" class="ticker-logo"> Сенсори найвищої продуктивності та опитування 8KHz</span>
-                <span><img src="logo-milipstore.png" alt="MilipStore" class="ticker-logo"> Офіційна гарантія та швидка відправка</span>
-                <span><img src="logo-milipstore.png" alt="MilipStore" class="ticker-logo"> Ідеальний сетап для справжніх геймерів</span>
+                <span><img src="logo-milipstore.png" alt="M1lipStore" class="ticker-logo"> Топові ігрові девайси та аксесуари</span>
+                <span><img src="logo-milipstore.png" alt="M1lipStore" class="ticker-logo"> Сенсори найвищої продуктивності та опитування 8KHz</span>
+                <span><img src="logo-milipstore.png" alt="M1lipStore" class="ticker-logo"> Офіційна гарантія та швидка відправка</span>
+                <span><img src="logo-milipstore.png" alt="M1lipStore" class="ticker-logo"> Ідеальний сетап для справжніх геймерів</span>
             </div>
         </div>
     </div>
@@ -885,7 +885,7 @@
     <!-- HERO SECTION -->
     <section class="hero">
         <div class="hero-content">
-            <div class="hero-badge">MILIPSTORE / 2026</div>
+            <div class="hero-badge">M1LIPSTORE / 2026</div>
             <h1>ТЕХНІКА,<br>ЯКА СТВОРЮЄ<br>ТВОЙ SETUP</h1>
             <p>Gaming mice, keyboards and accessories для сучасного ігрового простору найвищого рівня.</p>
             <div class="hero-actions">
@@ -924,7 +924,7 @@
     <footer>
         <div class="footer-grid">
             <div class="footer-col">
-                <a class="logo" style="margin-bottom: 12px;">MILIP<span>STORE</span></a>
+                <a class="logo" style="margin-bottom: 12px;">M1lip<span>Store</span></a>
                 <p style="color: var(--text-secondary); max-width: 280px; font-size: 0.9rem;">Gaming hardware for your ultimate setup. Преміальний вибір для ентузіастів.</p>
             </div>
             <div class="footer-col">
@@ -947,13 +947,13 @@
             <div class="footer-col">
                 <h4>Контакти</h4>
                 <ul>
-                    <li><a>support@milipstore.com</a></li>
+                    <li><a>support@m1lipstore.com</a></li>
                     <li>Київ, Україна</li>
                 </ul>
             </div>
         </div>
         <div class="footer-bottom">
-            <span>MILIPSTORE © 2026. Всі права захищено.</span>
+            <span>M1lipStore © 2026. Всі права захищено.</span>
             <span>Telegram Web App Market</span>
         </div>
     </footer>
@@ -1150,8 +1150,8 @@
             }
         ];
 
-        let cart = JSON.parse(localStorage.getItem('milip_cart')) || [];
-        let wishlist = JSON.parse(localStorage.getItem('milip_wishlist')) || [];
+        let cart = JSON.parse(localStorage.getItem('m1lip_cart')) || [];
+        let wishlist = JSON.parse(localStorage.getItem('m1lip_wishlist')) || [];
         let currentModalProduct = null;
         let modalQty = 1;
         let selectedColorIndex = 0;
@@ -1288,7 +1288,7 @@
                 wishlist.splice(existingIndex, 1);
             }
 
-            localStorage.setItem('milip_wishlist', JSON.stringify(wishlist));
+            localStorage.setItem('m1lip_wishlist', JSON.stringify(wishlist));
             
             const btnEl = document.getElementById(`wishlist-btn-${productId}`);
             if (btnEl) {
@@ -1344,7 +1344,7 @@
 
         function removeWishlistItem(index) {
             const removed = wishlist.splice(index, 1)[0];
-            localStorage.setItem('milip_wishlist', JSON.stringify(wishlist));
+            localStorage.setItem('m1lip_wishlist', JSON.stringify(wishlist));
             renderWishlistItems();
             updateBadges();
             if (removed) {
@@ -1386,7 +1386,7 @@
                 });
             }
 
-            localStorage.setItem('milip_cart', JSON.stringify(cart));
+            localStorage.setItem('m1lip_cart', JSON.stringify(cart));
             updateBadges();
             renderCartItems();
             toggleCart(true);
@@ -1400,7 +1400,7 @@
             if (item.qty <= 0) {
                 cart = cart.filter(i => !(i.id === productId && i.color === colorName));
             }
-            localStorage.setItem('milip_cart', JSON.stringify(cart));
+            localStorage.setItem('m1lip_cart', JSON.stringify(cart));
             updateBadges();
             renderCartItems();
             updateTelegramMainButton();
@@ -1580,9 +1580,9 @@
         }
 
         function checkout() {
-            alert("Замовлення успішно оформлено! Дякуємо за покупку в MILIPSTORE.");
+            alert("Замовлення успішно оформлено! Дякуємо за покупку в M1lipStore.");
             cart = [];
-            localStorage.setItem('milip_cart', JSON.stringify(cart));
+            localStorage.setItem('m1lip_cart', JSON.stringify(cart));
             updateBadges();
             renderCartItems();
             toggleCart(false);
