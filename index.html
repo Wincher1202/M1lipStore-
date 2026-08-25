@@ -373,7 +373,7 @@
         .hero-card-3d img {
             width: 100%;
             height: 100%;
-            object-fit: contain; /* Картинка полностью помещается без обрезки */
+            object-fit: contain;
             display: block;
             border-radius: var(--radius-md);
             transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
@@ -436,7 +436,6 @@
             border-color: var(--accent);
         }
 
-        /* СТРОГАЯ СЕТКА КАТАЛОГА С ИДЕНТИЧНЫМИ БЛОКАМИ */
         .catalog-grid {
             display: grid;
             grid-template-columns: 1fr;
@@ -467,7 +466,7 @@
             box-shadow: var(--shadow-subtle);
             cursor: pointer;
             height: 100%;
-            min-height: 480px; /* Фиксированная минимальная высота для абсолютной ровности всех карточек */
+            min-height: 480px;
         }
 
         @keyframes cardGlowPulse {
@@ -515,7 +514,6 @@
             transition: var(--transition);
         }
 
-        /* ФИКСИРОВАННЫЙ БЛОК КАРТИНКИ ТОВАРА 4:3 И object-fit: contain */
         .product-img-wrap {
             width: 100%;
             aspect-ratio: 4 / 3;
@@ -525,7 +523,7 @@
             overflow: hidden;
             position: relative;
             margin: 16px 0;
-            background: var(--bg-primary); /* Аккуратный фон контейнера */
+            background: var(--bg-primary);
             border-radius: var(--radius-md);
             padding: 12px;
         }
@@ -533,7 +531,7 @@
         .product-img-wrap img {
             width: 100%;
             height: 100%;
-            object-fit: contain; /* Ключевое: картинка полностью вписана без обрезки и искажений */
+            object-fit: contain;
             display: block;
             border-radius: 8px;
             transition: transform 0.4s ease;
@@ -559,15 +557,6 @@
         .color-dot.white { background-color: #FFFFFF; }
         .color-dot.black { background-color: #1a1a1a; }
         .color-dot.active { box-shadow: 0 0 0 2px var(--accent); }
-        .color-dot.out-of-stock { opacity: 0.3; cursor: not-allowed; }
-        .color-dot.out-of-stock::after {
-            content: '';
-            position: absolute;
-            top: 6px; left: -1px;
-            width: 16px; height: 1.5px;
-            background-color: #ff3b30;
-            transform: rotate(-45deg);
-        }
 
         .product-info {
             display: flex;
@@ -698,7 +687,7 @@
         .search-input-wrap { display: flex; align-items: center; border-bottom: 2px solid var(--text-primary); padding-bottom: 12px; gap: 15px; }
         .search-input-wrap input { width: 100%; background: transparent; border: none; font-size: 1.4rem; font-weight: 700; color: var(--text-primary); outline: none; }
         .search-results { margin-top: 20px; max-height: 350px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
-        .search-result-item { display: flex; align-items: center; justify-content: space-between; padding: 12px; background: var(--bg-primary); border-radius: var(--radius-sm); text-decoration: none; color: var(--text-primary); }
+        .search-result-item { display: flex; align-items: center; justify-content: space-between; padding: 12px; background: var(--bg-primary); border-radius: var(--radius-sm); text-decoration: none; color: var(--text-primary); cursor: pointer; }
 
         /* МОДАЛЬНОЕ ОКНО ТОВАРА */
         .product-modal {
@@ -862,19 +851,6 @@
         .color-circle-big.active {
             box-shadow: 0 0 0 3px var(--accent);
             border-color: var(--accent);
-        }
-
-        .color-circle-big.out-of-stock {
-            opacity: 0.35;
-            cursor: not-allowed;
-        }
-        .color-circle-big.out-of-stock::after {
-            content: '';
-            position: absolute;
-            top: 8px; left: -2px;
-            width: 22px; height: 2px;
-            background-color: #ff3b30;
-            transform: rotate(-45deg);
         }
 
         .specs-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 15px 0; }
@@ -1492,13 +1468,13 @@
                 return;
             }
             container.innerHTML = filtered.map(p => `
-                <a class="search-result-item" onclick="toggleSearch(false); openProductModal(products.find(x => x.id === '${p.id}'))">
+                <div class="search-result-item" onclick="toggleSearch(false); openProductModal(products.find(x => x.id === '${p.id}'))">
                     <div style="display: flex; align-items: center; gap: 12px;">
                         <img src="${p.img}" style="width: 40px; height: 40px; object-fit: contain; border-radius: 6px; padding: 2px;">
                         <div><strong style="font-size: 0.9rem;">${p.brand} ${p.title}</strong></div>
                     </div>
                     <span style="font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 0.9rem;">${formatPrice(p.price)}</span>
-                </a>
+                </div>
             `).join('');
         }
 
@@ -1551,7 +1527,7 @@
             const selectorContainer = document.getElementById('modal-color-selector');
             selectorContainer.innerHTML = currentModalProduct.colors.map((c, idx) => `
                 <div class="color-option-item" onclick="selectModalColor(${idx})">
-                    <div class="color-circle-big ${c.class} ${idx === selectedColorIndex ? 'active' : ''} ${!c.available ? 'out-of-stock' : ''}"></div>
+                    <div class="color-circle-big ${c.class} ${idx === selectedColorIndex ? 'active' : ''}"></div>
                 </div>
             `).join('');
 
