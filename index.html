@@ -352,9 +352,12 @@
 
         .hero-card-3d img {
             width: 100%;
-            height: 280px;
-            object-fit: cover; /* Убрано черное пространство */
+            height: auto; /* Автоматический формат под пропорции */
+            max-height: 360px;
+            object-fit: contain; /* Без обрезок */
             border-radius: var(--radius-sm);
+            display: block;
+            margin: 0 auto;
             transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
@@ -537,28 +540,29 @@
             transition: var(--transition);
         }
 
+        /* Контейнер картинки подстраивается под пропорции оригинала без черных полей */
         .product-img-wrap {
             width: 100%;
-            height: 220px;
             display: flex;
             align-items: center;
             justify-content: center;
             overflow: hidden;
             position: relative;
-            padding: 0;
-            margin: 16px 0;
+            padding: 10px 0;
+            margin: 12px 0;
             background: var(--bg-primary);
             border-radius: var(--radius-sm);
         }
 
         .product-img-wrap img {
             width: 100%;
-            height: 100%;
-            object-fit: cover; /* Заполняет всю рамку карточки без черных полей */
+            height: auto; /* Сохраняет исходный формат/пропорции фото */
+            max-height: 240px;
+            object-fit: contain; /* Картинка полностью видна в своем оригинальном виде */
             transition: transform 0.3s ease;
         }
 
-        .product-card:hover .product-img-wrap img { transform: scale(1.05); }
+        .product-card:hover .product-img-wrap img { transform: scale(1.03); }
 
         .color-picker-preview {
             display: flex;
@@ -684,7 +688,7 @@
             border: 1px solid var(--border-light);
         }
 
-        .cart-item img { width: 60px; height: 60px; object-fit: cover; background: var(--bg-secondary); border-radius: 8px; }
+        .cart-item img { width: 60px; height: 60px; object-fit: contain; background: var(--bg-secondary); border-radius: 8px; }
 
         .quantity-controls {
             display: flex;
@@ -783,11 +787,9 @@
         
         .modal-main-img-wrap {
             width: 100%;
-            aspect-ratio: 4 / 3;
-            max-height: 260px;
             background: var(--bg-primary);
             border-radius: var(--radius-md);
-            padding: 0; /* Убрано внутреннее поле, чтобы картинка заполнила рамку полностью */
+            padding: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -796,8 +798,9 @@
         }
         .modal-main-img { 
             width: 100%; 
-            height: 100%; 
-            object-fit: cover; /* Убраны черные полосы в галерее модалки */
+            height: auto; 
+            max-height: 320px;
+            object-fit: contain; /* Сохраняет формат фото в модалке */
         }
         
         .modal-thumbs { 
@@ -812,7 +815,7 @@
         .modal-thumb { 
             width: 50px; 
             height: 50px; 
-            object-fit: cover; /* Превью тоже заполняют свои квадраты без полей */
+            object-fit: contain; 
             background: var(--bg-primary); 
             border: 2px solid var(--border-light); 
             border-radius: 6px; 
@@ -1412,7 +1415,7 @@
             container.innerHTML = filtered.map(p => `
                 <a class="search-result-item" onclick="toggleSearch(false); openProductModal(products.find(x => x.id === '${p.id}'))">
                     <div style="display: flex; align-items: center; gap: 12px;">
-                        <img src="${p.img}" style="width: 40px; height: 40px; object-fit: cover;">
+                        <img src="${p.img}" style="width: 40px; height: 40px; object-fit: contain;">
                         <div><strong style="font-size: 0.9rem;">${p.brand} ${p.title}</strong></div>
                     </div>
                     <span style="font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 0.9rem;">${formatPrice(p.price)}</span>
