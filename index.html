@@ -338,34 +338,39 @@
             width: 100%;
         }
 
+        /* ИДЕАЛЬНЫЙ БЛОК БЕЗ РАМОК И ОТСТУПОВ ДЛЯ ПЕРВОНАЧАЛЬНОГО ЭКРАНА */
         .hero-card-3d {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-light);
+            background: transparent;
+            border: none;
             border-radius: var(--radius-lg);
-            padding: 16px;
+            padding: 0;
             box-shadow: var(--shadow-card);
             width: 100%;
-            max-width: 600px;
+            max-width: 520px;
             position: relative;
             cursor: pointer;
             transition: var(--transition);
+            overflow: hidden;
         }
 
         .hero-card-3d .product-tag {
             position: absolute;
-            top: 26px;
-            left: 26px;
+            top: 20px;
+            left: 20px;
             z-index: 5;
         }
 
-        /* ПОЛНОЕ ЗАПОЛНЕНИЕ КАРТИНКОЙ БЕЗ ПУСТОГО ПРОСТРАНСТВА */
         .hero-card-3d img {
             width: 100%;
-            height: 340px;
+            height: 380px;
             object-fit: cover;
-            border-radius: var(--radius-sm);
+            border-radius: var(--radius-lg);
             display: block;
             transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .hero-card-3d:hover img {
+            transform: scale(1.03);
         }
 
         /* SECTIONS & CATALOG */
@@ -492,7 +497,7 @@
             transition: var(--transition);
         }
 
-        /* ПОЛНОЕ ЗАПОЛНЕНИЕ КАРТИНКОЙ В КАТАЛОГЕ БЕЗ БИЛЫХ ПРОСТРАНСТВ */
+        /* ПОЛНОЕ ЗАПОЛНЕНИЕ КАРТИНКОЙ В КАТАЛОГЕ БЕЗ ПОЛЕЙ */
         .product-img-wrap {
             width: 100%;
             height: 280px;
@@ -502,8 +507,8 @@
             overflow: hidden;
             position: relative;
             margin: 16px 0;
-            background: var(--bg-primary);
-            border-radius: var(--radius-sm);
+            background: transparent;
+            border-radius: var(--radius-md);
         }
 
         .product-img-wrap img {
@@ -511,10 +516,11 @@
             height: 100%;
             object-fit: cover;
             display: block;
+            border-radius: var(--radius-md);
             transition: transform 0.4s ease;
         }
 
-        .product-card:hover .product-img-wrap img { transform: scale(1.05); }
+        .product-card:hover .product-img-wrap img { transform: scale(1.03); }
 
         .color-picker-preview {
             display: flex;
@@ -736,11 +742,10 @@
             overflow-x: hidden;
         }
         
-        /* КАРТИНКА В МОДАЛКЕ НА ВСЮ КАРТОЧКУ БЕЗ ПУСТОГО ПРОСТРАНСТВА */
         .modal-main-img-wrap {
             width: 100%;
             height: 360px;
-            background: var(--bg-primary);
+            background: transparent;
             border-radius: var(--radius-md);
             display: flex;
             align-items: center;
@@ -753,6 +758,7 @@
             height: 100%; 
             object-fit: cover;
             display: block;
+            border-radius: var(--radius-md);
         }
         
         .modal-thumbs { 
