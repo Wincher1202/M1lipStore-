@@ -522,10 +522,10 @@
 
         .wishlist-btn:hover { background: var(--bg-tertiary); transform: scale(1.05); }
 
-        /* Оновлені стилі для контейнера та самої картинки в каталозі */
+        /* СУВОРИЙ СТАНДАРТ: Рамка під пропорцію 4х3 для кожного товару */
         .product-img-wrap {
             width: 100%;
-            height: 260px;
+            aspect-ratio: 4 / 3; /* Фіксує пропорцію рамки рівно 4 до 3 */
             display: flex;
             align-items: center;
             justify-content: center;
@@ -533,12 +533,14 @@
             position: relative;
             padding: 10px;
             margin: 20px 0;
+            background: var(--bg-primary); /* Необов'язковий фон для естетики в пустих зонах */
+            border-radius: var(--radius-sm);
         }
 
         .product-img-wrap img {
             width: 100%;
             height: 100%;
-            object-fit: contain;
+            object-fit: contain; /* Зберігає цілісність фото — воно завжди повністю вміщується в рамку */
             transition: transform 0.3s ease;
         }
 
