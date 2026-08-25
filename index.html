@@ -338,12 +338,11 @@
             width: 100%;
         }
 
-        /* ИДЕАЛЬНЫЙ БЛОК БЕЗ РАМОК И ОТСТУПОВ ДЛЯ ПЕРВОНАЧАЛЬНОГО ЭКРАНА */
         .hero-card-3d {
-            background: transparent;
-            border: none;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-light);
             border-radius: var(--radius-lg);
-            padding: 0;
+            padding: 16px;
             box-shadow: var(--shadow-card);
             width: 100%;
             max-width: 520px;
@@ -355,17 +354,28 @@
 
         .hero-card-3d .product-tag {
             position: absolute;
-            top: 20px;
-            left: 20px;
+            top: 28px;
+            left: 28px;
             z-index: 5;
+        }
+
+        .hero-card-img-wrap {
+            width: 100%;
+            aspect-ratio: 4 / 3;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            background: var(--bg-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .hero-card-3d img {
             width: 100%;
-            height: 380px;
-            object-fit: cover;
-            border-radius: var(--radius-lg);
+            height: 100%;
+            object-fit: contain; /* Картинка полностью помещается без обрезки */
             display: block;
+            border-radius: var(--radius-md);
             transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
@@ -426,17 +436,23 @@
             border-color: var(--accent);
         }
 
+        /* СТРОГАЯ СЕТКА КАТАЛОГА С ИДЕНТИЧНЫМИ БЛОКАМИ */
         .catalog-grid {
             display: grid;
             grid-template-columns: 1fr;
-            gap: 20px;
+            gap: 24px;
         }
 
         @media(min-width: 768px) {
-            .catalog-grid { grid-template-columns: repeat(12, 1fr); }
-            .product-card.col-7 { grid-column: span 7; }
-            .product-card.col-5 { grid-column: span 5; }
-            .product-card.col-6 { grid-column: span 6; }
+            .catalog-grid { 
+                grid-template-columns: repeat(2, 1fr); 
+            }
+        }
+
+        @media(min-width: 1100px) {
+            .catalog-grid { 
+                grid-template-columns: repeat(3, 1fr); 
+            }
         }
 
         .product-card {
@@ -450,6 +466,8 @@
             transition: var(--transition);
             box-shadow: var(--shadow-subtle);
             cursor: pointer;
+            height: 100%;
+            min-height: 480px; /* Фиксированная минимальная высота для абсолютной ровности всех карточек */
         }
 
         @keyframes cardGlowPulse {
@@ -497,26 +515,27 @@
             transition: var(--transition);
         }
 
-        /* ПОЛНОЕ ЗАПОЛНЕНИЕ КАРТИНКОЙ В КАТАЛОГЕ БЕЗ ПОЛЕЙ */
+        /* ФИКСИРОВАННЫЙ БЛОК КАРТИНКИ ТОВАРА 4:3 И object-fit: contain */
         .product-img-wrap {
             width: 100%;
-            height: 280px;
+            aspect-ratio: 4 / 3;
             display: flex;
             align-items: center;
             justify-content: center;
             overflow: hidden;
             position: relative;
             margin: 16px 0;
-            background: transparent;
+            background: var(--bg-primary); /* Аккуратный фон контейнера */
             border-radius: var(--radius-md);
+            padding: 12px;
         }
 
         .product-img-wrap img {
             width: 100%;
             height: 100%;
-            object-fit: cover;
+            object-fit: contain; /* Ключевое: картинка полностью вписана без обрезки и искажений */
             display: block;
-            border-radius: var(--radius-md);
+            border-radius: 8px;
             transition: transform 0.4s ease;
         }
 
@@ -525,7 +544,7 @@
         .color-picker-preview {
             display: flex;
             gap: 6px;
-            margin: 10px 0 2px;
+            margin: 6px 0;
             align-items: center;
         }
 
@@ -564,7 +583,7 @@
         .product-price { font-size: 1.2rem; font-weight: 800; font-family: 'JetBrains Mono', monospace; }
 
         .product-action-hover {
-            margin-top: 14px;
+            margin-top: 12px;
             display: flex;
             gap: 10px;
         }
@@ -646,7 +665,7 @@
             border: 1px solid var(--border-light);
         }
 
-        .cart-item img { width: 60px; height: 60px; object-fit: cover; background: var(--bg-secondary); border-radius: 8px; }
+        .cart-item img { width: 60px; height: 60px; object-fit: contain; background: var(--bg-secondary); border-radius: 8px; padding: 4px; }
 
         .quantity-controls {
             display: flex;
@@ -681,7 +700,7 @@
         .search-results { margin-top: 20px; max-height: 350px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
         .search-result-item { display: flex; align-items: center; justify-content: space-between; padding: 12px; background: var(--bg-primary); border-radius: var(--radius-sm); text-decoration: none; color: var(--text-primary); }
 
-        /* МОДАЛЬНЕ ОКНО ТОВАРА */
+        /* МОДАЛЬНОЕ ОКНО ТОВАРА */
         .product-modal {
             position: fixed;
             top: 50%; left: 50%;
@@ -744,21 +763,22 @@
         
         .modal-main-img-wrap {
             width: 100%;
-            height: 360px;
-            background: transparent;
+            aspect-ratio: 4 / 3;
+            background: var(--bg-primary);
             border-radius: var(--radius-md);
             display: flex;
             align-items: center;
             justify-content: center;
             overflow: hidden;
             box-sizing: border-box;
+            padding: 12px;
         }
         .modal-main-img { 
             width: 100%; 
             height: 100%; 
-            object-fit: cover;
+            object-fit: contain;
             display: block;
-            border-radius: var(--radius-md);
+            border-radius: 8px;
         }
         
         .modal-thumbs { 
@@ -773,13 +793,14 @@
         .modal-thumb { 
             width: 56px; 
             height: 56px; 
-            object-fit: cover; 
+            object-fit: contain; 
             background: var(--bg-primary); 
             border: 2px solid var(--border-light); 
             border-radius: 6px; 
             cursor: pointer; 
             transition: var(--transition); 
             flex-shrink: 0; 
+            padding: 4px;
         }
         .modal-thumb:hover, .modal-thumb.active { border-color: var(--accent); }
 
@@ -891,10 +912,10 @@
     <!-- TICKER -->
     <div class="ticker-wrap">
         <div class="ticker-move">
-            <span><img src="logo-milipstore.png" alt="MilipStore" class="ticker-logo"> Безкоштовна доставка від 3000 грн</span>
-            <span><img src="logo-milipstore.png" alt="MilipStore" class="ticker-logo"> Нова категорія товарів вже доступна</span>
-            <span><img src="logo-milipstore.png" alt="MilipStore" class="ticker-logo"> Офіційне преміальне ігрове залізо</span>
-            <span><img src="logo-milipstore.png" alt="MilipStore" class="ticker-logo"> Безкоштовна доставка від 3000 грн</span>
+            <span><img src="logo-milipstore_4.png" alt="MilipStore" class="ticker-logo"> Безкоштовна доставка від 3000 грн</span>
+            <span><img src="logo-milipstore_4.png" alt="MilipStore" class="ticker-logo"> Нова категорія товарів вже доступна</span>
+            <span><img src="logo-milipstore_4.png" alt="MilipStore" class="ticker-logo"> Офіційне преміальне ігрове залізо</span>
+            <span><img src="logo-milipstore_4.png" alt="MilipStore" class="ticker-logo"> Безкоштовна доставка від 3000 грн</span>
         </div>
     </div>
 
@@ -911,7 +932,9 @@
         <div class="hero-visual">
             <div class="hero-card-3d" id="hero-card" onclick="openHeroProductModal()">
                 <span class="product-tag new" id="hero-tag">HOT NOVELTY</span>
-                <img id="hero-img" src="attack-shark-r5-ultra-colors-price.jpg" alt="Hero Product">
+                <div class="hero-card-img-wrap">
+                    <img id="hero-img" src="attack-shark-r5-ultra-colors-price.jpg" alt="Hero Product">
+                </div>
             </div>
         </div>
     </section>
@@ -1130,7 +1153,6 @@
                     { label: 'CONNECTION', value: 'TRI-MODE' },
                     { label: 'MATERIAL', value: 'CARBON FIBER' }
                 ],
-                colClass: 'col-7',
                 colors: [
                     { name: 'white', class: 'white', available: true },
                     { name: 'black', class: 'black', available: false },
@@ -1148,7 +1170,6 @@
                 img: 'https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?auto=format&fit=crop&w=800&q=80',
                 gallery: ['https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?auto=format&fit=crop&w=800&q=80'],
                 specs: [{ label: 'SENSOR', value: 'PAW3395' }, { label: 'WEIGHT', value: '54G' }],
-                colClass: 'col-5',
                 colors: [
                     { name: 'white', class: 'white', available: true },
                     { name: 'black', class: 'black', available: true }
@@ -1165,7 +1186,6 @@
                 img: 'https://images.unsplash.com/photo-1618384887929-16ec33fab9ef?auto=format&fit=crop&w=800&q=80',
                 gallery: ['https://images.unsplash.com/photo-1618384887929-16ec33fab9ef?auto=format&fit=crop&w=800&q=80'],
                 specs: [{ label: 'SURFACE', value: 'SPEED' }, { label: 'THICKNESS', value: '4MM' }],
-                colClass: 'col-5',
                 colors: [
                     { name: 'black', class: 'black', available: true }
                 ]
@@ -1181,7 +1201,6 @@
                 img: 'https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=800&q=80',
                 gallery: ['https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=800&q=80'],
                 specs: [{ label: 'SWITCHES', value: 'REAPER' }, { label: 'LAYOUT', value: '75%' }],
-                colClass: 'col-7',
                 colors: [
                     { name: 'white', class: 'white', available: true },
                     { name: 'black', class: 'black', available: true },
@@ -1275,7 +1294,7 @@
             container.innerHTML = filteredProducts.map((p) => {
                 const firstColorClass = p.colors && p.colors[0] ? p.colors[0].class : 'white';
                 return `
-                    <div class="product-card ${p.colClass}" id="product-card-${p.id}" onclick="openProductModal(products.find(x => x.id === '${p.id}'))">
+                    <div class="product-card" id="product-card-${p.id}" onclick="openProductModal(products.find(x => x.id === '${p.id}'))">
                         <span class="product-tag new">${p.tag}</span>
                         <button class="wishlist-btn ${wishlist.some(item => item.id === p.id) ? 'active' : ''}" onclick="event.stopPropagation(); toggleWishlist('${p.id}')">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="${wishlist.some(item => item.id === p.id) ? '#FF3B30' : 'none'}" stroke="${wishlist.some(item => item.id === p.id) ? '#FF3B30' : 'currentColor'}" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
@@ -1475,7 +1494,7 @@
             container.innerHTML = filtered.map(p => `
                 <a class="search-result-item" onclick="toggleSearch(false); openProductModal(products.find(x => x.id === '${p.id}'))">
                     <div style="display: flex; align-items: center; gap: 12px;">
-                        <img src="${p.img}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 6px;">
+                        <img src="${p.img}" style="width: 40px; height: 40px; object-fit: contain; border-radius: 6px; padding: 2px;">
                         <div><strong style="font-size: 0.9rem;">${p.brand} ${p.title}</strong></div>
                     </div>
                     <span style="font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 0.9rem;">${formatPrice(p.price)}</span>
