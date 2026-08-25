@@ -73,7 +73,6 @@
             flex-direction: column;
         }
 
-        /* Застосування гарного шрифту для всіх цифр на сайті */
         .product-price, .badge-count, .spec-box strong, .quantity-controls span, .cart-total, header .logo span {
             font-family: 'JetBrains Mono', monospace;
         }
@@ -1201,7 +1200,7 @@
                 return `
                     <div class="product-card" onclick="openProductModal(products.find(x => x.id === '${p.id}'))">
                         <span class="product-tag new">${p.tag}</span>
-                        <button class="wishlist-btn ${isFav ? 'active' : ''}" onclick="event.stopPropagation(); toggleWishlist('${p.id}')">
+                        <button class="wishlist-btn ${isFav ? 'active' : ''}" id="wishlist-btn-${p.id}" onclick="event.stopPropagation(); toggleWishlist('${p.id}')">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="${isFav ? '#FF3B30' : 'none'}" stroke="${isFav ? '#FF3B30' : 'currentColor'}" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
                         </button>
                         <div class="product-img-wrap">
@@ -1252,7 +1251,16 @@
             }
 
             localStorage.setItem('milip_wishlist', JSON.stringify(wishlist));
-            renderCatalog();
+            
+            // Оновлюємо стан конкретної кнопки в каталозі без повного перерендеру всього списку, щоб не збивати анімацію
+            const btnEl = document.getElementById(`wishlist-btn-${productId}`);
+            if (btnEl) {
+                btnEl.classList.toggle('active', isAdding);
+                const svg = btnEl.querySelector('svg');
+                svg.setAttribute('fill', isAdding ? '#FF3B30' : 'none');
+                svg.setAttribute('stroke', isAdding ? '#FF3B30' : 'currentColor');
+            }
+
             updateBadges();
             if (currentModalProduct && currentModalProduct.id === productId) updateModalWishlistBtn();
         }
@@ -1472,7 +1480,7 @@
         function addCurrentProductToCart() {
             if (currentModalProduct) {
                 const activeColors = currentModalProduct.colors || [{ name: 'білий', available: true }];
-                const colorObj = activeColors[selectedColorIndex] || activeColors[0];
+                const colorObj = activeColors[selectedColorIndex] гарний || activeColors[0];
                 if (!colorObj.available) return;
                 
                 addToCartFull(currentModalProduct, colorObj.name, modalQty);
