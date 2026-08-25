@@ -66,6 +66,29 @@
             -webkit-font-smoothing: antialiased;
         }
 
+        /* Анімації при вході на сайт */
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes scaleIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
         /* Custom Scrollbar */
         ::-webkit-scrollbar {
             width: 8px;
@@ -76,9 +99,6 @@
         ::-webkit-scrollbar-thumb {
             background: var(--border-hover);
             border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: var(--text-secondary);
         }
 
         /* HEADER */
@@ -130,29 +150,10 @@
             color: var(--accent);
         }
 
-        .nav-center {
-            display: flex;
-            gap: 32px;
-            list-style: none;
-        }
-
-        .nav-center a {
-            text-decoration: none;
-            color: var(--text-secondary);
-            font-weight: 500;
-            font-size: 0.95rem;
-            transition: var(--transition);
-            cursor: pointer;
-        }
-
-        .nav-center a:hover {
-            color: var(--text-primary);
-        }
-
         .nav-right {
             display: flex;
             align-items: center;
-            gap: 20px;
+            gap: 16px;
         }
 
         .icon-btn {
@@ -169,10 +170,12 @@
             align-items: center;
             justify-content: center;
             transition: var(--transition);
+            border: 1px solid var(--border-light);
         }
 
         .icon-btn:hover {
             background: var(--bg-tertiary);
+            border-color: var(--border-hover);
         }
 
         .badge-count {
@@ -194,7 +197,7 @@
         .lang-switch {
             background: var(--bg-secondary);
             border: 1px solid var(--border-light);
-            padding: 6px 12px;
+            padding: 8px 14px;
             border-radius: 20px;
             font-size: 0.85rem;
             font-weight: 600;
@@ -205,12 +208,43 @@
 
         .lang-switch:hover {
             border-color: var(--border-hover);
+            background: var(--bg-tertiary);
+        }
+
+        /* TICKER / ІНФОСТРІЧКА */
+        .ticker-wrap {
+            background: var(--accent);
+            color: white;
+            padding: 10px 0;
+            overflow: hidden;
+            white-space: nowrap;
+            position: relative;
+            top: 80px;
+            z-index: 999;
+            font-size: 0.85rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .ticker-move {
+            display: inline-block;
+            animation: ticker 25s linear infinite;
+        }
+
+        .ticker-move span {
+            margin-right: 40px;
+        }
+
+        @keyframes ticker {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
         }
 
         /* HERO SECTION */
         .hero {
             min-height: 100vh;
-            padding: 160px 40px 80px;
+            padding: 180px 40px 80px;
             max-width: 1440px;
             margin: 0 auto;
             display: grid;
@@ -239,7 +273,6 @@
             text-transform: uppercase;
             width: fit-content;
             opacity: 0;
-            transform: translateY(20px);
             animation: fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards 0.2s;
         }
 
@@ -248,9 +281,7 @@
             font-weight: 800;
             line-height: 1.05;
             letter-spacing: -0.03em;
-            color: var(--text-primary);
             opacity: 0;
-            transform: translateY(20px);
             animation: fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards 0.4s;
         }
 
@@ -260,7 +291,6 @@
             max-width: 480px;
             line-height: 1.6;
             opacity: 0;
-            transform: translateY(20px);
             animation: fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards 0.6s;
         }
 
@@ -270,7 +300,6 @@
             gap: 20px;
             margin-top: 10px;
             opacity: 0;
-            transform: translateY(20px);
             animation: fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards 0.8s;
         }
 
@@ -320,7 +349,6 @@
             justify-content: center;
             align-items: center;
             opacity: 0;
-            transform: scale(0.95);
             animation: scaleIn 1s cubic-bezier(0.16, 1, 0.3, 1) forwards 0.5s;
         }
 
@@ -333,8 +361,8 @@
             width: 100%;
             max-width: 540px;
             position: relative;
-            transition: transform 0.1s ease-out;
             cursor: pointer;
+            transition: var(--transition);
         }
 
         .hero-card-3d img {
@@ -349,37 +377,9 @@
             transform: scale(1.04) rotate(-2deg);
         }
 
-        .hero-specs-float {
-            position: absolute;
-            bottom: -20px;
-            left: -20px;
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-light);
-            padding: 16px 20px;
-            border-radius: var(--radius-md);
-            box-shadow: var(--shadow-card);
-            display: flex;
-            gap: 20px;
-        }
-
-        .spec-item span:first-child {
-            display: block;
-            font-size: 0.7rem;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            font-weight: 700;
-        }
-
-        .spec-item span:last-child {
-            font-size: 0.95rem;
-            font-weight: 700;
-            color: var(--text-primary);
-            font-family: 'JetBrains Mono', monospace;
-        }
-
         /* CATEGORIES SECTION */
         .section-padding {
-            padding: 120px 40px;
+            padding: 100px 40px;
             max-width: 1440px;
             margin: 0 auto;
         }
@@ -423,6 +423,7 @@
             justify-content: space-between;
             transition: var(--transition);
             box-shadow: var(--shadow-subtle);
+            cursor: pointer;
         }
 
         .category-card:hover {
@@ -434,7 +435,6 @@
         .category-card h3 {
             font-size: 1.4rem;
             font-weight: 700;
-            letter-spacing: -0.02em;
             z-index: 2;
         }
 
@@ -449,15 +449,11 @@
             transition: var(--transition);
         }
 
-        .category-card:hover .explore-link {
-            gap: 12px;
-        }
-
         .category-card img {
             position: absolute;
-            right: -20px;
-            bottom: -20px;
-            width: 160px;
+            right: -10px;
+            bottom: -10px;
+            width: 140px;
             height: auto;
             opacity: 0.85;
             transition: var(--transition);
@@ -488,7 +484,7 @@
             cursor: pointer;
         }
 
-        /* Анимация двойной пульсации и мерцания карточки (лайк) */
+        /* Анімація подвійної пульсації і мерцання картки при лайку */
         @keyframes cardGlowPulse {
             0% {
                 background-color: var(--bg-secondary);
@@ -565,7 +561,6 @@
             transform: scale(1.05);
         }
 
-        /* Плавная анимация двойной пульсации для иконки сердца */
         @keyframes doublePulseHeart {
             0% { transform: scale(1); }
             20% { transform: scale(1.35); }
@@ -614,25 +609,17 @@
             color: var(--text-muted);
             text-transform: uppercase;
             font-weight: 700;
-            letter-spacing: 0.05em;
         }
 
         .product-title-group h3 {
             font-size: 1.35rem;
             font-weight: 700;
-            color: var(--text-primary);
-            letter-spacing: -0.02em;
             margin-top: 4px;
-        }
-
-        .product-price-group {
-            text-align: right;
         }
 
         .product-price {
             font-size: 1.35rem;
             font-weight: 800;
-            color: var(--text-primary);
             font-family: 'JetBrains Mono', monospace;
         }
 
@@ -648,76 +635,6 @@
         .product-card:hover .product-action-hover {
             opacity: 1;
             transform: translateY(0);
-        }
-
-        /* FEATURED BANNER SECTION */
-        .featured-banner {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-light);
-            border-radius: var(--radius-lg);
-            padding: 80px;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            align-items: center;
-            gap: 60px;
-            position: relative;
-            overflow: hidden;
-            box-shadow: var(--shadow-card);
-        }
-
-        .featured-banner::before {
-            content: '';
-            position: absolute;
-            top: 0; right: 0;
-            width: 50%; height: 100%;
-            background: radial-gradient(circle at right, var(--accent-light) 0%, transparent 70%);
-            z-index: 1;
-        }
-
-        .featured-content {
-            position: relative;
-            z-index: 2;
-        }
-
-        .featured-content h2 {
-            font-size: clamp(2.2rem, 3.5vw, 3.2rem);
-            font-weight: 800;
-            letter-spacing: -0.03em;
-            line-height: 1.1;
-            margin: 20px 0;
-        }
-
-        .feature-chips {
-            display: flex;
-            gap: 12px;
-            margin: 30px 0;
-        }
-
-        .feature-chip {
-            background: var(--bg-tertiary);
-            padding: 8px 16px;
-            border-radius: var(--radius-sm);
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.85rem;
-            font-weight: 600;
-        }
-
-        .featured-visual {
-            position: relative;
-            z-index: 2;
-            display: flex;
-            justify-content: center;
-        }
-
-        .featured-visual img {
-            max-width: 100%;
-            height: auto;
-            filter: drop-shadow(0 30px 40px rgba(0,0,0,0.15));
-            transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .featured-banner:hover .featured-visual img {
-            transform: scale(1.05) rotate(2deg);
         }
 
         /* FOOTER */
@@ -757,6 +674,7 @@
             color: var(--text-secondary);
             font-weight: 500;
             transition: var(--transition);
+            cursor: pointer;
         }
 
         .footer-col a:hover {
@@ -773,7 +691,7 @@
             font-size: 0.9rem;
         }
 
-        /* OVERLAYS & DRAWERS (Cart, Wishlist, Search, Product Modal) */
+        /* DRAWER & MODALS */
         .overlay-backdrop {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -790,7 +708,6 @@
             visibility: visible;
         }
 
-        /* Cart Drawer */
         .drawer {
             position: fixed;
             top: 0; right: -480px; width: 480px; height: 100%;
@@ -812,11 +729,6 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-        }
-
-        .drawer-header h3 {
-            font-size: 1.25rem;
-            font-weight: 800;
         }
 
         .close-drawer {
@@ -855,22 +767,6 @@
             padding: 6px;
         }
 
-        .cart-item-details {
-            flex-grow: 1;
-        }
-
-        .cart-item-details h4 {
-            font-size: 0.95rem;
-            font-weight: 700;
-        }
-
-        .cart-item-details p {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-            font-family: 'JetBrains Mono', monospace;
-            margin-top: 4px;
-        }
-
         .quantity-controls {
             display: flex;
             align-items: center;
@@ -906,12 +802,6 @@
             font-weight: 800;
         }
 
-        .cart-total span:last-child {
-            font-family: 'JetBrains Mono', monospace;
-            color: var(--accent);
-        }
-
-        /* Search Overlay */
         .search-modal {
             position: fixed;
             top: -100%; left: 0; width: 100%;
@@ -929,7 +819,6 @@
         .search-container {
             max-width: 800px;
             margin: 0 auto;
-            position: relative;
         }
 
         .search-input-wrap {
@@ -972,11 +861,6 @@
             transition: var(--transition);
         }
 
-        .search-result-item:hover {
-            background: var(--accent-light);
-        }
-
-        /* Product Modal / Page View */
         .product-modal {
             position: fixed;
             top: 50%; left: 50%;
@@ -1015,43 +899,6 @@
             padding: 40px;
         }
 
-        .modal-details h2 {
-            font-size: 2.2rem;
-            font-weight: 800;
-            margin: 10px 0;
-        }
-
-        .modal-price {
-            font-size: 1.8rem;
-            font-weight: 800;
-            color: var(--accent);
-            font-family: 'JetBrains Mono', monospace;
-            margin: 20px 0;
-        }
-
-        .color-options {
-            display: flex;
-            gap: 12px;
-            margin: 20px 0;
-        }
-
-        .color-btn {
-            padding: 10px 20px;
-            border: 1px solid var(--border-light);
-            background: var(--bg-primary);
-            border-radius: var(--radius-sm);
-            font-weight: 600;
-            cursor: pointer;
-            transition: var(--transition);
-        }
-
-        .color-btn.selected {
-            border-color: var(--accent);
-            background: var(--accent-light);
-            color: var(--accent);
-        }
-
-        /* Specs Grid */
         .specs-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -1076,7 +923,6 @@
 
         .spec-box strong {
             font-size: 1.1rem;
-            color: var(--text-primary);
             font-family: 'JetBrains Mono', monospace;
         }
 
@@ -1085,10 +931,8 @@
             .hero-content { align-items: center; }
             .categories-grid { grid-template-columns: repeat(2, 1fr); }
             .catalog-grid { display: flex; flex-direction: column; }
-            .featured-banner { grid-template-columns: 1fr; padding: 40px; }
             .footer-grid { grid-template-columns: 1fr 1fr; gap: 40px; }
             .modal-grid { grid-template-columns: 1fr; padding: 30px; }
-            .nav-center { display: none; }
         }
     </style>
 </head>
@@ -1097,59 +941,56 @@
     <!-- HEADER -->
     <header id="site-header">
         <a class="logo" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">MILIP<span>STORE</span></a>
-        
-        <!-- Ссылки на категории сверху убраны по вашему запросу -->
-        <ul class="nav-center" style="display: none;"></ul>
 
         <div class="nav-right">
-            <button class="lang-switch" id="currency-switch-btn" onclick="toggleCurrency()" title="Валюта">UAH / USD</button>
-            <button class="icon-btn" id="search-open-btn" aria-label="Поиск">
+            <button class="lang-switch" id="currency-switch-btn" onclick="toggleCurrency()">UAH / USD</button>
+            <button class="lang-switch" id="lang-switch-btn" onclick="toggleLanguage()">UA / RU</button>
+            
+            <!-- Кнопка зміни теми замість валюти -->
+            <button class="icon-btn" id="theme-toggle-btn" aria-label="Змінити тему">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+            </button>
+
+            <button class="icon-btn" id="search-open-btn" aria-label="Пошук">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
             </button>
-            <button class="icon-btn" id="wishlist-open-btn" aria-label="Избранное">
+            <button class="icon-btn" id="wishlist-open-btn" aria-label="Обране">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
                 <span class="badge-count" id="wishlist-count">0</span>
             </button>
-            <button class="icon-btn" id="cart-open-btn" aria-label="Корзина">
+            <button class="icon-btn" id="cart-open-btn" aria-label="Кошик">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
                 <span class="badge-count" id="cart-count">0</span>
             </button>
-            <button class="lang-switch" id="lang-switch-btn" onclick="toggleLanguage()">UA / RU</button>
-            <button class="icon-btn" id="theme-toggle-btn" aria-label="Тема">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
-            </button>
         </div>
     </header>
+
+    <!-- ІНФОСТРІЧКА -->
+    <div class="ticker-wrap">
+        <div class="ticker-move">
+            <span>⚡ Безкоштовна доставка від 3000 грн</span>
+            <span>🔥 Нова категорія товарів вже доступна</span>
+            <span>🎮 Офіційне преміальне ігрове залізо</span>
+            <span>⚡ Безкоштовна доставка від 3000 грн</span>
+            <span>🔥 Нова категорія товарів вже доступна</span>
+            <span>🎮 Офіційне преміальне ігрове залізо</span>
+        </div>
+    </div>
 
     <!-- HERO SECTION -->
     <section class="hero">
         <div class="hero-content">
             <div class="hero-badge">MILIPSTORE / 2026</div>
-            <h1 id="tr-hero-title">ТЕХНИКА,<br>КОТОРАЯ СОЗДАЁТ<br>ТВОЙ SETUP</h1>
-            <p id="tr-hero-desc">Gaming mice, keyboards and accessories для современного игрового пространства высочайшего уровня.</p>
+            <h1 id="tr-hero-title">ТЕХНІКА,<br>ЯКА СТВОРЮЄ<br>ТВОЙ SETUP</h1>
+            <p id="tr-hero-desc">Gaming mice, keyboards and accessories для сучасного ігрового простору найвищого рівня.</p>
             <div class="hero-actions">
-                <a class="btn-primary" id="tr-btn-catalog" onclick="scrollToSection('catalog')">Смотреть каталог →</a>
-                <a class="btn-outline" onclick="openProductModal(products[0])">MCHOSE A7 V2 PRO</a>
+                <a class="btn-primary" id="tr-btn-catalog" onclick="scrollToSection('catalog')">Дивитися каталог →</a>
             </div>
         </div>
         <div class="hero-visual">
-            <div class="hero-card-3d" id="hero-tilt-card" onclick="openProductModal(products[0])">
-                <span class="product-tag new" id="tr-bestseller-tag">BESTSELLER</span>
+            <div class="hero-card-3d" onclick="openProductModal(products[0])">
+                <span class="product-tag new">BESTSELLER</span>
                 <img src="https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?auto=format&fit=crop&w=800&q=80" alt="MCHOSE A7 V2 PRO">
-                <div class="hero-specs-float">
-                    <div class="spec-item">
-                        <span id="tr-spec-sensor">Sensor</span>
-                        <span>PAW3395</span>
-                    </div>
-                    <div class="spec-item">
-                        <span id="tr-spec-weight">Weight</span>
-                        <span>54G</span>
-                    </div>
-                    <div class="spec-item">
-                        <span id="tr-spec-polling">Polling</span>
-                        <span>8000Hz</span>
-                    </div>
-                </div>
             </div>
         </div>
     </section>
@@ -1158,30 +999,30 @@
     <section class="section-padding" id="categories">
         <div class="section-header">
             <div>
-                <h2 class="section-title" id="tr-cat-title">Категории</h2>
-                <p class="section-subtitle" id="tr-cat-subtitle">Исследуйте профессиональное игровое железо</p>
+                <h2 class="section-title" id="tr-cat-title">Категорії</h2>
+                <p class="section-subtitle" id="tr-cat-subtitle">Досліджуйте професійне ігрове залізо</p>
             </div>
         </div>
         <div class="categories-grid">
             <a class="category-card" onclick="scrollToSection('catalog')">
-                <h3 id="tr-cat-mice">Мыши</h3>
-                <span class="explore-link" id="tr-explore-1">Смотреть →</span>
-                <img src="https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?auto=format&fit=crop&w=400&q=80" alt="Мыши">
+                <h3 id="tr-cat-mice">Миші</h3>
+                <span class="explore-link">Смотреть →</span>
+                <img src="https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?auto=format&fit=crop&w=400&q=80" alt="Миші">
             </a>
             <a class="category-card" onclick="scrollToSection('catalog')">
-                <h3 id="tr-cat-keyboards">Клавиатуры</h3>
-                <span class="explore-link" id="tr-explore-2">Смотреть →</span>
-                <img src="https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=400&q=80" alt="Клавиатуры">
+                <h3 id="tr-cat-keyboards">Клавіатури</h3>
+                <span class="explore-link">Смотреть →</span>
+                <img src="https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=400&q=80" alt="Клавіатури">
             </a>
             <a class="category-card" onclick="scrollToSection('catalog')">
-                <h3 id="tr-cat-headsets">Гарнитуры</h3>
-                <span class="explore-link" id="tr-explore-3">Смотреть →</span>
-                <img src="https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&w=400&q=80" alt="Гарнитуры">
+                <h3 id="tr-cat-headsets">Гарнітури</h3>
+                <span class="explore-link">Смотреть →</span>
+                <img src="https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&w=400&q=80" alt="Гарнітури">
             </a>
             <a class="category-card" onclick="scrollToSection('catalog')">
-                <h3 id="tr-cat-accessories">Аксессуары</h3>
-                <span class="explore-link" id="tr-explore-4">Смотреть →</span>
-                <img src="https://images.unsplash.com/photo-1618384887929-16ec33fab9ef?auto=format&fit=crop&w=400&q=80" alt="Аксессуары">
+                <h3 id="tr-cat-accessories">Аксесуари</h3>
+                <span class="explore-link">Смотреть →</span>
+                <img src="https://images.unsplash.com/photo-1618384887929-16ec33fab9ef?auto=format&fit=crop&w=400&q=80" alt="Аксесуари">
             </a>
         </div>
     </section>
@@ -1191,31 +1032,11 @@
         <div class="section-header">
             <div>
                 <h2 class="section-title" id="tr-catalog-title">Каталог</h2>
-                <p class="section-subtitle" id="tr-catalog-subtitle">Топовые девайсы в наличии</p>
+                <p class="section-subtitle" id="tr-catalog-subtitle">Топові девайси в наявності</p>
             </div>
         </div>
         <div class="catalog-grid" id="catalog-container">
             <!-- Dynamically rendered products -->
-        </div>
-    </section>
-
-    <!-- FEATURED BANNER -->
-    <section class="section-padding">
-        <div class="featured-banner">
-            <div class="featured-content">
-                <span class="product-tag new" id="tr-flagship-tag">FLAGSHIP GEAR</span>
-                <h2>MCHOSE A7 V2 PRO</h2>
-                <p id="tr-banner-desc" style="color: var(--text-secondary);">Бескомпромиссная игровая мышь для киберспорта с передовым сенсором и рекордным временем автономной работы.</p>
-                <div class="feature-chips">
-                    <span class="feature-chip">PAW3395</span>
-                    <span class="feature-chip">8K HYPERPOLL</span>
-                    <span class="feature-chip">54 GRAMS</span>
-                </div>
-                <button class="btn-primary" id="tr-banner-btn" onclick="openProductModal(products[0])">Подробнее →</button>
-            </div>
-            <div class="featured-visual">
-                <img src="https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?auto=format&fit=crop&w=800&q=80" alt="Featured">
-            </div>
         </div>
     </section>
 
@@ -1224,38 +1045,38 @@
         <div class="footer-grid">
             <div class="footer-col">
                 <a class="logo" style="margin-bottom: 20px;">MILIP<span>STORE</span></a>
-                <p id="tr-footer-desc" style="color: var(--text-secondary); max-width: 300px; font-size: 0.95rem;">Gaming hardware for your ultimate setup. Премиальный выбор для энтузиастов.</p>
+                <p style="color: var(--text-secondary); max-width: 300px; font-size: 0.95rem;">Gaming hardware for your ultimate setup. Преміальний вибір для ентузіастів.</p>
             </div>
             <div class="footer-col">
-                <h4 id="tr-fcol-catalog">Каталог</h4>
+                <h4>Каталог</h4>
                 <ul>
-                    <li><a onclick="scrollToSection('catalog')" id="tr-fcat-mice">Мыши</a></li>
-                    <li><a onclick="scrollToSection('catalog')" id="tr-fcat-keyboards">Клавиатуры</a></li>
-                    <li><a onclick="scrollToSection('catalog')" id="tr-fcat-headsets">Гарнитуры</a></li>
-                    <li><a onclick="scrollToSection('catalog')" id="tr-fcat-accessories">Аксессуары</a></li>
+                    <li><a onclick="scrollToSection('catalog')">Миші</a></li>
+                    <li><a onclick="scrollToSection('catalog')">Клавіатури</a></li>
+                    <li><a onclick="scrollToSection('catalog')">Гарнітури</a></li>
+                    <li><a onclick="scrollToSection('catalog')">Аксесуари</a></li>
                 </ul>
             </div>
             <div class="footer-col">
-                <h4 id="tr-fcol-buyers">Покупателям</h4>
+                <h4>Покупцям</h4>
                 <ul>
-                    <li><a id="tr-buy-delivery">Доставка</a></li>
-                    <li><a id="tr-buy-payment">Оплата</a></li>
-                    <li><a id="tr-buy-warranty">Гарантия</a></li>
-                    <li><a id="tr-buy-contacts">Контакты</a></li>
+                    <li><a>Доставка</a></li>
+                    <li><a>Оплата</a></li>
+                    <li><a>Гарантія</a></li>
+                    <li><a>Контакти</a></li>
                 </ul>
             </div>
             <div class="footer-col">
-                <h4 id="tr-fcol-contacts">Контакты</h4>
+                <h4>Контакти</h4>
                 <ul>
                     <li><a>support@milipstore.com</a></li>
                     <li><a>Telegram Support</a></li>
-                    <li id="tr-city">Киев, Украина</li>
+                    <li>Київ, Україна</li>
                 </ul>
             </div>
         </div>
         <div class="footer-bottom">
             <span>MILIPSTORE © 2026. All rights reserved.</span>
-            <span id="tr-footer-sub">Premium Gaming Hardware</span>
+            <span>Premium Gaming Hardware</span>
         </div>
     </footer>
 
@@ -1265,18 +1086,16 @@
     <!-- CART DRAWER -->
     <div class="drawer" id="cart-drawer">
         <div class="drawer-header">
-            <h3 id="tr-cart-title">Корзина</h3>
+            <h3 id="tr-cart-title">Кошик</h3>
             <button class="close-drawer" onclick="toggleCart(false)">✕</button>
         </div>
-        <div class="drawer-body" id="cart-items-container">
-            <!-- Cart items populated here -->
-        </div>
+        <div class="drawer-body" id="cart-items-container"></div>
         <div class="drawer-footer">
             <div class="cart-total">
-                <span id="tr-cart-total">Итого:</span>
+                <span id="tr-cart-total">Разом:</span>
                 <span id="cart-total-price">₴ 0</span>
             </div>
-            <button class="btn-primary" id="tr-checkout-btn" style="width: 100%; justify-content: center;" onclick="checkout()">Оформить заказ →</button>
+            <button class="btn-primary" style="width: 100%; justify-content: center;" onclick="checkout()">Оформити замовлення →</button>
         </div>
     </div>
 
@@ -1285,12 +1104,10 @@
         <div class="search-container">
             <div class="search-input-wrap">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-                <input type="text" id="search-input" placeholder="Что вы ищете?" oninput="handleSearch(this.value)">
+                <input type="text" id="search-input" placeholder="Що ви шукаєте?" oninput="handleSearch(this.value)">
                 <button class="close-drawer" onclick="toggleSearch(false)">✕</button>
             </div>
-            <div class="search-results" id="search-results">
-                <!-- Search results -->
-            </div>
+            <div class="search-results" id="search-results"></div>
         </div>
     </div>
 
@@ -1304,18 +1121,11 @@
             <div class="modal-details">
                 <span class="product-tag new" id="modal-tag">NEW</span>
                 <h4 id="modal-brand" style="color: var(--text-muted); text-transform: uppercase; font-size: 0.85rem; font-weight: 700; margin-top: 10px;">BRAND</h4>
-                <h2 id="modal-title">Product Title</h2>
+                <h2 id="modal-title" style="font-size: 2.2rem; font-weight: 800; margin: 10px 0;"></h2>
                 <p id="modal-desc" style="color: var(--text-secondary); margin: 15px 0; font-size: 0.95rem;"></p>
-                <div class="modal-price" id="modal-price">₴ 0</div>
-                
-                <div id="tr-modal-color-title" style="font-weight: 700; font-size: 0.9rem; margin-bottom: 8px;">Выберите цвет</div>
-                <div class="color-options" id="modal-colors">
-                    <button class="color-btn selected">WHITE</button>
-                    <button class="color-btn">BLACK</button>
-                    <button class="color-btn">PINK</button>
-                </div>
+                <div class="product-price" id="modal-price" style="font-size: 1.8rem; color: var(--accent); margin: 20px 0;">₴ 0</div>
 
-                <div id="tr-modal-qty-title" style="font-weight: 700; font-size: 0.9rem; margin: 20px 0 8px;">Количество</div>
+                <div style="font-weight: 700; font-size: 0.9rem; margin: 20px 0 8px;">Кількість</div>
                 <div class="quantity-controls" style="margin-bottom: 25px;">
                     <button onclick="adjustModalQty(-1)">−</button>
                     <span id="modal-qty" style="font-weight: 700; padding: 0 10px;">1</span>
@@ -1323,21 +1133,18 @@
                 </div>
 
                 <div style="display: flex; gap: 12px;">
-                    <button class="btn-primary" id="tr-modal-add-btn" style="flex-grow: 1; justify-content: center;" onclick="addCurrentProductToCart()">Добавить в корзину</button>
+                    <button class="btn-primary" style="flex-grow: 1; justify-content: center;" onclick="addCurrentProductToCart()">Додати в кошик</button>
                     <button class="wishlist-btn" id="modal-wishlist-btn" onclick="toggleCurrentWishlist()" style="position: static; width: 54px; height: 54px;">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
                     </button>
                 </div>
 
-                <div class="specs-grid" id="modal-specs">
-                    <!-- Specs populated here -->
-                </div>
+                <div class="specs-grid" id="modal-specs"></div>
             </div>
         </div>
     </div>
 
     <script>
-        // Dictionary for Multi-language support (UA / RU)
         let currentLang = 'ua';
         const translations = {
             ua: {
@@ -1350,29 +1157,12 @@
                 keyboards: "Клавіатури",
                 headsets: "Гарнітури",
                 accessories: "Аксесуари",
-                explore: "Дивитися →",
                 catalogTitle: "Каталог",
-                catalogSubtitle: "Топові девайсы в наявності",
-                bannerDesc: "Безкомпромісна ігрова миша для кіберспорту з передовим сенсором та рекордним часом автономної роботи.",
-                bannerBtn: "Детальніше →",
-                footerDesc: "Gaming hardware for your ultimate setup. Преміальний вибір для ентузіастів.",
-                fcolCatalog: "Каталог",
-                fcolBuyers: "Покупцям",
-                fcolContacts: "Контакти",
-                delivery: "Доставка",
-                payment: "Оплата",
-                warranty: "Гарантія",
-                contacts: "Контакти",
-                city: "Київ, Україна",
+                catalogSubtitle: "Топові девайси в наявності",
                 cartTitle: "Кошик",
                 cartTotal: "Разом:",
-                checkoutBtn: "Оформити замовлення →",
-                searchPlaceholder: "Що ви шукаєте?",
                 emptyCart: "Кошик порожній",
                 emptySearch: "Нічого не знайдено",
-                colorTitle: "Виберіть колір",
-                qtyTitle: "Кількість",
-                addCartBtn: "Додати в кошик",
                 alertOrder: "Замовлення успішно оформлено! Дякуємо за покупку в MILIPSTORE."
             },
             ru: {
@@ -1385,29 +1175,12 @@
                 keyboards: "Клавиатуры",
                 headsets: "Гарнитуры",
                 accessories: "Аксессуары",
-                explore: "Смотреть →",
                 catalogTitle: "Каталог",
                 catalogSubtitle: "Топовые девайсы в наличии",
-                bannerDesc: "Бескомпромиссная игровая мышь для киберспорта с передовым сенсором и рекордным временем автономной работы.",
-                bannerBtn: "Подробнее →",
-                footerDesc: "Gaming hardware for your ultimate setup. Премиальный выбор для энтузиастов.",
-                fcolCatalog: "Каталог",
-                fcolBuyers: "Покупателям",
-                fcolContacts: "Контакты",
-                delivery: "Доставка",
-                payment: "Оплата",
-                warranty: "Гарантия",
-                contacts: "Контакты",
-                city: "Киев, Украина",
                 cartTitle: "Корзина",
                 cartTotal: "Итого:",
-                checkoutBtn: "Оформить заказ →",
-                searchPlaceholder: "Что вы ищете?",
                 emptyCart: "Корзина пуста",
                 emptySearch: "Ничего не найдено",
-                colorTitle: "Выберите цвет",
-                qtyTitle: "Количество",
-                addCartBtn: "Добавить в корзину",
                 alertOrder: "Заказ успешно оформлен! Спасибо за покупку в MILIPSTORE."
             }
         };
@@ -1431,117 +1204,59 @@
             document.getElementById('tr-cat-keyboards').innerText = t.keyboards;
             document.getElementById('tr-cat-headsets').innerText = t.headsets;
             document.getElementById('tr-cat-accessories').innerText = t.accessories;
-            
-            for(let i=1; i<=4; i++) {
-                document.getElementById(`tr-explore-${i}`).innerHTML = `${t.explore}`;
-            }
-
             document.getElementById('tr-catalog-title').innerText = t.catalogTitle;
             document.getElementById('tr-catalog-subtitle').innerText = t.catalogSubtitle;
-            document.getElementById('tr-banner-desc').innerText = t.bannerDesc;
-            document.getElementById('tr-banner-btn').innerText = t.bannerBtn;
-            document.getElementById('tr-footer-desc').innerText = t.footerDesc;
-            document.getElementById('tr-fcol-catalog').innerText = t.fcolCatalog;
-            document.getElementById('tr-fcol-buyers').innerText = t.fcolBuyers;
-            document.getElementById('tr-fcol-contacts').innerText = t.fcolContacts;
-            document.getElementById('tr-fcat-mice').innerText = t.mice;
-            document.getElementById('tr-fcat-keyboards').innerText = t.keyboards;
-            document.getElementById('tr-fcat-headsets').innerText = t.headsets;
-            document.getElementById('tr-fcat-accessories').innerText = t.accessories;
-            document.getElementById('tr-buy-delivery').innerText = t.delivery;
-            document.getElementById('tr-buy-payment').innerText = t.payment;
-            document.getElementById('tr-buy-warranty').innerText = t.warranty;
-            document.getElementById('tr-buy-contacts').innerText = t.contacts;
-            document.getElementById('tr-city').innerText = t.city;
             document.getElementById('tr-cart-title').innerText = t.cartTitle;
             document.getElementById('tr-cart-total').innerText = t.cartTotal;
-            document.getElementById('tr-checkout-btn').innerText = t.checkoutBtn;
-            document.getElementById('search-input').placeholder = t.searchPlaceholder;
-            document.getElementById('tr-modal-color-title').innerText = t.colorTitle;
-            document.getElementById('tr-modal-qty-title').innerText = t.qtyTitle;
-            document.getElementById('tr-modal-add-btn').innerText = t.addCartBtn;
         }
 
-        // Data Store
         const products = [
             {
                 id: 'mchose-a7-v2',
                 brand: 'MCHOSE',
                 title: 'A7 V2 PRO',
-                category: 'Мыши',
+                category: 'Миші',
                 tag: 'BESTSELLER',
                 price: 4599,
-                desc: {
-                    ua: 'Wireless Gaming Mouse з безпрецедентною точністю та кіберспортивним сенсором.',
-                    ru: 'Wireless Gaming Mouse с беспрецедентной точностью и киберспортивным сенсором.'
-                },
+                desc: { ua: 'Wireless Gaming Mouse з безпрецедентною точністю.', ru: 'Wireless Gaming Mouse с беспрецедентной точностью.' },
                 img: 'https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?auto=format&fit=crop&w=800&q=80',
-                specs: [
-                    { label: 'SENSOR', value: 'PAW3395' },
-                    { label: 'WEIGHT', value: '54G' },
-                    { label: 'POLLING', value: '8000HZ' },
-                    { label: 'CONNECTION', value: '2.4G / BT / WIRED' }
-                ],
+                specs: [{ label: 'SENSOR', value: 'PAW3395' }, { label: 'WEIGHT', value: '54G' }],
                 colClass: 'col-7'
             },
             {
                 id: 'atk-xsoft',
                 brand: 'ATK',
                 title: 'XSOFT GAMING MAT',
-                category: 'Аксессуары',
+                category: 'Аксесуари',
                 tag: 'NEW',
                 price: 1499,
-                desc: {
-                    ua: 'Професійний ігровий килимок з ультрагладкою поверхнею для ідеального ковзання.',
-                    ru: 'Профессиональный игровой коврик с ультрагладкой поверхностью для идеального скольжения.'
-                },
+                desc: { ua: 'Професійний ігровий килимок.', ru: 'Профессиональный игровой коврик.' },
                 img: 'https://images.unsplash.com/photo-1618384887929-16ec33fab9ef?auto=format&fit=crop&w=800&q=80',
-                specs: [
-                    { label: 'SURFACE', value: 'SPEED / CONTROL' },
-                    { label: 'BASE', value: 'ANTI-SLIP RUBBER' },
-                    { label: 'THICKNESS', value: '4MM' },
-                    { label: 'EDGES', value: 'STITCHED' }
-                ],
+                specs: [{ label: 'SURFACE', value: 'SPEED' }, { label: 'THICKNESS', value: '4MM' }],
                 colClass: 'col-5'
             },
             {
                 id: 'aula-f75',
                 brand: 'AULA',
                 title: 'F75 MECHANICAL',
-                category: 'Клавиатуры',
+                category: 'Клавіатури',
                 tag: 'POPULAR',
                 price: 3899,
-                desc: {
-                    ua: 'Бездротова механічна клавіатура з тактильними світчами та хот-свапом.',
-                    ru: 'Беспроводная механическая клавиатура с тактильными свитчами и хот-свапом.'
-                },
+                desc: { ua: 'Бездротова механічна клавіатура.', ru: 'Беспроводная механическая клавиатура.' },
                 img: 'https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=800&q=80',
-                specs: [
-                    { label: 'SWITCHES', value: 'LEOBOG REAPER' },
-                    { label: 'LAYOUT', value: '75% COMPACT' },
-                    { label: 'BATTERY', value: '4000 MAH' },
-                    { label: 'GASKET', value: 'SILICONE MOUNT' }
-                ],
+                specs: [{ label: 'SWITCHES', value: 'REAPER' }, { label: 'LAYOUT', value: '75%' }],
                 colClass: 'col-5'
             },
             {
                 id: 'milip-h1',
                 brand: 'MILIPSTORE',
                 title: 'H1 PRO WIRELESS',
-                category: 'Гарнитуры',
+                category: 'Гарнітури',
                 tag: 'NEW',
                 price: 5299,
-                desc: {
-                    ua: 'Ігрова гарнітура студійної якості з просторовим звуком та активним шумозаглушенням.',
-                    ru: 'Игровая гарнитура студийного качества с пространственным звуком и активным шумоподавлением.'
-                },
+                desc: { ua: 'Ігрова гарнітура з просторовим звуком.', ru: 'Игровая гарнитура с пространственным звуком.' },
                 img: 'https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&w=800&q=80',
-                specs: [
-                    { label: 'DRIVERS', value: '50MM TITANIUM' },
-                    { label: 'MIC', value: 'DETACHABLE ENC' },
-                    { label: 'BATTERY', value: '60 HOURS' },
-                    { label: 'LATENCY', value: '< 20MS' }
-                ],
+                specs: [{ label: 'DRIVERS', value: '50MM' }, { label: 'BATTERY', value: '60H' }],
                 colClass: 'col-7'
             }
         ];
@@ -1550,22 +1265,19 @@
         let wishlist = JSON.parse(localStorage.getItem('milip_wishlist')) || [];
         let currentModalProduct = null;
         let modalQty = 1;
-        
         let currentCurrency = 'UAH';
+
         function formatPrice(price) {
-            if (currentCurrency === 'USD') {
-                return '$ ' + Math.round(price / 41);
-            }
+            if (currentCurrency === 'USD') return '$ ' + Math.round(price / 41);
             return '₴ ' + price.toLocaleString();
         }
+
         function toggleCurrency() {
             currentCurrency = currentCurrency === 'UAH' ? 'USD' : 'UAH';
             document.getElementById('currency-switch-btn').innerText = currentCurrency === 'UAH' ? 'UAH / USD' : 'USD / UAH';
             renderCatalog();
             renderCartItems();
-            if(currentModalProduct) {
-                document.getElementById('modal-price').innerText = formatPrice(currentModalProduct.price);
-            }
+            if (currentModalProduct) document.getElementById('modal-price').innerText = formatPrice(currentModalProduct.price);
         }
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -1573,51 +1285,28 @@
             updateBadges();
 
             window.addEventListener('scroll', () => {
-                const header = document.getElementById('site-header');
-                if (window.scrollY > 40) {
-                    header.classList.add('scrolled');
-                } else {
-                    header.classList.remove('scrolled');
-                }
+                document.getElementById('site-header').classList.toggle('scrolled', window.scrollY > 40);
             });
 
-            const tiltCard = document.getElementById('hero-tilt-card');
-            if (tiltCard) {
-                document.addEventListener('mousemove', (e) => {
-                    const xAxis = (window.innerWidth / 2 - e.pageX) / 40;
-                    const yAxis = (window.innerHeight / 2 - e.pageY) / 40;
-                    tiltCard.style.transform = `rotateY(${xAxis}deg) rotateX(${yAxis}deg)`;
-                });
-                document.addEventListener('mouseleave', () => {
-                    tiltCard.style.transform = `rotateY(0deg) rotateX(0deg)`;
-                });
-            }
-
-            const themeBtn = document.getElementById('theme-toggle-btn');
-            themeBtn.addEventListener('click', () => {
+            document.getElementById('theme-toggle-btn').addEventListener('click', () => {
                 const currentTheme = document.body.getAttribute('data-theme');
-                const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-                document.body.setAttribute('data-theme', newTheme);
+                document.body.setAttribute('data-theme', currentTheme === 'light' ? 'dark' : 'light');
             });
 
             document.getElementById('search-open-btn').addEventListener('click', () => toggleSearch(true));
-            document.getElementById('wishlist-open-btn').addEventListener('click', () => toggleWishlistDrawer());
+            document.getElementById('wishlist-open-btn').addEventListener('click', () => scrollToSection('catalog'));
             document.getElementById('cart-open-btn').addEventListener('click', () => toggleCart(true));
         });
 
         function scrollToSection(id) {
-            const el = document.getElementById(id);
-            if (el) {
-                el.scrollIntoView({ behavior: 'smooth' });
-            }
+            document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
         }
 
         function renderCatalog() {
             const container = document.getElementById('catalog-container');
-            const t = translations[currentLang];
             container.innerHTML = products.map((p, idx) => `
                 <div class="product-card ${p.colClass}" id="product-card-${p.id}" onclick="openProductModal(products[${idx}])">
-                    <span class="product-tag ${p.tag === 'NEW' || p.tag === 'BESTSELLER' ? 'new' : ''}">${p.tag}</span>
+                    <span class="product-tag new">${p.tag}</span>
                     <button class="wishlist-btn ${wishlist.includes(p.id) ? 'active' : ''}" onclick="event.stopPropagation(); toggleWishlist('${p.id}')">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="${wishlist.includes(p.id) ? '#FF3B30' : 'none'}" stroke="${wishlist.includes(p.id) ? '#FF3B30' : 'currentColor'}" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
                     </button>
@@ -1629,9 +1318,7 @@
                             <h4>${p.brand}</h4>
                             <h3>${p.title}</h3>
                         </div>
-                        <div class="product-price-group">
-                            <div class="product-price">${formatPrice(p.price)}</div>
-                        </div>
+                        <div class="product-price">${formatPrice(p.price)}</div>
                     </div>
                     <div class="product-action-hover">
                         <button class="btn-primary" style="padding: 10px 20px; font-size: 0.85rem;" onclick="event.stopPropagation(); addToCart('${p.id}')">${currentLang === 'ua' ? 'В кошик' : 'В корзину'}</button>
@@ -1644,60 +1331,43 @@
             const index = wishlist.indexOf(productId);
             const isAdding = index === -1;
             
-            if (isAdding) {
-                wishlist.push(productId);
-            } else {
-                wishlist.splice(index, 1);
-            }
+            if (isAdding) wishlist.push(productId);
+            else wishlist.splice(index, 1);
+
             localStorage.setItem('milip_wishlist', JSON.stringify(wishlist));
             renderCatalog();
             updateBadges();
 
-            // Запуск эффекта мерцания/пульсации красным для выбранной карточки
             if (isAdding) {
                 const cardEl = document.getElementById(`product-card-${productId}`);
                 if (cardEl) {
                     cardEl.classList.remove('liked-pulse');
-                    void cardEl.offsetWidth; // сброс анимации
+                    void cardEl.offsetWidth;
                     cardEl.classList.add('liked-pulse');
                 }
             }
-
-            if (currentModalProduct && currentModalProduct.id === productId) {
-                updateModalWishlistBtn();
-            }
+            if (currentModalProduct && currentModalProduct.id === productId) updateModalWishlistBtn();
         }
 
         function toggleCurrentWishlist() {
-            if (currentModalProduct) {
-                toggleWishlist(currentModalProduct.id);
-            }
+            if (currentModalProduct) toggleWishlist(currentModalProduct.id);
         }
 
         function updateModalWishlistBtn() {
             const btn = document.getElementById('modal-wishlist-btn');
             const isFav = wishlist.includes(currentModalProduct.id);
-            if (isFav) {
-                btn.classList.add('active');
-                btn.querySelector('svg').setAttribute('fill', '#FF3B30');
-                btn.querySelector('svg').setAttribute('stroke', '#FF3B30');
-            } else {
-                btn.classList.remove('active');
-                btn.querySelector('svg').setAttribute('fill', 'none');
-                btn.querySelector('svg').setAttribute('stroke', 'currentColor');
-            }
+            btn.classList.toggle('active', isFav);
+            btn.querySelector('svg').setAttribute('fill', isFav ? '#FF3B30' : 'none');
+            btn.querySelector('svg').setAttribute('stroke', isFav ? '#FF3B30' : 'currentColor');
         }
 
         function addToCart(productId, qty = 1) {
             const product = products.find(p => p.id === productId);
             if (!product) return;
+            const existing = cart.find(item => item.id === productId);
+            if (existing) existing.qty += qty;
+            else cart.push({ ...product, qty });
 
-            const existingItem = cart.find(item => item.id === productId);
-            if (existingItem) {
-                existingItem.qty += qty;
-            } else {
-                cart.push({ ...product, qty });
-            }
             localStorage.setItem('milip_cart', JSON.stringify(cart));
             updateBadges();
             renderCartItems();
@@ -1708,9 +1378,7 @@
             const item = cart.find(i => i.id === productId);
             if (!item) return;
             item.qty += change;
-            if (item.qty <= 0) {
-                cart = cart.filter(i => i.id !== productId);
-            }
+            if (item.qty <= 0) cart = cart.filter(i => i.id !== productId);
             localStorage.setItem('milip_cart', JSON.stringify(cart));
             updateBadges();
             renderCartItems();
@@ -1724,13 +1392,12 @@
                 document.getElementById('cart-total-price').innerText = formatPrice(0);
                 return;
             }
-
             container.innerHTML = cart.map(item => `
                 <div class="cart-item">
                     <img src="${item.img}" alt="${item.title}">
-                    <div class="cart-item-details">
-                        <h4>${item.brand} ${item.title}</h4>
-                        <p>${formatPrice(item.price)}</p>
+                    <div style="flex-grow: 1;">
+                        <h4 style="font-size: 0.95rem;">${item.brand} ${item.title}</h4>
+                        <p style="font-family: 'JetBrains Mono', monospace; font-size: 0.9rem;">${formatPrice(item.price)}</p>
                         <div class="quantity-controls">
                             <button onclick="updateCartQty('${item.id}', -1)">−</button>
                             <span>${item.qty}</span>
@@ -1739,7 +1406,6 @@
                     </div>
                 </div>
             `).join('');
-
             const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
             document.getElementById('cart-total-price').innerText = formatPrice(total);
         }
@@ -1750,33 +1416,15 @@
         }
 
         function toggleCart(open) {
-            const drawer = document.getElementById('cart-drawer');
-            const backdrop = document.getElementById('backdrop');
-            if (open) {
-                renderCartItems();
-                drawer.classList.add('active');
-                backdrop.classList.add('active');
-            } else {
-                drawer.classList.remove('active');
-                backdrop.classList.remove('active');
-            }
-        }
-
-        function toggleWishlistDrawer() {
-            scrollToSection('catalog');
+            document.getElementById('cart-drawer').classList.toggle('active', open);
+            document.getElementById('backdrop').classList.toggle('active', open);
+            if (open) renderCartItems();
         }
 
         function toggleSearch(open) {
-            const modal = document.getElementById('search-modal');
-            const backdrop = document.getElementById('backdrop');
-            if (open) {
-                modal.classList.add('active');
-                backdrop.classList.add('active');
-                document.getElementById('search-input').focus();
-            } else {
-                modal.classList.remove('active');
-                backdrop.classList.remove('active');
-            }
+            document.getElementById('search-modal').classList.toggle('active', open);
+            document.getElementById('backdrop').classList.toggle('active', open);
+            if (open) document.getElementById('search-input').focus();
         }
 
         function closeAllDrawers() {
@@ -1786,32 +1434,19 @@
         }
 
         function handleSearch(query) {
-            const resultsContainer = document.getElementById('search-results');
+            const container = document.getElementById('search-results');
             const t = translations[currentLang];
-            if (!query.trim()) {
-                resultsContainer.innerHTML = '';
-                return;
-            }
-
-            const filtered = products.filter(p => 
-                p.title.toLowerCase().includes(query.toLowerCase()) || 
-                p.brand.toLowerCase().includes(query.toLowerCase()) ||
-                p.category.toLowerCase().includes(query.toLowerCase())
-            );
-
+            if (!query.trim()) { container.innerHTML = ''; return; }
+            const filtered = products.filter(p => p.title.toLowerCase().includes(query.toLowerCase()) || p.brand.toLowerCase().includes(query.toLowerCase()));
             if (filtered.length === 0) {
-                resultsContainer.innerHTML = `<p style="color: var(--text-secondary); text-align: center; padding: 20px;">${t.emptySearch}</p>`;
+                container.innerHTML = `<p style="color: var(--text-secondary); text-align: center; padding: 20px;">${t.emptySearch}</p>`;
                 return;
             }
-
-            resultsContainer.innerHTML = filtered.map(p => `
+            container.innerHTML = filtered.map(p => `
                 <a class="search-result-item" onclick="toggleSearch(false); openProductModal(products.find(x => x.id === '${p.id}'))">
                     <div style="display: flex; align-items: center; gap: 16px;">
                         <img src="${p.img}" style="width: 50px; height: 50px; object-fit: contain;">
-                        <div>
-                            <strong>${p.brand} ${p.title}</strong>
-                            <p style="font-size: 0.85rem; color: var(--text-secondary);">${p.category}</p>
-                        </div>
+                        <div><strong>${p.brand} ${p.title}</strong></div>
                     </div>
                     <span style="font-family: 'JetBrains Mono', monospace; font-weight: 700;">${formatPrice(p.price)}</span>
                 </a>
@@ -1828,16 +1463,10 @@
             document.getElementById('modal-desc').innerText = product.desc[currentLang];
             document.getElementById('modal-price').innerText = formatPrice(product.price);
             document.getElementById('modal-qty').innerText = modalQty;
-
             document.getElementById('modal-specs').innerHTML = product.specs.map(s => `
-                <div class="spec-box">
-                    <span>${s.label}</span>
-                    <strong>${s.value}</strong>
-                </div>
+                <div class="spec-box"><span>${s.label}</span><strong>${s.value}</strong></div>
             `).join('');
-
             updateModalWishlistBtn();
-
             document.getElementById('product-modal').classList.add('active');
             document.getElementById('backdrop').classList.add('active');
         }
@@ -1848,8 +1477,7 @@
         }
 
         function adjustModalQty(change) {
-            modalQty += change;
-            if (modalQty < 1) modalQty = 1;
+            modalQty = Math.max(1, modalQty + change);
             document.getElementById('modal-qty').innerText = modalQty;
         }
 
@@ -1861,8 +1489,7 @@
         }
 
         function checkout() {
-            const t = translations[currentLang];
-            alert(t.alertOrder);
+            alert(translations[currentLang].alertOrder);
             cart = [];
             localStorage.setItem('milip_cart', JSON.stringify(cart));
             updateBadges();
@@ -1870,11 +1497,7 @@
             toggleCart(false);
         }
 
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                closeAllDrawers();
-            }
-        });
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeAllDrawers(); });
     </script>
 </body>
 </html>
