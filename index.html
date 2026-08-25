@@ -1,36 +1,4 @@
-```python
-# Let's inspect the user's request and make the required changes to the HTML file.
-# The user wants the second photo 1:1 format (where product category images or product card images are displayed) 
-# to fill the entire block completely ("full-формат"), without extra white space/padding around it ("чтобы она была полностью в табличке, то есть полностью чтобы была в блоке, чтобы не было лишнего пространства, лишнего пространства какого-то. Вот там есть белая штучка, а потом ещё идёт белая, уже ту не надо трогать. То есть первая, там где вставляется фото, чтобы она была полностью закрытая, понимаешь? Сделай чуть-чуть чуть-чуть больше типа фотку, чуть больше карточку, чтобы была полностью закрытая, понимаешь? Что-то такое, на full-формат. Где можно разместить фото, был full-формат фотки, понимаешь? И просто не добавляй ничего, значит, на задний фон до фотки.")
-
-# Looking at the code:
-# .product-img-wrap { width: 100%; aspect-ratio: 1 / 1; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; margin: 16px 0; background: var(--bg-primary); border-radius: var(--radius-md); padding: 12px; }
-# .product-img-wrap img { width: 100%; height: 100%; object-fit: contain; display: block; border-radius: 8px; transition: transform 0.4s ease; }
-
-# Also modal main image wrap:
-# .modal-main-img-wrap { width: 100%; aspect-ratio: 1 / 1; background: var(--bg-primary); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; overflow: hidden; box-sizing: border-box; padding: 12px; }
-# .modal-main-img { width: 100%; height: 100%; object-fit: contain; display: block; border-radius: 8px; }
-
-# Also hero card image wrap:
-# .hero-card-img-wrap { width: 100%; aspect-ratio: 1 / 1; border-radius: var(--radius-md); overflow: hidden; background: var(--bg-primary); display: flex; align-items: center; justify-content: center; }
-
-# To make the images "full-формат" without extra padding/background space inside the wrapper (so `object-fit: cover` or removing padding and using `object-fit: cover` so it fills the block completely):
-# "чтобы она была полностью в табличке, то есть полностью чтобы была в блоке, чтобы не было лишнего пространства... Сделай чуть-чуть чуть-чуть больше типа фотку, чуть больше карточку, чтобы была полностью закрытая, понимаешь? Что-то такое, на full-формат. Где можно разместить фото, чтобы был full-формат фотки, понимаешь? И просто не добавляй ничего, значит, на задний фон до фотки."
-
-# Let's update `object-fit: contain` to `object-fit: cover` and remove `padding: 12px` from `.product-img-wrap` and `.modal-main-img-wrap`, or adjust them so the image fills the block completely without extra padding/background ("чтобы не было лишнего пространства", "на задний фон до фотки").
-print("Ready to update HTML")
-
-
-```
-
-```text
-Ready to update HTML
-
-
-```
-
-```python
-html_content = """<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
@@ -40,7 +8,7 @@ html_content = """<!DOCTYPE html>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg-primary: #F8F9FA;
@@ -94,6 +62,7 @@ html_content = """<!DOCTYPE html>
 
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
+            font-weight: 650;
             background-color: var(--bg-primary);
             color: var(--text-primary);
             line-height: 1.5;
@@ -152,8 +121,8 @@ html_content = """<!DOCTYPE html>
         }
 
         .logo {
-            font-size: 1.15rem;
-            font-weight: 800;
+            font-size: 1.25rem;
+            font-weight: 900;
             letter-spacing: -0.03em;
             color: var(--text-primary);
             cursor: pointer;
@@ -200,7 +169,7 @@ html_content = """<!DOCTYPE html>
             background: var(--accent);
             color: white;
             font-size: 0.6rem;
-            font-weight: 700;
+            font-weight: 800;
             width: 16px;
             height: 16px;
             border-radius: 50%;
@@ -215,24 +184,24 @@ html_content = """<!DOCTYPE html>
             padding: 6px 10px;
             border-radius: 20px;
             font-size: 0.75rem;
-            font-weight: 600;
+            font-weight: 800;
             color: var(--text-primary);
             cursor: pointer;
             transition: var(--transition);
         }
 
-        /* TICKER */
+        /* TICKER (БЕГУЩАЯ СТРОКА С БЕСКОНЕЧНЫМ ВРАЩЕНИЕМ ЛОГОТИПА) */
         .ticker-wrap {
             background: var(--accent);
             color: white;
-            padding: 8px 0;
+            padding: 10px 0;
             overflow: hidden;
             white-space: nowrap;
             position: relative;
             top: 70px;
             z-index: 999;
-            font-size: 0.75rem;
-            font-weight: 700;
+            font-size: 0.8rem;
+            font-weight: 800;
             letter-spacing: 0.05em;
             text-transform: uppercase;
         }
@@ -245,15 +214,24 @@ html_content = """<!DOCTYPE html>
         .ticker-move span {
             display: inline-flex;
             align-items: center;
-            gap: 10px;
-            margin-right: 30px;
+            gap: 12px;
+            margin-right: 40px;
+        }
+
+        /* Анимация бесконечного вращения логотипа вокруг себя в строке */
+        @keyframes spinLogo {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
         .ticker-logo {
-            height: 20px;
-            width: auto;
+            height: 22px;
+            width: 22px;
             object-fit: contain;
-            border-radius: 4px;
+            border-radius: 50%;
+            display: inline-block;
+            vertical-align: middle;
+            animation: spinLogo 4s linear infinite; /* Бесконечно крутится вокруг себя */
         }
 
         @keyframes ticker {
@@ -303,7 +281,7 @@ html_content = """<!DOCTYPE html>
             padding: 6px 12px;
             border-radius: 30px;
             font-size: 0.75rem;
-            font-weight: 700;
+            font-weight: 800;
             letter-spacing: 0.05em;
             text-transform: uppercase;
             width: fit-content;
@@ -313,7 +291,7 @@ html_content = """<!DOCTYPE html>
 
         .hero h1 {
             font-size: clamp(2.2rem, 7vw, 3.8rem);
-            font-weight: 800;
+            font-weight: 900;
             line-height: 1.08;
             letter-spacing: -0.03em;
             opacity: 0;
@@ -321,7 +299,8 @@ html_content = """<!DOCTYPE html>
         }
 
         .hero p {
-            font-size: 1rem;
+            font-size: 1.05rem;
+            font-weight: 600;
             color: var(--text-secondary);
             max-width: 480px;
             line-height: 1.5;
@@ -344,8 +323,8 @@ html_content = """<!DOCTYPE html>
             border: none;
             padding: 14px 28px;
             border-radius: var(--radius-sm);
-            font-weight: 600;
-            font-size: 0.9rem;
+            font-weight: 800;
+            font-size: 0.95rem;
             cursor: pointer;
             display: inline-flex;
             align-items: center;
@@ -393,7 +372,7 @@ html_content = """<!DOCTYPE html>
 
         .hero-card-img-wrap {
             width: 100%;
-            aspect-ratio: 1 / 1; /* Жорсткий формат 1:1 */
+            aspect-ratio: 1 / 1;
             border-radius: var(--radius-md);
             overflow: hidden;
             background: transparent;
@@ -405,7 +384,7 @@ html_content = """<!DOCTYPE html>
         .hero-card-3d img {
             width: 100%;
             height: 100%;
-            object-fit: cover; /* Full-формат без зайвого фону */
+            object-fit: cover;
             display: block;
             border-radius: var(--radius-md);
             transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
@@ -432,13 +411,14 @@ html_content = """<!DOCTYPE html>
 
         .section-title {
             font-size: clamp(1.6rem, 4vw, 2.4rem);
-            font-weight: 800;
+            font-weight: 900;
             letter-spacing: -0.03em;
         }
 
         .section-subtitle {
             color: var(--text-secondary);
-            font-size: 0.9rem;
+            font-size: 0.95rem;
+            font-weight: 650;
         }
 
         .catalog-filters {
@@ -455,7 +435,7 @@ html_content = """<!DOCTYPE html>
             padding: 8px 16px;
             border-radius: 30px;
             font-size: 0.85rem;
-            font-weight: 600;
+            font-weight: 800;
             color: var(--text-secondary);
             cursor: pointer;
             white-space: nowrap;
@@ -475,15 +455,11 @@ html_content = """<!DOCTYPE html>
         }
 
         @media(min-width: 768px) {
-            .catalog-grid { 
-                grid-template-columns: repeat(2, 1fr); 
-            }
+            .catalog-grid { grid-template-columns: repeat(2, 1fr); }
         }
 
         @media(min-width: 1100px) {
-            .catalog-grid { 
-                grid-template-columns: repeat(3, 1fr); 
-            }
+            .catalog-grid { grid-template-columns: repeat(3, 1fr); }
         }
 
         .product-card {
@@ -518,8 +494,8 @@ html_content = """<!DOCTYPE html>
         .product-tag {
             background: var(--bg-tertiary);
             color: var(--text-primary);
-            font-size: 0.65rem;
-            font-weight: 700;
+            font-size: 0.7rem;
+            font-weight: 900;
             padding: 4px 10px;
             border-radius: 20px;
             width: fit-content;
@@ -548,14 +524,14 @@ html_content = """<!DOCTYPE html>
 
         .product-img-wrap {
             width: 100%;
-            aspect-ratio: 1 / 1; /* Жорсткий формат 1:1 */
+            aspect-ratio: 1 / 1;
             display: flex;
             align-items: center;
             justify-content: center;
             overflow: hidden;
             position: relative;
             margin: 16px 0;
-            background: transparent; /* Без зайвого фону та відступів */
+            background: transparent;
             border-radius: var(--radius-md);
             padding: 0;
         }
@@ -563,7 +539,7 @@ html_content = """<!DOCTYPE html>
         .product-img-wrap img {
             width: 100%;
             height: 100%;
-            object-fit: cover; /* Full-формат без лишнього простору та рамок */
+            object-fit: cover;
             display: block;
             border-radius: var(--radius-md);
             transition: transform 0.4s ease;
@@ -599,9 +575,9 @@ html_content = """<!DOCTYPE html>
             padding-top: 14px;
         }
 
-        .product-title-group h4 { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; }
-        .product-title-group h3 { font-size: 1.15rem; font-weight: 700; margin-top: 2px; }
-        .product-price { font-size: 1.2rem; font-weight: 800; font-family: 'JetBrains Mono', monospace; }
+        .product-title-group h4 { font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; font-weight: 800; }
+        .product-title-group h3 { font-size: 1.2rem; font-weight: 900; margin-top: 2px; }
+        .product-price { font-size: 1.25rem; font-weight: 900; font-family: 'JetBrains Mono', monospace; }
 
         .product-action-hover {
             margin-top: 12px;
@@ -631,18 +607,18 @@ html_content = """<!DOCTYPE html>
         }
 
         .footer-col h4 {
-            font-size: 0.85rem;
+            font-size: 0.9rem;
             text-transform: uppercase;
             letter-spacing: 0.05em;
             color: var(--text-muted);
             margin-bottom: 16px;
-            font-weight: 700;
+            font-weight: 900;
         }
 
         .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
-        .footer-col a { text-decoration: none; color: var(--text-secondary); font-weight: 500; font-size: 0.9rem; transition: var(--transition); cursor: pointer; }
+        .footer-col a { text-decoration: none; color: var(--text-secondary); font-weight: 700; font-size: 0.95rem; transition: var(--transition); cursor: pointer; }
         .footer-col a:hover { color: var(--text-primary); }
-        .footer-bottom { border-top: 1px solid var(--border-light); padding-top: 20px; display: flex; flex-direction: column; gap: 10px; align-items: center; text-align: center; color: var(--text-muted); font-size: 0.8rem; }
+        .footer-bottom { border-top: 1px solid var(--border-light); padding-top: 20px; display: flex; flex-direction: column; gap: 10px; align-items: center; text-align: center; color: var(--text-muted); font-size: 0.85rem; font-weight: 700; }
         @media(min-width: 768px) { .footer-bottom { flex-direction: row; justify-content: space-between; } }
 
         /* OVERLAYS & MODALS */
@@ -673,7 +649,7 @@ html_content = """<!DOCTYPE html>
 
         .drawer.active { right: 0; }
         .drawer-header { padding: 20px; border-bottom: 1px solid var(--border-light); display: flex; justify-content: space-between; align-items: center; }
-        .close-drawer { background: transparent; border: none; font-size: 1.1rem; cursor: pointer; color: var(--text-primary); }
+        .close-drawer { background: transparent; border: none; font-size: 1.2rem; font-weight: 900; cursor: pointer; color: var(--text-primary); }
         .drawer-body { padding: 20px; flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
         
         .cart-item {
@@ -699,10 +675,10 @@ html_content = """<!DOCTYPE html>
             width: fit-content;
         }
 
-        .quantity-controls button { background: transparent; border: none; cursor: pointer; font-weight: 700; color: var(--text-primary); }
+        .quantity-controls button { background: transparent; border: none; cursor: pointer; font-weight: 900; color: var(--text-primary); }
 
         .drawer-footer { padding: 20px; border-top: 1px solid var(--border-light); background: var(--bg-primary); }
-        .cart-total { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; font-size: 1.1rem; font-weight: 800; }
+        .cart-total { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; font-size: 1.15rem; font-weight: 900; }
 
         .search-modal {
             position: fixed;
@@ -717,7 +693,7 @@ html_content = """<!DOCTYPE html>
         .search-modal.active { top: 0; }
         .search-container { max-width: 800px; margin: 0 auto; }
         .search-input-wrap { display: flex; align-items: center; border-bottom: 2px solid var(--text-primary); padding-bottom: 12px; gap: 15px; }
-        .search-input-wrap input { width: 100%; background: transparent; border: none; font-size: 1.4rem; font-weight: 700; color: var(--text-primary); outline: none; }
+        .search-input-wrap input { width: 100%; background: transparent; border: none; font-size: 1.4rem; font-weight: 800; color: var(--text-primary); outline: none; }
         .search-results { margin-top: 20px; max-height: 350px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
         .search-result-item { display: flex; align-items: center; justify-content: space-between; padding: 12px; background: var(--bg-primary); border-radius: var(--radius-sm); text-decoration: none; color: var(--text-primary); cursor: pointer; }
 
@@ -784,7 +760,7 @@ html_content = """<!DOCTYPE html>
         
         .modal-main-img-wrap {
             width: 100%;
-            aspect-ratio: 1 / 1; /* Жорсткий формат 1:1 */
+            aspect-ratio: 1 / 1;
             background: transparent;
             border-radius: var(--radius-md);
             display: flex;
@@ -797,7 +773,7 @@ html_content = """<!DOCTYPE html>
         .modal-main-img { 
             width: 100%; 
             height: 100%; 
-            object-fit: cover; /* Full-формат без зайвого фону */
+            object-fit: cover;
             display: block;
             border-radius: 8px;
         }
@@ -848,7 +824,7 @@ html_content = """<!DOCTYPE html>
         }
 
         .option-group label {
-            font-weight: 700;
+            font-weight: 900;
             font-size: 0.75rem;
             color: var(--text-muted);
             text-transform: uppercase;
@@ -877,8 +853,34 @@ html_content = """<!DOCTYPE html>
         }
 
         .color-circle-big.white { background-color: #FFFFFF; }
-        .color-circle-big.black { background-color: #1a1a1a; }
-        .color-circle-big.pink { background-color: #ffb6c1; }
+        
+        /* Черный цвет зачеркнут красной линией */
+        .color-circle-big.black { 
+            background-color: #1a1a1a; 
+            position: relative;
+        }
+        .color-circle-big.black::after {
+            content: '';
+            position: absolute;
+            top: 50%; left: -2px; right: -2px;
+            height: 2px;
+            background-color: #ff3b30;
+            transform: translateY(-50%) rotate(45deg);
+        }
+
+        /* Насыщенный розовый цвет (#ff2a85) тоже зачеркнут красной линией */
+        .color-circle-big.pink { 
+            background-color: #ff2a85; 
+            position: relative;
+        }
+        .color-circle-big.pink::after {
+            content: '';
+            position: absolute;
+            top: 50%; left: -2px; right: -2px;
+            height: 2px;
+            background-color: #ff3b30;
+            transform: translateY(-50%) rotate(45deg);
+        }
         
         .color-circle-big.active {
             box-shadow: 0 0 0 3px var(--accent);
@@ -887,8 +889,8 @@ html_content = """<!DOCTYPE html>
 
         .specs-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 15px 0; }
         .spec-box { background: var(--bg-primary); padding: 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-light); }
-        .spec-box span { display: block; font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; }
-        .spec-box strong { font-size: 0.9rem; font-family: 'JetBrains Mono', monospace; }
+        .spec-box span { display: block; font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; font-weight: 900; }
+        .spec-box strong { font-size: 0.95rem; font-weight: 800; font-family: 'JetBrains Mono', monospace; }
     </style>
 </head>
 <body data-theme="light">
@@ -917,13 +919,13 @@ html_content = """<!DOCTYPE html>
         </div>
     </header>
 
-    <!-- TICKER -->
+    <!-- TICKER С БЕСКОНЕЧНЫМ ВРАЩЕНИЕМ ЛОГОТИПА ПО СЕРЕДИНЕ -->
     <div class="ticker-wrap">
         <div class="ticker-move">
-            <span><img src="logo-milipstore_4.png" alt="MilipStore" class="ticker-logo"> Безкоштовна доставка від 3000 грн</span>
-            <span><img src="logo-milipstore_4.png" alt="MilipStore" class="ticker-logo"> Нова категорія товарів вже доступна</span>
-            <span><img src="logo-milipstore_4.png" alt="MilipStore" class="ticker-logo"> Офіційне преміальне ігрове залізо</span>
-            <span><img src="logo-milipstore_4.png" alt="MilipStore" class="ticker-logo"> Безкоштовна доставка від 3000 грн</span>
+            <span><img src="logo-milipstore.png" alt="MilipStore" class="ticker-logo"> Безкоштовна доставка від 3000 грн</span>
+            <span><img src="logo-milipstore.png" alt="MilipStore" class="ticker-logo"> Нова категорія товарів вже доступна</span>
+            <span><img src="logo-milipstore.png" alt="MilipStore" class="ticker-logo"> Офіційне преміальне ігрове залізо</span>
+            <span><img src="logo-milipstore.png" alt="MilipStore" class="ticker-logo"> Безкоштовна доставка від 3000 грн</span>
         </div>
     </div>
 
@@ -941,7 +943,7 @@ html_content = """<!DOCTYPE html>
             <div class="hero-card-3d" id="hero-card" onclick="openHeroProductModal()">
                 <span class="product-tag new" id="hero-tag">HOT NOVELTY</span>
                 <div class="hero-card-img-wrap">
-                    <img id="hero-img" src="attack-shark-r5-ultra-colors-price_2.jpg" alt="Hero Product">
+                    <img id="hero-img" src="attack-shark-r5-ultra-colors-price.jpg" alt="Hero Product">
                 </div>
             </div>
         </div>
@@ -970,7 +972,7 @@ html_content = """<!DOCTYPE html>
         <div class="footer-grid">
             <div class="footer-col">
                 <a class="logo" style="margin-bottom: 15px;">MILIP<span>STORE</span></a>
-                <p style="color: var(--text-secondary); max-width: 300px; font-size: 0.9rem;">Gaming hardware for your ultimate setup. Преміальний вибір для ентузіастів.</p>
+                <p style="color: var(--text-secondary); max-width: 300px; font-size: 0.95rem; font-weight: 650;">Gaming hardware for your ultimate setup. Преміальний вибір для ентузіастів.</p>
             </div>
             <div class="footer-col">
                 <h4>Каталог</h4>
@@ -1009,7 +1011,7 @@ html_content = """<!DOCTYPE html>
     <!-- CART DRAWER -->
     <div class="drawer" id="cart-drawer">
         <div class="drawer-header">
-            <h3 id="tr-cart-title">Кошик</h3>
+            <h3 id="tr-cart-title" style="font-weight: 900;">Кошик</h3>
             <button class="close-drawer" onclick="toggleCart(false)">✕</button>
         </div>
         <div class="drawer-body" id="cart-items-container"></div>
@@ -1046,10 +1048,10 @@ html_content = """<!DOCTYPE html>
             </div>
             <div class="modal-details">
                 <span class="product-tag new" id="modal-tag">NEW</span>
-                <h4 id="modal-brand" style="color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; font-weight: 700; margin-top: 6px;">BRAND</h4>
-                <h2 id="modal-title" style="font-size: 1.5rem; font-weight: 800; margin: 6px 0;"></h2>
-                <p id="modal-desc" style="color: var(--text-secondary); margin: 8px 0; font-size: 0.85rem;"></p>
-                <div class="product-price" id="modal-price" style="font-size: 1.3rem; color: var(--accent); margin: 10px 0;">₴ 0</div>
+                <h4 id="modal-brand" style="color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; font-weight: 900; margin-top: 6px;">BRAND</h4>
+                <h2 id="modal-title" style="font-size: 1.5rem; font-weight: 900; margin: 6px 0;"></h2>
+                <p id="modal-desc" style="color: var(--text-secondary); margin: 8px 0; font-size: 0.9rem; font-weight: 650;"></p>
+                <div class="product-price" id="modal-price" style="font-size: 1.35rem; color: var(--accent); margin: 10px 0;">₴ 0</div>
 
                 <div class="modal-options-row">
                     <div class="option-group">
@@ -1061,7 +1063,7 @@ html_content = """<!DOCTYPE html>
                         <label>Кількість</label>
                         <div class="quantity-controls">
                             <button onclick="adjustModalQty(-1)">−</button>
-                            <span id="modal-qty" style="font-weight: 700; padding: 0 8px;">1</span>
+                            <span id="modal-qty" style="font-weight: 900; padding: 0 8px;">1</span>
                             <button onclick="adjustModalQty(1)">+</button>
                         </div>
                     </div>
@@ -1295,7 +1297,7 @@ html_content = """<!DOCTYPE html>
                 : products.filter(p => p.category === currentCategoryFilter);
 
             if (filteredProducts.length === 0) {
-                container.innerHTML = `<p style="color: var(--text-secondary); grid-column: span 12; text-align: center; padding: 30px;">Товарів у цій категорії поки немає</p>`;
+                container.innerHTML = `<p style="color: var(--text-secondary); grid-column: span 12; text-align: center; padding: 30px; font-weight: 700;">Товарів у цій категорії поки немає</p>`;
                 return;
             }
 
@@ -1323,7 +1325,7 @@ html_content = """<!DOCTYPE html>
                             <div class="product-price">${formatPrice(p.price)}</div>
                         </div>
                         <div class="product-action-hover">
-                            <button class="btn-primary" style="width: 100%; justify-content: center; padding: 10px; font-size: 0.85rem;" onclick="event.stopPropagation(); addDirectToCart('${p.id}')">${currentLang === 'ua' ? 'В кошик' : 'В корзину'}</button>
+                            <button class="btn-primary" style="width: 100%; justify-content: center; padding: 10px; font-size: 0.9rem;" onclick="event.stopPropagation(); addDirectToCart('${p.id}')">${currentLang === 'ua' ? 'В кошик' : 'В корзину'}</button>
                         </div>
                     </div>
                 `;
@@ -1430,7 +1432,7 @@ html_content = """<!DOCTYPE html>
             const container = document.getElementById('cart-items-container');
             const t = translations[currentLang];
             if (cart.length === 0) {
-                container.innerHTML = `<p style="color: var(--text-secondary); text-align: center; margin-top: 30px;">${t.emptyCart}</p>`;
+                container.innerHTML = `<p style="color: var(--text-secondary); text-align: center; margin-top: 30px; font-weight: 700;">${t.emptyCart}</p>`;
                 document.getElementById('cart-total-price').innerText = formatPrice(0);
                 if (tg && tg.MainButton) tg.MainButton.hide();
                 return;
@@ -1439,12 +1441,12 @@ html_content = """<!DOCTYPE html>
                 <div class="cart-item">
                     <img src="${item.img}" alt="${item.title}">
                     <div style="flex-grow: 1;">
-                        <h4 style="font-size: 0.9rem;">${item.brand} ${item.title}</h4>
-                        <p style="font-size: 0.75rem; color: var(--text-secondary);">Колір: <strong>${item.color}</strong></p>
-                        <p style="font-family: 'JetBrains Mono', monospace; font-size: 0.85rem;">${formatPrice(item.price)}</p>
+                        <h4 style="font-size: 0.95rem; font-weight: 800;">${item.brand} ${item.title}</h4>
+                        <p style="font-size: 0.8rem; color: var(--text-secondary); font-weight: 700;">Колір: <strong>${item.color}</strong></p>
+                        <p style="font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; font-weight: 800;">${formatPrice(item.price)}</p>
                         <div class="quantity-controls" style="margin-top: 4px;">
                             <button onclick="updateCartQty('${item.id}', '${item.color}', -1)">−</button>
-                            <span>${item.qty}</span>
+                            <span style="font-weight: 900;">${item.qty}</span>
                             <button onclick="updateCartQty('${item.id}', '${item.color}', 1)">+</button>
                         </div>
                     </div>
@@ -1496,16 +1498,16 @@ html_content = """<!DOCTYPE html>
             if (!query.trim()) { container.innerHTML = ''; return; }
             const filtered = products.filter(p => p.title.toLowerCase().includes(query.toLowerCase()) || p.brand.toLowerCase().includes(query.toLowerCase()));
             if (filtered.length === 0) {
-                container.innerHTML = `<p style="color: var(--text-secondary); text-align: center; padding: 15px;">${t.emptySearch}</p>`;
+                container.innerHTML = `<p style="color: var(--text-secondary); text-align: center; padding: 15px; font-weight: 700;">${t.emptySearch}</p>`;
                 return;
             }
             container.innerHTML = filtered.map(p => `
                 <div class="search-result-item" onclick="toggleSearch(false); openProductModal(products.find(x => x.id === '${p.id}'))">
                     <div style="display: flex; align-items: center; gap: 12px;">
                         <img src="${p.img}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 6px; padding: 0;">
-                        <div><strong style="font-size: 0.9rem;">${p.brand} ${p.title}</strong></div>
+                        <div><strong style="font-size: 0.95rem; font-weight: 800;">${p.brand} ${p.title}</strong></div>
                     </div>
-                    <span style="font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 0.9rem;">${formatPrice(p.price)}</span>
+                    <span style="font-family: 'JetBrains Mono', monospace; font-weight: 900; font-size: 0.95rem;">${formatPrice(p.price)}</span>
                 </div>
             `).join('');
         }
