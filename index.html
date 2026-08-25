@@ -32,7 +32,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Підключення окремого CSS файлу -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="font-sans antialiased selection:bg-skybrand-blue selection:text-skybrand-bg">
@@ -55,7 +54,6 @@
     <header id="header" class="fixed top-0 left-0 right-0 z-40 transition-all duration-300 glass-sky border-b border-skybrand-border/40">
         <div class="max-w-7xl mx-auto px-6 h-20 grid grid-cols-3 items-center">
             
-            <!-- Ліва частина: Навігація -->
             <nav class="hidden md:flex items-center space-x-6">
                 <a href="#catalog" class="text-xs uppercase tracking-wider text-skybrand-light/70 hover:text-skybrand-blue transition-colors">Каталог</a>
                 <a href="#catalog" onclick="filterCategory('mice')" class="text-xs uppercase tracking-wider text-skybrand-light/70 hover:text-skybrand-blue transition-colors">Миші</a>
@@ -63,7 +61,6 @@
             </nav>
             <div class="md:hidden"></div>
 
-            <!-- Центральна частина: Плаваючий логотип -->
             <div class="flex justify-center">
                 <a href="#top" class="group flex items-center justify-center focus:outline-none animate-float">
                     <div class="w-10 h-10 rounded-full bg-skybrand-surface border border-skybrand-border flex items-center justify-center shadow-[0_0_20px_rgba(56,189,248,0.2)] group-hover:scale-110 transition-transform duration-300">
@@ -75,7 +72,6 @@
                 </a>
             </div>
 
-            <!-- Права частина: Кнопки кошика та обраного -->
             <div class="flex items-center justify-end space-x-4">
                 <button onclick="openWishlistDrawer()" class="relative p-2.5 rounded-xl bg-skybrand-surface border border-skybrand-border text-skybrand-light/80 hover:text-white hover:border-skybrand-blue transition-all focus:outline-none" aria-label="Обране">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
@@ -108,11 +104,11 @@
                 </div>
                 
                 <h1 class="text-5xl lg:text-7xl font-light tracking-tight text-white leading-[1.08]">
-                    AORUS SHARK <br><span class="font-bold text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-sky-200">R5 ULTRA</span>
+                    ATTACK SHARK <br><span class="font-bold text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-sky-200">R5 ULTRA</span>
                 </h1>
 
                 <p class="text-skybrand-light/70 text-sm lg:text-base max-w-md font-light leading-relaxed">
-                    Флагманська бездротова миша в чистому білому кольорі. Створена для максимальної швидкості, має революційний сенсор та небесну ергономіку.
+                    Ультралегка ігрова миша вагою всього 39г. Оснащена сенсором PAW3950MAX, частотою 8000 Гц та роздільною здатністю 42 000 DPI[cite: 5].
                 </p>
 
                 <div class="flex items-center space-x-6 pt-4">
@@ -120,7 +116,7 @@
                         Обрати девайс
                     </a>
                     <div class="text-2xl font-semibold tracking-tight text-white">
-                        ₴ 4,199
+                        ₴ 2,945[cite: 5]
                     </div>
                 </div>
             </div>
@@ -128,36 +124,39 @@
             <div class="lg:col-span-6 relative flex items-center justify-center">
                 <div class="relative w-full aspect-square max-w-[520px] bg-skybrand-surface/60 border border-skybrand-border/80 rounded-3xl p-8 flex items-center justify-center overflow-hidden group shadow-2xl">
                     <div class="absolute inset-0 bg-gradient-to-t from-sky-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
-                    <img src="https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?q=80&w=1000&auto=format&fit=crop" alt="Aorus Shark R5 Ultra" class="w-4/5 h-auto object-contain drop-shadow-[0_25px_35px_rgba(56,189,248,0.25)] transform group-hover:scale-110 transition-transform duration-700">
+                    <img src="https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?q=80&w=1000&auto=format&fit=crop" alt="Attack Shark R5 Ultra" class="w-4/5 h-auto object-contain drop-shadow-[0_25px_35px_rgba(56,189,248,0.25)] transform group-hover:scale-110 transition-transform duration-700">
                     
                     <div class="absolute bottom-6 left-6 px-3.5 py-2 rounded-xl bg-skybrand-card/90 backdrop-blur-md border border-skybrand-border text-[10px] tracking-widest text-skybrand-blue uppercase font-bold">
-                        PURE WHITE EDITION
+                        39Г / 8000 ГЦ[cite: 5]
                     </div>
                     <div class="absolute top-6 right-6 px-3.5 py-2 rounded-xl bg-skybrand-card/90 backdrop-blur-md border border-skybrand-border text-[10px] tracking-widest text-skybrand-light uppercase">
-                        8K HYPERPOLL
+                        PAW3950MAX[cite: 5]
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Catalog Section -->
-    <section id="catalog" class="py-32 bg-skybrand-surface/30 border-t border-skybrand-border/40">
-        <div class="max-w-7xl mx-auto px-6">
-            <div class="flex flex-col md:flex-row md:items-end justify-between mb-12">
+    <!-- Catalog Section with Sticky Filter Bar -->
+    <section id="catalog" class="relative py-24 bg-skybrand-surface/30 border-t border-skybrand-border/40">
+        
+        <!-- Sticky Category Header (Плашечка, яка не перекривається контентом) -->
+        <div class="sticky top-20 z-30 bg-skybrand-bg/90 backdrop-blur-md py-6 border-b border-skybrand-border/40 shadow-xl mb-16">
+            <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <span class="text-xs uppercase tracking-[0.25em] text-skybrand-blue font-semibold block mb-3">Heavenly Marketplace</span>
-                    <h2 class="text-3xl lg:text-4xl font-light tracking-tight text-white">КАТАЛОГ ОБЛАДНАННЯ</h2>
+                    <span class="text-[11px] uppercase tracking-[0.25em] text-skybrand-blue font-semibold block mb-1">Heavenly Marketplace</span>
+                    <h2 class="text-2xl lg:text-3xl font-light tracking-tight text-white">КАТАЛОГ ОБЛАДНАННЯ</h2>
                 </div>
                 
-                <div class="flex flex-wrap gap-2 mt-6 md:mt-0">
+                <div class="flex flex-wrap gap-2">
                     <button onclick="filterCategory('all')" id="filter-all" class="cat-btn px-5 py-2.5 rounded-full text-xs uppercase tracking-wider bg-skybrand-blue text-skybrand-bg font-bold transition-all shadow-md">Усі товари</button>
                     <button onclick="filterCategory('mice')" id="filter-mice" class="cat-btn px-5 py-2.5 rounded-full text-xs uppercase tracking-wider bg-skybrand-card text-skybrand-light/70 border border-skybrand-border hover:text-white transition-all">Миші</button>
                     <button onclick="filterCategory('keyboards')" id="filter-keyboards" class="cat-btn px-5 py-2.5 rounded-full text-xs uppercase tracking-wider bg-skybrand-card text-skybrand-light/70 border border-skybrand-border hover:text-white transition-all">Клавіатури</button>
-                    <button onclick="filterCategory('headsets')" id="filter-headsets" class="cat-btn px-5 py-2.5 rounded-full text-xs uppercase tracking-wider bg-skybrand-card text-skybrand-light/70 border border-skybrand-border hover:text-white transition-all">Навушники</button>
                 </div>
             </div>
+        </div>
 
+        <div class="max-w-7xl mx-auto px-6">
             <div id="products-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
         </div>
     </section>
@@ -204,7 +203,6 @@
         <p>&copy; 2026 MILIPSTORE. Heavenly Hardware Experience. All rights reserved.</p>
     </footer>
 
-    <!-- Підключення окремого JS файлу -->
     <script src="script.js"></script>
 </body>
 </html>

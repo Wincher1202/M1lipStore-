@@ -1,14 +1,14 @@
-// База даних товарів (включно з Aorus Shark R5 Ultra)
+// База даних товарів (включно з Attack Shark R5 Ultra та супутніми категоріями)
 const productsData = [
     {
         id: 'p1',
-        brand: 'AORUS SHARK',
-        name: 'Aorus Shark R5 Ultra',
+        brand: 'ATTACK SHARK',
+        name: 'ATTACK SHARK R5 ULTRA',
         category: 'mice',
-        price: 4199,
+        price: 2945, //[cite: 5]
         image: 'https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?q=80&w=800&auto=format&fit=crop',
-        spec: 'Pure White / PAW3395 / 8K',
-        description: 'Flagship Wireless Gaming Mouse (White Only)'
+        spec: 'Вага: 39г / 8000 Гц / PAW3950MAX / 42 000 DPI', //[cite: 5]
+        description: 'Флагманська бездротова ігрова миша' //[cite: 5]
     },
     {
         id: 'p2',
@@ -18,37 +18,7 @@ const productsData = [
         price: 4399,
         image: 'https://images.unsplash.com/photo-1587829741301-dc798b83add3?q=80&w=800&auto=format&fit=crop',
         spec: 'Gasket Mount / Hot-Swap / RGB',
-        description: 'Mechanical Keyboard / Ice Blue'
-    },
-    {
-        id: 'p3',
-        brand: 'MCHOSE',
-        name: 'MCHOSE G9 Pro',
-        category: 'headsets',
-        price: 4899,
-        image: 'https://images.unsplash.com/photo-1546435770-a3e426bf472b?q=80&w=800&auto=format&fit=crop',
-        spec: 'ANC / Tri-Mode / Hi-Res Audio',
-        description: 'Wireless Gaming Headset'
-    },
-    {
-        id: 'p4',
-        brand: 'ATK',
-        name: 'ATK Blazing Sky X1 Pro',
-        category: 'mice',
-        price: 3899,
-        image: 'https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?q=80&w=800&auto=format&fit=crop',
-        spec: 'Nordic MCU / 49G / White',
-        description: 'Ultra-lightweight Esports Mouse'
-    },
-    {
-        id: 'p5',
-        brand: 'WOBCORP',
-        name: 'WOB Rainy 75 Sky',
-        category: 'keyboards',
-        price: 6499,
-        image: 'https://images.unsplash.com/photo-1587829741301-dc798b83add3?q=80&w=800&auto=format&fit=crop',
-        spec: 'CNC Aluminum / Custom Switches',
-        description: 'Premium Mechanical Keyboard'
+        description: 'Механічна ігрова клавіатура'
     }
 ];
 
@@ -56,7 +26,6 @@ let cart = [];
 let wishlist = [];
 let currentFilter = 'all';
 
-// Завантаження сторінки та вимкнення лоадера
 window.addEventListener('load', () => {
     const loaderBar = document.getElementById('loader-bar');
     if (loaderBar) loaderBar.style.transform = 'translateX(0)';
@@ -70,7 +39,6 @@ window.addEventListener('load', () => {
     renderProducts();
 });
 
-// Рендеринг карток каталогу
 function renderProducts() {
     const grid = document.getElementById('products-grid');
     if (!grid) return;
@@ -102,7 +70,8 @@ function renderProducts() {
                         <h3 class="text-base font-semibold text-white tracking-wide">${product.name}</h3>
                         <span class="text-sm font-bold text-skybrand-blue">₴ ${product.price.toLocaleString()}</span>
                     </div>
-                    <p class="text-xs text-skybrand-light/60 font-light mb-4">${product.description}</p>
+                    <p class="text-xs text-skybrand-light/60 font-light mb-2">${product.description}</p>
+                    <p class="text-[11px] text-skybrand-blue/80 font-medium mb-4">${product.spec}</p>
                     <button onclick="addToCart('${product.id}')" class="w-full py-3 bg-skybrand-surface border border-skybrand-border rounded-xl text-xs uppercase tracking-wider text-skybrand-light font-semibold hover:bg-skybrand-blue hover:border-skybrand-blue hover:text-skybrand-bg transition-all duration-300 shadow-md">
                         Додати до кошика
                     </button>
@@ -113,7 +82,6 @@ function renderProducts() {
     });
 }
 
-// Фільтрація категорій
 function filterCategory(category) {
     currentFilter = category;
     document.querySelectorAll('.cat-btn').forEach(btn => {
@@ -128,7 +96,6 @@ function filterCategory(category) {
     renderProducts();
 }
 
-// Перемикання обраного
 function toggleWishlist(productId) {
     const card = document.getElementById(`card-${productId}`);
     const index = wishlist.indexOf(productId);
@@ -159,7 +126,6 @@ function updateWishlistUI() {
     }
 }
 
-// Додавання в кошик
 function addToCart(productId) {
     const product = productsData.find(p => p.id === productId);
     if (!product) return;
@@ -175,7 +141,6 @@ function addToCart(productId) {
     openCartDrawer();
 }
 
-// Оновлення кошика
 function updateCartUI() {
     const counter = document.getElementById('cart-counter');
     const container = document.getElementById('cart-items');
@@ -221,7 +186,6 @@ function removeFromCart(productId) {
     updateCartUI();
 }
 
-// Керування висувними панелями (Drawers)
 function openCartDrawer() {
     const drawer = document.getElementById('cart-drawer');
     const panel = document.getElementById('cart-panel');
