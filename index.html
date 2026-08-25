@@ -24,7 +24,6 @@
             --border-hover: rgba(0, 0, 0, 0.16);
             --shadow-subtle: 0 4px 24px rgba(0, 0, 0, 0.04);
             --shadow-card: 0 10px 30px rgba(0, 0, 0, 0.06);
-            /* Адаптивное сияние для светлой темы */
             --shadow-hover: 0 20px 40px rgba(0, 102, 255, 0.15);
             --radius-lg: 20px;
             --radius-md: 14px;
@@ -46,7 +45,6 @@
             --border-hover: rgba(255, 255, 255, 0.16);
             --shadow-subtle: 0 4px 24px rgba(0, 0, 0, 0.2);
             --shadow-card: 0 10px 30px rgba(0, 0, 0, 0.3);
-            /* Сияние для темной темы */
             --shadow-hover: 0 20px 40px rgba(43, 127, 255, 0.25);
         }
 
@@ -440,7 +438,6 @@
             .catalog-grid { grid-template-columns: repeat(3, 1fr); }
         }
 
-        /* КАРТОЧКА ТОВАРА: плавное приближение и сияние для обеих тем */
         .product-card {
             background: var(--bg-secondary);
             border: 1px solid var(--border-light);
@@ -476,6 +473,15 @@
 
         .product-tag.new { background: var(--accent-light); color: var(--accent); }
 
+        /* НОВАЯ ПРИКОЛЬНАЯ АНИМАЦИЯ СЕРДЕЧКА */
+        @keyframes heartBeatAnim {
+            0% { transform: scale(1); }
+            15% { transform: scale(1.35); }
+            30% { transform: scale(0.95); }
+            45% { transform: scale(1.2); }
+            60% { transform: scale(1); }
+        }
+
         .wishlist-btn {
             position: absolute;
             top: 18px;
@@ -491,6 +497,16 @@
             cursor: pointer;
             z-index: 10;
             transition: var(--transition);
+        }
+
+        .wishlist-btn svg {
+            transition: transform 0.2s ease, fill 0.2s ease, stroke 0.2s ease;
+        }
+
+        .wishlist-btn.active svg {
+            animation: heartBeatAnim 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+            fill: #FF3B30;
+            stroke: #FF3B30;
         }
 
         .product-img-wrap {
@@ -824,13 +840,13 @@
         </div>
     </header>
 
-    <!-- TICKER -->
+    <!-- TICKER (БІГУЧИЙ РЯДОК УКРАЇНСЬКОЮ) -->
     <div class="ticker-wrap">
         <div class="ticker-move">
-            <span><img src="logo-milipstore.png" alt="MilipStore" class="ticker-logo"> Top Gaming Gear & Accessories</span>
-            <span><img src="logo-milipstore.png" alt="MilipStore" class="ticker-logo"> High Performance Sensors & 8KHz Polling</span>
-            <span><img src="logo-milipstore.png" alt="MilipStore" class="ticker-logo"> Official Warranty & Fast Dispatch</span>
-            <span><img src="logo-milipstore.png" alt="MilipStore" class="ticker-logo"> Ultimate Setup for Pro Gamers</span>
+            <span><img src="logo-milipstore.png" alt="MilipStore" class="ticker-logo"> Топові ігрові девайси та аксесуари</span>
+            <span><img src="logo-milipstore.png" alt="MilipStore" class="ticker-logo"> Сенсори найвищої продуктивності та опитування 8KHz</span>
+            <span><img src="logo-milipstore.png" alt="MilipStore" class="ticker-logo"> Офіційна гарантія та швидка відправка</span>
+            <span><img src="logo-milipstore.png" alt="MilipStore" class="ticker-logo"> Ідеальний сетап для справжніх геймерів</span>
         </div>
     </div>
 
@@ -1208,11 +1224,12 @@
 
             container.innerHTML = filteredProducts.map((p) => {
                 const firstColorClass = p.colors && p.colors[0] ? p.colors[0].class : 'white';
+                const isFav = wishlist.some(item => item.id === p.id);
                 return `
                     <div class="product-card" onclick="openProductModal(products.find(x => x.id === '${p.id}'))">
                         <span class="product-tag new">${p.tag}</span>
-                        <button class="wishlist-btn ${wishlist.some(item => item.id === p.id) ? 'active' : ''}" onclick="event.stopPropagation(); toggleWishlist('${p.id}')">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="${wishlist.some(item => item.id === p.id) ? '#FF3B30' : 'none'}" stroke="${wishlist.some(item => item.id === p.id) ? '#FF3B30' : 'currentColor'}" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                        <button class="wishlist-btn ${isFav ? 'active' : ''}" onclick="event.stopPropagation(); toggleWishlist('${p.id}')">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="${isFav ? '#FF3B30' : 'none'}" stroke="${isFav ? '#FF3B30' : 'currentColor'}" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
                         </button>
                         <div class="product-img-wrap">
                             <img src="${p.img}" alt="${p.title}">
