@@ -353,7 +353,7 @@
         .hero-card-3d img {
             width: 100%;
             height: 280px;
-            object-fit: cover; /* Заполняет всю рамку без черных полей */
+            object-fit: contain; /* Картинка полностью помещается без обрезки */
             border-radius: var(--radius-sm);
             display: block;
             transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
@@ -539,10 +539,10 @@
             transition: var(--transition);
         }
 
-        /* Контейнер картинки под размер рамки карточки */
+        /* Контейнер картинки под размер рамки карточки (высота увеличена для полного помещения картинки) */
         .product-img-wrap {
             width: 100%;
-            height: 220px; /* Фиксированная высота блока изображения */
+            height: 250px; 
             display: flex;
             align-items: center;
             justify-content: center;
@@ -556,7 +556,7 @@
         .product-img-wrap img {
             width: 100%;
             height: 100%;
-            object-fit: cover; /* Картинка полностью заполняет рамку без черных полей */
+            object-fit: contain; /* Картинка полностью помещается внутри рамки */
             transition: transform 0.3s ease;
         }
 
@@ -686,7 +686,7 @@
             border: 1px solid var(--border-light);
         }
 
-        .cart-item img { width: 60px; height: 60px; object-fit: cover; background: var(--bg-secondary); border-radius: 8px; }
+        .cart-item img { width: 60px; height: 60px; object-fit: contain; background: var(--bg-secondary); border-radius: 8px; }
 
         .quantity-controls {
             display: flex;
@@ -785,7 +785,7 @@
         
         .modal-main-img-wrap {
             width: 100%;
-            height: 320px;
+            height: 350px; /* Увеличено для полноценного размещения фото */
             background: var(--bg-primary);
             border-radius: var(--radius-md);
             display: flex;
@@ -797,7 +797,7 @@
         .modal-main-img { 
             width: 100%; 
             height: 100%; 
-            object-fit: cover; /* Заполнение без черных полей в модалке */
+            object-fit: contain; /* Картинка полностью помещается в модалке */
         }
         
         .modal-thumbs { 
@@ -812,7 +812,7 @@
         .modal-thumb { 
             width: 50px; 
             height: 50px; 
-            object-fit: cover; 
+            object-fit: contain; 
             background: var(--bg-primary); 
             border: 2px solid var(--border-light); 
             border-radius: 6px; 
@@ -1412,7 +1412,7 @@
             container.innerHTML = filtered.map(p => `
                 <a class="search-result-item" onclick="toggleSearch(false); openProductModal(products.find(x => x.id === '${p.id}'))">
                     <div style="display: flex; align-items: center; gap: 12px;">
-                        <img src="${p.img}" style="width: 40px; height: 40px; object-fit: cover;">
+                        <img src="${p.img}" style="width: 40px; height: 40px; object-fit: contain;">
                         <div><strong style="font-size: 0.9rem;">${p.brand} ${p.title}</strong></div>
                     </div>
                     <span style="font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 0.9rem;">${formatPrice(p.price)}</span>
