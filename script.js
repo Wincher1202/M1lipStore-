@@ -1,32 +1,28 @@
 // Translations dictionary (UA & RU)
 const translations = {
     uk: {
-        loader_sub: "DIGITAL EXPERIENCE",
+        loader_sub: "CELESTIAL EXPERIENCE",
         nav_catalog: "МАГАЗИН",
         nav_new: "НОВИНКИ",
         nav_mice: "МИШКИ",
         nav_setup: "SETUP LAB",
         nav_delivery: "ДОСТАВКА",
-        sys_online: "MILIPSTORE SYSTEM ONLINE",
-        hero_label: "MILIPSTORE / DIGITAL PERIPHERALS",
-        click_to_open: "ВІДКРИТИ ПРОСТІР →",
-        cat_title: "DIGITAL SPACE CATALOGUE",
+        sys_online: "MILIPSTORE CELESTIAL SYSTEM ONLINE",
+        hero_label: "MILIPSTORE / CELESTIAL EDITION",
+        click_to_open: "ВІДКРИТИ НЕБЕСНИЙ ПРОСТІР →",
+        cat_title: "CELESTIAL SPACE CATALOGUE",
         view_product: "ПЕРЕГЛЯНУТИ →",
         bread_mice: "МИШКИ",
-        tag_bestseller: "BESTSELLER 2026",
-        prod_subtitle: "Ультралегка бездротова ігрова миша трирежимного підключення",
-        in_stock: "● В наявності (18 шт)",
+        tag_bestseller: "CELESTIAL EDITION 2026",
+        prod_subtitle: "Флагманська ультралегка ігрова миша у небесному білому виконанні",
+        in_stock: "● В наявності (24 шт)",
         label_color: "КОЛІР:",
-        color_not_selected: "НЕ ВИБРАНО",
-        thumb_box: "Коробка",
-        thumb_black: "Black",
-        thumb_white: "White",
         btn_add_cart: "ДОДАТИ В КОШИК",
         acc_desc: "01. ОПИС ТОВАРУ",
-        desc_text: "Attack Shark X3 створена для кіберспорту та професійного геймінгу. Ергономічний корпус вагою всього 54 грами, флагманський сенсор PAW3395 та підтримка частоти опитування 8000 Гц забезпечують блискавичну реакцію без затримок.",
+        desc_text: "Attack Shark R5 Ultra створена для безкомпромісного геймінгу у витонченому білому дизайні. Небесна легкість корпусу, флагманський сенсор нового покоління та підтримка частоти 8000 Гц дарують абсолютний контроль над кожним рухом.",
         acc_specs: "02. ХАРАКТЕРИСТИКИ",
         acc_delivery: "03. ДОСТАВКА ТА ОПЛАТА",
-        delivery_text: "Нова Пошта по Україні (1-2 дні), кур'єрська доставка, оплата при отриманні або на картку/рахунок ФОП.",
+        delivery_text: "Швидка доставка Новою Поштою по Україні (1-2 дні), кур'єр до дверей, оплата при отриманні або на рахунок ФОП.",
         cart_title: "КОШИК",
         cart_empty: "Ваш кошик наразі порожній",
         cart_total: "Разом:",
@@ -35,32 +31,28 @@ const translations = {
         trend_label: "TRENDING:"
     },
     ru: {
-        loader_sub: "DIGITAL EXPERIENCE",
+        loader_sub: "CELESTIAL EXPERIENCE",
         nav_catalog: "МАГАЗИН",
         nav_new: "НОВИНКИ",
         nav_mice: "МЫШКИ",
         nav_setup: "SETUP LAB",
         nav_delivery: "ДОСТАВКА",
-        sys_online: "MILIPSTORE SYSTEM ONLINE",
-        hero_label: "MILIPSTORE / DIGITAL PERIPHERALS",
-        click_to_open: "ОТКРЫТЬ ПРОСТРАНСТВО →",
-        cat_title: "DIGITAL SPACE CATALOGUE",
+        sys_online: "MILIPSTORE CELESTIAL SYSTEM ONLINE",
+        hero_label: "MILIPSTORE / CELESTIAL EDITION",
+        click_to_open: "ОТКРЫТЬ НЕБЕСНОЕ ПРОСТРАНСТВО →",
+        cat_title: "CELESTIAL SPACE CATALOGUE",
         view_product: "ПОСМОТРЕТЬ →",
         bread_mice: "МЫШКИ",
-        tag_bestseller: "BESTSELLER 2026",
-        prod_subtitle: "Ультралегкая беспроводная игровая мышь трехрежимного подключения",
-        in_stock: "● В наличии (18 шт)",
+        tag_bestseller: "CELESTIAL EDITION 2026",
+        prod_subtitle: "Флагманская ультралегкая игровая мышь в небесном белом исполнении",
+        in_stock: "● В наличии (24 шт)",
         label_color: "ЦВЕТ:",
-        color_not_selected: "НЕ ВЫБРАНО",
-        thumb_box: "Коробка",
-        thumb_black: "Black",
-        thumb_white: "White",
         btn_add_cart: "ДОБАВИТЬ В КОРЗИНУ",
         acc_desc: "01. ОПИСАНИЕ ТОВАРА",
-        desc_text: "Attack Shark X3 создана для киберспорта и профессионального гейминга. Эргономичный корпус весом всего 54 грамма, флагманский сенсор PAW3395 и поддержка частоты опроса 8000 Гц обеспечивают молниеносную реакцию без задержек.",
+        desc_text: "Attack Shark R5 Ultra создана для бескомпромиссного гейминга в изящном белом дизайне. Небесная легкость корпуса, флагманский сенсор нового поколения и поддержка частоты 8000 Гц даруют абсолютный контроль над каждым движением.",
         acc_specs: "02. ХАРАКТЕРИСТИКИ",
         acc_delivery: "03. ДОСТАВКА И ОПЛАТА",
-        delivery_text: "Новая Почта по Украине (1-2 дня), курьерская доставка, оплата при получении или на карту/счет ФЛП.",
+        delivery_text: "Быстрая доставка Новой Почтой по Украине (1-2 дня), курьер до дверей, оплата при получении или на счет ФЛП.",
         cart_title: "КОРЗИНА",
         cart_empty: "Ваша корзина пока пуста",
         cart_total: "Итого:",
@@ -70,49 +62,55 @@ const translations = {
     }
 };
 
-// Database of products for dynamic modal switching
+// Database of products with precise requested photo order
 const productsData = {
-    'x3': {
-        name: 'ATTACK SHARK X3',
-        subtitle: 'Ультралегка бездротова ігрова миша трирежимного підключення',
-        price: 2499,
-        rawPrice: 2499,
+    'r5-ultra': {
+        name: 'ATTACK SHARK R5 ULTRA',
+        subtitle: 'Флагманська ультралегка ігрова миша у небесному білому виконанні',
+        price: 3299,
         category: 'MICE',
-        images: ['attack-shark-x3-box.jpg', 'attack-shark-x3-black.jpg', 'attack-shark-x3-white.jpg'],
+        images: [
+            { file: 'attack-shark-r5-ultra-top-angle.jpg', title: 'Top Angle' },
+            { file: 'attack-shark-r5-ultra-in-hand-setup.jpg', title: 'In Hand' },
+            { file: 'attack-shark-r5-ultra-side-buttons.jpg', title: 'Side Buttons' },
+            { file: 'attack-shark-r5-ultra-back-grip.jpg', title: 'Back Grip' },
+            { file: 'attack-shark-r5-ultra-dongle-receiver.jpg', title: 'Dongle 8K' },
+            { file: 'attack-shark-r5-ultra-box-bundle-contents.jpg', title: 'Bundle' },
+            { file: 'attack-shark-r5-ultra-colors-price.jpg', title: 'Edition' }
+        ],
         hasColors: true,
         specs: `
-            <li><span>Сенсор:</span> <strong>PixArt PAW3395</strong></li>
-            <li><span>Вага:</span> <strong>54 г</strong></li>
-            <li><span>Частота опитування:</span> <strong>До 8000 Гц</strong></li>
-            <li><span>Підключення:</span> <strong>Wired / 2.4G / Bluetooth 5.4</strong></li>
+            <li><span>Сенсор:</span> <strong>PixArt PAW3395 Ultra</strong></li>
+            <li><span>Частота опитування:</span> <strong>8000 Гц Hyper-Polling</strong></li>
+            <li><span>Підключення:</span> <strong>Tri-Mode Wireless</strong></li>
+            <li><span>Колір:</span> <strong>Celestial White</strong></li>
         `,
-        desc: 'Attack Shark X3 створена для кіберспорту та професійного геймінгу. Ергономічний корпус вагою всього 54 грами, флагманський сенсор PAW3395 та підтримка частоти опитування 8000 Гц забезпечують блискавичну реакцію без затримок.'
+        desc: 'Attack Shark R5 Ultra створена для безкомпромісного геймінгу у витонченому білому дизайні. Небесна легкість корпусу, флагманський сенсор нового покоління та підтримка частоти 8000 Гц дарують абсолютний контроль над кожним рухом.'
     },
     'pad': {
-        name: 'ESPORTS CONTROL MOUSEPAD',
-        subtitle: 'Професійний ігровий килимок з контролюючим покриттям Cordura',
-        price: 899,
-        rawPrice: 899,
+        name: 'CELESTIAL ESPORTS MOUSEPAD',
+        subtitle: 'Професійний ігровий килимок у небесному стилі',
+        price: 999,
         category: 'SETUP LAB',
-        images: ['attack-shark-x3-white.jpg'],
+        images: [
+            { file: 'attack-shark-r5-ultra-in-hand-setup.jpg', title: 'Celestial Mat' }
+        ],
         hasColors: false,
         specs: `
-            <li><span>Матеріал:</span> <strong>Cordura / Natural Rubber</strong></li>
-            <li><span>Розмір:</span> <strong>480 x 400 x 4 мм</strong></li>
-            <li><span>База:</span> <strong>Протиковзка гумова основа</strong></li>
+            <li><span>Матеріал:</span> <strong>Micro-control Fabric</strong></li>
+            <li><span>Розмір:</span> <strong>500 x 420 x 4 мм</strong></li>
         `,
-        desc: 'Високоякісний ігровий килимок, що забезпечує ідеальний баланс між швидкістю ковзання миші та зупинкою під час точного прицілювання в шутерах.'
+        desc: 'Килимок преміум-класу для ідеального ковзання девайсів у вашому сетапі.'
     }
 };
 
-// State Management
+// State
 let currentLang = localStorage.getItem('milipstore_lang') || 'uk';
-let selectedColor = null;
-let currentProductId = 'x3';
+let selectedColor = 'white';
+let currentProductId = 'r5-ultra';
 let cart = JSON.parse(localStorage.getItem('milipstore_cart')) || [];
 let wishlist = [];
 
-// DOM Loaded Initialization
 document.addEventListener('DOMContentLoaded', () => {
     initLoader();
     initClock();
@@ -121,7 +119,6 @@ document.addEventListener('DOMContentLoaded', () => {
     updateCartUI();
 });
 
-// Loader simulation
 function initLoader() {
     const loader = document.getElementById('loader');
     const bar = document.getElementById('loader-bar');
@@ -129,7 +126,7 @@ function initLoader() {
     
     let progress = 0;
     const interval = setInterval(() => {
-        progress += Math.floor(Math.random() * 15) + 10;
+        progress += Math.floor(Math.random() * 20) + 10;
         if (progress >= 100) {
             progress = 100;
             clearInterval(interval);
@@ -137,10 +134,9 @@ function initLoader() {
         }
         bar.style.width = progress + '%';
         percent.textContent = progress + '%';
-    }, 120);
+    }, 100);
 }
 
-// Live Clock
 function initClock() {
     const clockEl = document.getElementById('live-clock');
     setInterval(() => {
@@ -151,11 +147,9 @@ function initClock() {
     }, 1000);
 }
 
-// Language Switcher
 document.querySelectorAll('[data-lang-switch]').forEach(btn => {
     btn.addEventListener('click', (e) => {
-        const lang = e.target.getAttribute('data-lang-switch');
-        setLanguage(lang);
+        setLanguage(e.target.getAttribute('data-lang-switch'));
     });
 });
 
@@ -175,14 +169,8 @@ function setLanguage(lang) {
             el.textContent = translations[lang][key];
         }
     });
-
-    if (!selectedColor) {
-        const colorLabel = document.getElementById('selectedColorLabel');
-        if (colorLabel) colorLabel.textContent = lang === 'uk' ? 'НЕ ВИБРАНО' : 'НЕ ВЫБРАНО';
-    }
 }
 
-// Header Scroll Effect
 window.addEventListener('scroll', () => {
     const header = document.getElementById('header');
     if (window.scrollY > 40) {
@@ -192,11 +180,10 @@ window.addEventListener('scroll', () => {
     }
 });
 
-// Hero Parallax effect
 function initParallax() {
     document.addEventListener('mousemove', (e) => {
-        const x = (e.clientX / window.innerWidth - 0.5) * 20;
-        const y = (e.clientY / window.innerHeight - 0.5) * 20;
+        const x = (e.clientX / window.innerWidth - 0.5) * 15;
+        const y = (e.clientY / window.innerHeight - 0.5) * 15;
         const floatCard = document.getElementById('heroProductCard');
         if (floatCard) {
             floatCard.style.transform = `translate(${x}px, ${y}px)`;
@@ -204,13 +191,11 @@ function initParallax() {
     });
 }
 
-// Product Modal Operations
-function openProductModal(productId = 'x3') {
+function openProductModal(productId = 'r5-ultra') {
     currentProductId = productId;
     const prod = productsData[productId];
     if (!prod) return;
 
-    // Populate Modal Data
     document.getElementById('modalTitle').textContent = prod.name;
     document.getElementById('modalSubtitle').textContent = prod.subtitle;
     document.getElementById('modalPrice').textContent = `₴ ${prod.price}`;
@@ -218,32 +203,29 @@ function openProductModal(productId = 'x3') {
     document.getElementById('modalSpecsList').innerHTML = prod.specs;
     document.getElementById('modalBreadcrumb').innerHTML = `MILIPSTORE / <span>${prod.category}</span> / ${prod.name}`;
 
-    // Handle Color options block display
     const colorBlock = document.getElementById('colorConfigBlock');
     if (prod.hasColors) {
         colorBlock.style.display = 'block';
-        selectedColor = null;
-        document.getElementById('selectedColorLabel').textContent = currentLang === 'uk' ? 'НЕ ВИБРАНО' : 'НЕ ВЫБРАНО';
-        document.querySelectorAll('.color-option').forEach(b => b.classList.remove('active'));
+        selectedColor = 'white';
     } else {
         colorBlock.style.display = 'none';
         selectedColor = 'default';
     }
 
-    // Render gallery thumbnails dynamically
+    // Render thumbnails following user's file sequence
     const thumbsContainer = document.getElementById('thumbnailsContainer');
     let thumbsHtml = '';
-    prod.images.forEach((img, idx) => {
-        const thumbName = idx === 0 ? (currentLang === 'uk' ? 'Вигляд' : 'Вид') : (idx === 1 ? 'Black' : 'White');
+    prod.images.forEach((imgObj, idx) => {
+        const padNum = String(idx + 1).padStart(2, '0');
         thumbsHtml += `
-            <button class="thumb-btn ${idx === 0 ? 'active' : ''}" onclick="switchImage('${img}', ${idx})">
-                <img src="${img}" alt="Thumb">
-                <span>${thumbName}</span>
+            <button class="thumb-btn ${idx === 0 ? 'active' : ''}" onclick="switchImage('${imgObj.file}', ${idx})">
+                <img src="${imgObj.file}" alt="Thumb">
+                <span>${padNum}</span>
             </button>
         `;
     });
     thumbsContainer.innerHTML = thumbsHtml;
-    document.getElementById('mainGalleryImg').src = prod.images[0];
+    document.getElementById('mainGalleryImg').src = prod.images[0].file;
     document.getElementById('galleryProgress').textContent = `01 / 0${prod.images.length}`;
 
     document.getElementById('productModal').classList.add('active');
@@ -255,11 +237,10 @@ function closeProductModal() {
     document.body.style.overflow = '';
 }
 
-// Gallery image switching
 function switchImage(src, index) {
     const mainImg = document.getElementById('mainGalleryImg');
     mainImg.style.opacity = '0';
-    mainImg.style.transform = 'scale(0.96)';
+    mainImg.style.transform = 'scale(0.97)';
     
     setTimeout(() => {
         mainImg.src = src;
@@ -272,32 +253,23 @@ function switchImage(src, index) {
         btn.classList.toggle('active', idx === index);
     });
 
-    document.getElementById('galleryProgress').textContent = `0${index + 1} / 0${prod.images.length}`;
+    const totalStr = String(prod.images.length).padStart(2, '0');
+    const curStr = String(index + 1).padStart(2, '0');
+    document.getElementById('galleryProgress').textContent = `${curStr} / ${totalStr}`;
 }
 
-// Color Selector
 function selectColor(color) {
     selectedColor = color;
     document.querySelectorAll('.color-option').forEach(btn => {
         btn.classList.toggle('active', btn.classList.contains(color));
     });
-    
-    const colorLabel = document.getElementById('selectedColorLabel');
-    colorLabel.textContent = color.toUpperCase();
-
-    if (currentProductId === 'x3') {
-        if (color === 'black') switchImage('attack-shark-x3-black.jpg', 1);
-        else if (color === 'white') switchImage('attack-shark-x3-white.jpg', 2);
-    }
+    document.getElementById('selectedColorLabel').textContent = 'CELESTIAL WHITE';
 }
 
-// Accordion Toggle
 function toggleAccordion(btn) {
-    const accordion = btn.parentElement;
-    accordion.classList.toggle('active');
+    btn.parentElement.classList.toggle('active');
 }
 
-// Wishlist Logic
 function toggleWishlist(itemName, btn) {
     btn.classList.toggle('active');
     const countEl = document.getElementById('wishlist-count');
@@ -317,19 +289,13 @@ function toggleModalWishlist() {
     toggleWishlist(prod.name, btn);
 }
 
-// Cart Logic
 function addToCart() {
     const prod = productsData[currentProductId];
-    if (prod.hasColors && !selectedColor) {
-        alert(currentLang === 'uk' ? 'Будь ласка, виберіть колір миші!' : 'Пожалуйста, выберите цвет мыши!');
-        return;
-    }
-
     const item = {
         name: prod.name,
-        color: selectedColor && selectedColor !== 'default' ? selectedColor : '',
+        color: 'Celestial White',
         price: prod.price,
-        image: prod.images[0]
+        image: prod.images[0].file
     };
 
     cart.push(item);
@@ -365,7 +331,7 @@ function updateCartUI() {
                 <img src="${item.image}" alt="${item.name}">
                 <div class="cart-item-info">
                     <h4>${item.name}</h4>
-                    ${item.color ? `<p>${currentLang === 'uk' ? 'Колір' : 'Цвет'}: ${item.color.toUpperCase()}</p>` : ''}
+                    <p>White</p>
                     <strong>₴ ${item.price}</strong>
                 </div>
                 <button onclick="removeFromCart(${index})" style="background:none;border:none;cursor:pointer;margin-left:auto;color:#999;font-size:1.2rem;">×</button>
@@ -394,14 +360,13 @@ function closeCart() {
 }
 
 function checkout() {
-    alert(currentLang === 'uk' ? 'Дякуємо! Замовлення успішно сформовано.' : 'Спасибо! Заказ успешно сформирован.');
+    alert(currentLang === 'uk' ? 'Дякуємо! Замовлення на R5 Ultra успішно сформовано.' : 'Спасибо! Заказ на R5 Ultra успешно сформирован.');
     cart = [];
     saveCart();
     updateCartUI();
     closeCart();
 }
 
-// Search Overlay Logic
 document.getElementById('search-btn').addEventListener('click', () => {
     document.getElementById('searchOverlay').classList.add('active');
     document.getElementById('searchInput').focus();
@@ -428,25 +393,14 @@ function handleSearch(query) {
     const q = query.toLowerCase();
     let resultsHtml = '';
 
-    if ('attack shark x3 mice paw3395'.includes(q)) {
+    if ('attack shark r5 ultra white 8000hz'.includes(q)) {
         resultsHtml += `
-            <div class="search-result-item" onclick="closeSearch(); openProductModal('x3');">
+            <div class="search-result-item" onclick="closeSearch(); openProductModal('r5-ultra');">
                 <div>
-                    <strong>Attack Shark X3 Wireless Gaming Mouse</strong>
-                    <p style="font-size:0.75rem; color:#666;">Mice / PAW3395 / 54G</p>
+                    <strong>Attack Shark R5 Ultra Wireless Mouse</strong>
+                    <p style="font-size:0.75rem; color:#666;">Mice / Celestial White / 8K</p>
                 </div>
-                <span style="font-weight:700;">₴ 2,499 →</span>
-            </div>
-        `;
-    }
-    if ('pad mat килимок cordura'.includes(q)) {
-        resultsHtml += `
-            <div class="search-result-item" onclick="closeSearch(); openProductModal('pad');">
-                <div>
-                    <strong>Esports Control Mousepad</strong>
-                    <p style="font-size:0.75rem; color:#666;">Setup Lab / Control</p>
-                </div>
-                <span style="font-weight:700;">₴ 899 →</span>
+                <span style="font-weight:700;">₴ 3,299 →</span>
             </div>
         `;
     }
