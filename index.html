@@ -352,12 +352,10 @@
 
         .hero-card-3d img {
             width: 100%;
-            height: auto; /* Автоматический формат под пропорции */
-            max-height: 360px;
-            object-fit: contain; /* Без обрезок */
+            height: 280px;
+            object-fit: cover; /* Заполняет всю рамку без черных полей */
             border-radius: var(--radius-sm);
             display: block;
-            margin: 0 auto;
             transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
@@ -437,7 +435,8 @@
             right: -10px;
             bottom: -10px;
             width: 110px;
-            height: auto;
+            height: 110px;
+            object-fit: cover;
             opacity: 0.85;
             transition: var(--transition);
         }
@@ -540,15 +539,15 @@
             transition: var(--transition);
         }
 
-        /* Контейнер картинки подстраивается под пропорции оригинала без черных полей */
+        /* Контейнер картинки под размер рамки карточки */
         .product-img-wrap {
             width: 100%;
+            height: 220px; /* Фиксированная высота блока изображения */
             display: flex;
             align-items: center;
             justify-content: center;
             overflow: hidden;
             position: relative;
-            padding: 10px 0;
             margin: 12px 0;
             background: var(--bg-primary);
             border-radius: var(--radius-sm);
@@ -556,9 +555,8 @@
 
         .product-img-wrap img {
             width: 100%;
-            height: auto; /* Сохраняет исходный формат/пропорции фото */
-            max-height: 240px;
-            object-fit: contain; /* Картинка полностью видна в своем оригинальном виде */
+            height: 100%;
+            object-fit: cover; /* Картинка полностью заполняет рамку без черных полей */
             transition: transform 0.3s ease;
         }
 
@@ -688,7 +686,7 @@
             border: 1px solid var(--border-light);
         }
 
-        .cart-item img { width: 60px; height: 60px; object-fit: contain; background: var(--bg-secondary); border-radius: 8px; }
+        .cart-item img { width: 60px; height: 60px; object-fit: cover; background: var(--bg-secondary); border-radius: 8px; }
 
         .quantity-controls {
             display: flex;
@@ -787,9 +785,9 @@
         
         .modal-main-img-wrap {
             width: 100%;
+            height: 320px;
             background: var(--bg-primary);
             border-radius: var(--radius-md);
-            padding: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -798,9 +796,8 @@
         }
         .modal-main-img { 
             width: 100%; 
-            height: auto; 
-            max-height: 320px;
-            object-fit: contain; /* Сохраняет формат фото в модалке */
+            height: 100%; 
+            object-fit: cover; /* Заполнение без черных полей в модалке */
         }
         
         .modal-thumbs { 
@@ -815,7 +812,7 @@
         .modal-thumb { 
             width: 50px; 
             height: 50px; 
-            object-fit: contain; 
+            object-fit: cover; 
             background: var(--bg-primary); 
             border: 2px solid var(--border-light); 
             border-radius: 6px; 
@@ -1093,7 +1090,7 @@
                 mice: "Мыши",
                 keyboards: "Клавиатуры",
                 headsets: "Гарнитуры",
-                accessories: "Аксессуары",
+                accessories: "Аксесуари",
                 catalogTitle: "Каталог",
                 catalogSubtitle: "Топовые девайсы в наличии",
                 cartTitle: "Корзина",
@@ -1415,7 +1412,7 @@
             container.innerHTML = filtered.map(p => `
                 <a class="search-result-item" onclick="toggleSearch(false); openProductModal(products.find(x => x.id === '${p.id}'))">
                     <div style="display: flex; align-items: center; gap: 12px;">
-                        <img src="${p.img}" style="width: 40px; height: 40px; object-fit: contain;">
+                        <img src="${p.img}" style="width: 40px; height: 40px; object-fit: cover;">
                         <div><strong style="font-size: 0.9rem;">${p.brand} ${p.title}</strong></div>
                     </div>
                     <span style="font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 0.9rem;">${formatPrice(p.price)}</span>
