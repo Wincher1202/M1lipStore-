@@ -209,7 +209,19 @@
             animation: ticker 25s linear infinite;
         }
 
-        .ticker-move span { margin-right: 40px; }
+        .ticker-move span {
+            display: inline-flex;
+            align-items: center;
+            gap: 15px;
+            margin-right: 40px;
+        }
+
+        .ticker-logo {
+            height: 24px;
+            width: auto;
+            object-fit: contain;
+            border-radius: 4px;
+        }
 
         @keyframes ticker {
             0% { transform: translateX(0); }
@@ -527,13 +539,51 @@
 
         .product-card:hover .product-img-wrap img { transform: scale(1.06); }
 
+        /* ВЫБОР ЦВЕТА (КРУЖКИ) В КАРТОЧКЕ */
+        .color-picker-preview {
+            display: flex;
+            gap: 8px;
+            margin: 12px 0 4px;
+            align-items: center;
+        }
+
+        .color-dot {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            border: 1px solid var(--border-hover);
+            position: relative;
+        }
+
+        .color-dot.white { background-color: #FFFFFF; }
+        .color-dot.black { background-color: #1a1a1a; }
+
+        /* Если цвет выбран / активен */
+        .color-dot.active {
+            box-shadow: 0 0 0 2px var(--accent);
+        }
+
+        /* Если товара в другом цвете нет в наличии */
+        .color-dot.out-of-stock {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+        .color-dot.out-of-stock::after {
+            content: '';
+            position: absolute;
+            top: 7px; left: -1px;
+            width: 18px; height: 1.5px;
+            background-color: #ff3b30;
+            transform: rotate(-45deg);
+        }
+
         .product-info {
             display: flex;
             justify-content: space-between;
             align-items: flex-end;
             margin-top: auto;
             border-top: 1px solid var(--border-light);
-            padding-top: 20px;
+            padding-top: 16px;
         }
 
         .product-title-group h4 { font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; }
@@ -689,19 +739,6 @@
             .footer-grid { grid-template-columns: 1fr 1fr; gap: 40px; }
             .modal-grid { grid-template-columns: 1fr; padding: 30px; }
         }
-        .ticker-move span {
-    display: inline-flex;
-    align-items: center;
-    gap: 15px; /* Расстояние между логотипом и текстом */
-    margin-right: 40px;
-}
-
-.ticker-logo {
-    height: 24px; /* Высота логотипа в строке, можете настроить под себя */
-    width: auto;
-    object-fit: contain;
-    border-radius: 4px; /* Если хотите скругленные углы */
-}
     </style>
 </head>
 <body data-theme="light">
@@ -733,16 +770,15 @@
 
     <!-- TICKER -->
     <div class="ticker-wrap">
-    <div class="ticker-move">
-        <span><img src="logo-milipstore.png" alt="MilipStore" class="ticker-logo"> Безкоштовна доставка від 3000 грн</span>
-        <span><img src="logo-milipstore.png" alt="MilipStore" class="ticker-logo"> Нова категорія товарів вже доступна</span>
-        <span><img src="logo-milipstore.png" alt="MilipStore" class="ticker-logo"> Офіційне преміальне ігрове залізо</span>
-        <span><img src="logo-milipstore.png" alt="MilipStore" class="ticker-logo"> Безкоштовна доставка від 3000 грн</span>
-        <span><img src="logo-milipstore.png" alt="MilipStore" class="ticker-logo"> Безкоштовна доставка від 3000 грн</span>
-        <span><img src="logo-milipstore.png" alt="MilipStore" class="ticker-logo"> Нова категорія товарів вже доступна</span>
-        <span><img src="logo-milipstore.png" alt="MilipStore" class="ticker-logo"> Офіційне преміальне ігрове залізо</span>
+        <div class="ticker-move">
+            <span><img src="logo-milipstore.png" alt="MilipStore" class="ticker-logo"> Безкоштовна доставка від 3000 грн</span>
+            <span><img src="logo-milipstore.png" alt="MilipStore" class="ticker-logo"> Нова категорія товарів вже доступна</span>
+            <span><img src="logo-milipstore.png" alt="MilipStore" class="ticker-logo"> Офіційне преміальне ігрове залізо</span>
+            <span><img src="logo-milipstore.png" alt="MilipStore" class="ticker-logo"> Безкоштовна доставка від 3000 грн</span>
+            <span><img src="logo-milipstore.png" alt="MilipStore" class="ticker-logo"> Нова категорія товарів вже доступна</span>
+            <span><img src="logo-milipstore.png" alt="MilipStore" class="ticker-logo"> Офіційне преміальне ігрове залізо</span>
+        </div>
     </div>
-</div>
 
     <!-- HERO SECTION -->
     <section class="hero">
@@ -756,8 +792,8 @@
         </div>
         <div class="hero-visual">
             <div class="hero-card-3d" onclick="openProductModal(products[0])">
-                <span class="product-tag new">BESTSELLER</span>
-                <img src="https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?auto=format&fit=crop&w=800&q=80" alt="MCHOSE A7 V2 PRO">
+                <span class="product-tag new">HOT NOVELTY</span>
+                <img src="https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?auto=format&fit=crop&w=800&q=80" alt="ATTACK SHARK R5 ULTRA">
             </div>
         </div>
     </section>
@@ -897,6 +933,13 @@
                 <p id="modal-desc" style="color: var(--text-secondary); margin: 15px 0; font-size: 0.95rem;"></p>
                 <div class="product-price" id="modal-price" style="font-size: 1.8rem; color: var(--accent); margin: 20px 0;">₴ 0</div>
 
+                <!-- Выбор цвета в модалке -->
+                <div style="font-weight: 700; font-size: 0.9rem; margin: 15px 0 6px;">Колір (Color)</div>
+                <div class="color-picker-preview" style="margin-bottom: 20px;">
+                    <div class="color-dot white active" title="White (В наявності)"></div>
+                    <div class="color-dot black out-of-stock" title="Black (Немає в наявності)"></div>
+                </div>
+
                 <div style="font-weight: 700; font-size: 0.9rem; margin: 20px 0 8px;">Кількість</div>
                 <div class="quantity-controls" style="margin-bottom: 25px;">
                     <button onclick="adjustModalQty(-1)">−</button>
@@ -984,6 +1027,23 @@
 
         const products = [
             {
+                id: 'attack-shark-r5-ultra',
+                brand: 'ATTACK SHARK',
+                title: 'R5 ULTRA',
+                category: 'Миші',
+                tag: 'NEW / 8KHZ',
+                price: 2945,
+                desc: { ua: 'Carbon Fiber Lightweight Gaming Mouse з частотою опитування 8KHz та сенсором PAW3900MAX.', ru: 'Carbon Fiber Lightweight Gaming Mouse с частотой опроса 8KHz и сенсором PAW3900MAX.' },
+                img: 'attack-shark-r5-ultra-colors-price_3.jpg',
+                specs: [
+                    { label: 'SENSOR', value: 'PAW3900MAX' },
+                    { label: 'POLLING', value: '8KHZ' },
+                    { label: 'CONNECTION', value: 'TRI-MODE' },
+                    { label: 'MATERIAL', value: 'CARBON FIBER' }
+                ],
+                colClass: 'col-7'
+            },
+            {
                 id: 'mchose-a7-v2',
                 brand: 'MCHOSE',
                 title: 'A7 V2 PRO',
@@ -993,7 +1053,7 @@
                 desc: { ua: 'Wireless Gaming Mouse з безпрецедентною точністю.', ru: 'Wireless Gaming Mouse с беспрецедентной точностью.' },
                 img: 'https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?auto=format&fit=crop&w=800&q=80',
                 specs: [{ label: 'SENSOR', value: 'PAW3395' }, { label: 'WEIGHT', value: '54G' }],
-                colClass: 'col-7'
+                colClass: 'col-5'
             },
             {
                 id: 'atk-xsoft',
@@ -1017,18 +1077,6 @@
                 desc: { ua: 'Бездротова механічна клавіатура.', ru: 'Беспроводная механическая клавиатура.' },
                 img: 'https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=800&q=80',
                 specs: [{ label: 'SWITCHES', value: 'REAPER' }, { label: 'LAYOUT', value: '75%' }],
-                colClass: 'col-5'
-            },
-            {
-                id: 'milip-h1',
-                brand: 'MILIPSTORE',
-                title: 'H1 PRO WIRELESS',
-                category: 'Гарнітури',
-                tag: 'NEW',
-                price: 5299,
-                desc: { ua: 'Ігрова гарнітура з просторовим звуком.', ru: 'Игровая гарнитура с пространственным звуком.' },
-                img: 'https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&w=800&q=80',
-                specs: [{ label: 'DRIVERS', value: '50MM' }, { label: 'BATTERY', value: '60H' }],
                 colClass: 'col-7'
             }
         ];
@@ -1098,6 +1146,13 @@
                     <div class="product-img-wrap">
                         <img src="${p.img}" alt="${p.title}">
                     </div>
+                    
+                    <!-- Индикатор цветов прямо в карточке каталога -->
+                    <div class="color-picker-preview">
+                        <div class="color-dot white active" title="White"></div>
+                        <div class="color-dot black out-of-stock" title="Black (Out of stock)"></div>
+                    </div>
+
                     <div class="product-info">
                         <div class="product-title-group">
                             <h4>${p.brand}</h4>
