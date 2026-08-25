@@ -180,7 +180,7 @@
             transition: var(--transition);
         }
 
-        /* TICKER */
+        /* TICKER (Безперервний рядок) */
         .ticker-wrap {
             background: var(--accent);
             color: white;
@@ -198,7 +198,13 @@
 
         .ticker-move {
             display: inline-block;
-            animation: ticker 30s linear infinite;
+            white-space: nowrap;
+            animation: ticker 25s linear infinite;
+        }
+
+        .ticker-group {
+            display: inline-flex;
+            align-items: center;
         }
 
         .ticker-move span {
@@ -473,7 +479,7 @@
 
         .product-tag.new { background: var(--accent-light); color: var(--accent); }
 
-        /* НОВАЯ ПРИКОЛЬНАЯ АНИМАЦИЯ СЕРДЕЧКА */
+        /* ПОВІЛЬНА АНІМАЦІЯ СЕРДЕЧКА (В 2 РАЗИ ПОВІЛЬНІШЕ) */
         @keyframes heartBeatAnim {
             0% { transform: scale(1); }
             15% { transform: scale(1.35); }
@@ -500,11 +506,11 @@
         }
 
         .wishlist-btn svg {
-            transition: transform 0.2s ease, fill 0.2s ease, stroke 0.2s ease;
+            transition: transform 0.3s ease, fill 0.3s ease, stroke 0.3s ease;
         }
 
         .wishlist-btn.active svg {
-            animation: heartBeatAnim 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+            animation: heartBeatAnim 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
             fill: #FF3B30;
             stroke: #FF3B30;
         }
@@ -840,13 +846,21 @@
         </div>
     </header>
 
-    <!-- TICKER (БІГУЧИЙ РЯДОК УКРАЇНСЬКОЮ) -->
+    <!-- TICKER (БІГУЧИЙ РЯДОК З ДУБЛЮВАННЯМ ДЛЯ ПОВНОГО ЗАПОВНЕННЯ) -->
     <div class="ticker-wrap">
         <div class="ticker-move">
-            <span><img src="logo-milipstore.png" alt="MilipStore" class="ticker-logo"> Топові ігрові девайси та аксесуари</span>
-            <span><img src="logo-milipstore.png" alt="MilipStore" class="ticker-logo"> Сенсори найвищої продуктивності та опитування 8KHz</span>
-            <span><img src="logo-milipstore.png" alt="MilipStore" class="ticker-logo"> Офіційна гарантія та швидка відправка</span>
-            <span><img src="logo-milipstore.png" alt="MilipStore" class="ticker-logo"> Ідеальний сетап для справжніх геймерів</span>
+            <div class="ticker-group">
+                <span><img src="logo-milipstore.png" alt="MilipStore" class="ticker-logo"> Топові ігрові девайси та аксесуари</span>
+                <span><img src="logo-milipstore.png" alt="MilipStore" class="ticker-logo"> Сенсори найвищої продуктивності та опитування 8KHz</span>
+                <span><img src="logo-milipstore.png" alt="MilipStore" class="ticker-logo"> Офіційна гарантія та швидка відправка</span>
+                <span><img src="logo-milipstore.png" alt="MilipStore" class="ticker-logo"> Ідеальний сетап для справжніх геймерів</span>
+            </div>
+            <div class="ticker-group">
+                <span><img src="logo-milipstore.png" alt="MilipStore" class="ticker-logo"> Топові ігрові девайси та аксесуари</span>
+                <span><img src="logo-milipstore.png" alt="MilipStore" class="ticker-logo"> Сенсори найвищої продуктивності та опитування 8KHz</span>
+                <span><img src="logo-milipstore.png" alt="MilipStore" class="ticker-logo"> Офіційна гарантія та швидка відправка</span>
+                <span><img src="logo-milipstore.png" alt="MilipStore" class="ticker-logo"> Ідеальний сетап для справжніх геймерів</span>
+            </div>
         </div>
     </div>
 
