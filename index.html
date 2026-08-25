@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="uk">
+<html lang="ua">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -8,7 +8,7 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg-primary: #F8F9FA;
@@ -71,6 +71,11 @@
             min-height: 100%;
             display: flex;
             flex-direction: column;
+        }
+
+        /* Застосування гарного шрифту для всіх цифр на сайті */
+        .product-price, .badge-count, .spec-box strong, .quantity-controls span, .cart-total, header .logo span {
+            font-family: 'JetBrains Mono', monospace;
         }
 
         ::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -168,19 +173,7 @@
             justify-content: center;
         }
 
-        .lang-switch {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-light);
-            padding: 6px 10px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 700;
-            color: var(--text-primary);
-            cursor: pointer;
-            transition: var(--transition);
-        }
-
-        /* TICKER (Безперервний рядок) */
+        /* TICKER */
         .ticker-wrap {
             background: var(--accent);
             color: white;
@@ -479,7 +472,6 @@
 
         .product-tag.new { background: var(--accent-light); color: var(--accent); }
 
-        /* ПОВІЛЬНА АНІМАЦІЯ СЕРДЕЧКА (В 2 РАЗИ ПОВІЛЬНІШЕ) */
         @keyframes heartBeatAnim {
             0% { transform: scale(1); }
             15% { transform: scale(1.35); }
@@ -567,7 +559,7 @@
 
         .product-title-group h4 { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; }
         .product-title-group h3 { font-size: 1.1rem; font-weight: 800; margin-top: 2px; }
-        .product-price { font-size: 1.2rem; font-weight: 800; font-family: 'JetBrains Mono', monospace; }
+        .product-price { font-size: 1.2rem; font-weight: 800; }
 
         .product-action-hover {
             margin-top: 12px;
@@ -817,7 +809,7 @@
         .specs-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin: 12px 0; }
         .spec-box { background: var(--bg-primary); padding: 8px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-light); }
         .spec-box span { display: block; font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; }
-        .spec-box strong { font-size: 0.9rem; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+        .spec-box strong { font-size: 0.9rem; font-weight: 700; }
     </style>
 </head>
 <body data-theme="light">
@@ -826,8 +818,6 @@
         <a class="logo" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">MILIP<span>STORE</span></a>
 
         <div class="nav-right">
-            <button class="lang-switch" id="lang-switch-btn" onclick="toggleLanguage()">UA / RU</button>
-            
             <button class="icon-btn" id="theme-toggle-btn" aria-label="Тема">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
             </button>
@@ -846,7 +836,7 @@
         </div>
     </header>
 
-    <!-- TICKER (Безперервний рядок) -->
+    <!-- TICKER -->
     <div class="ticker-wrap">
         <div class="ticker-move">
             <div class="ticker-group">
@@ -868,10 +858,10 @@
     <section class="hero">
         <div class="hero-content">
             <div class="hero-badge">MILIPSTORE / 2026</div>
-            <h1 id="tr-hero-title">ТЕХНІКА,<br>ЯКА СТВОРЮЄ<br>ТВОЙ SETUP</h1>
-            <p id="tr-hero-desc">Gaming mice, keyboards and accessories для сучасного ігрового простору найвищого рівня.</p>
+            <h1>ТЕХНІКА,<br>ЯКА СТВОРЮЄ<br>ТВОЙ SETUP</h1>
+            <p>Gaming mice, keyboards and accessories для сучасного ігрового простору найвищого рівня.</p>
             <div class="hero-actions">
-                <a class="btn-primary" id="tr-btn-catalog" onclick="scrollToSection('catalog')">Дивитися каталог →</a>
+                <a class="btn-primary" onclick="scrollToSection('catalog')">Дивитися каталог →</a>
             </div>
         </div>
         <div class="hero-visual">
@@ -888,8 +878,8 @@
     <section class="section-padding" id="catalog">
         <div class="section-header">
             <div>
-                <h2 class="section-title" id="tr-catalog-title">Каталог</h2>
-                <p class="section-subtitle" id="tr-catalog-subtitle">Топові девайси в наявності</p>
+                <h2 class="section-title">Каталог</h2>
+                <p class="section-subtitle">Топові девайси в наявності</p>
             </div>
         </div>
         <div class="catalog-filters" id="catalog-filters">
@@ -935,7 +925,7 @@
             </div>
         </div>
         <div class="footer-bottom">
-            <span>MILIPSTORE © 2026. All rights reserved.</span>
+            <span>MILIPSTORE © 2026. Всі права захищено.</span>
             <span>Telegram Web App Market</span>
         </div>
     </footer>
@@ -946,13 +936,13 @@
     <!-- CART DRAWER -->
     <div class="drawer" id="cart-drawer">
         <div class="drawer-header">
-            <h3 id="tr-cart-title" style="font-weight: 800;">Кошик</h3>
+            <h3 style="font-weight: 800;">Кошик</h3>
             <button class="close-drawer" onclick="toggleCart(false)">✕</button>
         </div>
         <div class="drawer-body" id="cart-items-container"></div>
         <div class="drawer-footer">
             <div class="cart-total">
-                <span id="tr-cart-total">Разом:</span>
+                <span>Разом:</span>
                 <span id="cart-total-price">₴ 0</span>
             </div>
             <button class="btn-primary" style="width: 100%; justify-content: center;" onclick="checkout()">Оформити замовлення →</button>
@@ -982,15 +972,15 @@
                 <div class="modal-thumbs" id="modal-thumbs"></div>
             </div>
             <div class="modal-details">
-                <span class="product-tag new" id="modal-tag">NEW</span>
-                <h4 id="modal-brand" style="color: var(--text-muted); text-transform: uppercase; font-size: 0.7rem; font-weight: 800; margin-top: 6px;">BRAND</h4>
+                <span class="product-tag new" id="modal-tag">НОВИНКА</span>
+                <h4 id="modal-brand" style="color: var(--text-muted); text-transform: uppercase; font-size: 0.7rem; font-weight: 800; margin-top: 6px;">БРЕНД</h4>
                 <h2 id="modal-title" style="font-size: 1.4rem; font-weight: 800; margin: 4px 0;"></h2>
                 <p id="modal-desc" style="color: var(--text-secondary); margin: 6px 0; font-size: 0.85rem;"></p>
                 <div class="product-price" id="modal-price" style="font-size: 1.3rem; color: var(--accent); margin: 8px 0;">₴ 0</div>
 
                 <div class="modal-options-row">
                     <div class="option-group">
-                        <label>Color (<span id="modal-color-name" style="text-transform: capitalize;">white</span>)</label>
+                        <label>Колір (<span id="modal-color-name" style="text-transform: capitalize;">білий</span>)</label>
                         <div class="color-selector-large" id="modal-color-selector"></div>
                     </div>
 
@@ -1026,62 +1016,15 @@
             }
         }
 
-        let currentLang = 'ua';
-        const translations = {
-            ua: {
-                heroTitle: "ТЕХНІКА,<br>ЯКА СТВОРЮЄ<br>ТВОЙ SETUP",
-                heroDesc: "Gaming mice, keyboards and accessories для сучасного ігрового простору найвищого рівня.",
-                btnCatalog: "Дивитися каталог →",
-                catalogTitle: "Каталог",
-                catalogSubtitle: "Топові девайси в наявності",
-                cartTitle: "Кошик",
-                cartTotal: "Разом:",
-                emptyCart: "Кошик порожній",
-                emptySearch: "Нічого не знайдено",
-                alertOrder: "Замовлення успішно оформлено! Дякуємо за покупку в MILIPSTORE."
-            },
-            ru: {
-                heroTitle: "ТЕХНИКА,<br>КОТОРАЯ СОЗДАЁТ<br>ТВОЙ SETUP",
-                heroDesc: "Gaming mice, keyboards and accessories для современного игрового пространства высочайшего уровня.",
-                btnCatalog: "Смотреть каталог →",
-                catalogTitle: "Каталог",
-                catalogSubtitle: "Топовые девайсы в наличии",
-                cartTitle: "Корзина",
-                cartTotal: "Итого:",
-                emptyCart: "Корзина пуста",
-                emptySearch: "Ничего не найдено",
-                alertOrder: "Заказ успешно оформлен! Спасибо за покупку в MILIPSTORE."
-            }
-        };
-
-        function toggleLanguage() {
-            currentLang = currentLang === 'ua' ? 'ru' : 'ua';
-            document.getElementById('lang-switch-btn').innerText = currentLang === 'ua' ? 'UA / RU' : 'RU / UA';
-            updateStaticTexts();
-            renderCatalog();
-            renderCartItems();
-        }
-
-        function updateStaticTexts() {
-            const t = translations[currentLang];
-            document.getElementById('tr-hero-title').innerHTML = t.heroTitle;
-            document.getElementById('tr-hero-desc').innerText = t.heroDesc;
-            document.getElementById('tr-btn-catalog').innerText = t.btnCatalog;
-            document.getElementById('tr-catalog-title').innerText = t.catalogTitle;
-            document.getElementById('tr-catalog-subtitle').innerText = t.catalogSubtitle;
-            document.getElementById('tr-cart-title').innerText = t.cartTitle;
-            document.getElementById('tr-cart-total').innerText = t.cartTotal;
-        }
-
         const products = [
             {
                 id: 'attack-shark-r5-ultra',
                 brand: 'ATTACK SHARK',
                 title: 'R5 ULTRA',
                 category: 'Миші',
-                tag: 'NEW / 8KHZ',
+                tag: 'ХІТ / 8KHZ',
                 price: 2945,
-                desc: { ua: 'Флагманська надлегка бездротова ігрова миша з карбону вагою 39г, сенсором PAW3950MAX (42 000 DPI) та 8KHz опитуванням.', ru: 'Флагманская сверхлёгкая беспроводная игровая мышь из карбона весом 39г, сенсором PAW3950MAX (42 000 DPI) и опросом 8KHz.' },
+                desc: 'Флагманська надлегка бездротова ігрова миша з карбону вагою 39г, сенсором PAW3950MAX (42 000 DPI) та 8KHz опитуванням.',
                 img: 'attack-shark-r5-ultra-colors-price.jpg',
                 gallery: [
                     'attack-shark-r5-ultra-colors-price.jpg',
@@ -1093,17 +1036,17 @@
                     'attack-shark-r5-ultra-dongle-receiver.jpg'
                 ],
                 specs: [
-                    { label: 'SENSOR', value: 'PAW3950MAX' },
-                    { label: 'DPI', value: '42,000 DPI' },
-                    { label: 'WEIGHT', value: '39G' },
-                    { label: 'POLLING', value: '8KHZ' },
-                    { label: 'CONNECTION', value: 'TRI-MODE' },
-                    { label: 'MATERIAL', value: 'CARBON FIBER' }
+                    { label: 'СЕНСОР', value: 'PAW3950MAX' },
+                    { label: 'РОЗДІЛЬНІСТЬ (DPI)', value: '42,000 DPI' },
+                    { label: 'ВАГА', value: '39Г' },
+                    { label: 'ЧАСТОТА ОПИТУВАННЯ', value: '8KHZ' },
+                    { label: 'ПІДКЛЮЧЕННЯ', value: 'ТРИРЕЖИМНЕ' },
+                    { label: 'МАТЕРІАЛ', value: 'КАРБОН' }
                 ],
                 colors: [
-                    { name: 'white', class: 'white', available: true },
-                    { name: 'black', class: 'black', available: false },
-                    { name: 'pink', class: 'pink', available: false }
+                    { name: 'білий', class: 'white', available: true },
+                    { name: 'чорний', class: 'black', available: false },
+                    { name: 'рожевий', class: 'pink', available: false }
                 ]
             },
             {
@@ -1111,15 +1054,20 @@
                 brand: 'MCHOSE',
                 title: 'A7 V2 PRO',
                 category: 'Миші',
-                tag: 'BESTSELLER',
+                tag: 'БЕСТСЕЛЕР',
                 price: 4599,
-                desc: { ua: 'Wireless Gaming Mouse з безпрецедентною точністю.', ru: 'Wireless Gaming Mouse с беспрецедентной точностью.' },
+                desc: 'Бездротова ігрова миша з безпрецедентною точністю та високою продуктивністю.',
                 img: 'https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?auto=format&fit=crop&w=800&q=80',
                 gallery: ['https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?auto=format&fit=crop&w=800&q=80'],
-                specs: [{ label: 'SENSOR', value: 'PAW3395' }, { label: 'WEIGHT', value: '54G' }],
+                specs: [
+                    { label: 'СЕНСОР', value: 'PAW3395' },
+                    { label: 'ВАГА', value: '54Г' },
+                    { label: 'ПІДКЛЮЧЕННЯ', value: 'БЕЗДРОТОВЕ' },
+                    { label: 'АКУМУЛЯТОР', value: 'ДО 80 ГОД' }
+                ],
                 colors: [
-                    { name: 'white', class: 'white', available: true },
-                    { name: 'black', class: 'black', available: true }
+                    { name: 'білий', class: 'white', available: true },
+                    { name: 'чорний', class: 'black', available: true }
                 ]
             },
             {
@@ -1127,14 +1075,18 @@
                 brand: 'ATK',
                 title: 'XSOFT GAMING MAT',
                 category: 'Аксесуари',
-                tag: 'NEW',
+                tag: 'НОВИНКА',
                 price: 1499,
-                desc: { ua: 'Професійний ігровий килимок.', ru: 'Профессиональный игровой коврик.' },
+                desc: 'Професійний ігровий килимок для максимального контролю ковзання миші.',
                 img: 'https://images.unsplash.com/photo-1618384887929-16ec33fab9ef?auto=format&fit=crop&w=800&q=80',
                 gallery: ['https://images.unsplash.com/photo-1618384887929-16ec33fab9ef?auto=format&fit=crop&w=800&q=80'],
-                specs: [{ label: 'SURFACE', value: 'SPEED' }, { label: 'THICKNESS', value: '4MM' }],
+                specs: [
+                    { label: 'ПОВЕРХНЯ', value: 'ШВИДКІСТЬ (SPEED)' },
+                    { label: 'ТОВЩИНА', value: '4 ММ' },
+                    { label: 'ОСНОВА', value: 'КАУЧУК' }
+                ],
                 colors: [
-                    { name: 'black', class: 'black', available: true }
+                    { name: 'чорний', class: 'black', available: true }
                 ]
             },
             {
@@ -1142,16 +1094,21 @@
                 brand: 'AULA',
                 title: 'F75 MECHANICAL',
                 category: 'Клавіатури',
-                tag: 'POPULAR',
+                tag: 'ПОПУЛЯРНЕ',
                 price: 3899,
-                desc: { ua: 'Бездротова механічна клавіатура.', ru: 'Беспроводная механическая клавиатура.' },
+                desc: 'Бездротова механічна клавіатура з чудовим звуком друку та кастомними світчами.',
                 img: 'https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=800&q=80',
                 gallery: ['https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=800&q=80'],
-                specs: [{ label: 'SWITCHES', value: 'REAPER' }, { label: 'LAYOUT', value: '75%' }],
+                specs: [
+                    { label: 'ПЕРЕМИКАЧІ', value: 'REAPER' },
+                    { label: 'ФОРМ-ФАКТОР', value: '75%' },
+                    { label: 'ПІДКЛЮЧЕННЯ', value: 'ТРИРЕЖИМНЕ' },
+                    { label: 'ПІДСВІЧУВАННЯ', value: 'RGB' }
+                ],
                 colors: [
-                    { name: 'white', class: 'white', available: true },
-                    { name: 'black', class: 'black', available: true },
-                    { name: 'pink', class: 'pink', available: true }
+                    { name: 'білий', class: 'white', available: true },
+                    { name: 'чорний', class: 'black', available: true },
+                    { name: 'рожевий', class: 'pink', available: true }
                 ]
             }
         ];
@@ -1164,7 +1121,7 @@
         let currentCategoryFilter = 'All';
 
         let heroIndex = 0;
-        const heroProducts = products.filter(p => p.tag.includes('NEW') || p.tag.includes('HOT') || p.tag.includes('BESTSELLER'));
+        const heroProducts = products.filter(p => p.tag.includes('НОВИНКА') || p.tag.includes('ХІТ') || p.tag.includes('БЕСТСЕЛЕР') || p.tag.includes('ПОПУЛЯРНЕ'));
 
         function updateHeroBanner() {
             if (heroProducts.length === 0) return;
@@ -1252,7 +1209,7 @@
                         </div>
                         
                         <div class="color-picker-preview">
-                            <div class="color-dot ${firstColorClass} active" title="Color"></div>
+                            <div class="color-dot ${firstColorClass} active" title="Колір"></div>
                         </div>
 
                         <div class="product-info">
@@ -1263,7 +1220,7 @@
                             <div class="product-price">${formatPrice(p.price)}</div>
                         </div>
                         <div class="product-action-hover">
-                            <button class="btn-primary" style="width: 100%; justify-content: center; padding: 10px; font-size: 0.85rem;" onclick="event.stopPropagation(); addDirectToCart('${p.id}')">${currentLang === 'ua' ? 'В кошик' : 'В корзину'}</button>
+                            <button class="btn-primary" style="width: 100%; justify-content: center; padding: 10px; font-size: 0.85rem;" onclick="event.stopPropagation(); addDirectToCart('${p.id}')">В кошик</button>
                         </div>
                     </div>
                 `;
@@ -1274,7 +1231,7 @@
             const product = products.find(p => p.id === productId);
             if (!product) return;
 
-            const activeColors = product.colors || [{ name: 'white', available: true }];
+            const activeColors = product.colors || [{ name: 'білий', available: true }];
             const colorObj = activeColors[selectedColorIndex] || activeColors[0];
 
             const existingIndex = wishlist.findIndex(item => item.id === productId && item.color === colorObj.name);
@@ -1306,7 +1263,7 @@
 
         function updateModalWishlistBtn() {
             const btn = document.getElementById('modal-wishlist-btn');
-            const activeColors = currentModalProduct.colors || [{ name: 'white' }];
+            const activeColors = currentModalProduct.colors || [{ name: 'білий' }];
             const colorObj = activeColors[selectedColorIndex] || activeColors[0];
             const isFav = wishlist.some(item => item.id === currentModalProduct.id && item.color === colorObj.name);
             btn.classList.toggle('active', isFav);
@@ -1317,7 +1274,7 @@
         function addDirectToCart(productId) {
             const product = products.find(p => p.id === productId);
             if (!product) return;
-            const defaultColor = product.colors && product.colors.find(c => c.available) ? product.colors.find(c => c.available).name : 'white';
+            const defaultColor = product.colors && product.colors.find(c => c.available) ? product.colors.find(c => c.available).name : 'білий';
             addToCartFull(product, defaultColor, 1);
         }
 
@@ -1359,9 +1316,8 @@
 
         function renderCartItems() {
             const container = document.getElementById('cart-items-container');
-            const t = translations[currentLang];
             if (cart.length === 0) {
-                container.innerHTML = `<p style="color: var(--text-secondary); text-align: center; margin-top: 30px;">${t.emptyCart}</p>`;
+                container.innerHTML = `<p style="color: var(--text-secondary); text-align: center; margin-top: 30px;">Кошик порожній</p>`;
                 document.getElementById('cart-total-price').innerText = formatPrice(0);
                 if (tg && tg.MainButton) tg.MainButton.hide();
                 return;
@@ -1372,7 +1328,7 @@
                     <div style="flex-grow: 1;">
                         <h4 style="font-size: 0.9rem; font-weight: 700;">${item.brand} ${item.title}</h4>
                         <p style="font-size: 0.75rem; color: var(--text-secondary);">Колір: <strong>${item.color}</strong></p>
-                        <p style="font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; font-weight: 700;">${formatPrice(item.price)}</p>
+                        <p style="font-size: 0.85rem; font-weight: 700;">${formatPrice(item.price)}</p>
                         <div class="quantity-controls" style="margin-top: 4px;">
                             <button onclick="updateCartQty('${item.id}', '${item.color}', -1)">−</button>
                             <span style="font-weight: 700;">${item.qty}</span>
@@ -1390,7 +1346,7 @@
             if (!tg || !tg.MainButton) return;
             const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
             if (cart.length > 0) {
-                tg.MainButton.text = (currentLang === 'ua' ? 'Оформити замовлення: ' : 'Оформить заказ: ') + formatPrice(total);
+                tg.MainButton.text = 'Оформити замовлення: ' + formatPrice(total);
                 tg.MainButton.show();
                 tg.MainButton.onClick(checkout);
             } else {
@@ -1423,11 +1379,10 @@
 
         function handleSearch(query) {
             const container = document.getElementById('search-results');
-            const t = translations[currentLang];
             if (!query.trim()) { container.innerHTML = ''; return; }
             const filtered = products.filter(p => p.title.toLowerCase().includes(query.toLowerCase()) || p.brand.toLowerCase().includes(query.toLowerCase()));
             if (filtered.length === 0) {
-                container.innerHTML = `<p style="color: var(--text-secondary); text-align: center; padding: 15px;">${t.emptySearch}</p>`;
+                container.innerHTML = `<p style="color: var(--text-secondary); text-align: center; padding: 15px;">Нічого не знайдено</p>`;
                 return;
             }
             container.innerHTML = filtered.map(p => `
@@ -1436,7 +1391,7 @@
                         <img src="${p.img}" style="width: 38px; height: 38px; object-fit: cover; border-radius: 6px;">
                         <div><strong style="font-size: 0.9rem;">${p.brand} ${p.title}</strong></div>
                     </div>
-                    <span style="font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 0.9rem;">${formatPrice(p.price)}</span>
+                    <span style="font-weight: 700; font-size: 0.9rem;">${formatPrice(p.price)}</span>
                 </div>
             `).join('');
         }
@@ -1464,7 +1419,7 @@
             document.getElementById('modal-tag').innerText = product.tag;
             document.getElementById('modal-brand').innerText = product.brand;
             document.getElementById('modal-title').innerText = product.title;
-            document.getElementById('modal-desc').innerText = product.desc[currentLang];
+            document.getElementById('modal-desc').innerText = product.desc;
             document.getElementById('modal-price').innerText = formatPrice(product.price);
             document.getElementById('modal-qty').innerText = modalQty;
             document.getElementById('modal-specs').innerHTML = product.specs.map(s => `
@@ -1495,7 +1450,7 @@
             `).join('');
 
             const activeColorObj = currentModalProduct.colors[selectedColorIndex];
-            document.getElementById('modal-color-name').innerText = activeColorObj ? activeColorObj.name : 'white';
+            document.getElementById('modal-color-name').innerText = activeColorObj ? activeColorObj.name : 'білий';
         }
 
         function changeModalMainImage(src, thumbElement) {
@@ -1516,7 +1471,7 @@
 
         function addCurrentProductToCart() {
             if (currentModalProduct) {
-                const activeColors = currentModalProduct.colors || [{ name: 'white', available: true }];
+                const activeColors = currentModalProduct.colors || [{ name: 'білий', available: true }];
                 const colorObj = activeColors[selectedColorIndex] || activeColors[0];
                 if (!colorObj.available) return;
                 
@@ -1526,7 +1481,7 @@
         }
 
         function checkout() {
-            alert(translations[currentLang].alertOrder);
+            alert("Замовлення успішно оформлено! Дякуємо за покупку в MILIPSTORE.");
             cart = [];
             localStorage.setItem('milip_cart', JSON.stringify(cart));
             updateBadges();
