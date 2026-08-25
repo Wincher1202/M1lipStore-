@@ -65,7 +65,7 @@
             background-color: var(--bg-primary);
             color: var(--text-primary);
             line-height: 1.5;
-            overflow-x: hidden;
+            overflow-x: hidden; /* Жесткий запрет горизонтального скролла на странице */
             -webkit-font-smoothing: antialiased;
             min-height: 100%;
             display: flex;
@@ -723,34 +723,71 @@
         .search-results { margin-top: 20px; max-height: 350px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
         .search-result-item { display: flex; align-items: center; justify-content: space-between; padding: 12px; background: var(--bg-primary); border-radius: var(--radius-sm); text-decoration: none; color: var(--text-primary); }
 
-        /* Оптимизированные стили модального окна товара для мобильных */
+        /* ИДЕАЛЬНО ОПТИМИЗИРОВАННОЕ МОДАЛЬНОЕ ОКНО ДЛЯ ТЕЛЕФОНОВ (БЕЗ ГОРИЗОНТАЛЬНОГО СКРОЛЛА) */
         .product-modal {
             position: fixed;
             top: 50%; left: 50%;
             transform: translate(-50%, -50%) scale(0.95);
-            width: 92%; max-width: 960px;
-            max-height: 85vh;
+            width: 100%; 
+            max-width: 600px;
+            height: 100%; 
+            max-height: 100vh;
             background: var(--bg-secondary);
             z-index: 2005;
-            border-radius: var(--radius-lg);
+            border-radius: 0;
             box-shadow: 0 30px 60px rgba(0,0,0,0.25);
             overflow-y: auto;
+            overflow-x: hidden !important; /* Гарантированно убирает боковой скролл */
             opacity: 0;
             visibility: hidden;
             transition: var(--transition);
         }
 
+        @media(min-width: 768px) {
+            .product-modal {
+                width: 92%;
+                max-width: 850px;
+                height: auto;
+                max-height: 85vh;
+                border-radius: var(--radius-lg);
+            }
+        }
+
         .product-modal.active { opacity: 1; visibility: visible; transform: translate(-50%, -50%) scale(1); }
-        .modal-grid { display: grid; grid-template-columns: 1fr; gap: 20px; padding: 24px 20px; }
-        @media(min-width: 768px) { .modal-grid { grid-template-columns: 1fr 1fr; padding: 40px; gap: 30px; } }
         
-        .modal-gallery { display: flex; flex-direction: column; gap: 12px; }
+        .modal-grid { 
+            display: flex;
+            flex-direction: column;
+            gap: 16px; 
+            padding: 20px 16px 40px; 
+            width: 100%;
+            box-sizing: border-box;
+            overflow-x: hidden;
+        }
+
+        @media(min-width: 768px) { 
+            .modal-grid { 
+                display: grid;
+                grid-template-columns: 1fr 1fr; 
+                padding: 40px; 
+                gap: 30px; 
+            } 
+        }
         
-        /* Исправление размера картинки: адаптивные пропорции вместо жесткой высоты */
+        .modal-gallery { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 10px; 
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
+            overflow-x: hidden;
+        }
+        
         .modal-main-img-wrap {
             width: 100%;
-            aspect-ratio: 16 / 11;
-            max-height: 240px;
+            aspect-ratio: 4 / 3;
+            max-height: 260px;
             background: var(--bg-primary);
             border-radius: var(--radius-md);
             padding: 10px;
@@ -758,6 +795,7 @@
             align-items: center;
             justify-content: center;
             overflow: hidden;
+            box-sizing: border-box;
         }
         .modal-main-img { 
             width: 100%; 
@@ -765,9 +803,36 @@
             object-fit: contain; 
         }
         
-        .modal-thumbs { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; }
-        .modal-thumb { width: 52px; height: 52px; object-fit: contain; background: var(--bg-primary); border: 2px solid var(--border-light); border-radius: 6px; padding: 4px; cursor: pointer; transition: var(--transition); flex-shrink: 0; }
+        /* ПРЕВЬЮШКИ ТЕПЕРЬ ПЕРЕНОСЯТСЯ ВНИЗ БЕЗ ГОРИЗОНТАЛЬНОГО СКРОЛЛА */
+        .modal-thumbs { 
+            display: flex; 
+            flex-wrap: wrap; /* Автоматический перенос фоток вниз на новую строку */
+            gap: 8px; 
+            overflow: visible; 
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
+        }
+        .modal-thumb { 
+            width: 50px; 
+            height: 50px; 
+            object-fit: contain; 
+            background: var(--bg-primary); 
+            border: 2px solid var(--border-light); 
+            border-radius: 6px; 
+            padding: 4px; 
+            cursor: pointer; 
+            transition: var(--transition); 
+            flex-shrink: 0; 
+        }
         .modal-thumb:hover, .modal-thumb.active { border-color: var(--accent); }
+
+        .modal-details {
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
+            overflow-x: hidden;
+        }
 
         .specs-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 15px 0; }
         .spec-box { background: var(--bg-primary); padding: 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-light); }
@@ -776,7 +841,6 @@
     </style>
 </head>
 <body data-theme="light">
-
     <!-- HEADER -->
     <header id="site-header">
         <a class="logo" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">MILIP<span>STORE</span></a>
@@ -1067,7 +1131,7 @@
             document.getElementById('tr-cart-total').innerText = t.cartTotal;
         }
 
-       const products = [
+        const products = [
             {
                 id: 'attack-shark-r5-ultra',
                 brand: 'ATTACK SHARK',
