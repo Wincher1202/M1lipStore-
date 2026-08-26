@@ -1,6 +1,7 @@
 import asyncio
 import json
 import logging
+import os
 import urllib.parse
 from fastapi import FastAPI, Response
 from fastapi.middleware.cors import CORSMiddleware
@@ -197,6 +198,10 @@ async def process_back_to_admin(callback: CallbackQuery):
 # --- ЗМІНА ТЕГУ ---
 @router.callback_query(F.data.startswith("set_tag_"))
 async def process_set_tag(callback: CallbackQuery, state: FSMContext):
+    if callback.from_user.id not in ADMIN_IDS:
+        await callback.answer("Доступ заборонено!", show_alert=True)
+        return
+
     product_id = callback.data.replace("set_tag_", "")
     product = next((p for p in PRODUCTS_DB if p["id"] == product_id), None)
 
@@ -230,6 +235,10 @@ async def save_tag(message: Message, state: FSMContext):
 # --- ЗМІНА ЦІНИ ---
 @router.callback_query(F.data.startswith("set_price_"))
 async def process_set_price(callback: CallbackQuery, state: FSMContext):
+    if callback.from_user.id not in ADMIN_IDS:
+        await callback.answer("Доступ заборонено!", show_alert=True)
+        return
+
     product_id = callback.data.replace("set_price_", "")
     product = next((p for p in PRODUCTS_DB if p["id"] == product_id), None)
 
@@ -265,6 +274,10 @@ async def save_price(message: Message, state: FSMContext):
 # --- ЗМІНА НАЗВИ ---
 @router.callback_query(F.data.startswith("set_title_"))
 async def process_set_title(callback: CallbackQuery, state: FSMContext):
+    if callback.from_user.id not in ADMIN_IDS:
+        await callback.answer("Доступ заборонено!", show_alert=True)
+        return
+
     product_id = callback.data.replace("set_title_", "")
     product = next((p for p in PRODUCTS_DB if p["id"] == product_id), None)
 
@@ -362,6 +375,4 @@ async def main():
 
 
 if __name__ == "__main__":
-    import os
-
     asyncio.run(main())
