@@ -316,7 +316,7 @@
             object-fit: cover;
             display: block;
             border-radius: var(--radius-md);
-            transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+            transition: opacity 0.5s ease, transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
         }
 
         .hero-card-3d:hover img {
@@ -1092,7 +1092,8 @@
         let currentCategoryFilter = 'All';
 
         let heroIndex = 0;
-        const heroProducts = products.filter(p => p.tag.includes('НОВИНКА') || p.tag.includes('ХІТ') || p.tag.includes('БЕСТСЕЛЕР') || p.tag.includes('ПОПУЛЯРНЕ'));
+        // Змінено: беремо абсолютно весь асортимент товарів для анімації в банері
+        const heroProducts = products;
 
         function updateHeroBanner() {
             if (heroProducts.length === 0) return;
@@ -1135,7 +1136,7 @@
             renderCatalog();
             updateBadges();
 
-            setInterval(updateHeroBanner, 4500);
+            setInterval(updateHeroBanner, 3500);
 
             window.addEventListener('scroll', () => {
                 document.getElementById('site-header').classList.toggle('scrolled', window.scrollY > 30);
