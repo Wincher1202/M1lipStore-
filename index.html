@@ -1003,8 +1003,6 @@
             }
         }
 
-        // Початкові повні характеристики для товарів (зображення, опис тощо),
-        // а ціни, назви та теги будуть підтягуватись із твого бекенду (main.py)
         const staticProductsMeta = {
             'attack-shark-r5-ultra': {
                 brand: 'ATTACK SHARK',
@@ -1095,7 +1093,6 @@
         let currentCategoryFilter = 'All';
         let heroIndex = 0;
 
-        // Вкажи сюди посилання на свій запущений FastAPI бекенд (наприклад, з Render)
         const API_URL = "https://m1lipstore.onrender.com/api/products";
 
         async function fetchProducts() {
@@ -1103,7 +1100,6 @@
                 let response = await fetch(API_URL);
                 let backendData = await response.json();
                 
-                // Об'єднуємо дані з сервера (ціна, назва, тег) із детальними описами й фотографіями
                 products = backendData.map(item => {
                     let meta = staticProductsMeta[item.id] || {
                         brand: 'M1LIP',
@@ -1124,7 +1120,6 @@
                 });
             } catch (e) {
                 console.warn("Не вдалося завантажити товари з API, завантажуємо локальний резерв:", e);
-                // Резервний варіант, якщо сервер недоступний
                 products = Object.keys(staticProductsMeta).map(id => ({
                     id,
                     ...staticProductsMeta[id],
@@ -1178,7 +1173,7 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            fetchProducts(); // Завантажуємо товари з бекенду при старті
+            fetchProducts();
             updateBadges();
 
             setInterval(updateHeroBanner, 3500);
@@ -1605,7 +1600,6 @@
 
         function checkout() {
             if (tg && tg.sendData) {
-                // Відправляємо дані назад у Telegram-бота
                 tg.sendData(JSON.stringify(cart));
                 tg.close();
             } else {
