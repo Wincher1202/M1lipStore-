@@ -8,7 +8,7 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg-primary: #F8F9FA;
@@ -73,7 +73,20 @@
             flex-direction: column;
         }
 
-        .product-price, .badge-count, .spec-box strong, .quantity-controls span, .cart-total, header .logo span {
+        /* Стандартний акуратний шрифт для цін як у топ маркетплейсах */
+        .product-price, .cart-total, header .logo span {
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+        }
+        
+        .product-price span.currency {
+            font-weight: 400;
+            color: var(--text-secondary);
+            font-size: 0.9em;
+            margin-left: 2px;
+        }
+
+        .badge-count, .spec-box strong, .quantity-controls span {
             font-family: 'JetBrains Mono', monospace;
         }
 
@@ -524,7 +537,7 @@
 
         .product-title-group h4 { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; }
         .product-title-group h3 { font-size: 1.1rem; font-weight: 800; margin-top: 2px; }
-        .product-price { font-size: 1.2rem; font-weight: 800; }
+        .product-price { font-size: 1.15rem; font-weight: 600; }
 
         .product-action-hover {
             margin-top: 12px;
@@ -633,7 +646,7 @@
         .quantity-controls button:hover { transform: scale(1.2); color: var(--accent); }
 
         .drawer-footer { padding: 20px; border-top: 1px solid var(--border-light); background: var(--bg-primary); }
-        .cart-total { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; font-size: 1.1rem; font-weight: 800; }
+        .cart-total { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; font-size: 1.1rem; font-weight: 700; }
 
         .search-modal {
             position: fixed;
@@ -905,7 +918,7 @@
         <div class="drawer-footer">
             <div class="cart-total">
                 <span>Разом:</span>
-                <span id="cart-total-price">₴ 0</span>
+                <span id="cart-total-price">2945 <span class="currency">₴</span></span>
             </div>
             <button class="btn-primary" style="width: 100%; justify-content: center;" onclick="checkout()">Оформити замовлення →</button>
         </div>
@@ -947,7 +960,7 @@
                 <h4 id="modal-brand" style="color: var(--text-muted); text-transform: uppercase; font-size: 0.7rem; font-weight: 800; margin-top: 6px;">БРЕНД</h4>
                 <h2 id="modal-title" style="font-size: 1.4rem; font-weight: 800; margin: 4px 0;"></h2>
                 <p id="modal-desc" style="color: var(--text-secondary); margin: 6px 0; font-size: 0.85rem;"></p>
-                <div class="product-price" id="modal-price" style="font-size: 1.3rem; color: var(--accent); margin: 8px 0;">₴ 0</div>
+                <div class="product-price" id="modal-price" style="font-size: 1.3rem; color: var(--accent); margin: 8px 0;">2945 <span class="currency">₴</span></div>
 
                 <div class="modal-options-row">
                     <div class="option-group">
@@ -1092,7 +1105,6 @@
         let currentCategoryFilter = 'All';
 
         let heroIndex = 0;
-        // Змінено: беремо абсолютно весь асортимент товарів для анімації в банері
         const heroProducts = products;
 
         function updateHeroBanner() {
@@ -1116,8 +1128,9 @@
             openProductModal(currentHeroProd);
         }
 
+        // Функція форматування ціни у стилі маркетплейсів (наприклад: 2 945 ₴)
         function formatPrice(price) {
-            return '₴ ' + price.toLocaleString();
+            return `${price.toLocaleString('uk-UA')} <span class="currency">₴</span>`;
         }
 
         function filterByCategory(category) {
@@ -1267,7 +1280,7 @@
                     <div style="flex-grow: 1;">
                         <h4 style="font-size: 0.9rem; font-weight: 700; cursor: pointer;" onclick="toggleWishlistDrawer(false); openProductModal(products.find(x => x.id === '${item.id}'))">${item.brand} ${item.title}</h4>
                         <p style="font-size: 0.75rem; color: var(--text-secondary);">Колір: <strong>${item.color}</strong></p>
-                        <p style="font-size: 0.85rem; font-weight: 700;">${formatPrice(item.price)}</p>
+                        <p style="font-size: 0.85rem; font-weight: 600;">${formatPrice(item.price)}</p>
                         <div style="display: flex; gap: 8px; margin-top: 6px;">
                             <button class="btn-primary" style="padding: 4px 10px; font-size: 0.75rem;" onclick="addWishlistItemToCart('${item.id}', '${item.color}')">В кошик</button>
                             <button class="filter-btn" style="padding: 4px 10px; font-size: 0.75rem; color: #FF3B30; border-color: #FF3B30;" onclick="removeWishlistItem(${index})">Видалити</button>
@@ -1345,7 +1358,7 @@
             const container = document.getElementById('cart-items-container');
             if (cart.length === 0) {
                 container.innerHTML = `<p style="color: var(--text-secondary); text-align: center; margin-top: 30px;">Кошик порожній</p>`;
-                document.getElementById('cart-total-price').innerText = formatPrice(0);
+                document.getElementById('cart-total-price').innerHTML = formatPrice(0);
                 if (tg && tg.MainButton) tg.MainButton.hide();
                 return;
             }
@@ -1355,7 +1368,7 @@
                     <div style="flex-grow: 1;">
                         <h4 style="font-size: 0.9rem; font-weight: 700;">${item.brand} ${item.title}</h4>
                         <p style="font-size: 0.75rem; color: var(--text-secondary);">Колір: <strong>${item.color}</strong></p>
-                        <p style="font-size: 0.85rem; font-weight: 700;">${formatPrice(item.price)}</p>
+                        <p style="font-size: 0.85rem; font-weight: 600;">${formatPrice(item.price)}</p>
                         <div class="quantity-controls" style="margin-top: 4px;">
                             <button onclick="updateCartQty('${item.id}', '${item.color}', -1)">−</button>
                             <span style="font-weight: 700;">${item.qty}</span>
@@ -1365,7 +1378,7 @@
                 </div>
             `).join('');
             const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-            document.getElementById('cart-total-price').innerText = formatPrice(total);
+            document.getElementById('cart-total-price').innerHTML = formatPrice(total);
             updateTelegramMainButton();
         }
 
@@ -1373,7 +1386,7 @@
             if (!tg || !tg.MainButton) return;
             const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
             if (cart.length > 0) {
-                tg.MainButton.text = 'Оформити замовлення: ' + formatPrice(total);
+                tg.MainButton.text = 'Оформити замовлення: ' + total.toLocaleString('uk-UA') + ' ₴';
                 tg.MainButton.show();
                 tg.MainButton.onClick(checkout);
             } else {
@@ -1425,7 +1438,7 @@
                         <img src="${p.img}" style="width: 38px; height: 38px; object-fit: cover; border-radius: 6px;">
                         <div><strong style="font-size: 0.9rem;">${p.brand} ${p.title}</strong></div>
                     </div>
-                    <span style="font-weight: 700; font-size: 0.9rem;">${formatPrice(p.price)}</span>
+                    <span style="font-weight: 600; font-size: 0.9rem;">${formatPrice(p.price)}</span>
                 </div>
             `).join('');
         }
@@ -1454,7 +1467,7 @@
             document.getElementById('modal-brand').innerText = product.brand;
             document.getElementById('modal-title').innerText = product.title;
             document.getElementById('modal-desc').innerText = product.desc;
-            document.getElementById('modal-price').innerText = formatPrice(product.price);
+            document.getElementById('modal-price').innerHTML = formatPrice(product.price);
             document.getElementById('modal-qty').innerText = modalQty;
             document.getElementById('modal-specs').innerHTML = product.specs.map(s => `
                 <div class="spec-box"><span>${s.label}</span><strong>${s.value}</strong></div>
