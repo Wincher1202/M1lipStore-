@@ -105,9 +105,11 @@ def get_db_products():
 
 
 app = FastAPI()
+
+# НАЛАШТУВАННЯ CORS (виправляє помилку блокування запитів з GitHub Pages на Render)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["*"],  # Дозволяє запити з будь-яких джерел (включно з твоїм сайтом на GitHub Pages)
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -361,7 +363,7 @@ async def process_delete_product(callback: CallbackQuery):
         )
 
 
-# --- НОВИЙ ЗРУЧНИЙ ПРОЦЕС СТВОРЕННЯ ТОВАРУ ТА ДИНАМІЧНИХ БЛОКІВ ---
+# --- ПРОЦЕС СТВОРЕННЯ ТОВАРУ ТА ДИНАМІЧНИХ БЛОКІВ ---
 
 @router.callback_query(F.data == "add_new_product")
 async def process_add_new(callback: CallbackQuery, state: FSMContext):
@@ -452,8 +454,6 @@ async def add_qty(message: Message, state: FSMContext):
     try:
         qty = int(message.text.strip())
         await state.update_data(quantity=qty, specs=[], current_spec_index=1)
-
-        # Переходимо до динамічних блоків характеристик
         await ask_next_spec(message, state, 1)
     except ValueError:
         await message.answer("❌ Будь ласка, введіть ціле число:")
@@ -478,7 +478,6 @@ async def process_spec_input(message: Message, state: FSMContext):
     if message.from_user.id not in ADMIN_IDS: return
     text = message.text.strip()
 
-    # Якщо користувач ввів /done — завершуємо введення характеристик і йдемо далі до кольорів
     if text.lower() == '/done':
         await state.set_state(AddProductStates.waiting_for_colors)
 
@@ -503,7 +502,6 @@ async def process_spec_input(message: Message, state: FSMContext):
     specs = data.get("specs", [])
     spec_index = data.get("current_spec_index", 1)
 
-    # Парсимо рядок виду "1. Сенсор (PAW334)"
     import re
     cleaned_text = re.sub(r'^\d+[\.\)]\s*', '', text)
 
@@ -518,7 +516,6 @@ async def process_spec_input(message: Message, state: FSMContext):
     specs.append({"label": label, "value": value})
     await state.update_data(specs=specs)
 
-    # Продовжуємо опитування для наступного блоку
     next_index = spec_index + 1
     await ask_next_spec(message, state, next_index)
 
