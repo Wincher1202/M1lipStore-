@@ -442,14 +442,6 @@
 
         .product-tag.new { background: var(--accent-light); color: var(--accent); }
 
-        .product-stock {
-            font-size: 0.8rem;
-            font-weight: 600;
-            margin-top: 4px;
-        }
-        .stock-in { color: #27ae60; }
-        .stock-out { color: #e74c3c; }
-
         @keyframes heartBeatAnim {
             0% { transform: scale(1); }
             15% { transform: scale(1.35); }
@@ -850,7 +842,7 @@
             <div class="hero-card-3d" id="hero-card" onclick="openHeroProductModal()">
                 <span class="product-tag new" id="hero-tag">HOT NOVELTY</span>
                 <div class="hero-card-img-wrap">
-                    <img id="hero-img" src="" alt="Hero Product">
+                    <img id="hero-img" src="attack-shark-r5-ultra-colors-price.jpg" alt="Hero Product">
                 </div>
             </div>
         </div>
@@ -968,7 +960,6 @@
                 <h2 id="modal-title" style="font-size: 1.4rem; font-weight: 800; margin: 4px 0;"></h2>
                 <p id="modal-desc" style="color: var(--text-secondary); margin: 6px 0; font-size: 0.85rem;"></p>
                 <div class="product-price" id="modal-price" style="font-size: 1.3rem; color: var(--accent); margin: 8px 0;">0 <span class="currency">₴</span></div>
-                <div id="modal-stock" class="product-stock" style="margin-bottom: 8px;"></div>
 
                 <div class="modal-options-row">
                     <div class="option-group">
@@ -987,7 +978,7 @@
                 </div>
 
                 <div style="display: flex; gap: 10px; margin-top: 14px; align-items: center;">
-                    <button class="btn-primary" id="modal-buy-btn" style="flex-grow: 1; justify-content: center; padding: 12px;" onclick="addCurrentProductToCart()">Додати в кошик</button>
+                    <button class="btn-primary" style="flex-grow: 1; justify-content: center; padding: 12px;" onclick="addCurrentProductToCart()">Додати в кошик</button>
                     <button class="wishlist-btn" id="modal-wishlist-btn" onclick="toggleCurrentWishlist()" style="position: static; width: 42px; height: 42px; flex-shrink: 0;">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
                     </button>
@@ -1012,14 +1003,22 @@
             }
         }
 
+        // Початкові повні характеристики для товарів (зображення, опис тощо),
+        // а ціни, назви та теги підтягуватимуться з твого бекенду (main.py)
         const staticProductsMeta = {
             'attack-shark-r5-ultra': {
                 brand: 'ATTACK SHARK',
                 category: 'Миші',
                 desc: 'Флагманська надлегка бездротова ігрова миша з карбону вагою 39г, сенсором PAW3950MAX (42 000 DPI) та 8KHz опитуванням.',
-                img: 'https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?auto=format&fit=crop&w=800&q=80',
+                img: 'attack-shark-r5-ultra-colors-price.jpg',
                 gallery: [
-                    'https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?auto=format&fit=crop&w=800&q=80'
+                    'attack-shark-r5-ultra-colors-price.jpg',
+                    'attack-shark-r5-ultra-in-hand-setup.jpg',
+                    'attack-shark-r5-ultra-top-angle.jpg',
+                    'attack-shark-r5-ultra-side-buttons.jpg',
+                    'attack-shark-r5-ultra-back-grip.jpg',
+                    'attack-shark-r5-ultra-box-bundle-contents.jpg',
+                    'attack-shark-r5-ultra-dongle-receiver.jpg'
                 ],
                 specs: [
                     { label: 'СЕНСОР', value: 'PAW3950MAX' },
@@ -1034,6 +1033,56 @@
                     { name: 'Black', class: 'black', available: false },
                     { name: 'Pink', class: 'pink', available: false }
                 ]
+            },
+            'mchose-a7-v2': {
+                brand: 'MCHOSE',
+                category: 'Миші',
+                desc: 'Бездротова ігрова миша з безпрецедентною точністю та високою продуктивністю.',
+                img: 'https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?auto=format&fit=crop&w=800&q=80',
+                gallery: ['https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?auto=format&fit=crop&w=800&q=80'],
+                specs: [
+                    { label: 'СЕНСОР', value: 'PAW3395' },
+                    { label: 'ВАГА', value: '54Г' },
+                    { label: 'ПІДКЛЮЧЕННЯ', value: 'БЕЗДРОТОВЕ' },
+                    { label: 'АКУМУЛЯТОР', value: 'ДО 80 ГОД' }
+                ],
+                colors: [
+                    { name: 'White', class: 'white', available: true },
+                    { name: 'Black', class: 'black', available: true }
+                ]
+            },
+            'atk-xsoft': {
+                brand: 'ATK',
+                category: 'Аксесуари',
+                desc: 'Професійний ігровий килимок для максимального контролю ковзання миші.',
+                img: 'https://images.unsplash.com/photo-1618384887929-16ec33fab9ef?auto=format&fit=crop&w=800&q=80',
+                gallery: ['https://images.unsplash.com/photo-1618384887929-16ec33fab9ef?auto=format&fit=crop&w=800&q=80'],
+                specs: [
+                    { label: 'ПОВЕРХНЯ', value: 'ШВИДКІСТЬ (SPEED)' },
+                    { label: 'ТОВЩИНА', value: '4 ММ' },
+                    { label: 'ОСНОВА', value: 'КАУЧУК' }
+                ],
+                colors: [
+                    { name: 'Black', class: 'black', available: true }
+                ]
+            },
+            'aula-f75': {
+                brand: 'AULA',
+                category: 'Клавіатури',
+                desc: 'Бездротова механічна клавіатура з чудовим звуком друку та кастомними світчами.',
+                img: 'https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=800&q=80',
+                gallery: ['https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=800&q=80'],
+                specs: [
+                    { label: 'ПЕРЕМИКАЧІ', value: 'REAPER' },
+                    { label: 'ФОРМ-ФАКТОР', value: '75%' },
+                    { label: 'ПІДКЛЮЧЕННЯ', value: 'ТРИРЕЖИМНЕ' },
+                    { label: 'ПІДСВІЧУВАННЯ', value: 'RGB' }
+                ],
+                colors: [
+                    { name: 'White', class: 'white', available: true },
+                    { name: 'Black', class: 'black', available: true },
+                    { name: 'Pink', class: 'pink', available: true }
+                ]
             }
         };
 
@@ -1046,35 +1095,31 @@
         let currentCategoryFilter = 'All';
         let heroIndex = 0;
 
-        const API_URL = "https://m1lipstore.onrender.com/api/products";
+        // Вкажи сюди посилання на свій запущений FastAPI бекенд (наприклад, на Render)
+        const API_URL = "https://ТВОЄ_ПОСИЛАННЯ_БЕКЕНДУ.onrender.com/api/products";
 
         async function fetchProducts() {
             try {
                 let response = await fetch(API_URL);
                 let backendData = await response.json();
                 
+                // Об'єднуємо дані з сервера (ціна, назва, тег) із детальними описами та фотографіями
                 products = backendData.map(item => {
                     let meta = staticProductsMeta[item.id] || {
                         brand: 'M1LIP',
-                        category: item.category || 'Аксесуари',
-                        desc: item.desc || 'Якісний ігровий девайс.',
-                        img: item.img || 'https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?auto=format&fit=crop&w=800&q=80',
-                        gallery: item.gallery ? (Array.isArray(item.gallery) ? item.gallery : item.gallery.split(',')) : ['https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?auto=format&fit=crop&w=800&q=80'],
-                        specs: item.specs || [],
-                        colors: item.colors || [{ name: 'White', class: 'white', available: true }]
+                        category: 'Аксесуари',
+                        desc: 'Якісний ігровий девайс.',
+                        img: 'https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?auto=format&fit=crop&w=800&q=80',
+                        gallery: ['https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?auto=format&fit=crop&w=800&q=80'],
+                        specs: [],
+                        colors: [{ name: 'White', class: 'white', available: true }]
                     };
                     return {
                         ...meta,
                         id: item.id,
                         title: item.title,
                         price: item.price,
-                        tag: item.tag,
-                        category: item.category || meta.category,
-                        img: item.img || meta.img,
-                        gallery: item.gallery || meta.gallery,
-                        specs: item.specs || meta.specs,
-                        colors: item.colors || meta.colors,
-                        quantity: item.quantity !== undefined ? item.quantity : 10
+                        tag: item.tag
                     };
                 });
             } catch (e) {
@@ -1084,8 +1129,7 @@
                     ...staticProductsMeta[id],
                     title: id.toUpperCase(),
                     price: 2999,
-                    tag: 'ХІТ',
-                    quantity: 10
+                    tag: 'ХІТ'
                 }));
             }
 
@@ -1178,7 +1222,6 @@
             container.innerHTML = filteredProducts.map((p) => {
                 const firstColorClass = p.colors && p.colors[0] ? p.colors[0].class : 'white';
                 const isFav = wishlist.some(item => item.id === p.id);
-
                 return `
                     <div class="product-card" onclick="openProductModal(products.find(x => x.id === '${p.id}'))">
                         <span class="product-tag new">${p.tag || ''}</span>
@@ -1313,19 +1356,18 @@
 
         function addWishlistItemToCart(productId, colorName) {
             const product = products.find(p => p.id === productId);
-            if (!product || product.quantity <= 0) return;
+            if (!product) return;
             addToCartFull(product, colorName, 1);
         }
 
         function addDirectToCart(productId) {
             const product = products.find(p => p.id === productId);
-            if (!product || product.quantity <= 0) return;
+            if (!product) return;
             const defaultColor = product.colors && product.colors.find(c => c.available) ? product.colors.find(c => c.available).name : 'White';
             addToCartFull(product, defaultColor, 1);
         }
 
         function addToCartFull(product, colorName, qty) {
-            if (product.quantity <= 0) return;
             const existing = cart.find(item => item.id === product.id && item.color === colorName);
             if (existing) {
                 existing.qty += qty;
@@ -1488,27 +1530,12 @@
             const priceEl = document.getElementById('modal-price');
             if (priceEl) priceEl.innerHTML = formatPrice(product.price);
             
-            const stockEl = document.getElementById('modal-stock');
-            const buyBtn = document.getElementById('modal-buy-btn');
-            if (stockEl) {
-                if (product.quantity > 0) {
-                    stockEl.innerHTML = `<span class="stock-in">🟢 В наявності: ${product.quantity} шт.</span>`;
-                    if (buyBtn) { buyBtn.disabled = false; buyBtn.style.opacity = '1'; }
-                } else {
-                    stockEl.innerHTML = `<span class="stock-out">🔴 Немає в наявності</span>`;
-                    if (buyBtn) { buyBtn.disabled = true; buyBtn.style.opacity = '0.5'; }
-                }
-            }
-
             setElementText('modal-qty', modalQty);
 
             const specsEl = document.getElementById('modal-specs');
             if (specsEl && product.specs) {
                 specsEl.innerHTML = product.specs.map(s => `
-                    <div class="spec-box">
-                        <span>${s.label}</span>
-                        <strong>${s.value}</strong>
-                    </div>
+                    <div class="spec-box"><span>${s.label}</span><strong>${s.value}</strong></div>
                 `).join('');
             }
             
@@ -1538,7 +1565,7 @@
             if (selectorContainer) {
                 selectorContainer.innerHTML = currentModalProduct.colors.map((c, idx) => `
                     <div class="color-option-item" onclick="selectModalColor(${idx})">
-                        <div class="color-circle-big ${c.class} ${!c.available ? 'disabled' : ''} ${idx === selectedColorIndex ? 'active' : ''}" title="${c.name}"></div>
+                        <div class="color-circle-big ${c.class} ${!c.available ? 'disabled' : ''} ${idx === selectedColorIndex ? 'active' : ''}" title="${c.name} ${!c.available ? '(Out of stock)' : ''}"></div>
                     </div>
                 `).join('');
             }
@@ -1565,7 +1592,7 @@
         }
 
         function addCurrentProductToCart() {
-            if (currentModalProduct && currentModalProduct.quantity > 0) {
+            if (currentModalProduct) {
                 const activeColors = currentModalProduct.colors || [{ name: 'White', available: true }];
                 const colorObj = activeColors[selectedColorIndex] || activeColors[0];
                 if (!colorObj.available) return;
