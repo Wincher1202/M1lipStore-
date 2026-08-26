@@ -42,31 +42,35 @@ app.add_middleware(
 
 router = Router()
 
-# База даних товарів
+# База даних товарів (тепер із полем quantity для наявності)
 PRODUCTS_DB = [
     {
         "id": "attack-shark-r5-ultra",
         "title": "R5 ULTRA",
         "price": 2945,
-        "tag": "ХІТ / 8KHZ"
+        "tag": "ХІТ / 8KHZ",
+        "quantity": 12
     },
     {
         "id": "mchose-a7-v2",
         "title": "A7 V2 PRO",
         "price": 4599,
-        "tag": "БЕСТСЕЛЕР"
+        "tag": "БЕСТСЕЛЕР",
+        "quantity": 5
     },
     {
         "id": "atk-xsoft",
         "title": "XSOFT GAMING MAT",
         "price": 1499,
-        "tag": "НОВИНКА"
+        "tag": "НОВИНКА",
+        "quantity": 25
     },
     {
         "id": "aula-f75",
         "title": "F75 MECHANICAL",
         "price": 3899,
-        "tag": "ПОПУЛЯРНЕ"
+        "tag": "ПОПУЛЯРНЕ",
+        "quantity": 0
     }
 ]
 
@@ -79,6 +83,7 @@ class AdminStates(StatesGroup):
     waiting_for_tag_text = State()
     waiting_for_price = State()
     waiting_for_title = State()
+    waiting_for_quantity = State()
 
 @router.message(Command("start"))
 async def cmd_start(message: Message):
@@ -111,9 +116,10 @@ async def cmd_admin(message: Message):
 
     keyboard_buttons = []
     for product in PRODUCTS_DB:
+        stock_status = f"📦 {product['quantity']} шт." if product['quantity'] > 0 else "❌ Немає"
         keyboard_buttons.append([
             InlineKeyboardButton(
-                text=f"📦 {product['title']} | {product['price']} ₴",
+                text=f"{product['title']} | {product['price']} ₴ | {stock_status}",
                 callback_data=f"manage_{product['id']}"
             )
         ])
@@ -147,6 +153,9 @@ async def process_manage_product(callback: CallbackQuery):
         ],
         [
             InlineKeyboardButton(text="✏️ Змінити назву", callback_data=f"set_title_{product_id}"),
+            InlineKeyboardButton(text="📦 Змінити наявність", callback_data=f"set_qty_{product_id}")
+        ],
+        [
             InlineKeyboardButton(text="🔙 Назад до списку", callback_data="back_to_admin")
         ]
     ])
@@ -154,7 +163,8 @@ async def process_manage_product(callback: CallbackQuery):
     await callback.message.edit_text(
         f"🛠 Керування товаром: **{product['title']}**\n\n"
         f"• Ціна: {product['price']} ₴\n"
-        f"• Тег: `{product['tag']}`\n\n"
+        f"• Тег: `{product['tag']}`\n"
+        f"• Кількість на складі: **{product['quantity']} шт.**\n\n"
         f"Що бажаєте змінити?",
         reply_markup=action_markup,
         parse_mode="Markdown"
@@ -168,9 +178,10 @@ async def process_back_to_admin(callback: CallbackQuery):
 
     keyboard_buttons = []
     for product in PRODUCTS_DB:
+        stock_status = f"📦 {product['quantity']} шт." if product['quantity'] > 0 else "❌ Немає"
         keyboard_buttons.append([
             InlineKeyboardButton(
-                text=f"📦 {product['title']} | {product['price']} ₴",
+                text=f"{product['title']} | {product['price']} ₴ | {stock_status}",
                 callback_data=f"manage_{product['id']}"
             )
         ])
@@ -285,6 +296,44 @@ async def save_title(message: Message, state: FSMContext):
             await message.answer(f"✅ Назву успішно змінено на **{new_title}**! Напишіть /admin.")
             break
     await state.clear()
+
+@router.callback_query(F.data.startswith("set_qty_"))
+async def process_set_qty(callback: CallbackQuery, state: FSMContext):
+    if callback.from_user.id not in ADMIN_IDS:
+        await callback.answer("Доступ заборонено!", show_alert=True)
+        return
+
+    product_id = callback.data.replace("set_qty_", "")
+    product = next((p for p in PRODUCTS_DB if p["id"] == product_id), None)
+
+    await state.update_data(editing_product_id=product_id)
+    await state.set_state(AdminStates.waiting_for_quantity)
+
+    await callback.message.answer(
+        f"📦 Введіть доступну кількість товару **{product['title']}** на складі (ціле число, наприклад `10` або `0`, якщо немає):",
+        parse_mode="Markdown"
+    )
+    await callback.answer()
+
+@router.message(AdminStates.waiting_for_quantity)
+async def save_quantity(message: Message, state: FSMContext):
+    if message.from_user.id not in ADMIN_IDS:
+        return
+    data = await state.get_data()
+    product_id = data.get("editing_product_id")
+
+    try:
+        new_qty = int(message.text.strip())
+        if new_qty < 0:
+            raise ValueError()
+        for p in PRODUCTS_DB:
+            if p["id"] == product_id:
+                p["quantity"] = new_qty
+                await message.answer(f"✅ Кількість для **{p['title']}** змінено на {new_qty} шт.! Напишіть /admin.")
+                break
+        await state.clear()
+    except ValueError:
+        await message.answer("❌ Будь ласка, введіть додатне число або 0 (наприклад: 12). Спробуйте ще раз:")
 
 # --- ОБРОБКА ЗАМОВЛЕНЬ ІЗ САЙТУ ---
 

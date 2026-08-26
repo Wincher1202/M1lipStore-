@@ -442,6 +442,15 @@
 
         .product-tag.new { background: var(--accent-light); color: var(--accent); }
 
+        /* Стиль для наявності */
+        .product-stock {
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-top: 4px;
+        }
+        .stock-in { color: #27ae60; }
+        .stock-out { color: #e74c3c; }
+
         @keyframes heartBeatAnim {
             0% { transform: scale(1); }
             15% { transform: scale(1.35); }
@@ -960,6 +969,7 @@
                 <h2 id="modal-title" style="font-size: 1.4rem; font-weight: 800; margin: 4px 0;"></h2>
                 <p id="modal-desc" style="color: var(--text-secondary); margin: 6px 0; font-size: 0.85rem;"></p>
                 <div class="product-price" id="modal-price" style="font-size: 1.3rem; color: var(--accent); margin: 8px 0;">0 <span class="currency">₴</span></div>
+                <div id="modal-stock" class="product-stock" style="margin-bottom: 8px;"></div>
 
                 <div class="modal-options-row">
                     <div class="option-group">
@@ -978,7 +988,7 @@
                 </div>
 
                 <div style="display: flex; gap: 10px; margin-top: 14px; align-items: center;">
-                    <button class="btn-primary" style="flex-grow: 1; justify-content: center; padding: 12px;" onclick="addCurrentProductToCart()">Додати в кошик</button>
+                    <button class="btn-primary" id="modal-buy-btn" style="flex-grow: 1; justify-content: center; padding: 12px;" onclick="addCurrentProductToCart()">Додати в кошик</button>
                     <button class="wishlist-btn" id="modal-wishlist-btn" onclick="toggleCurrentWishlist()" style="position: static; width: 42px; height: 42px; flex-shrink: 0;">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
                     </button>
@@ -1115,7 +1125,8 @@
                         id: item.id,
                         title: item.title,
                         price: item.price,
-                        tag: item.tag
+                        tag: item.tag,
+                        quantity: item.quantity !== undefined ? item.quantity : 10 // Наявність за замовчуванням
                     };
                 });
             } catch (e) {
@@ -1125,7 +1136,8 @@
                     ...staticProductsMeta[id],
                     title: id.toUpperCase(),
                     price: 2999,
-                    tag: 'ХІТ'
+                    tag: 'ХІТ',
+                    quantity: 10
                 }));
             }
 
@@ -1218,6 +1230,12 @@
             container.innerHTML = filteredProducts.map((p) => {
                 const firstColorClass = p.colors && p.colors[0] ? p.colors[0].class : 'white';
                 const isFav = wishlist.some(item => item.id === p.id);
+                
+                // Рендеринг статусу наявності
+                let stockHtml = p.quantity > 0 
+                    ? `<div class="product-stock stock-in">🟢 В наявності (${p.quantity} шт.)</div>` 
+                    : `<div class="product-stock stock-out">🔴 Немає в наявності</div>`;
+
                 return `
                     <div class="product-card" onclick="openProductModal(products.find(x => x.id === '${p.id}'))">
                         <span class="product-tag new">${p.tag || ''}</span>
@@ -1236,6 +1254,7 @@
                             <div class="product-title-group">
                                 <h4>${p.brand}</h4>
                                 <h3>${p.title}</h3>
+                                ${stockHtml}
                             </div>
                             <div class="product-price">${formatPrice(p.price)}</div>
                         </div>
@@ -1352,18 +1371,19 @@
 
         function addWishlistItemToCart(productId, colorName) {
             const product = products.find(p => p.id === productId);
-            if (!product) return;
+            if (!product || product.quantity <= 0) return;
             addToCartFull(product, colorName, 1);
         }
 
         function addDirectToCart(productId) {
             const product = products.find(p => p.id === productId);
-            if (!product) return;
+            if (!product || product.quantity <= 0) return;
             const defaultColor = product.colors && product.colors.find(c => c.available) ? product.colors.find(c => c.available).name : 'White';
             addToCartFull(product, defaultColor, 1);
         }
 
         function addToCartFull(product, colorName, qty) {
+            if (product.quantity <= 0) return;
             const existing = cart.find(item => item.id === product.id && item.color === colorName);
             if (existing) {
                 existing.qty += qty;
@@ -1526,6 +1546,18 @@
             const priceEl = document.getElementById('modal-price');
             if (priceEl) priceEl.innerHTML = formatPrice(product.price);
             
+            const stockEl = document.getElementById('modal-stock');
+            const buyBtn = document.getElementById('modal-buy-btn');
+            if (stockEl) {
+                if (product.quantity > 0) {
+                    stockEl.innerHTML = `<span class="stock-in">🟢 В наявності: ${product.quantity} шт.</span>`;
+                    if (buyBtn) { buyBtn.disabled = false; buyBtn.style.opacity = '1'; }
+                } else {
+                    stockEl.innerHTML = `<span class="stock-out">🔴 Немає в наявності</span>`;
+                    if (buyBtn) { buyBtn.disabled = true; buyBtn.style.opacity = '0.5'; }
+                }
+            }
+
             setElementText('modal-qty', modalQty);
 
             const specsEl = document.getElementById('modal-specs');
@@ -1588,7 +1620,7 @@
         }
 
         function addCurrentProductToCart() {
-            if (currentModalProduct) {
+            if (currentModalProduct && currentModalProduct.quantity > 0) {
                 const activeColors = currentModalProduct.colors || [{ name: 'White', available: true }];
                 const colorObj = activeColors[selectedColorIndex] || activeColors[0];
                 if (!colorObj.available) return;
