@@ -917,7 +917,7 @@
         <div class="drawer-footer">
             <div class="cart-total">
                 <span>Разом:</span>
-                <span id="cart-total-price">2945 <span class="currency">₴</span></span>
+                <span id="cart-total-price">0 <span class="currency">₴</span></span>
             </div>
             <button class="btn-primary" style="width: 100%; justify-content: center;" onclick="checkout()">Оформити замовлення →</button>
         </div>
@@ -959,7 +959,7 @@
                 <h4 id="modal-brand" style="color: var(--text-muted); text-transform: uppercase; font-size: 0.7rem; font-weight: 800; margin-top: 6px;">БРЕНД</h4>
                 <h2 id="modal-title" style="font-size: 1.4rem; font-weight: 800; margin: 4px 0;"></h2>
                 <p id="modal-desc" style="color: var(--text-secondary); margin: 6px 0; font-size: 0.85rem;"></p>
-                <div class="product-price" id="modal-price" style="font-size: 1.3rem; color: var(--accent); margin: 8px 0;">2945 <span class="currency">₴</span></div>
+                <div class="product-price" id="modal-price" style="font-size: 1.3rem; color: var(--accent); margin: 8px 0;">0 <span class="currency">₴</span></div>
 
                 <div class="modal-options-row">
                     <div class="option-group">
@@ -1003,14 +1003,12 @@
             }
         }
 
-        const products = [
-            {
-                id: 'attack-shark-r5-ultra',
+        // Початкові повні характеристики для товарів (зображення, опис тощо),
+        // а ціни, назви та теги будуть підтягуватись із твого бекенду (main.py)
+        const staticProductsMeta = {
+            'attack-shark-r5-ultra': {
                 brand: 'ATTACK SHARK',
-                title: 'R5 ULTRA',
                 category: 'Миші',
-                tag: 'ХІТ / 8KHZ',
-                price: 2945,
                 desc: 'Флагманська надлегка бездротова ігрова миша з карбону вагою 39г, сенсором PAW3950MAX (42 000 DPI) та 8KHz опитуванням.',
                 img: 'attack-shark-r5-ultra-colors-price.jpg',
                 gallery: [
@@ -1036,13 +1034,9 @@
                     { name: 'Pink', class: 'pink', available: false }
                 ]
             },
-            {
-                id: 'mchose-a7-v2',
+            'mchose-a7-v2': {
                 brand: 'MCHOSE',
-                title: 'A7 V2 PRO',
                 category: 'Миші',
-                tag: 'БЕСТСЕЛЕР',
-                price: 4599,
                 desc: 'Бездротова ігрова миша з безпрецедентною точністю та високою продуктивністю.',
                 img: 'https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?auto=format&fit=crop&w=800&q=80',
                 gallery: ['https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?auto=format&fit=crop&w=800&q=80'],
@@ -1057,13 +1051,9 @@
                     { name: 'Black', class: 'black', available: true }
                 ]
             },
-            {
-                id: 'atk-xsoft',
+            'atk-xsoft': {
                 brand: 'ATK',
-                title: 'XSOFT GAMING MAT',
                 category: 'Аксесуари',
-                tag: 'НОВИНКА',
-                price: 1499,
                 desc: 'Професійний ігровий килимок для максимального контролю ковзання миші.',
                 img: 'https://images.unsplash.com/photo-1618384887929-16ec33fab9ef?auto=format&fit=crop&w=800&q=80',
                 gallery: ['https://images.unsplash.com/photo-1618384887929-16ec33fab9ef?auto=format&fit=crop&w=800&q=80'],
@@ -1076,13 +1066,9 @@
                     { name: 'Black', class: 'black', available: true }
                 ]
             },
-            {
-                id: 'aula-f75',
+            'aula-f75': {
                 brand: 'AULA',
-                title: 'F75 MECHANICAL',
                 category: 'Клавіатури',
-                tag: 'ПОПУЛЯРНЕ',
-                price: 3899,
                 desc: 'Бездротова механічна клавіатура з чудовим звуком друку та кастомними світчами.',
                 img: 'https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=800&q=80',
                 gallery: ['https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=800&q=80'],
@@ -1098,21 +1084,63 @@
                     { name: 'Pink', class: 'pink', available: true }
                 ]
             }
-        ];
+        };
 
+        let products = [];
         let cart = JSON.parse(localStorage.getItem('m1lip_cart')) || [];
         let wishlist = JSON.parse(localStorage.getItem('m1lip_wishlist')) || [];
         let currentModalProduct = null;
         let modalQty = 1;
         let selectedColorIndex = 0;
         let currentCategoryFilter = 'All';
-
         let heroIndex = 0;
-        const heroProducts = products;
+
+        // Вкажи сюди посилання на свій запущений FastAPI бекенд (наприклад, з Render)
+        const API_URL = "https://ТВОЯ_СПОСІБ_БЕКЕНДУ.onrender.com/api/products";
+
+        async function fetchProducts() {
+            try {
+                let response = await fetch(API_URL);
+                let backendData = await response.json();
+                
+                // Об'єднуємо дані з сервера (ціна, назва, тег) із детальними описами й фотографіями
+                products = backendData.map(item => {
+                    let meta = staticProductsMeta[item.id] || {
+                        brand: 'M1LIP',
+                        category: 'Аксесуари',
+                        desc: 'Якісний ігровий девайс.',
+                        img: 'https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?auto=format&fit=crop&w=800&q=80',
+                        gallery: ['https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?auto=format&fit=crop&w=800&q=80'],
+                        specs: [],
+                        colors: [{ name: 'White', class: 'white', available: true }]
+                    };
+                    return {
+                        ...meta,
+                        id: item.id,
+                        title: item.title,
+                        price: item.price,
+                        tag: item.tag
+                    };
+                });
+            } catch (e) {
+                console.warn("Не вдалося завантажити товари з API, завантажуємо локальний резерв:", e);
+                // Резервний варіант, якщо сервер недоступний
+                products = Object.keys(staticProductsMeta).map(id => ({
+                    id,
+                    ...staticProductsMeta[id],
+                    title: id.toUpperCase(),
+                    price: 2999,
+                    tag: 'ХІТ'
+                }));
+            }
+
+            renderCatalog();
+            updateHeroBanner();
+        }
 
         function updateHeroBanner() {
-            if (heroProducts.length === 0) return;
-            const p = heroProducts[heroIndex];
+            if (products.length === 0) return;
+            const p = products[heroIndex % products.length];
             const imgEl = document.getElementById('hero-img');
             const tagEl = document.getElementById('hero-tag');
             
@@ -1120,16 +1148,16 @@
                 imgEl.style.opacity = '0';
                 setTimeout(() => {
                     imgEl.src = p.img;
-                    tagEl.innerText = p.tag;
+                    tagEl.innerText = p.tag || 'НОВИНКА';
                     imgEl.style.opacity = '1';
                 }, 300);
             }
-
-            heroIndex = (heroIndex + 1) % heroProducts.length;
+            heroIndex++;
         }
 
         function openHeroProductModal() {
-            const currentHeroProd = heroProducts[(heroIndex - 1 + heroProducts.length) % heroProducts.length];
+            if (products.length === 0) return;
+            const currentHeroProd = products[(heroIndex - 2 + products.length) % products.length];
             openProductModal(currentHeroProd);
         }
 
@@ -1150,7 +1178,7 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            renderCatalog();
+            fetchProducts(); // Завантажуємо товари з бекенду при старті
             updateBadges();
 
             setInterval(updateHeroBanner, 3500);
@@ -1197,7 +1225,7 @@
                 const isFav = wishlist.some(item => item.id === p.id);
                 return `
                     <div class="product-card" onclick="openProductModal(products.find(x => x.id === '${p.id}'))">
-                        <span class="product-tag new">${p.tag}</span>
+                        <span class="product-tag new">${p.tag || ''}</span>
                         <button class="wishlist-btn ${isFav ? 'active' : ''}" id="wishlist-btn-${p.id}" onclick="event.stopPropagation(); toggleWishlist('${p.id}')">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="${isFav ? '#FF3B30' : 'none'}" stroke="${isFav ? '#FF3B30' : 'currentColor'}" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
                         </button>
@@ -1495,7 +1523,7 @@
                 `).join('');
             }
 
-            setElementText('modal-tag', product.tag);
+            setElementText('modal-tag', product.tag || '');
             setElementText('modal-brand', product.brand);
             setElementText('modal-title', product.title);
             setElementText('modal-desc', product.desc);
@@ -1576,13 +1604,18 @@
         }
 
         function checkout() {
-            alert("Замовлення успішно оформлено! Дякуємо за покупку в M1lipStore.");
-            cart = [];
-            localStorage.setItem('m1lip_cart', JSON.stringify(cart));
-            updateBadges();
-            renderCartItems();
-            toggleCart(false);
-            if (tg && tg.MainButton) tg.MainButton.hide();
+            if (tg && tg.sendData) {
+                // Відправляємо дані назад у Telegram-бота
+                tg.sendData(JSON.stringify(cart));
+                tg.close();
+            } else {
+                alert("Замовлення успішно оформлено! Дякуємо за покупку в M1lipStore.");
+                cart = [];
+                localStorage.setItem('m1lip_cart', JSON.stringify(cart));
+                updateBadges();
+                renderCartItems();
+                toggleCart(false);
+            }
         }
 
         document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeAllDrawers(); });
