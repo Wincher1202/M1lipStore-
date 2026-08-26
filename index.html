@@ -442,7 +442,6 @@
 
         .product-tag.new { background: var(--accent-light); color: var(--accent); }
 
-        /* Стиль для наявності */
         .product-stock {
             font-size: 0.8rem;
             font-weight: 600;
@@ -1113,10 +1112,10 @@
                 products = backendData.map(item => {
                     let meta = staticProductsMeta[item.id] || {
                         brand: 'M1LIP',
-                        category: 'Аксесуари',
+                        category: item.category || 'Аксесуари',
                         desc: 'Якісний ігровий девайс.',
-                        img: 'https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?auto=format&fit=crop&w=800&q=80',
-                        gallery: ['https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?auto=format&fit=crop&w=800&q=80'],
+                        img: item.img || 'https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?auto=format&fit=crop&w=800&q=80',
+                        gallery: item.gallery ? item.gallery.split(',') : ['https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?auto=format&fit=crop&w=800&q=80'],
                         specs: [],
                         colors: [{ name: 'White', class: 'white', available: true }]
                     };
@@ -1126,7 +1125,10 @@
                         title: item.title,
                         price: item.price,
                         tag: item.tag,
-                        quantity: item.quantity !== undefined ? item.quantity : 10 // Наявність за замовчуванням
+                        category: item.category || meta.category,
+                        img: item.img || meta.img,
+                        gallery: item.gallery ? item.gallery.split(',') : meta.gallery,
+                        quantity: item.quantity !== undefined ? item.quantity : 10
                     };
                 });
             } catch (e) {
@@ -1231,7 +1233,6 @@
                 const firstColorClass = p.colors && p.colors[0] ? p.colors[0].class : 'white';
                 const isFav = wishlist.some(item => item.id === p.id);
                 
-                // Рендеринг статусу наявності
                 let stockHtml = p.quantity > 0 
                     ? `<div class="product-stock stock-in">🟢 В наявності (${p.quantity} шт.)</div>` 
                     : `<div class="product-stock stock-out">🔴 Немає в наявності</div>`;
