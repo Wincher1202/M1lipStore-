@@ -173,54 +173,6 @@
             justify-content: center;
         }
 
-        /* TICKER */
-        .ticker-wrap {
-            background: var(--accent);
-            color: white;
-            padding: 10px 0;
-            overflow: hidden;
-            white-space: nowrap;
-            position: relative;
-            top: 70px;
-            z-index: 999;
-            font-size: 0.75rem;
-            font-weight: 700;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-        }
-
-        .ticker-move {
-            display: inline-block;
-            white-space: nowrap;
-            animation: ticker 25s linear infinite;
-        }
-
-        .ticker-group {
-            display: inline-flex;
-            align-items: center;
-        }
-
-        .ticker-move span {
-            display: inline-flex;
-            align-items: center;
-            gap: 12px;
-            margin-right: 50px;
-        }
-
-        .ticker-logo {
-            height: 18px;
-            width: 18px;
-            object-fit: contain;
-            border-radius: 50%;
-            display: inline-block;
-            vertical-align: middle;
-        }
-
-        @keyframes ticker {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-50%); }
-        }
-
         /* HERO SECTION */
         .hero {
             min-height: 90vh;
@@ -863,24 +815,6 @@
             </button>
         </div>
     </header>
-
-    <!-- TICKER -->
-    <div class="ticker-wrap">
-        <div class="ticker-move">
-            <div class="ticker-group">
-                <span><img src="logo-milipstore.png" alt="M1lipStore" class="ticker-logo"> Топові ігрові девайси та аксесуари</span>
-                <span><img src="logo-milipstore.png" alt="M1lipStore" class="ticker-logo"> Сенсори найвищої продуктивності та опитування 8KHz</span>
-                <span><img src="logo-milipstore.png" alt="M1lipStore" class="ticker-logo"> Офіційна гарантія та швидка відправка</span>
-                <span><img src="logo-milipstore.png" alt="M1lipStore" class="ticker-logo"> Ідеальний сетап для справжніх геймерів</span>
-            </div>
-            <div class="ticker-group">
-                <span><img src="logo-milipstore.png" alt="M1lipStore" class="ticker-logo"> Топові ігрові девайси та аксесуари</span>
-                <span><img src="logo-milipstore.png" alt="M1lipStore" class="ticker-logo"> Сенсори найвищої продуктивності та опитування 8KHz</span>
-                <span><img src="logo-milipstore.png" alt="M1lipStore" class="ticker-logo"> Офіційна гарантія та швидка відправка</span>
-                <span><img src="logo-milipstore.png" alt="M1lipStore" class="ticker-logo"> Ідеальний сетап для справжніх геймерів</span>
-            </div>
-        </div>
-    </div>
 
     <!-- HERO SECTION -->
     <section class="hero">
