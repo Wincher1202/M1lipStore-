@@ -27,7 +27,7 @@ PAYMENT_TOKEN = "1877036958:TEST:3ee3e1f439bade2f14881b4f9a87c61392fa6ec6"
 MANAGER_USERNAME = "lnvinciblee"
 
 # Твій Telegram ID адміністратора
-ADMIN_IDS = [1929165295]
+ADMIN_IDS = [1929165295,1248134309]
 
 # Ініціалізація FastAPI та роутера бота
 app = FastAPI()
