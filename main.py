@@ -3,7 +3,7 @@ import json
 import logging
 import os
 import urllib.parse
-from fastapi import FastAPI, Response
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from aiogram import Bot, Dispatcher, F, Router
 from aiogram.filters import Command
@@ -286,7 +286,7 @@ async def save_title(message: Message, state: FSMContext):
             break
     await state.clear()
 
-# --- ОБРОБКА ЗАМОВЛЕНЬ ІЗ САЙТУ (ОНОВЛЕНО ДЛЯ КІЛЬКОСТІ) ---
+# --- ОБРОБКА ЗАМОВЛЕНЬ ІЗ САЙТУ ---
 
 @router.message(F.web_app_data)
 async def process_web_app_order(message: Message):
@@ -297,7 +297,6 @@ async def process_web_app_order(message: Message):
             await message.answer("Ваш кошик порожній.")
             return
 
-        # Правильний розрахунок загальної суми з урахуванням кількості (qty)
         total_price = sum(item["price"] * item.get("qty", 1) for item in cart_items)
 
         items_list_str = "\n".join([
@@ -343,7 +342,7 @@ async def main():
     await bot.delete_webhook(drop_pending_updates=True)
 
     asyncio.create_task(dp.start_polling(bot))
-    print("Telegram-бот запущен и готов к работе!")
+    print("Telegram-бот запущено і готовий до роботи!")
 
     port = int(os.environ.get("PORT", 8000))
     config = uvicorn.Config(app, host="0.0.0.0", port=port, log_level="info")
