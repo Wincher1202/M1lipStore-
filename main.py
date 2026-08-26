@@ -26,13 +26,12 @@ PAYMENT_TOKEN = "1877036958:TEST:3ee3e1f439bade2f14881b4f9a87c61392fa6ec6"
 
 MANAGER_USERNAME = "lnvinciblee"
 
-# Твій Telegram ID адміністратора
-ADMIN_IDS = [1929165295,1248134309]
+# Telegram ID адміністраторів
+ADMIN_IDS = [1929165295, 1248134309]
 
 # Ініціалізація FastAPI та роутера бота
 app = FastAPI()
 
-# Налаштування CORS, щоб сайт з GitHub міг робити запити до цього сервера
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -43,7 +42,7 @@ app.add_middleware(
 
 router = Router()
 
-# База даних товарів у пам'яті бота (єдина для сайту і бота)
+# База даних товарів
 PRODUCTS_DB = [
     {
         "id": "attack-shark-r5-ultra",
@@ -71,21 +70,16 @@ PRODUCTS_DB = [
     }
 ]
 
-
-# Ендпоінт для сайту: віддає поточний список товарів у форматі JSON
 @app.get("/api/products")
 async def get_products():
     return PRODUCTS_DB
 
-
-# Стани для FSM
+# Стани для FSM (Адмін-панель)
 class AdminStates(StatesGroup):
     waiting_for_tag_text = State()
     waiting_for_price = State()
     waiting_for_title = State()
 
-
-# 1. Команда /start
 @router.message(Command("start"))
 async def cmd_start(message: Message):
     shop_reply_keyboard = ReplyKeyboardMarkup(
@@ -106,7 +100,6 @@ async def cmd_start(message: Message):
         reply_markup=shop_reply_keyboard,
         parse_mode="Markdown",
     )
-
 
 # --- АДМІН-ПАНЕЛЬ ---
 
@@ -134,8 +127,6 @@ async def cmd_admin(message: Message):
         parse_mode="Markdown"
     )
 
-
-# Вибір конкретного товару для керування
 @router.callback_query(F.data.startswith("manage_"))
 async def process_manage_product(callback: CallbackQuery):
     if callback.from_user.id not in ADMIN_IDS:
@@ -170,8 +161,6 @@ async def process_manage_product(callback: CallbackQuery):
     )
     await callback.answer()
 
-
-# Повернення до списку
 @router.callback_query(F.data == "back_to_admin")
 async def process_back_to_admin(callback: CallbackQuery):
     if callback.from_user.id not in ADMIN_IDS:
@@ -194,8 +183,6 @@ async def process_back_to_admin(callback: CallbackQuery):
     )
     await callback.answer()
 
-
-# --- ЗМІНА ТЕГУ ---
 @router.callback_query(F.data.startswith("set_tag_"))
 async def process_set_tag(callback: CallbackQuery, state: FSMContext):
     if callback.from_user.id not in ADMIN_IDS:
@@ -215,7 +202,6 @@ async def process_set_tag(callback: CallbackQuery, state: FSMContext):
     )
     await callback.answer()
 
-
 @router.message(AdminStates.waiting_for_tag_text)
 async def save_tag(message: Message, state: FSMContext):
     if message.from_user.id not in ADMIN_IDS:
@@ -231,8 +217,6 @@ async def save_tag(message: Message, state: FSMContext):
             break
     await state.clear()
 
-
-# --- ЗМІНА ЦІНИ ---
 @router.callback_query(F.data.startswith("set_price_"))
 async def process_set_price(callback: CallbackQuery, state: FSMContext):
     if callback.from_user.id not in ADMIN_IDS:
@@ -250,7 +234,6 @@ async def process_set_price(callback: CallbackQuery, state: FSMContext):
         parse_mode="Markdown"
     )
     await callback.answer()
-
 
 @router.message(AdminStates.waiting_for_price)
 async def save_price(message: Message, state: FSMContext):
@@ -270,8 +253,6 @@ async def save_price(message: Message, state: FSMContext):
     except ValueError:
         await message.answer("❌ Будь ласка, введіть числове значення ціни (наприклад: 2945). Спробуйте ще раз:")
 
-
-# --- ЗМІНА НАЗВИ ---
 @router.callback_query(F.data.startswith("set_title_"))
 async def process_set_title(callback: CallbackQuery, state: FSMContext):
     if callback.from_user.id not in ADMIN_IDS:
@@ -290,7 +271,6 @@ async def process_set_title(callback: CallbackQuery, state: FSMContext):
     )
     await callback.answer()
 
-
 @router.message(AdminStates.waiting_for_title)
 async def save_title(message: Message, state: FSMContext):
     if message.from_user.id not in ADMIN_IDS:
@@ -306,8 +286,7 @@ async def save_title(message: Message, state: FSMContext):
             break
     await state.clear()
 
-
-# --- ОБРОБКА ЗАМОВЛЕНЬ ІЗ САЙТУ ---
+# --- ОБРОБКА ЗАМОВЛЕНЬ ІЗ САЙТУ (ОНОВЛЕНО ДЛЯ КІЛЬКОСТІ) ---
 
 @router.message(F.web_app_data)
 async def process_web_app_order(message: Message):
@@ -318,16 +297,17 @@ async def process_web_app_order(message: Message):
             await message.answer("Ваш кошик порожній.")
             return
 
-        total_price = sum(item["price"] for item in cart_items)
+        # Правильний розрахунок загальної суми з урахуванням кількості (qty)
+        total_price = sum(item["price"] * item.get("qty", 1) for item in cart_items)
 
         items_list_str = "\n".join([
-            f"• {item['title']} (колір: {item.get('color', 'не вказано')}) — {item['price']} UAH"
+            f"• {item['title']} (колір: {item.get('color', 'не вказано')}) — {item['qty']} шт. х {item['price']} UAH = {item['price'] * item.get('qty', 1)} UAH"
             for item in cart_items
         ])
 
         manager_url = (
             f"https://t.me/{MANAGER_USERNAME}?text="
-            f"{encode_text(f'Добрий день, бажаю оформити замовлення:\n{items_list_str}\nСума: {total_price} UAH')}"
+            f"{encode_text(f'Добрий день, бажаю оформити замовлення:\n{items_list_str}\n\nЗагальна сума: {total_price} UAH')}"
         )
 
         contact_keyboard = InlineKeyboardMarkup(
@@ -341,6 +321,7 @@ async def process_web_app_order(message: Message):
 
         await message.answer(
             f"📦 **Твоє замовлення сформовано!**\n\n{items_list_str}\n\n"
+            f"💰 **Загальна сума:** {total_price} UAH\n\n"
             f"Натисни кнопку нижче, щоб надіслати його менеджеру в особисті повідомлення:",
             reply_markup=contact_keyboard,
             parse_mode="Markdown",
@@ -349,10 +330,8 @@ async def process_web_app_order(message: Message):
     except Exception as e:
         await message.answer(f"Сталася помилка при обробці замовлення: {e}")
 
-
 def encode_text(text):
     return urllib.parse.quote(text)
-
 
 async def main():
     logging.basicConfig(level=logging.INFO)
@@ -363,16 +342,13 @@ async def main():
 
     await bot.delete_webhook(drop_pending_updates=True)
 
-    # Запускаємо бота в фоновому режимі asyncio
     asyncio.create_task(dp.start_polling(bot))
     print("Telegram-бот запущен и готов к работе!")
 
-    # Запускаємо FastAPI сервер (Render вимагає порт з змінної середовища або 8000 за замовчуванням)
     port = int(os.environ.get("PORT", 8000))
     config = uvicorn.Config(app, host="0.0.0.0", port=port, log_level="info")
     server = uvicorn.Server(config)
     await server.serve()
-
 
 if __name__ == "__main__":
     asyncio.run(main())
