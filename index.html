@@ -842,7 +842,7 @@
             <div class="hero-card-3d" id="hero-card" onclick="openHeroProductModal()">
                 <span class="product-tag new" id="hero-tag">HOT NOVELTY</span>
                 <div class="hero-card-img-wrap">
-                    <img id="hero-img" src="attack-shark-r5-ultra-colors-price.jpg" alt="Hero Product">
+                    <img id="hero-img" src="" alt="Hero Product">
                 </div>
             </div>
         </div>
@@ -1003,87 +1003,6 @@
             }
         }
 
-        const staticProductsMeta = {
-            'attack-shark-r5-ultra': {
-                brand: 'ATTACK SHARK',
-                category: 'Миші',
-                desc: 'Флагманська надлегка бездротова ігрова миша з карбону вагою 39г, сенсором PAW3950MAX (42 000 DPI) та 8KHz опитуванням.',
-                img: 'attack-shark-r5-ultra-colors-price.jpg',
-                gallery: [
-                    'attack-shark-r5-ultra-colors-price.jpg',
-                    'attack-shark-r5-ultra-in-hand-setup.jpg',
-                    'attack-shark-r5-ultra-top-angle.jpg',
-                    'attack-shark-r5-ultra-side-buttons.jpg',
-                    'attack-shark-r5-ultra-back-grip.jpg',
-                    'attack-shark-r5-ultra-box-bundle-contents.jpg',
-                    'attack-shark-r5-ultra-dongle-receiver.jpg'
-                ],
-                specs: [
-                    { label: 'СЕНСОР', value: 'PAW3950MAX' },
-                    { label: 'РОЗДІЛЬНІСТЬ (DPI)', value: '42,000 DPI' },
-                    { label: 'ВАГА', value: '39Г' },
-                    { label: 'ЧАСТОТА ОПИТУВАННЯ', value: '8KHZ' },
-                    { label: 'ПІДКЛЮЧЕННЯ', value: 'ТРИРЕЖИМНЕ' },
-                    { label: 'МАТЕРІАЛ', value: 'КАРБОН' }
-                ],
-                colors: [
-                    { name: 'White', class: 'white', available: true },
-                    { name: 'Black', class: 'black', available: false },
-                    { name: 'Pink', class: 'pink', available: false }
-                ]
-            },
-            'mchose-a7-v2': {
-                brand: 'MCHOSE',
-                category: 'Миші',
-                desc: 'Бездротова ігрова миша з безпрецедентною точністю та високою продуктивністю.',
-                img: 'https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?auto=format&fit=crop&w=800&q=80',
-                gallery: ['https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?auto=format&fit=crop&w=800&q=80'],
-                specs: [
-                    { label: 'СЕНСОР', value: 'PAW3395' },
-                    { label: 'ВАГА', value: '54Г' },
-                    { label: 'ПІДКЛЮЧЕННЯ', value: 'БЕЗДРОТОВЕ' },
-                    { label: 'АКУМУЛЯТОР', value: 'ДО 80 ГОД' }
-                ],
-                colors: [
-                    { name: 'White', class: 'white', available: true },
-                    { name: 'Black', class: 'black', available: true }
-                ]
-            },
-            'atk-xsoft': {
-                brand: 'ATK',
-                category: 'Аксесуари',
-                desc: 'Професійний ігровий килимок для максимального контролю ковзання миші.',
-                img: 'https://images.unsplash.com/photo-1618384887929-16ec33fab9ef?auto=format&fit=crop&w=800&q=80',
-                gallery: ['https://images.unsplash.com/photo-1618384887929-16ec33fab9ef?auto=format&fit=crop&w=800&q=80'],
-                specs: [
-                    { label: 'ПОВЕРХНЯ', value: 'ШВИДКІСТЬ (SPEED)' },
-                    { label: 'ТОВЩИНА', value: '4 ММ' },
-                    { label: 'ОСНОВА', value: 'КАУЧУК' }
-                ],
-                colors: [
-                    { name: 'Black', class: 'black', available: true }
-                ]
-            },
-            'aula-f75': {
-                brand: 'AULA',
-                category: 'Клавіатури',
-                desc: 'Бездротова механічна клавіатура з чудовим звуком друку та кастомними світчами.',
-                img: 'https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=800&q=80',
-                gallery: ['https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=800&q=80'],
-                specs: [
-                    { label: 'ПЕРЕМИКАЧІ', value: 'REAPER' },
-                    { label: 'ФОРМ-ФАКТОР', value: '75%' },
-                    { label: 'ПІДКЛЮЧЕННЯ', value: 'ТРИРЕЖИМНЕ' },
-                    { label: 'ПІДСВІЧУВАННЯ', value: 'RGB' }
-                ],
-                colors: [
-                    { name: 'White', class: 'white', available: true },
-                    { name: 'Black', class: 'black', available: true },
-                    { name: 'Pink', class: 'pink', available: true }
-                ]
-            }
-        };
-
         let products = [];
         let cart = JSON.parse(localStorage.getItem('m1lip_cart')) || [];
         let wishlist = JSON.parse(localStorage.getItem('m1lip_wishlist')) || [];
@@ -1102,32 +1021,83 @@
                 let backendData = await response.json();
                 
                 products = backendData.map(item => {
-                    let meta = staticProductsMeta[item.id] || {
-                        brand: 'M1LIP',
-                        category: 'Аксесуари',
-                        desc: 'Якісний ігровий девайс.',
-                        img: 'https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?auto=format&fit=crop&w=800&q=80',
-                        gallery: ['https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?auto=format&fit=crop&w=800&q=80'],
-                        specs: [],
-                        colors: [{ name: 'White', class: 'white', available: true }]
-                    };
+                    // Перетворення полів кольорів з бекенду (підтримує різні варіанти назв полів)
+                    let parsedColors = [];
+                    let rawColors = item.color_images || item.colorImages;
+                    
+                    if (rawColors) {
+                        if (typeof rawColors === 'string') {
+                            try { rawColors = JSON.parse(rawColors); } catch(err) { rawColors = {}; }
+                        }
+                        parsedColors = Object.keys(rawColors).map(colorName => {
+                            let lower = colorName.toLowerCase();
+                            let cls = 'white';
+                            if (lower.includes('чорн') || lower.includes('black')) cls = 'black';
+                            else if (lower.includes(' розов') || lower.includes('pink')) cls = 'pink';
+                            return {
+                                name: colorName,
+                                class: cls,
+                                available: true,
+                                image: rawColors[colorName]
+                            };
+                        });
+                    }
+                    
+                    if (parsedColors.length === 0 && item.colors) {
+                        let colorNames = typeof item.colors === 'string' ? item.colors.split(',').map(s => s.trim()) : item.colors;
+                        parsedColors = colorNames.map(colorName => {
+                            let lower = colorName.toLowerCase();
+                            let cls = 'white';
+                            if (lower.includes('чорн') || lower.includes('black')) cls = 'black';
+                            else if (lower.includes(' розов') || lower.includes('pink')) cls = 'pink';
+                            return { name: colorName, class: cls, available: true };
+                        });
+                    }
+
+                    if (parsedColors.length === 0) {
+                        parsedColors = [{ name: 'White', class: 'white', available: true }];
+                    }
+
+                    // Обробка галереї
+                    let parsedGallery = [];
+                    if (item.gallery) {
+                        if (typeof item.gallery === 'string') {
+                            parsedGallery = item.gallery.split(',').map(s => s.trim()).filter(Boolean);
+                        } else if (Array.isArray(item.gallery)) {
+                            parsedGallery = item.gallery;
+                        }
+                    }
+                    if (parsedGallery.length === 0 && item.img) {
+                        parsedGallery = [item.img];
+                    }
+
+                    // Обробка характеристик specs
+                    let parsedSpecs = [];
+                    if (item.specs) {
+                        if (typeof item.specs === 'string') {
+                            try { parsedSpecs = JSON.parse(item.specs); } catch(err) { parsedSpecs = []; }
+                        } else if (Array.isArray(item.specs)) {
+                            parsedSpecs = item.specs;
+                        }
+                    }
+
                     return {
-                        ...meta,
-                        id: item.id,
-                        title: item.title,
-                        price: item.price,
-                        tag: item.tag
+                        id: item.id || 'prod-' + Math.random(),
+                        brand: item.brand || 'M1LIP',
+                        title: item.title || 'Товар',
+                        price: Number(item.price) || 0,
+                        tag: item.tag || 'НОВИНКА',
+                        category: item.category || 'Аксесуари',
+                        desc: item.description || item.desc || 'Якісний ігровий девайс.',
+                        img: item.img || (parsedGallery.length > 0 ? parsedGallery[0] : ''),
+                        gallery: parsedGallery,
+                        specs: parsedSpecs,
+                        colors: parsedColors
                     };
                 });
             } catch (e) {
-                console.warn("Не вдалося завантажити товари з API, завантажуємо локальний резерв:", e);
-                products = Object.keys(staticProductsMeta).map(id => ({
-                    id,
-                    ...staticProductsMeta[id],
-                    title: id.toUpperCase(),
-                    price: 2999,
-                    tag: 'ХІТ'
-                }));
+                console.warn("Не вдалося завантажити товари з API:", e);
+                products = [];
             }
 
             renderCatalog();
@@ -1158,7 +1128,7 @@
         }
 
         function formatPrice(price) {
-            return `${price.toLocaleString('uk-UA')} <span class="currency">₴</span>`;
+            return `${Number(price).toLocaleString('uk-UA')} <span class="currency">₴</span>`;
         }
 
         function filterByCategory(category) {
@@ -1553,6 +1523,12 @@
             selectedColorIndex = index;
             updateModalColorDisplay();
             updateModalWishlistBtn();
+
+            // Якщо для кольору задано окреме фото, змінюємо головне фото в модалці
+            if (colorObj.image) {
+                const modalImg = document.getElementById('modal-img');
+                if (modalImg) modalImg.src = colorObj.image;
+            }
         }
 
         function updateModalColorDisplay() {
@@ -1562,7 +1538,7 @@
             if (selectorContainer) {
                 selectorContainer.innerHTML = currentModalProduct.colors.map((c, idx) => `
                     <div class="color-option-item" onclick="selectModalColor(${idx})">
-                        <div class="color-circle-big ${c.class} ${!c.available ? 'disabled' : ''} ${idx === selectedColorIndex ? 'active' : ''}" title="${c.name} ${!c.available ? '(Out of stock)' : ''}"></div>
+                        <div class="color-circle-big ${c.class} ${!c.available ? 'disabled' : ''} ${idx === selectedColorIndex ? 'active' : ''}" title="${c.name}"></div>
                     </div>
                 `).join('');
             }
