@@ -356,8 +356,11 @@ async def process_add_new(callback: CallbackQuery, state: FSMContext):
     if callback.from_user.id not in ADMIN_IDS:
         return
     await state.set_state(AddProductStates.waiting_for_brand)
-    await callback.message.answer("🏷 Введіть **бренд** товару (наприклад: `АУРА`, `Razer`, `Logitech`):",
-                                  parse_mode="Markdown")
+    await callback.message.answer(
+        "🏷 Введіть **бренд** товару\n\n"
+        "*(Наприклад: `Logitech`, `Razer`, `AULA`, `AJAZZ`, `Hator`, `Attack Shark`)*:",
+        parse_mode="Markdown"
+    )
     await callback.answer()
 
 
@@ -403,7 +406,11 @@ async def skip_tag_cb(callback: CallbackQuery, state: FSMContext):
         await callback.message.delete()
     except Exception:
         pass
-    await callback.message.answer("📁 Введіть **категорію** товару (наприклад: `Миші`, `Клавіатури`, `Аксесуари`):")
+    await callback.message.answer(
+        "📁 Введіть **категорію** товару\n\n"
+        "*(Доступні варіанти: `Миші`, `Клавіатури`, `Гарнітури`, `Аксесуари`)*:",
+        parse_mode="Markdown"
+    )
     await callback.answer()
 
 
@@ -412,7 +419,11 @@ async def add_tag(message: Message, state: FSMContext):
     if message.from_user.id not in ADMIN_IDS: return
     await state.update_data(tag=message.text.strip())
     await state.set_state(AddProductStates.waiting_for_category)
-    await message.answer("📁 Введіть **категорію** товару (наприклад: `Миші`, `Клавіатури`, `Аксесуари`):")
+    await message.answer(
+        "📁 Введіть **категорію** товару\n\n"
+        "*(Доступні варіанти: `Миші`, `Клавіатури`, `Гарнітури`, `Аксесуари`)*:",
+        parse_mode="Markdown"
+    )
 
 
 @router.message(AddProductStates.waiting_for_category)
@@ -441,7 +452,7 @@ async def add_qty(message: Message, state: FSMContext):
                 InlineKeyboardButton(text="✅ Готово / Завершити вибір", callback_data="col_done")
             ]
         ])
-        await message.update_data(selected_colors=[])
+        await state.update_data(selected_colors=[])
         await message.answer(
             "🎨 Оберіть **наявність кольорів** для цього товару (натискайте на кнопки по черзі, а потім натисніть «Готово»):",
             reply_markup=colors_markup)
@@ -530,7 +541,6 @@ async def finish_product_creation(callback: CallbackQuery, state: FSMContext):
     brand = data.get("brand", "")
     title = data.get("title", "")
 
-    # Автоматична генерація чистого ID для бази та сайту
     generated_id = f"{brand}-{title}".lower().replace(" ", "-").replace("(", "").replace(")", "")
 
     img = data.get("img", "")
