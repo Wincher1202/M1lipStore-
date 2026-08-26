@@ -73,7 +73,6 @@
             flex-direction: column;
         }
 
-        /* Стандартний акуратний шрифт для цін як у топ маркетплейсах */
         .product-price, .cart-total, header .logo span {
             font-family: 'Inter', sans-serif;
             font-weight: 600;
@@ -918,7 +917,7 @@
         <div class="drawer-footer">
             <div class="cart-total">
                 <span>Разом:</span>
-                <span id="cart-total-price">0 <span class="currency">₴</span></span>
+                <span id="cart-total-price">2945 <span class="currency">₴</span></span>
             </div>
             <button class="btn-primary" style="width: 100%; justify-content: center;" onclick="checkout()">Оформити замовлення →</button>
         </div>
@@ -960,7 +959,7 @@
                 <h4 id="modal-brand" style="color: var(--text-muted); text-transform: uppercase; font-size: 0.7rem; font-weight: 800; margin-top: 6px;">БРЕНД</h4>
                 <h2 id="modal-title" style="font-size: 1.4rem; font-weight: 800; margin: 4px 0;"></h2>
                 <p id="modal-desc" style="color: var(--text-secondary); margin: 6px 0; font-size: 0.85rem;"></p>
-                <div class="product-price" id="modal-price" style="font-size: 1.3rem; color: var(--accent); margin: 8px 0;">0 <span class="currency">₴</span></div>
+                <div class="product-price" id="modal-price" style="font-size: 1.3rem; color: var(--accent); margin: 8px 0;">2945 <span class="currency">₴</span></div>
 
                 <div class="modal-options-row">
                     <div class="option-group">
@@ -991,17 +990,20 @@
     </div>
 
     <script>
-        let tg = window.Telegram.WebApp;
+        let tg = window.Telegram?.WebApp;
         if (tg) {
-            tg.expand();
-            tg.ready();
-            if (tg.colorScheme === 'dark') {
-                document.body.setAttribute('data-theme', 'dark');
+            try {
+                tg.expand();
+                tg.ready();
+                if (tg.colorScheme === 'dark') {
+                    document.body.setAttribute('data-theme', 'dark');
+                }
+            } catch (e) {
+                console.log('Telegram WebApp Init Error:', e);
             }
         }
 
-        // Початковий масив товарів (запасний варіант, якщо сервер офлайн)
-        let products = [
+        const products = [
             {
                 id: 'attack-shark-r5-ultra',
                 brand: 'ATTACK SHARK',
@@ -1033,6 +1035,68 @@
                     { name: 'Black', class: 'black', available: false },
                     { name: 'Pink', class: 'pink', available: false }
                 ]
+            },
+            {
+                id: 'mchose-a7-v2',
+                brand: 'MCHOSE',
+                title: 'A7 V2 PRO',
+                category: 'Миші',
+                tag: 'БЕСТСЕЛЕР',
+                price: 4599,
+                desc: 'Бездротова ігрова миша з безпрецедентною точністю та високою продуктивністю.',
+                img: 'https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?auto=format&fit=crop&w=800&q=80',
+                gallery: ['https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?auto=format&fit=crop&w=800&q=80'],
+                specs: [
+                    { label: 'СЕНСОР', value: 'PAW3395' },
+                    { label: 'ВАГА', value: '54Г' },
+                    { label: 'ПІДКЛЮЧЕННЯ', value: 'БЕЗДРОТОВЕ' },
+                    { label: 'АКУМУЛЯТОР', value: 'ДО 80 ГОД' }
+                ],
+                colors: [
+                    { name: 'White', class: 'white', available: true },
+                    { name: 'Black', class: 'black', available: true }
+                ]
+            },
+            {
+                id: 'atk-xsoft',
+                brand: 'ATK',
+                title: 'XSOFT GAMING MAT',
+                category: 'Аксесуари',
+                tag: 'НОВИНКА',
+                price: 1499,
+                desc: 'Професійний ігровий килимок для максимального контролю ковзання миші.',
+                img: 'https://images.unsplash.com/photo-1618384887929-16ec33fab9ef?auto=format&fit=crop&w=800&q=80',
+                gallery: ['https://images.unsplash.com/photo-1618384887929-16ec33fab9ef?auto=format&fit=crop&w=800&q=80'],
+                specs: [
+                    { label: 'ПОВЕРХНЯ', value: 'ШВИДКІСТЬ (SPEED)' },
+                    { label: 'ТОВЩИНА', value: '4 ММ' },
+                    { label: 'ОСНОВА', value: 'КАУЧУК' }
+                ],
+                colors: [
+                    { name: 'Black', class: 'black', available: true }
+                ]
+            },
+            {
+                id: 'aula-f75',
+                brand: 'AULA',
+                title: 'F75 MECHANICAL',
+                category: 'Клавіатури',
+                tag: 'ПОПУЛЯРНЕ',
+                price: 3899,
+                desc: 'Бездротова механічна клавіатура з чудовим звуком друку та кастомними світчами.',
+                img: 'https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=800&q=80',
+                gallery: ['https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=800&q=80'],
+                specs: [
+                    { label: 'ПЕРЕМИКАЧІ', value: 'REAPER' },
+                    { label: 'ФОРМ-ФАКТОР', value: '75%' },
+                    { label: 'ПІДКЛЮЧЕННЯ', value: 'ТРИРЕЖИМНЕ' },
+                    { label: 'ПІДСВІЧУВАННЯ', value: 'RGB' }
+                ],
+                colors: [
+                    { name: 'White', class: 'white', available: true },
+                    { name: 'Black', class: 'black', available: true },
+                    { name: 'Pink', class: 'pink', available: true }
+                ]
             }
         ];
 
@@ -1042,51 +1106,35 @@
         let modalQty = 1;
         let selectedColorIndex = 0;
         let currentCategoryFilter = 'All';
-        let heroIndex = 0;
 
-        // Функція підтягування актуальних даних з сервера через fetch
-        async function fetchProducts() {
-            try {
-                let response = await fetch('https://m1lipstore.onrender.com/api/products');
-                if (response.ok) {
-                    let data = await response.json();
-                    if (Array.isArray(data) && data.length > 0) {
-                        products = data;
-                    }
-                }
-            } catch (error) {
-                console.error('Помилка завантаження даних із сервера, використовуються локальні дані:', error);
-            } finally {
-                initApp();
-            }
-        }
+        let heroIndex = 0;
+        const heroProducts = products;
 
         function updateHeroBanner() {
-            if (products.length === 0) return;
-            const p = products[heroIndex];
+            if (heroProducts.length === 0) return;
+            const p = heroProducts[heroIndex];
             const imgEl = document.getElementById('hero-img');
             const tagEl = document.getElementById('hero-tag');
             
-            if (imgEl && tagEl && p) {
+            if (imgEl && tagEl) {
                 imgEl.style.opacity = '0';
                 setTimeout(() => {
-                    imgEl.src = p.img || '';
-                    tagEl.innerText = p.tag || 'HOT';
+                    imgEl.src = p.img;
+                    tagEl.innerText = p.tag;
                     imgEl.style.opacity = '1';
                 }, 300);
             }
 
-            heroIndex = (heroIndex + 1) % products.length;
+            heroIndex = (heroIndex + 1) % heroProducts.length;
         }
 
         function openHeroProductModal() {
-            if (products.length === 0) return;
-            const currentHeroProd = products[(heroIndex - 1 + products.length) % products.length];
+            const currentHeroProd = heroProducts[(heroIndex - 1 + heroProducts.length) % heroProducts.length];
             openProductModal(currentHeroProd);
         }
 
         function formatPrice(price) {
-            return `${Number(price || 0).toLocaleString('uk-UA')} <span class="currency">₴</span>`;
+            return `${price.toLocaleString('uk-UA')} <span class="currency">₴</span>`;
         }
 
         function filterByCategory(category) {
@@ -1102,27 +1150,30 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            fetchProducts();
-
-            window.addEventListener('scroll', () => {
-                document.getElementById('site-header').classList.toggle('scrolled', window.scrollY > 30);
-            });
-
-            document.getElementById('theme-toggle-btn').addEventListener('click', () => {
-                const currentTheme = document.body.getAttribute('data-theme');
-                document.body.setAttribute('data-theme', currentTheme === 'light' ? 'dark' : 'light');
-            });
-
-            document.getElementById('search-open-btn').addEventListener('click', () => toggleSearch(true));
-            document.getElementById('wishlist-open-btn').addEventListener('click', () => toggleWishlistDrawer(true));
-            document.getElementById('cart-open-btn').addEventListener('click', () => toggleCart(true));
-        });
-
-        function initApp() {
             renderCatalog();
             updateBadges();
+
             setInterval(updateHeroBanner, 3500);
-        }
+
+            window.addEventListener('scroll', () => {
+                const header = document.getElementById('site-header');
+                if (header) {
+                    header.classList.toggle('scrolled', window.scrollY > 30);
+                }
+            });
+
+            const themeBtn = document.getElementById('theme-toggle-btn');
+            if (themeBtn) {
+                themeBtn.addEventListener('click', () => {
+                    const currentTheme = document.body.getAttribute('data-theme');
+                    document.body.setAttribute('data-theme', currentTheme === 'light' ? 'dark' : 'light');
+                });
+            }
+
+            document.getElementById('search-open-btn')?.addEventListener('click', () => toggleSearch(true));
+            document.getElementById('wishlist-open-btn')?.addEventListener('click', () => toggleWishlistDrawer(true));
+            document.getElementById('cart-open-btn')?.addEventListener('click', () => toggleCart(true));
+        });
 
         function scrollToSection(id) {
             document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
@@ -1130,6 +1181,8 @@
 
         function renderCatalog() {
             const container = document.getElementById('catalog-container');
+            if (!container) return;
+
             const filteredProducts = currentCategoryFilter === 'All' 
                 ? products 
                 : products.filter(p => p.category === currentCategoryFilter);
@@ -1144,7 +1197,7 @@
                 const isFav = wishlist.some(item => item.id === p.id);
                 return `
                     <div class="product-card" onclick="openProductModal(products.find(x => x.id === '${p.id}'))">
-                        <span class="product-tag new">${p.tag || ''}</span>
+                        <span class="product-tag new">${p.tag}</span>
                         <button class="wishlist-btn ${isFav ? 'active' : ''}" id="wishlist-btn-${p.id}" onclick="event.stopPropagation(); toggleWishlist('${p.id}')">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="${isFav ? '#FF3B30' : 'none'}" stroke="${isFav ? '#FF3B30' : 'currentColor'}" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
                         </button>
@@ -1201,11 +1254,13 @@
             if (btnEl) {
                 btnEl.classList.toggle('active', isAdding);
                 const svg = btnEl.querySelector('svg');
-                svg.style.animation = 'none';
-                svg.offsetHeight; 
-                svg.style.animation = '';
-                svg.setAttribute('fill', isAdding ? '#FF3B30' : 'none');
-                svg.setAttribute('stroke', isAdding ? '#FF3B30' : 'currentColor');
+                if (svg) {
+                    svg.style.animation = 'none';
+                    svg.offsetHeight; 
+                    svg.style.animation = '';
+                    svg.setAttribute('fill', isAdding ? '#FF3B30' : 'none');
+                    svg.setAttribute('stroke', isAdding ? '#FF3B30' : 'currentColor');
+                }
             }
 
             updateBadges();
@@ -1224,12 +1279,16 @@
             const colorObj = activeColors[selectedColorIndex] || activeColors[0];
             const isFav = wishlist.some(item => item.id === currentModalProduct.id && item.color === colorObj.name);
             btn.classList.toggle('active', isFav);
-            btn.querySelector('svg').setAttribute('fill', isFav ? '#FF3B30' : 'none');
-            btn.querySelector('svg').setAttribute('stroke', isFav ? '#FF3B30' : 'currentColor');
+            const svg = btn.querySelector('svg');
+            if (svg) {
+                svg.setAttribute('fill', isFav ? '#FF3B30' : 'none');
+                svg.setAttribute('stroke', isFav ? '#FF3B30' : 'currentColor');
+            }
         }
 
         function renderWishlistItems() {
             const container = document.getElementById('wishlist-items-container');
+            if (!container) return;
             if (wishlist.length === 0) {
                 container.innerHTML = `<p style="color: var(--text-secondary); text-align: center; margin-top: 30px;">Список обраного порожній</p>`;
                 return;
@@ -1259,8 +1318,11 @@
                 const btnEl = document.getElementById(`wishlist-btn-${removed.id}`);
                 if (btnEl) {
                     btnEl.classList.remove('active');
-                    btnEl.querySelector('svg').setAttribute('fill', 'none');
-                    btnEl.querySelector('svg').setAttribute('stroke', 'currentColor');
+                    const svg = btnEl.querySelector('svg');
+                    if (svg) {
+                        svg.setAttribute('fill', 'none');
+                        svg.setAttribute('stroke', 'currentColor');
+                    }
                 }
             }
         }
@@ -1316,9 +1378,11 @@
 
         function renderCartItems() {
             const container = document.getElementById('cart-items-container');
+            if (!container) return;
             if (cart.length === 0) {
                 container.innerHTML = `<p style="color: var(--text-secondary); text-align: center; margin-top: 30px;">Кошик порожній</p>`;
-                document.getElementById('cart-total-price').innerHTML = formatPrice(0);
+                const totalPriceEl = document.getElementById('cart-total-price');
+                if (totalPriceEl) totalPriceEl.innerHTML = formatPrice(0);
                 if (tg && tg.MainButton) tg.MainButton.hide();
                 return;
             }
@@ -1338,7 +1402,8 @@
                 </div>
             `).join('');
             const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-            document.getElementById('cart-total-price').innerHTML = formatPrice(total);
+            const totalPriceEl = document.getElementById('cart-total-price');
+            if (totalPriceEl) totalPriceEl.innerHTML = formatPrice(total);
             updateTelegramMainButton();
         }
 
@@ -1355,26 +1420,28 @@
         }
 
         function updateBadges() {
-            document.getElementById('cart-count').innerText = cart.reduce((sum, item) => sum + item.qty, 0);
-            document.getElementById('wishlist-count').innerText = wishlist.length;
+            const cartCountEl = document.getElementById('cart-count');
+            const wishlistCountEl = document.getElementById('wishlist-count');
+            if (cartCountEl) cartCountEl.innerText = cart.reduce((sum, item) => sum + item.qty, 0);
+            if (wishlistCountEl) wishlistCountEl.innerText = wishlist.length;
         }
 
         function toggleCart(open) {
-            document.getElementById('cart-drawer').classList.toggle('active', open);
-            document.getElementById('backdrop').classList.toggle('active', open);
+            document.getElementById('cart-drawer')?.classList.toggle('active', open);
+            document.getElementById('backdrop')?.classList.toggle('active', open);
             if (open) renderCartItems();
         }
 
         function toggleWishlistDrawer(open) {
-            document.getElementById('wishlist-drawer').classList.toggle('active', open);
-            document.getElementById('backdrop').classList.toggle('active', open);
+            document.getElementById('wishlist-drawer')?.classList.toggle('active', open);
+            document.getElementById('backdrop')?.classList.toggle('active', open);
             if (open) renderWishlistItems();
         }
 
         function toggleSearch(open) {
-            document.getElementById('search-modal').classList.toggle('active', open);
-            document.getElementById('backdrop').classList.toggle('active', open);
-            if (open) document.getElementById('search-input').focus();
+            document.getElementById('search-modal')?.classList.toggle('active', open);
+            document.getElementById('backdrop')?.classList.toggle('active', open);
+            if (open) document.getElementById('search-input')?.focus();
         }
 
         function closeAllDrawers() {
@@ -1386,6 +1453,7 @@
 
         function handleSearch(query) {
             const container = document.getElementById('search-results');
+            if (!container) return;
             if (!query.trim()) { container.innerHTML = ''; return; }
             const filtered = products.filter(p => p.title.toLowerCase().includes(query.toLowerCase()) || p.brand.toLowerCase().includes(query.toLowerCase()));
             if (filtered.length === 0) {
@@ -1404,6 +1472,7 @@
         }
 
         function openProductModal(product) {
+            if (!product) return;
             currentModalProduct = product;
             modalQty = 1;
             selectedColorIndex = 0;
@@ -1416,37 +1485,47 @@
             updateModalColorDisplay();
             
             const galleryImages = product.gallery && product.gallery.length > 0 ? product.gallery : [product.img];
-            document.getElementById('modal-img').src = galleryImages[0];
+            const modalImg = document.getElementById('modal-img');
+            if (modalImg) modalImg.src = galleryImages[0];
             
             const thumbsContainer = document.getElementById('modal-thumbs');
-            thumbsContainer.innerHTML = galleryImages.map((imgSrc, index) => `
-                <img class="modal-thumb ${index === 0 ? 'active' : ''}" src="${imgSrc}" onclick="changeModalMainImage('${imgSrc}', this)">
-            `).join('');
+            if (thumbsContainer) {
+                thumbsContainer.innerHTML = galleryImages.map((imgSrc, index) => `
+                    <img class="modal-thumb ${index === 0 ? 'active' : ''}" src="${imgSrc}" onclick="changeModalMainImage('${imgSrc}', this)">
+                `).join('');
+            }
 
-            document.getElementById('modal-tag').innerText = product.tag || '';
-            document.getElementById('modal-brand').innerText = product.brand;
-            document.getElementById('modal-title').innerText = product.title;
-            document.getElementById('modal-desc').innerText = product.desc || '';
-            document.getElementById('modal-price').innerHTML = formatPrice(product.price);
-            document.getElementById('modal-qty').innerText = modalQty;
+            setElementText('modal-tag', product.tag);
+            setElementText('modal-brand', product.brand);
+            setElementText('modal-title', product.title);
+            setElementText('modal-desc', product.desc);
             
-            const specsContainer = document.getElementById('modal-specs');
-            if (product.specs && Array.isArray(product.specs)) {
-                specsContainer.innerHTML = product.specs.map(s => `
+            const priceEl = document.getElementById('modal-price');
+            if (priceEl) priceEl.innerHTML = formatPrice(product.price);
+            
+            setElementText('modal-qty', modalQty);
+
+            const specsEl = document.getElementById('modal-specs');
+            if (specsEl && product.specs) {
+                specsEl.innerHTML = product.specs.map(s => `
                     <div class="spec-box"><span>${s.label}</span><strong>${s.value}</strong></div>
                 `).join('');
-            } else {
-                specsContainer.innerHTML = '';
             }
             
             updateModalWishlistBtn();
-            document.getElementById('product-modal').classList.add('active');
-            document.getElementById('backdrop').classList.add('active');
+            document.getElementById('product-modal')?.classList.add('active');
+            document.getElementById('backdrop')?.classList.add('active');
+        }
+
+        function setElementText(id, text) {
+            const el = document.getElementById(id);
+            if (el) el.innerText = text;
         }
 
         function selectModalColor(index) {
+            if (!currentModalProduct || !currentModalProduct.colors) return;
             const colorObj = currentModalProduct.colors[index];
-            if (!colorObj.available) return;
+            if (!colorObj || !colorObj.available) return;
             selectedColorIndex = index;
             updateModalColorDisplay();
             updateModalWishlistBtn();
@@ -1456,30 +1535,33 @@
             if (!currentModalProduct || !currentModalProduct.colors) return;
             
             const selectorContainer = document.getElementById('modal-color-selector');
-            selectorContainer.innerHTML = currentModalProduct.colors.map((c, idx) => `
-                <div class="color-option-item" onclick="selectModalColor(${idx})">
-                    <div class="color-circle-big ${c.class} ${!c.available ? 'disabled' : ''} ${idx === selectedColorIndex ? 'active' : ''}" title="${c.name} ${!c.available ? '(Out of stock)' : ''}"></div>
-                </div>
-            `).join('');
+            if (selectorContainer) {
+                selectorContainer.innerHTML = currentModalProduct.colors.map((c, idx) => `
+                    <div class="color-option-item" onclick="selectModalColor(${idx})">
+                        <div class="color-circle-big ${c.class} ${!c.available ? 'disabled' : ''} ${idx === selectedColorIndex ? 'active' : ''}" title="${c.name} ${!c.available ? '(Out of stock)' : ''}"></div>
+                    </div>
+                `).join('');
+            }
 
             const activeColorObj = currentModalProduct.colors[selectedColorIndex];
-            document.getElementById('modal-color-name').innerText = activeColorObj ? activeColorObj.name : 'White';
+            setElementText('modal-color-name', activeColorObj ? activeColorObj.name : 'White');
         }
 
         function changeModalMainImage(src, thumbElement) {
-            document.getElementById('modal-img').src = src;
+            const modalImg = document.getElementById('modal-img');
+            if (modalImg) modalImg.src = src;
             document.querySelectorAll('.modal-thumb').forEach(t => t.classList.remove('active'));
             thumbElement.classList.add('active');
         }
 
         function closeProductModal() {
-            document.getElementById('product-modal').classList.remove('active');
-            document.getElementById('backdrop').classList.remove('active');
+            document.getElementById('product-modal')?.classList.remove('active');
+            document.getElementById('backdrop')?.classList.remove('active');
         }
 
         function adjustModalQty(change) {
             modalQty = Math.max(1, modalQty + change);
-            document.getElementById('modal-qty').innerText = modalQty;
+            setElementText('modal-qty', modalQty);
         }
 
         function addCurrentProductToCart() {
