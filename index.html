@@ -1232,10 +1232,6 @@
             container.innerHTML = filteredProducts.map((p) => {
                 const firstColorClass = p.colors && p.colors[0] ? p.colors[0].class : 'white';
                 const isFav = wishlist.some(item => item.id === p.id);
-                
-                let stockHtml = p.quantity > 0 
-                    ? `<div class="product-stock stock-in">🟢 В наявності (${p.quantity} шт.)</div>` 
-                    : `<div class="product-stock stock-out">🔴 Немає в наявності</div>`;
 
                 return `
                     <div class="product-card" onclick="openProductModal(products.find(x => x.id === '${p.id}'))">
@@ -1255,7 +1251,6 @@
                             <div class="product-title-group">
                                 <h4>${p.brand}</h4>
                                 <h3>${p.title}</h3>
-                                ${stockHtml}
                             </div>
                             <div class="product-price">${formatPrice(p.price)}</div>
                         </div>
