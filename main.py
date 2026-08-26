@@ -66,7 +66,6 @@ def init_db():
                    """)
     conn.commit()
 
-    # Додаємо початкові товари, якщо база порожня
     cursor.execute("SELECT COUNT(*) FROM products")
     if cursor.fetchone()[0] == 0:
         initial_products = [
@@ -101,7 +100,6 @@ def get_db_products():
     return [dict(row) for row in rows]
 
 
-# Ініціалізація FastAPI та роутера бота
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
@@ -119,7 +117,6 @@ async def get_products():
     return get_db_products()
 
 
-# --- СТАНИ ДЛЯ FSM (Адмін-панель) ---
 class AdminStates(StatesGroup):
     waiting_for_tag_text = State()
     waiting_for_price = State()
@@ -157,8 +154,6 @@ async def cmd_start(message: Message):
         parse_mode="Markdown",
     )
 
-
-# --- АДМІН-ПАНЕЛЬ ---
 
 @router.message(Command("admin"))
 async def cmd_admin(message: Message):
@@ -219,7 +214,7 @@ async def process_back_to_admin(callback: CallbackQuery):
         pass
 
     await callback.message.answer(
-        "⚙️ **Панель адміністратора M1lipStore**\n\nОберіть товар, який хочете відредагувати:",
+        "⚙️ **Панель адміністратора M1lipStore**\n\nОберіть товар для редагування або створіть новий:",
         reply_markup=admin_markup,
         parse_mode="Markdown"
     )
@@ -246,6 +241,7 @@ async def process_manage_product(callback: CallbackQuery):
         f"• Ціна: {product['price']} ₴\n"
         f"• Тег: `{product['tag'] or 'немає'}`\n"
         f"• На складі: **{product['quantity']} шт.**\n"
+        f"• Фото в галереї: {len((product['gallery'] or '').split(','))} шт.\n"
         f"• Головне фото: нижче 👇"
     )
 
@@ -279,16 +275,23 @@ async def process_manage_product(callback: CallbackQuery):
     if not photo_url or not photo_url.startswith("http"):
         photo_url = "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=800&q=80"
 
-    await callback.message.answer_photo(
-        photo=photo_url,
-        caption=caption,
-        parse_mode="Markdown",
-        reply_markup=action_markup
-    )
+    try:
+        await callback.message.answer_photo(
+            photo=photo_url,
+            caption=caption,
+            parse_mode="Markdown",
+            reply_markup=action_markup
+        )
+    except Exception:
+        # Безпечний запасний варіант, якщо посилання на фото з якихось причин не завантажилось телеграмом
+        await callback.message.answer(
+            caption + "\n\n⚠️ *(Не вдалося завантажити прев'ю фото, але керування доступне)*",
+            parse_mode="Markdown",
+            reply_markup=action_markup
+        )
     await callback.answer()
 
 
-# --- ВИБІР ТИПУ ФОТО ДЛЯ ЗМІНИ ---
 @router.callback_query(F.data.startswith("photo_menu_"))
 async def process_photo_menu(callback: CallbackQuery):
     if callback.from_user.id not in ADMIN_IDS:
@@ -296,19 +299,18 @@ async def process_photo_menu(callback: CallbackQuery):
     product_id = callback.data.replace("photo_menu_", "")
 
     markup = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="🖼 Головне фото (в каталозі)", callback_data=f"set_img_{product_id}")],
-        [InlineKeyboardButton(text="📸 Фото товару (галерея)", callback_data=f"set_gallery_{product_id}")],
+        [InlineKeyboardButton(text="🖼 Головне фото (каталог + сайт)", callback_data=f"set_img_{product_id}")],
+        [InlineKeyboardButton(text="📸 Додати фото до галереї (без ліміту)", callback_data=f"set_gallery_{product_id}")],
         [InlineKeyboardButton(text="🔙 Назад до товару", callback_data=f"manage_{product_id}")]
     ])
 
     try:
         await callback.message.edit_reply_markup(reply_markup=markup)
     except Exception:
-        await callback.message.answer("Оберіть, яке саме фото ви хочете оновити:", reply_markup=markup)
+        await callback.message.answer("Оберіть дію з фотографіями:", reply_markup=markup)
     await callback.answer()
 
 
-# --- ПОВНЕ ВИДАЛЕННЯ ТОВАРУ ---
 @router.callback_query(F.data.startswith("delete_prod_"))
 async def process_delete_product(callback: CallbackQuery):
     if callback.from_user.id not in ADMIN_IDS:
@@ -342,7 +344,6 @@ async def process_delete_product(callback: CallbackQuery):
         )
 
 
-# --- СТВОРЕННЯ НОВОГО ТОВАРУ ---
 @router.callback_query(F.data == "add_new_product")
 async def process_add_new(callback: CallbackQuery, state: FSMContext):
     if callback.from_user.id not in ADMIN_IDS:
@@ -397,7 +398,7 @@ async def create_new_qty(message: Message, state: FSMContext):
         qty = int(message.text.strip())
         await state.update_data(new_qty=qty)
         await state.set_state(AdminStates.waiting_for_new_img)
-        await message.answer("🖼 Надішліть фотографію для нового товару прямо сюди (або введіть URL посилання):")
+        await message.answer("🖼 Надішліть головну фотографію для нового товару:")
     except ValueError:
         await message.answer("❌ Введіть ціле число для кількості:")
 
@@ -442,8 +443,6 @@ async def finalize_new_product(message: Message, state: FSMContext, photo_url: s
     await state.clear()
     await message.answer("✅ Новий товар успішно створено та додано до каталогу! Напишіть /admin для перегляду.")
 
-
-# --- РЕДАГУВАННЯ ПОЛІВ ТОВАРУ ---
 
 @router.callback_query(F.data.startswith("set_tag_"))
 async def process_set_tag(callback: CallbackQuery, state: FSMContext):
@@ -562,8 +561,8 @@ async def process_set_cat(callback: CallbackQuery, state: FSMContext):
     product_id = callback.data.replace("set_cat_", "")
     await state.update_data(editing_product_id=product_id)
     await state.set_state(AdminStates.waiting_for_category)
-    await callback.message.answer(
-        "📁 Введіть нову категорію (наприклад: `Миші`, `Клавіатури`, `Гарнітури`, `Аксесуари`):", parse_mode="Markdown")
+    await callback.message.answer("📁 Введіть нову категорію (наприклад: `Миші`, `Клавіатури`, `Аксесуари`):",
+                                  parse_mode="Markdown")
     await callback.answer()
 
 
@@ -584,14 +583,14 @@ async def save_category(message: Message, state: FSMContext):
     await state.clear()
 
 
-# --- РЕДАГУВАННЯ ГОЛОВНОГО ФОТО ---
+# --- РЕДАГУВАННЯ ГОЛОВНОГО ФОТО (оновлює і каталог, і стає основою) ---
 @router.callback_query(F.data.startswith("set_img_"))
 async def process_set_img(callback: CallbackQuery, state: FSMContext):
     if callback.from_user.id not in ADMIN_IDS: return
     product_id = callback.data.replace("set_img_", "")
     await state.update_data(editing_product_id=product_id)
     await state.set_state(AdminStates.waiting_for_img)
-    await callback.message.answer("🖼 Надішліть **нове головне фото** у чат або введіть URL:")
+    await callback.message.answer("🖼 Надішліть **нове головне фото** у чат (відображатиметься в каталозі та картці):")
     await callback.answer()
 
 
@@ -607,11 +606,12 @@ async def save_img_photo(message: Message, state: FSMContext):
 
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
-    cursor.execute("UPDATE products SET img = ? WHERE id = ?", (file_url, product_id))
+    # Оновлюємо і головне фото (img), і перше фото галереї або всю галерею
+    cursor.execute("UPDATE products SET img = ?, gallery = ? WHERE id = ?", (file_url, file_url, product_id))
     conn.commit()
     conn.close()
 
-    await message.answer("✅ Головне фото успішно оновлено! Напишіть /admin.")
+    await message.answer("✅ Головне фото успішно оновлено для каталогу та картки! Напишіть /admin.")
     await state.clear()
 
 
@@ -624,7 +624,7 @@ async def save_img_text(message: Message, state: FSMContext):
 
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
-    cursor.execute("UPDATE products SET img = ? WHERE id = ?", (new_img, product_id))
+    cursor.execute("UPDATE products SET img = ?, gallery = ? WHERE id = ?", (new_img, new_img, product_id))
     conn.commit()
     conn.close()
 
@@ -632,14 +632,15 @@ async def save_img_text(message: Message, state: FSMContext):
     await state.clear()
 
 
-# --- РЕДАГУВАННЯ ГАЛЕРЕЇ ФОТО ---
+# --- ДОДАВАННЯ ФОТО ДО ГАЛЕРЕЇ (Без ліміту, дописує через кому) ---
 @router.callback_query(F.data.startswith("set_gallery_"))
 async def process_set_gallery(callback: CallbackQuery, state: FSMContext):
     if callback.from_user.id not in ADMIN_IDS: return
     product_id = callback.data.replace("set_gallery_", "")
     await state.update_data(editing_product_id=product_id)
     await state.set_state(AdminStates.waiting_for_gallery)
-    await callback.message.answer("📸 Надішліть фото для **галереї товару** (або через колу, або посилання):")
+    await callback.message.answer(
+        "📸 Надішліть додаткове фото для **картки товару** (можете кидати кілька по черзі, вони додаватимуться до галереї):")
     await callback.answer()
 
 
@@ -655,12 +656,21 @@ async def save_gallery_photo(message: Message, state: FSMContext):
 
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
-    # Можемо оновлювати галерею або додавати через кому
-    cursor.execute("UPDATE products SET gallery = ? WHERE id = ?", (file_url, product_id))
+    cursor.execute("SELECT gallery FROM products WHERE id = ?", (product_id,))
+    row = cursor.fetchone()
+
+    current_gallery = row[0] if row and row[0] else ""
+    if current_gallery:
+        new_gallery = f"{current_gallery},{file_url}"
+    else:
+        new_gallery = file_url
+
+    cursor.execute("UPDATE products SET gallery = ? WHERE id = ?", (new_gallery, product_id))
     conn.commit()
     conn.close()
 
-    await message.answer("✅ Галерею товару успішно оновлено! Напишіть /admin.")
+    await message.answer(
+        "✅ Фото успішно додано до галереї картки товару! Можете надіслати ще одне або написати /admin.")
     await state.clear()
 
 
@@ -669,15 +679,24 @@ async def save_gallery_text(message: Message, state: FSMContext):
     if message.from_user.id not in ADMIN_IDS: return
     data = await state.get_data()
     product_id = data.get("editing_product_id")
-    new_gallery = message.text.strip()
+    new_url = message.text.strip()
 
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
+    cursor.execute("SELECT gallery FROM products WHERE id = ?", (product_id,))
+    row = cursor.fetchone()
+
+    current_gallery = row[0] if row and row[0] else ""
+    if current_gallery:
+        new_gallery = f"{current_gallery},{new_url}"
+    else:
+        new_gallery = new_url
+
     cursor.execute("UPDATE products SET gallery = ? WHERE id = ?", (new_gallery, product_id))
     conn.commit()
     conn.close()
 
-    await message.answer("✅ Галерею товару успішно оновлено! Напишіть /admin.")
+    await message.answer("✅ Посилання успішно додано до галереї! Напишіть /admin.")
     await state.clear()
 
 
