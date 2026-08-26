@@ -1000,7 +1000,7 @@
             }
         }
 
-        // Запасний масив товарів на випадок, якщо сервер не відповідає
+        // Початковий масив товарів (запасний варіант, якщо сервер офлайн)
         let products = [
             {
                 id: 'attack-shark-r5-ultra',
@@ -1044,7 +1044,7 @@
         let currentCategoryFilter = 'All';
         let heroIndex = 0;
 
-        // Функція завантаження товарів із сервера на Render
+        // Функція підтягування актуальних даних з сервера через fetch
         async function fetchProducts() {
             try {
                 let response = await fetch('https://m1lipstore.onrender.com/api/products');
@@ -1055,7 +1055,7 @@
                     }
                 }
             } catch (error) {
-                console.error('Не вдалося завантажити товари з сервера, використовуються локальні дані:', error);
+                console.error('Помилка завантаження даних із сервера, використовуються локальні дані:', error);
             } finally {
                 initApp();
             }
