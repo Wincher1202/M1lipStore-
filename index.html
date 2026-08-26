@@ -1003,8 +1003,6 @@
             }
         }
 
-        // Початкові повні характеристики для товарів (зображення, опис тощо),
-        // а ціни, назви та теги підтягуватимуться з твого бекенду (main.py)
         const staticProductsMeta = {
             'attack-shark-r5-ultra': {
                 brand: 'ATTACK SHARK',
@@ -1095,15 +1093,14 @@
         let currentCategoryFilter = 'All';
         let heroIndex = 0;
 
-        // Вкажи сюди посилання на свій запущений FastAPI бекенд (наприклад, на Render)
-        const API_URL = "https://ТВОЄ_ПОСИЛАННЯ_БЕКЕНДУ.onrender.com/api/products";
+        // Посилання на ваш розгорнутий FastAPI бекенд на Render
+        const API_URL = "https://m1lipstore.onrender.com/api/products";
 
         async function fetchProducts() {
             try {
                 let response = await fetch(API_URL);
                 let backendData = await response.json();
                 
-                // Об'єднуємо дані з сервера (ціна, назва, тег) із детальними описами та фотографіями
                 products = backendData.map(item => {
                     let meta = staticProductsMeta[item.id] || {
                         brand: 'M1LIP',
