@@ -270,10 +270,18 @@
             transition: var(--transition-smooth);
         }
 
-        .btn-primary:hover {
+        .btn-primary:hover:not(:disabled) {
             background: var(--accent);
             transform: translateY(-3px) scale(1.02);
             box-shadow: var(--shadow-hover);
+        }
+
+        .btn-primary:disabled {
+            background: var(--border-hover) !important;
+            color: var(--text-muted) !important;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
         }
 
         .hero-visual {
@@ -739,10 +747,11 @@
 
         .modal-options-row {
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             justify-content: flex-start;
-            gap: 30px;
+            gap: 20px;
             margin: 14px 0;
+            flex-wrap: wrap;
         }
 
         .option-group {
@@ -784,18 +793,20 @@
         .color-circle-big.black { background-color: #1a1a1a; }
         .color-circle-big.pink { background-color: #ff2a85; }
 
-        .color-circle-big.disabled {
-            opacity: 0.35;
-            cursor: not-allowed;
-            border-style: dashed;
-        }
-
         .color-circle-big.active {
             box-shadow: 0 0 0 3px var(--accent);
             border-color: var(--accent);
             opacity: 1;
             transform: scale(1.1);
         }
+
+        .stock-status {
+            font-size: 0.75rem;
+            font-weight: 700;
+            margin-top: 4px;
+        }
+        .stock-status.in-stock { color: #2E7D32; }
+        .stock-status.out-of-stock { color: #D32F2F; }
 
         .specs-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin: 12px 0; }
         .spec-box { background: var(--bg-primary); padding: 8px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-light); transition: var(--transition-smooth); }
@@ -965,6 +976,7 @@
                     <div class="option-group">
                         <label>Колір (<span id="modal-color-name">White</span>)</label>
                         <div class="color-selector-large" id="modal-color-selector"></div>
+                        <div id="modal-stock-status" class="stock-status"></div>
                     </div>
 
                     <div class="option-group">
@@ -978,7 +990,7 @@
                 </div>
 
                 <div style="display: flex; gap: 10px; margin-top: 14px; align-items: center;">
-                    <button class="btn-primary" style="flex-grow: 1; justify-content: center; padding: 12px;" onclick="addCurrentProductToCart()">Додати в кошик</button>
+                    <button class="btn-primary" id="modal-add-cart-btn" style="flex-grow: 1; justify-content: center; padding: 12px;" onclick="addCurrentProductToCart()">Додати в кошик</button>
                     <button class="wishlist-btn" id="modal-wishlist-btn" onclick="toggleCurrentWishlist()" style="position: static; width: 42px; height: 42px; flex-shrink: 0;">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
                     </button>
@@ -1012,7 +1024,6 @@
         let currentCategoryFilter = 'All';
         let heroIndex = 0;
 
-        // Посилання на ваш розгорнутий FastAPI бекенд на Render
         const API_URL = "https://m1lipstore.onrender.com/api/products";
 
         async function fetchProducts() {
@@ -1021,7 +1032,6 @@
                 let backendData = await response.json();
                 
                 products = backendData.map(item => {
-                    // Перетворення полів кольорів з бекенду (підтримує різні варіанти назв полів)
                     let parsedColors = [];
                     let rawColors = item.color_images || item.colorImages;
                     
@@ -1034,10 +1044,15 @@
                             let cls = 'white';
                             if (lower.includes('чорн') || lower.includes('black')) cls = 'black';
                             else if (lower.includes(' розов') || lower.includes('pink')) cls = 'pink';
+                            
+                            // Визначаємо наявність для цього кольору (stock / quantity / available)
+                            let stockVal = 5; // дефолт, якщо не прийшло
+                            if (item.stock !== undefined) stockVal = Number(item.stock);
+                            
                             return {
                                 name: colorName,
                                 class: cls,
-                                available: true,
+                                stock: stockVal,
                                 image: rawColors[colorName]
                             };
                         });
@@ -1050,15 +1065,14 @@
                             let cls = 'white';
                             if (lower.includes('чорн') || lower.includes('black')) cls = 'black';
                             else if (lower.includes(' розов') || lower.includes('pink')) cls = 'pink';
-                            return { name: colorName, class: cls, available: true };
+                            return { name: colorName, class: cls, stock: item.stock !== undefined ? Number(item.stock) : 5 };
                         });
                     }
 
                     if (parsedColors.length === 0) {
-                        parsedColors = [{ name: 'White', class: 'white', available: true }];
+                        parsedColors = [{ name: 'White', class: 'white', stock: item.stock !== undefined ? Number(item.stock) : 5 }];
                     }
 
-                    // Обробка галереї
                     let parsedGallery = [];
                     if (item.gallery) {
                         if (typeof item.gallery === 'string') {
@@ -1071,7 +1085,6 @@
                         parsedGallery = [item.img];
                     }
 
-                    // Обробка характеристик specs
                     let parsedSpecs = [];
                     if (item.specs) {
                         if (typeof item.specs === 'string') {
@@ -1222,7 +1235,7 @@
             const product = products.find(p => p.id === productId);
             if (!product) return;
 
-            const activeColors = product.colors || [{ name: 'White', available: true }];
+            const activeColors = product.colors || [{ name: 'White', stock: 5 }];
             const colorObj = activeColors[selectedColorIndex] || activeColors[0];
 
             const existingIndex = wishlist.findIndex(item => item.id === productId && item.color === colorObj.name);
@@ -1330,8 +1343,12 @@
         function addDirectToCart(productId) {
             const product = products.find(p => p.id === productId);
             if (!product) return;
-            const defaultColor = product.colors && product.colors.find(c => c.available) ? product.colors.find(c => c.available).name : 'White';
-            addToCartFull(product, defaultColor, 1);
+            const defaultColorObj = product.colors && product.colors.find(c => c.stock > 0) ? product.colors.find(c => c.stock > 0) : product.colors[0];
+            if (!defaultColorObj || defaultColorObj.stock <= 0) {
+                alert("Цей товар наразі відсутній на складі.");
+                return;
+            }
+            addToCartFull(product, defaultColorObj.name, 1);
         }
 
         function addToCartFull(product, colorName, qty) {
@@ -1472,19 +1489,35 @@
             selectedColorIndex = 0;
             
             if (product.colors && product.colors.length > 0) {
-                const firstAvailableIdx = product.colors.findIndex(c => c.available);
+                const firstAvailableIdx = product.colors.findIndex(c => c.stock > 0);
                 if (firstAvailableIdx !== -1) selectedColorIndex = firstAvailableIdx;
             }
 
-            updateModalColorDisplay();
-            
-            const galleryImages = product.gallery && product.gallery.length > 0 ? product.gallery : [product.img];
+            // Об'єднуємо загальну галерею та фотографії кольорів у єдиний набір мініатюр
+            let allImages = [];
+            if (product.gallery && product.gallery.length > 0) {
+                allImages = [...product.gallery];
+            } else if (product.img) {
+                allImages = [product.img];
+            }
+
+            // Додаємо картинки кольорів, якщо їх ще немає в галереї
+            if (product.colors) {
+                product.colors.forEach(c => {
+                    if (c.image && !allImages.includes(c.image)) {
+                        allImages.push(c.image);
+                    }
+                });
+            }
+
+            currentModalProduct._allImages = allImages;
+
             const modalImg = document.getElementById('modal-img');
-            if (modalImg) modalImg.src = galleryImages[0];
+            if (modalImg) modalImg.src = allImages[0];
             
             const thumbsContainer = document.getElementById('modal-thumbs');
             if (thumbsContainer) {
-                thumbsContainer.innerHTML = galleryImages.map((imgSrc, index) => `
+                thumbsContainer.innerHTML = allImages.map((imgSrc, index) => `
                     <img class="modal-thumb ${index === 0 ? 'active' : ''}" src="${imgSrc}" onclick="changeModalMainImage('${imgSrc}', this)">
                 `).join('');
             }
@@ -1506,6 +1539,7 @@
                 `).join('');
             }
             
+            updateModalColorDisplay();
             updateModalWishlistBtn();
             document.getElementById('product-modal')?.classList.add('active');
             document.getElementById('backdrop')?.classList.add('active');
@@ -1519,15 +1553,23 @@
         function selectModalColor(index) {
             if (!currentModalProduct || !currentModalProduct.colors) return;
             const colorObj = currentModalProduct.colors[index];
-            if (!colorObj || !colorObj.available) return;
+            if (!colorObj) return;
             selectedColorIndex = index;
             updateModalColorDisplay();
             updateModalWishlistBtn();
 
-            // Якщо для кольору задано окреме фото, змінюємо головне фото в модалці
+            // Якщо у кольору є власне фото — показуємо його як головне і знаходимо відповідний таб
             if (colorObj.image) {
                 const modalImg = document.getElementById('modal-img');
                 if (modalImg) modalImg.src = colorObj.image;
+                
+                const thumbs = document.querySelectorAll('.modal-thumb');
+                thumbs.forEach(t => {
+                    t.classList.remove('active');
+                    if (t.src.includes(colorObj.image)) {
+                        t.classList.add('active');
+                    }
+                });
             }
         }
 
@@ -1538,13 +1580,30 @@
             if (selectorContainer) {
                 selectorContainer.innerHTML = currentModalProduct.colors.map((c, idx) => `
                     <div class="color-option-item" onclick="selectModalColor(${idx})">
-                        <div class="color-circle-big ${c.class} ${!c.available ? 'disabled' : ''} ${idx === selectedColorIndex ? 'active' : ''}" title="${c.name}"></div>
+                        <div class="color-circle-big ${c.class} ${idx === selectedColorIndex ? 'active' : ''}" title="${c.name}"></div>
                     </div>
                 `).join('');
             }
 
             const activeColorObj = currentModalProduct.colors[selectedColorIndex];
             setElementText('modal-color-name', activeColorObj ? activeColorObj.name : 'White');
+
+            // Оновлюємо статус наявності та стан кнопки купівлі
+            const stockStatusEl = document.getElementById('modal-stock-status');
+            const addCartBtn = document.getElementById('modal-add-cart-btn');
+
+            if (activeColorObj) {
+                const stock = activeColorObj.stock !== undefined ? activeColorObj.stock : 5;
+                if (stock > 0) {
+                    stockStatusEl.innerText = `В наявності: ${stock} шт.`;
+                    stockStatusEl.className = 'stock-status in-stock';
+                    if (addCartBtn) addCartBtn.removeAttribute('disabled');
+                } else {
+                    stockStatusEl.innerText = `Немає в наявності`;
+                    stockStatusEl.className = 'stock-status out-of-stock';
+                    if (addCartBtn) addCartBtn.setAttribute('disabled', 'true');
+                }
+            }
         }
 
         function changeModalMainImage(src, thumbElement) {
@@ -1566,9 +1625,9 @@
 
         function addCurrentProductToCart() {
             if (currentModalProduct) {
-                const activeColors = currentModalProduct.colors || [{ name: 'White', available: true }];
+                const activeColors = currentModalProduct.colors || [{ name: 'White', stock: 5 }];
                 const colorObj = activeColors[selectedColorIndex] || activeColors[0];
-                if (!colorObj.available) return;
+                if (!colorObj || colorObj.stock <= 0) return;
                 
                 addToCartFull(currentModalProduct, colorObj.name, modalQty);
                 closeProductModal();
