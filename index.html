@@ -850,7 +850,7 @@
             <div class="hero-card-3d" id="hero-card" onclick="openHeroProductModal()">
                 <span class="product-tag new" id="hero-tag">HOT NOVELTY</span>
                 <div class="hero-card-img-wrap">
-                    <img id="hero-img" src="attack-shark-r5-ultra-colors-price.jpg" alt="Hero Product">
+                    <img id="hero-img" src="" alt="Hero Product">
                 </div>
             </div>
         </div>
@@ -1017,15 +1017,9 @@
                 brand: 'ATTACK SHARK',
                 category: 'Миші',
                 desc: 'Флагманська надлегка бездротова ігрова миша з карбону вагою 39г, сенсором PAW3950MAX (42 000 DPI) та 8KHz опитуванням.',
-                img: 'attack-shark-r5-ultra-colors-price.jpg',
+                img: 'https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?auto=format&fit=crop&w=800&q=80',
                 gallery: [
-                    'attack-shark-r5-ultra-colors-price.jpg',
-                    'attack-shark-r5-ultra-in-hand-setup.jpg',
-                    'attack-shark-r5-ultra-top-angle.jpg',
-                    'attack-shark-r5-ultra-side-buttons.jpg',
-                    'attack-shark-r5-ultra-back-grip.jpg',
-                    'attack-shark-r5-ultra-box-bundle-contents.jpg',
-                    'attack-shark-r5-ultra-dongle-receiver.jpg'
+                    'https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?auto=format&fit=crop&w=800&q=80'
                 ],
                 specs: [
                     { label: 'СЕНСОР', value: 'PAW3950MAX' },
@@ -1039,56 +1033,6 @@
                     { name: 'White', class: 'white', available: true },
                     { name: 'Black', class: 'black', available: false },
                     { name: 'Pink', class: 'pink', available: false }
-                ]
-            },
-            'mchose-a7-v2': {
-                brand: 'MCHOSE',
-                category: 'Миші',
-                desc: 'Бездротова ігрова миша з безпрецедентною точністю та високою продуктивністю.',
-                img: 'https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?auto=format&fit=crop&w=800&q=80',
-                gallery: ['https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?auto=format&fit=crop&w=800&q=80'],
-                specs: [
-                    { label: 'СЕНСОР', value: 'PAW3395' },
-                    { label: 'ВАГА', value: '54Г' },
-                    { label: 'ПІДКЛЮЧЕННЯ', value: 'БЕЗДРОТОВЕ' },
-                    { label: 'АКУМУЛЯТОР', value: 'ДО 80 ГОД' }
-                ],
-                colors: [
-                    { name: 'White', class: 'white', available: true },
-                    { name: 'Black', class: 'black', available: true }
-                ]
-            },
-            'atk-xsoft': {
-                brand: 'ATK',
-                category: 'Аксесуари',
-                desc: 'Професійний ігровий килимок для максимального контролю ковзання миші.',
-                img: 'https://images.unsplash.com/photo-1618384887929-16ec33fab9ef?auto=format&fit=crop&w=800&q=80',
-                gallery: ['https://images.unsplash.com/photo-1618384887929-16ec33fab9ef?auto=format&fit=crop&w=800&q=80'],
-                specs: [
-                    { label: 'ПОВЕРХНЯ', value: 'ШВИДКІСТЬ (SPEED)' },
-                    { label: 'ТОВЩИНА', value: '4 ММ' },
-                    { label: 'ОСНОВА', value: 'КАУЧУК' }
-                ],
-                colors: [
-                    { name: 'Black', class: 'black', available: true }
-                ]
-            },
-            'aula-f75': {
-                brand: 'AULA',
-                category: 'Клавіатури',
-                desc: 'Бездротова механічна клавіатура з чудовим звуком друку та кастомними світчами.',
-                img: 'https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=800&q=80',
-                gallery: ['https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=800&q=80'],
-                specs: [
-                    { label: 'ПЕРЕМИКАЧІ', value: 'REAPER' },
-                    { label: 'ФОРМ-ФАКТОР', value: '75%' },
-                    { label: 'ПІДКЛЮЧЕННЯ', value: 'ТРИРЕЖИМНЕ' },
-                    { label: 'ПІДСВІЧУВАННЯ', value: 'RGB' }
-                ],
-                colors: [
-                    { name: 'White', class: 'white', available: true },
-                    { name: 'Black', class: 'black', available: true },
-                    { name: 'Pink', class: 'pink', available: true }
                 ]
             }
         };
@@ -1113,11 +1057,11 @@
                     let meta = staticProductsMeta[item.id] || {
                         brand: 'M1LIP',
                         category: item.category || 'Аксесуари',
-                        desc: 'Якісний ігровий девайс.',
+                        desc: item.desc || 'Якісний ігровий девайс.',
                         img: item.img || 'https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?auto=format&fit=crop&w=800&q=80',
-                        gallery: item.gallery ? item.gallery.split(',') : ['https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?auto=format&fit=crop&w=800&q=80'],
-                        specs: [],
-                        colors: [{ name: 'White', class: 'white', available: true }]
+                        gallery: item.gallery ? (Array.isArray(item.gallery) ? item.gallery : item.gallery.split(',')) : ['https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?auto=format&fit=crop&w=800&q=80'],
+                        specs: item.specs || [],
+                        colors: item.colors || [{ name: 'White', class: 'white', available: true }]
                     };
                     return {
                         ...meta,
@@ -1127,7 +1071,9 @@
                         tag: item.tag,
                         category: item.category || meta.category,
                         img: item.img || meta.img,
-                        gallery: item.gallery ? item.gallery.split(',') : meta.gallery,
+                        gallery: item.gallery || meta.gallery,
+                        specs: item.specs || meta.specs,
+                        colors: item.colors || meta.colors,
                         quantity: item.quantity !== undefined ? item.quantity : 10
                     };
                 });
@@ -1556,10 +1502,14 @@
 
             setElementText('modal-qty', modalQty);
 
+            // Динамічне виведення характеристик у вигляді сітки блоків як на вашому скріншоті
             const specsEl = document.getElementById('modal-specs');
             if (specsEl && product.specs) {
                 specsEl.innerHTML = product.specs.map(s => `
-                    <div class="spec-box"><span>${s.label}</span><strong>${s.value}</strong></div>
+                    <div class="spec-box">
+                        <span>${s.label}</span>
+                        <strong>${s.value}</strong>
+                    </div>
                 `).join('');
             }
             
@@ -1589,7 +1539,7 @@
             if (selectorContainer) {
                 selectorContainer.innerHTML = currentModalProduct.colors.map((c, idx) => `
                     <div class="color-option-item" onclick="selectModalColor(${idx})">
-                        <div class="color-circle-big ${c.class} ${!c.available ? 'disabled' : ''} ${idx === selectedColorIndex ? 'active' : ''}" title="${c.name} ${!c.available ? '(Out of stock)' : ''}"></div>
+                        <div class="color-circle-big ${c.class} ${!c.available ? 'disabled' : ''} ${idx === selectedColorIndex ? 'active' : ''}" title="${c.name}"></div>
                     </div>
                 `).join('');
             }
