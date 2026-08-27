@@ -1013,6 +1013,39 @@
         .spec-box:hover { border-color: var(--border-hover); transform: translateY(-2px); }
         .spec-box span { display: block; font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; }
         .spec-box strong { font-size: 0.9rem; font-weight: 700; }
+
+        /* Стилі для Checkout сторінки */
+        .checkout-container {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .checkout-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .checkout-group label {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+        .checkout-group input, .checkout-group select, .checkout-group textarea {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-light);
+            padding: 12px;
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95krem;
+            outline: none;
+            transition: var(--transition-smooth);
+        }
+        .checkout-group input:focus, .checkout-group select:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px var(--accent-light);
+        }
     </style>
 </head>
 <body data-theme="light">
@@ -1191,7 +1224,78 @@
                 <span>Разом:</span>
                 <span id="cart-total-price">0 <span class="currency">₴</span></span>
             </div>
-            <button class="btn-primary" style="width: 100%; justify-content: center;" onclick="checkout()">Оформити замовлення →</button>
+            <button class="btn-primary" style="width: 100%; justify-content: center;" onclick="openCheckoutModal()">Перейти до оформлення →</button>
+        </div>
+    </div>
+
+    <!-- Модалка оформлення замовлення (Checkout) -->
+    <div class="drawer" id="checkout-drawer">
+        <div class="drawer-header">
+            <h3 style="font-weight: 800;">Оформлення замовлення</h3>
+            <button class="close-drawer" onclick="toggleCheckoutDrawer(false)">✕</button>
+        </div>
+        <div class="drawer-body">
+            <div class="checkout-container">
+                <h4 style="font-size: 0.9rem; font-weight: 800; color: var(--accent);">1. Контактні дані</h4>
+                <div class="checkout-group">
+                    <label>Ім'я</label>
+                    <input type="text" id="chk-name" placeholder="Введіть ваше ім'я">
+                </div>
+                <div class="checkout-group">
+                    <label>Прізвище</label>
+                    <input type="text" id="chk-surname" placeholder="Введіть ваше прізвище">
+                </div>
+                <div class="checkout-group">
+                    <label>Номер телефону</label>
+                    <input type="tel" id="chk-phone" placeholder="+380XXXXXXXXX">
+                </div>
+
+                <h4 style="font-size: 0.9rem; font-weight: 800; color: var(--accent); margin-top: 10px;">2. Доставка</h4>
+                <div class="checkout-group">
+                    <label>Служба доставки</label>
+                    <input type="text" value="Нова пошта" disabled style="opacity: 0.7;">
+                </div>
+                <div class="checkout-group">
+                    <label>Місто</label>
+                    <input type="text" id="chk-city" placeholder="Наприклад, Київ, Львів...">
+                </div>
+                <div class="checkout-group">
+                    <label>Відділення / Поштомат</label>
+                    <input type="text" id="chk-department" placeholder="Номер відділення або адреса">
+                </div>
+
+                <h4 style="font-size: 0.9rem; font-weight: 800; color: var(--accent); margin-top: 10px;">3. Спосіб оплати</h4>
+                <div class="checkout-group">
+                    <label>Оберіть спосіб оплати</label>
+                    <select id="chk-payment" style="width: 100%; padding: 12px; border-radius: 8px;">
+                        <option value="online">Повна онлайн-оплата</option>
+                        <option value="cod">Накладений платіж</option>
+                    </select>
+                </div>
+                <div class="checkout-group">
+                    <label>Коментар до замовлення (необов'язково)</label>
+                    <textarea id="chk-comment" rows="2" placeholder="Побажання до замовлення"></textarea>
+                </div>
+            </div>
+        </div>
+        <div class="drawer-footer">
+            <button class="btn-primary" style="width: 100%; justify-content: center;" onclick="submitOrder()">Підтвердити замовлення</button>
+        </div>
+    </div>
+
+    <!-- Модалка успішного замовлення -->
+    <div class="product-modal" id="success-modal" style="max-width: 450px; height: auto;">
+        <button class="close-drawer" style="position: absolute; top: 16px; right: 16px; z-index: 10;" onclick="closeSuccessModal()">✕</button>
+        <div style="padding: 35px 24px; text-align: center;">
+            <div style="font-size: 3rem; margin-bottom: 10px;">🎉</div>
+            <h3 style="font-size: 1.4rem; font-weight: 800; margin-bottom: 8px;">ЗАМОВЛЕННЯ ПРИЙНЯТО</h3>
+            <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 16px;">Дякуємо за замовлення в M1lipStore.</p>
+            <div style="background: var(--bg-primary); padding: 14px; border-radius: var(--radius-sm); border: 1px solid var(--border-light); margin-bottom: 20px;">
+                <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Номер замовлення:</div>
+                <div id="success-order-id" style="font-family: 'JetBrains Mono', monospace; font-size: 1.2rem; font-weight: 800; color: var(--accent); margin-top: 4px;">#MLP-2026-XXXXXX</div>
+                <div style="font-size: 0.8rem; font-weight: 700; color: #2E7D32; margin-top: 8px;">Статус: Нове замовлення</div>
+            </div>
+            <button class="btn-primary" style="width: 100%; justify-content: center;" onclick="closeSuccessModal()">Продовжити покупки</button>
         </div>
     </div>
 
@@ -1292,6 +1396,7 @@
         let heroIndex = 0;
 
         const API_URL = "https://m1lipstore.onrender.com/api/products";
+        const ORDER_API_URL = "https://m1lipstore.onrender.com/api/orders";
 
         function formatColorEnglish(name) {
             if (!name) return 'Selected';
@@ -1641,7 +1746,6 @@
             document.getElementById('backdrop').classList.add('active');
         }
 
-        // --- ЛОГІКА PS BOOST ДЛЯ ГАЛЕРЕЇ ТА КОЛЬОРІВ ---
         function updateModalGalleryAndColor() {
             if (!currentModalProduct) return;
             const colors = currentModalProduct.colors || [];
@@ -1685,7 +1789,6 @@
                 }
             } else {
                 if (colorNameEl) colorNameEl.innerText = 'не вибрано';
-                // Коли колір НЕ вибрано — показуються всі загальні фото товару
                 currentGalleryImages = currentModalProduct.gallery || [currentModalProduct.img];
                 activeImg = currentGalleryImages[0] || currentModalProduct.img;
 
@@ -1799,10 +1902,99 @@
                 renderCartItems();
             } else {
                 drawer.classList.remove('active');
-                if (!document.getElementById('wishlist-drawer').classList.contains('active')) {
+                if (!document.getElementById('wishlist-drawer').classList.contains('active') && !document.getElementById('checkout-drawer').classList.contains('active')) {
                     backdrop.classList.remove('active');
                 }
             }
+        }
+
+        function toggleCheckoutDrawer(open) {
+            const drawer = document.getElementById('checkout-drawer');
+            const backdrop = document.getElementById('backdrop');
+            if (open) {
+                toggleCart(false);
+                drawer.classList.add('active');
+                backdrop.classList.add('active');
+            } else {
+                drawer.classList.remove('active');
+                backdrop.classList.remove('active');
+            }
+        }
+
+        function openCheckoutModal() {
+            if (cart.length === 0) return;
+            toggleCheckoutDrawer(true);
+        }
+
+        async function submitOrder() {
+            const name = document.getElementById('chk-name').value.trim();
+            const surname = document.getElementById('chk-surname').value.trim();
+            const phone = document.getElementById('chk-phone').value.trim();
+            const city = document.getElementById('chk-city').value.trim();
+            const department = document.getElementById('chk-department').value.trim();
+            const paymentMethod = document.getElementById('chk-payment').value;
+            const comment = document.getElementById('chk-comment').value.trim();
+
+            if (!name || !surname || !phone || !city || !department) {
+                alert("Будь ласка, заповніть усі обов'язкові поля доставки та контактів!");
+                return;
+            }
+
+            let totals = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+
+            let orderPayload = {
+                customer: {
+                    firstName: name,
+                    lastName: surname,
+                    phone: phone,
+                    telegram: tg?.initDataUnsafe?.user?.username ? `@${tg.initDataUnsafe.user.username}` : ''
+                },
+                items: cart,
+                delivery: {
+                    service: "Нова пошта",
+                    city: city,
+                    department: department
+                },
+                payment: {
+                    method: paymentMethod === 'online' ? "Повна онлайн-оплата" : "Накладений платіж",
+                    status: paymentMethod === 'online' ? "paid" : "pending"
+                },
+                totals: totals,
+                comment: comment
+            };
+
+            try {
+                let response = await fetch(ORDER_API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(orderPayload)
+                });
+
+                if (!response.ok) {
+                    throw new Error("Не вдалося створити замовлення");
+                }
+
+                let result = await response.json();
+                
+                // Очищення кошика
+                cart = [];
+                saveCart();
+                toggleCheckoutDrawer(false);
+
+                // Показ модалки успіху
+                document.getElementById('success-order-id').innerText = `#${result.orderId}`;
+                document.getElementById('success-modal').classList.add('active');
+                document.getElementById('backdrop').classList.add('active');
+
+            } catch (err) {
+                alert("Не вдалося створити замовлення. Спробуйте ще раз.");
+                console.error(err);
+            }
+        }
+
+        function closeSuccessModal() {
+            document.getElementById('success-modal').classList.remove('active');
+            document.getElementById('backdrop').classList.remove('active');
         }
 
         function toggleWishlistDrawer(open) {
@@ -1822,11 +2014,13 @@
 
         function closeAllDrawers() {
             document.getElementById('cart-drawer').classList.remove('active');
+            document.getElementById('checkout-drawer').classList.remove('active');
             document.getElementById('wishlist-drawer').classList.remove('active');
             document.getElementById('backdrop').classList.remove('active');
             closeProductModal();
             toggleSearch(false);
             closeInfoModal();
+            closeSuccessModal();
         }
 
         function toggleSearch(open) {
@@ -1989,30 +2183,6 @@
             const totalCartItems = cart.reduce((sum, item) => sum + item.qty, 0);
             if (cartCountEl) cartCountEl.innerText = totalCartItems;
             if (wishlistCountEl) wishlistCountEl.innerText = wishlist.length;
-        }
-
-        function checkout() {
-            if (cart.length === 0) return;
-            let orderText = "🛒 *Нове замовлення M1lipStore*:\n\n";
-            let total = 0;
-            cart.forEach((item, i) => {
-                orderText += `${i + 1}. *${item.brand} ${item.title}*\n   Color: ${item.color} | Кількість: ${item.qty} шт. | Сума: ${item.price * item.qty} ₴\n`;
-                total += item.price * item.qty;
-            });
-            orderText += `\n💰 *Загальна сума*: ${total} ₴`;
-
-            if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) {
-                orderText += `\n👤 Клієнт: @${tg.initDataUnsafe.user.username || tg.initDataUnsafe.user.first_name}`;
-            }
-
-            const encoded = encodeURIComponent(orderText);
-            const managerUrl = `https://t.me/milipmanager?text=${encoded}`;
-            
-            if (tg && tg.openTelegramLink) {
-                tg.openTelegramLink(managerUrl);
-            } else {
-                window.open(managerUrl, '_blank');
-            }
         }
     </script>
 </body>
