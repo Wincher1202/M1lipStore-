@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ua">
+<html lang="uk">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -28,7 +28,7 @@
             --radius-lg: 20px;
             --radius-md: 14px;
             --radius-sm: 8px;
-            --transition-smooth: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+            --transition-smooth: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
         }
 
         [data-theme="dark"] {
@@ -71,6 +71,7 @@
             min-height: 100%;
             display: flex;
             flex-direction: column;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
 
         .product-price, .cart-total, header .logo span {
@@ -146,6 +147,38 @@
             gap: 10px;
         }
 
+        /* Tooltip & Icon Buttons */
+        .icon-btn-wrapper {
+            position: relative;
+            display: inline-flex;
+        }
+
+        .tooltip {
+            position: absolute;
+            bottom: -36px;
+            left: 50%;
+            transform: translateX(-50%) translateY(4px);
+            background: var(--text-primary);
+            color: var(--bg-secondary);
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: all 0.25s cubic-bezier(0.25, 1, 0.5, 1);
+            box-shadow: var(--shadow-subtle);
+            z-index: 1010;
+        }
+
+        .icon-btn-wrapper:hover .tooltip {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(0);
+        }
+
         .icon-btn {
             background: transparent;
             border: none;
@@ -153,8 +186,8 @@
             color: var(--text-primary);
             font-size: 1rem;
             position: relative;
-            width: 36px;
-            height: 36px;
+            width: 38px;
+            height: 38px;
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -166,7 +199,7 @@
         .icon-btn:hover {
             background: var(--bg-tertiary);
             border-color: var(--border-hover);
-            transform: scale(1.05);
+            transform: translateY(-2px);
         }
 
         .badge-count {
@@ -218,6 +251,18 @@
             .hero-content { align-items: flex-start; }
         }
 
+        .hero-badge-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        @media(min-width: 900px) {
+            .hero-badge-group { justify-content: flex-start; }
+        }
+
         .hero-badge {
             display: inline-flex;
             align-items: center;
@@ -230,7 +275,27 @@
             font-weight: 700;
             letter-spacing: 0.05em;
             text-transform: uppercase;
-            width: fit-content;
+        }
+
+        /* Online Status */
+        .store-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-light);
+            padding: 5px 10px;
+            border-radius: 20px;
+        }
+
+        .status-dot {
+            width: 7px;
+            height: 7px;
+            background-color: #2E7D32;
+            border-radius: 50%;
         }
 
         .hero h1 {
@@ -272,7 +337,7 @@
 
         .btn-primary:hover:not(:disabled) {
             background: var(--accent);
-            transform: translateY(-3px) scale(1.02);
+            transform: translateY(-2px) scale(1.02);
             box-shadow: var(--shadow-hover);
         }
 
@@ -336,11 +401,11 @@
             object-fit: cover;
             display: block;
             border-radius: var(--radius-md);
-            transition: opacity 0.5s ease, transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+            transition: opacity 0.4s ease, transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
         }
 
         .hero-card-3d:hover img {
-            transform: scale(1.06);
+            transform: scale(1.05);
         }
 
         /* SECTIONS & CATALOG */
@@ -411,7 +476,7 @@
             .catalog-grid { grid-template-columns: repeat(3, 1fr); }
         }
 
-        /* КАРТКА ТОВАРУ */
+        /* PRODUCT CARD */
         .product-card {
             background: var(--bg-secondary);
             border: 1px solid var(--border-light);
@@ -425,13 +490,13 @@
             height: 100%;
             min-height: 450px;
             will-change: transform;
-            transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1), 
-                        box-shadow 0.5s cubic-bezier(0.25, 1, 0.5, 1),
-                        border-color 0.5s ease;
+            transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), 
+                        box-shadow 0.4s cubic-bezier(0.25, 1, 0.5, 1),
+                        border-color 0.4s ease;
         }
 
         .product-card:hover {
-            transform: translateY(-8px) scale(1.015);
+            transform: translateY(-6px) scale(1.01);
             border-color: var(--accent);
             box-shadow: var(--shadow-hover);
         }
@@ -481,11 +546,11 @@
         }
 
         .wishlist-btn svg {
-            transition: fill 0.4s ease, stroke 0.4s ease;
+            transition: fill 0.3s ease, stroke 0.3s ease;
         }
 
         .wishlist-btn.active svg {
-            animation: heartBeatAnim 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+            animation: heartBeatAnim 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
             fill: #FF3B30;
             stroke: #FF3B30;
         }
@@ -508,11 +573,11 @@
             object-fit: cover;
             display: block;
             border-radius: var(--radius-md);
-            transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+            transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
         }
 
         .product-card:hover .product-img-wrap img { 
-            transform: scale(1.06); 
+            transform: scale(1.05); 
         }
 
         .color-picker-preview {
@@ -550,11 +615,70 @@
             margin-top: 12px;
         }
 
+        /* ADVANTAGES BLOCK */
+        .advantages-section {
+            padding: 40px 20px;
+            max-width: 1440px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .advantages-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+        }
+
+        @media(min-width: 768px) {
+            .advantages-grid { grid-template-columns: repeat(3, 1fr); }
+        }
+
+        .advantage-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+            padding: 24px;
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            box-shadow: var(--shadow-subtle);
+            transition: var(--transition-smooth);
+        }
+
+        .advantage-card:hover {
+            border-color: var(--border-hover);
+            transform: translateY(-2px);
+        }
+
+        .advantage-icon {
+            background: var(--accent-light);
+            color: var(--accent);
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .advantage-text h4 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .advantage-text p {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+
         /* FOOTER */
         footer {
             background: var(--bg-secondary);
             border-top: 1px solid var(--border-light);
-            padding: 50px 20px 30px;
+            padding: 60px 20px 30px;
             max-width: 1440px;
             margin: 0 auto;
             width: 100%;
@@ -563,8 +687,8 @@
         .footer-grid {
             display: grid;
             grid-template-columns: 1fr;
-            gap: 30px;
-            margin-bottom: 30px;
+            gap: 32px;
+            margin-bottom: 40px;
         }
 
         @media(min-width: 768px) {
@@ -576,15 +700,44 @@
             text-transform: uppercase;
             letter-spacing: 0.05em;
             color: var(--text-muted);
-            margin-bottom: 14px;
+            margin-bottom: 16px;
             font-weight: 800;
         }
 
-        .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+        .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
         .footer-col a { text-decoration: none; color: var(--text-secondary); font-weight: 600; font-size: 0.9rem; transition: var(--transition-smooth); cursor: pointer; }
         .footer-col a:hover { color: var(--text-primary); transform: translateX(2px); }
-        .footer-bottom { border-top: 1px solid var(--border-light); padding-top: 20px; display: flex; flex-direction: column; gap: 8px; align-items: center; text-align: center; color: var(--text-muted); font-size: 0.8rem; }
-        @media(min-width: 768px) { .footer-bottom { flex-direction: row; justify-content: space-between; } }
+        
+        .footer-bottom { 
+            border-top: 1px solid var(--border-light); 
+            padding-top: 24px; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 12px; 
+            align-items: center; 
+            text-align: center; 
+            color: var(--text-muted); 
+            font-size: 0.8rem; 
+        }
+        @media(min-width: 768px) { 
+            .footer-bottom { flex-direction: row; justify-content: space-between; } 
+        }
+
+        .footer-socials {
+            display: flex;
+            gap: 16px;
+        }
+
+        .footer-socials a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 600;
+            transition: var(--transition-smooth);
+        }
+
+        .footer-socials a:hover {
+            color: var(--accent);
+        }
 
         /* OVERLAYS & MODALS */
         .overlay-backdrop {
@@ -596,7 +749,7 @@
             z-index: 2000;
             opacity: 0;
             visibility: hidden;
-            transition: opacity 0.4s ease, visibility 0.4s ease;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
         }
 
         .overlay-backdrop.active { opacity: 1; visibility: visible; }
@@ -609,7 +762,7 @@
             box-shadow: -10px 0 40px rgba(0,0,0,0.15);
             display: flex;
             flex-direction: column;
-            transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: right 0.35s cubic-bezier(0.16, 1, 0.3, 1);
         }
         @media(min-width: 500px) { .drawer { width: 420px; right: -420px; } }
 
@@ -662,7 +815,7 @@
             z-index: 2002;
             padding: 30px 20px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            transition: top 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: top 0.35s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .search-modal.active { top: 0; }
@@ -688,7 +841,7 @@
             overflow-y: auto;
             opacity: 0;
             visibility: hidden;
-            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         @media(min-width: 768px) {
@@ -729,7 +882,7 @@
             justify-content: center;
             overflow: hidden;
         }
-        .modal-main-img { width: 100%; height: 100%; object-fit: cover; border-radius: var(--radius-md); transition: transform 0.5s ease; }
+        .modal-main-img { width: 100%; height: 100%; object-fit: cover; border-radius: var(--radius-md); transition: transform 0.4s ease; }
         .modal-main-img:hover { transform: scale(1.03); }
         
         .modal-thumbs { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -821,28 +974,48 @@
         <a class="logo" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">M1lip<span>Store</span></a>
 
         <div class="nav-right">
-            <button class="icon-btn" id="theme-toggle-btn" aria-label="Тема">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
-            </button>
+            <div class="icon-btn-wrapper">
+                <button class="icon-btn" id="theme-toggle-btn" aria-label="Змінити тему">
+                    <!-- SVG Moon for Light Theme -->
+                    <svg class="theme-icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                    <!-- SVG Sun for Dark Theme -->
+                    <svg class="theme-icon-sun" style="display: none;" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+                </button>
+                <span class="tooltip">Змінити тему</span>
+            </div>
 
-            <button class="icon-btn" id="search-open-btn" aria-label="Пошук">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-            </button>
-            <button class="icon-btn" id="wishlist-open-btn" aria-label="Обране">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-                <span class="badge-count" id="wishlist-count">0</span>
-            </button>
-            <button class="icon-btn" id="cart-open-btn" aria-label="Кошик">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-                <span class="badge-count" id="cart-count">0</span>
-            </button>
+            <div class="icon-btn-wrapper">
+                <button class="icon-btn" id="search-open-btn" aria-label="Пошук">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                </button>
+                <span class="tooltip">Пошук</span>
+            </div>
+
+            <div class="icon-btn-wrapper">
+                <button class="icon-btn" id="wishlist-open-btn" aria-label="Обране">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                    <span class="badge-count" id="wishlist-count">0</span>
+                </button>
+                <span class="tooltip">Обране</span>
+            </div>
+
+            <div class="icon-btn-wrapper">
+                <button class="icon-btn" id="cart-open-btn" aria-label="Кошик">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                    <span class="badge-count" id="cart-count">0</span>
+                </button>
+                <span class="tooltip">Кошик</span>
+            </div>
         </div>
     </header>
 
     <!-- HERO SECTION -->
     <section class="hero">
         <div class="hero-content">
-            <div class="hero-badge">M1LIPSTORE / 2026</div>
+            <div class="hero-badge-group">
+                <div class="hero-badge">M1LIPSTORE / 2026</div>
+                <div class="store-status"><span class="status-dot"></span>Магазин онлайн</div>
+            </div>
             <h1>ТЕХНІКА,<br>ЯКА СТВОРЮЄ<br>ТВОЙ SETUP</h1>
             <p>Gaming mice, keyboards and accessories для сучасного ігрового простору найвищого рівня.</p>
             <div class="hero-actions">
@@ -877,41 +1050,84 @@
         <div class="catalog-grid" id="catalog-container"></div>
     </section>
 
+    <!-- ADVANTAGES BLOCK -->
+    <section class="advantages-section">
+        <div class="advantages-grid">
+            <div class="advantage-card">
+                <div class="advantage-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+                </div>
+                <div class="advantage-text">
+                    <h4>Відправка в день замовлення</h4>
+                    <p>Замовлення, оформлені до встановленого часу, передаємо перевізнику в день оформлення.</p>
+                </div>
+            </div>
+
+            <div class="advantage-card">
+                <div class="advantage-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+                </div>
+                <div class="advantage-text">
+                    <h4>Зручна оплата</h4>
+                    <p>Оплата онлайн або накладений платіж — залежно від доступного способу оплати.</p>
+                </div>
+            </div>
+
+            <div class="advantage-card">
+                <div class="advantage-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                </div>
+                <div class="advantage-text">
+                    <h4>Гарантія від виробника</h4>
+                    <p>На товари діє гарантія відповідно до умов виробника та законодавства.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- FOOTER -->
     <footer>
         <div class="footer-grid">
             <div class="footer-col">
                 <a class="logo" style="margin-bottom: 12px;">M1lip<span>Store</span></a>
-                <p style="color: var(--text-secondary); max-width: 280px; font-size: 0.9rem;">Gaming hardware for your ultimate setup. Преміальний вибір для ентузіастів.</p>
+                <p style="color: var(--text-secondary); max-width: 280px; font-size: 0.9rem; margin-bottom: 12px;">Gaming hardware для твого ідеального setup. Преміальний вибір техніки для тих, хто цінує якість, комфорт і продуктивність.</p>
+                <p style="font-size: 0.85font; font-weight: 700; color: var(--text-primary);">Обирай. Грай. Перемагай.</p>
             </div>
             <div class="footer-col">
-                <h4>Каталог</h4>
-                <ul>
-                    <li><a onclick="scrollToSection('catalog')">Миші</a></li>
-                    <li><a onclick="scrollToSection('catalog')">Клавіатури</a></li>
-                    <li><a onclick="scrollToSection('catalog')">Гарнітури</a></li>
-                    <li><a onclick="scrollToSection('catalog')">Аксесуари</a></li>
-                </ul>
-            </div>
-            <div class="footer-col">
-                <h4>Покупцям</h4>
+                <h4>ДОПОМОГА</h4>
                 <ul>
                     <li><a>Доставка</a></li>
                     <li><a>Оплата</a></li>
                     <li><a>Гарантія</a></li>
+                    <li><a>Повернення</a></li>
+                    <li><a>Часті запитання</a></li>
                 </ul>
             </div>
             <div class="footer-col">
-                <h4>Контакти</h4>
+                <h4>ПРО M1lipStore</h4>
                 <ul>
-                    <li><a>support@m1lipstore.com</a></li>
-                    <li>Київ, Україна</li>
+                    <li><a>Про магазин</a></li>
+                    <li><a>Новинки</a></li>
+                    <li><a>Хіти продажу</a></li>
+                    <li><a>Знижки</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>КОНТАКТИ</h4>
+                <ul>
+                    <li><a>Email: support@m1lipstore.com</a></li>
+                    <li><a href="https://t.me/m1lipstore" target="_blank">Telegram: @m1lipstore</a></li>
+                    <li><a href="https://instagram.com/m1lipstore" target="_blank">Instagram: @m1lipstore</a></li>
                 </ul>
             </div>
         </div>
         <div class="footer-bottom">
-            <span>M1lipStore © 2026. Всі права захищено.</span>
-            <span>Telegram Web App Market</span>
+            <span>© 2026 M1lipStore. Усі права захищено.</span>
+            <div class="footer-socials">
+                <a href="https://t.me/m1lipstore" target="_blank">Telegram</a>
+                <a href="https://tiktok.com/@m1lipstore" target="_blank">TikTok</a>
+                <a href="https://instagram.com/m1lipstore" target="_blank">Instagram</a>
+            </div>
         </div>
     </footer>
 
@@ -974,7 +1190,7 @@
 
                 <div class="modal-options-row">
                     <div class="option-group">
-                        <label>Колір (<span id="modal-color-name">White</span>)</label>
+                        <label>Color: <span id="modal-color-name">White</span></label>
                         <div class="color-selector-large" id="modal-color-selector"></div>
                         <div id="modal-stock-status" class="stock-status"></div>
                     </div>
@@ -1008,7 +1224,7 @@
                 tg.expand();
                 tg.ready();
                 if (tg.colorScheme === 'dark') {
-                    document.body.setAttribute('data-theme', 'dark');
+                    setTheme('dark', false);
                 }
             } catch (e) {
                 console.log('Telegram WebApp Init Error:', e);
@@ -1156,10 +1372,16 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
+            // Restore theme from localStorage
+            const savedTheme = localStorage.getItem('m1lip_theme');
+            if (savedTheme) {
+                setTheme(savedTheme, false);
+            }
+
             fetchProducts();
             updateBadges();
 
-            setInterval(updateHeroBanner, 3500);
+            setInterval(updateHeroBanner, 4000);
 
             window.addEventListener('scroll', () => {
                 const header = document.getElementById('site-header');
@@ -1172,7 +1394,8 @@
             if (themeBtn) {
                 themeBtn.addEventListener('click', () => {
                     const currentTheme = document.body.getAttribute('data-theme');
-                    document.body.setAttribute('data-theme', currentTheme === 'light' ? 'dark' : 'light');
+                    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+                    setTheme(newTheme, true);
                 });
             }
 
@@ -1180,6 +1403,24 @@
             document.getElementById('wishlist-open-btn')?.addEventListener('click', () => toggleWishlistDrawer(true));
             document.getElementById('cart-open-btn')?.addEventListener('click', () => toggleCart(true));
         });
+
+        function setTheme(theme, save = true) {
+            document.body.setAttribute('data-theme', theme);
+            if (save) {
+                localStorage.setItem('m1lip_theme', theme);
+            }
+            const moonIcon = document.querySelector('.theme-icon-moon');
+            const sunIcon = document.querySelector('.theme-icon-sun');
+            if (moonIcon && sunIcon) {
+                if (theme === 'dark') {
+                    moonIcon.style.display = 'none';
+                    sunIcon.style.display = 'block';
+                } else {
+                    moonIcon.style.display = 'block';
+                    sunIcon.style.display = 'none';
+                }
+            }
+        }
 
         function scrollToSection(id) {
             document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
@@ -1296,7 +1537,13 @@
             const container = document.getElementById('wishlist-items-container');
             if (!container) return;
             if (wishlist.length === 0) {
-                container.innerHTML = `<p style="color: var(--text-secondary); text-align: center; margin-top: 30px;">Список обраного порожній</p>`;
+                container.innerHTML = `
+                    <div style="text-align: center; margin-top: 50px; padding: 20px;">
+                        <p style="font-weight: 700; font-size: 1.05rem; margin-bottom: 6px;">В обраному поки нічого немає</p>
+                        <p style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 20px;">Додайте товари, які вам сподобалися.</p>
+                        <button class="btn-primary" onclick="toggleWishlistDrawer(false); scrollToSection('catalog')">Переглянути товари</button>
+                    </div>
+                `;
                 return;
             }
             container.innerHTML = wishlist.map((item, index) => `
@@ -1304,7 +1551,7 @@
                     <img src="${item.img}" alt="${item.title}" onclick="toggleWishlistDrawer(false); openProductModal(products.find(x => x.id === '${item.id}'))" title="Перейти до опису">
                     <div style="flex-grow: 1;">
                         <h4 style="font-size: 0.9rem; font-weight: 700; cursor: pointer;" onclick="toggleWishlistDrawer(false); openProductModal(products.find(x => x.id === '${item.id}'))">${item.brand} ${item.title}</h4>
-                        <p style="font-size: 0.75rem; color: var(--text-secondary);">Колір: <strong>${item.color}</strong></p>
+                        <p style="font-size: 0.75rem; color: var(--text-secondary);">Color: <strong>${item.color}</strong></p>
                         <p style="font-size: 0.85rem; font-weight: 600;">${formatPrice(item.price)}</p>
                         <div style="display: flex; gap: 8px; margin-top: 6px;">
                             <button class="btn-primary" style="padding: 4px 10px; font-size: 0.75rem;" onclick="addWishlistItemToCart('${item.id}', '${item.color}')">В кошик</button>
@@ -1390,7 +1637,13 @@
             const container = document.getElementById('cart-items-container');
             if (!container) return;
             if (cart.length === 0) {
-                container.innerHTML = `<p style="color: var(--text-secondary); text-align: center; margin-top: 30px;">Кошик порожній</p>`;
+                container.innerHTML = `
+                    <div style="text-align: center; margin-top: 50px; padding: 20px;">
+                        <p style="font-weight: 700; font-size: 1.05rem; margin-bottom: 6px;">Кошик порожній</p>
+                        <p style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 20px;">Додайте товари, які хочете придбати.</p>
+                        <button class="btn-primary" onclick="toggleCart(false); scrollToSection('catalog')">Перейти до каталогу</button>
+                    </div>
+                `;
                 const totalPriceEl = document.getElementById('cart-total-price');
                 if (totalPriceEl) totalPriceEl.innerHTML = formatPrice(0);
                 if (tg && tg.MainButton) tg.MainButton.hide();
@@ -1401,7 +1654,7 @@
                     <img src="${item.img}" alt="${item.title}">
                     <div style="flex-grow: 1;">
                         <h4 style="font-size: 0.9rem; font-weight: 700;">${item.brand} ${item.title}</h4>
-                        <p style="font-size: 0.75rem; color: var(--text-secondary);">Колір: <strong>${item.color}</strong></p>
+                        <p style="font-size: 0.75rem; color: var(--text-secondary);">Color: <strong>${item.color}</strong></p>
                         <p style="font-size: 0.85rem; font-weight: 600;">${formatPrice(item.price)}</p>
                         <div class="quantity-controls" style="margin-top: 4px;">
                             <button onclick="updateCartQty('${item.id}', '${item.color}', -1)">−</button>
