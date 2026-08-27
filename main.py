@@ -2,7 +2,6 @@ import asyncio
 import json
 import logging
 import os
-import sqlite3
 import urllib.parse
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -20,59 +19,41 @@ from aiogram.types import (
     CallbackQuery,
 )
 import uvicorn
+import psycopg2
+from psycopg2.extras import RealDictCursor
 
 TOKEN = "8993086388:AAETWcnRI-uxvm-lI2r6mQCKIXtuXq0nwpo"
 MANAGER_USERNAME = "lnvinciblee"
 ADMIN_IDS = [1929165295, 1248134309]
 
-DB_NAME = "store.db"
+DATABASE_URL = os.environ.get("DATABASE_URL")
+
+def get_db_connection():
+    return psycopg2.connect(DATABASE_URL, cursor_factory=RealDictCursor)
 
 
 def init_db():
-    conn = sqlite3.connect(DB_NAME)
+    conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("""
-                   CREATE TABLE IF NOT EXISTS products
-                   (
-                       id
-                       TEXT
-                       PRIMARY
-                       KEY,
-                       brand
-                       TEXT,
-                       title
-                       TEXT
-                       NOT
-                       NULL,
-                       price
-                       INTEGER
-                       NOT
-                       NULL,
-                       tag
-                       TEXT,
-                       category
-                       TEXT
-                       NOT
-                       NULL,
-                       quantity
-                       INTEGER
-                       NOT
-                       NULL,
-                       colors
-                       TEXT,
-                       description
-                       TEXT,
-                       img
-                       TEXT,
-                       gallery
-                       TEXT,
-                       specs
-                       TEXT,
-                       color_images
-                       TEXT
-                   )
-                   """)
+        CREATE TABLE IF NOT EXISTS products (
+            id TEXT PRIMARY KEY,
+            brand TEXT,
+            title TEXT NOT NULL,
+            price INTEGER NOT NULL,
+            tag TEXT,
+            category TEXT NOT NULL,
+            quantity INTEGER NOT NULL,
+            colors TEXT,
+            description TEXT,
+            img TEXT,
+            gallery TEXT,
+            specs TEXT,
+            color_images TEXT
+        )
+    """)
     conn.commit()
+    cursor.close()
     conn.close()
 
 
@@ -80,11 +61,11 @@ init_db()
 
 
 def get_db_products():
-    conn = sqlite3.connect(DB_NAME)
-    conn.row_factory = sqlite3.Row
+    conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM products")
     rows = cursor.fetchall()
+    cursor.close()
     conn.close()
 
     result = []
@@ -337,10 +318,11 @@ async def process_delete_product(callback: CallbackQuery):
 
     product_id = callback.data.replace("delete_prod_", "")
 
-    conn = sqlite3.connect(DB_NAME)
+    conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute("DELETE FROM products WHERE id = ?", (product_id,))
+    cursor.execute("DELETE FROM products WHERE id = %s", (product_id,))
     conn.commit()
+    cursor.close()
     conn.close()
 
     await callback.answer("Товар успішно видалено!", show_alert=True)
@@ -638,13 +620,26 @@ async def finish_product_creation(callback: CallbackQuery, state: FSMContext):
     color_images_json = json.dumps(data.get("color_images_dict", {}), ensure_ascii=False)
     specs_json = json.dumps(data.get("specs", []), ensure_ascii=False)
 
-    conn = sqlite3.connect(DB_NAME)
+    conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute(
         """
-        INSERT OR REPLACE INTO products 
+        INSERT INTO products 
         (id, brand, title, price, tag, category, quantity, colors, description, img, gallery, specs, color_images)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        ON CONFLICT (id) DO UPDATE SET 
+            brand = EXCLUDED.brand,
+            title = EXCLUDED.title,
+            price = EXCLUDED.price,
+            tag = EXCLUDED.tag,
+            category = EXCLUDED.category,
+            quantity = EXCLUDED.quantity,
+            colors = EXCLUDED.colors,
+            description = EXCLUDED.description,
+            img = EXCLUDED.img,
+            gallery = EXCLUDED.gallery,
+            specs = EXCLUDED.specs,
+            color_images = EXCLUDED.color_images
         """,
         (
             generated_id,
@@ -663,6 +658,7 @@ async def finish_product_creation(callback: CallbackQuery, state: FSMContext):
         )
     )
     conn.commit()
+    cursor.close()
     conn.close()
 
     await state.clear()
@@ -695,10 +691,11 @@ async def save_tag(message: Message, state: FSMContext):
     product_id = data.get("editing_product_id")
     new_val = "" if message.text.strip() == "-" else message.text.strip()
 
-    conn = sqlite3.connect(DB_NAME)
+    conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute("UPDATE products SET tag = ? WHERE id = ?", (new_val, product_id))
+    cursor.execute("UPDATE products SET tag = %s WHERE id = %s", (new_val, product_id))
     conn.commit()
+    cursor.close()
     conn.close()
 
     await message.answer("✅ Тег успішно оновлено! Напишіть /admin.")
@@ -722,10 +719,11 @@ async def save_price(message: Message, state: FSMContext):
     product_id = data.get("editing_product_id")
     try:
         new_price = int(message.text.strip())
-        conn = sqlite3.connect(DB_NAME)
+        conn = get_db_connection()
         cursor = conn.cursor()
-        cursor.execute("UPDATE products SET price = ? WHERE id = ?", (new_price, product_id))
+        cursor.execute("UPDATE products SET price = %s WHERE id = %s", (new_price, product_id))
         conn.commit()
+        cursor.close()
         conn.close()
         await message.answer(f"✅ Ціну змінено на {new_price} ₴! Напишіть /admin.")
         await state.clear()
@@ -750,10 +748,11 @@ async def save_title(message: Message, state: FSMContext):
     product_id = data.get("editing_product_id")
     new_title = message.text.strip()
 
-    conn = sqlite3.connect(DB_NAME)
+    conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute("UPDATE products SET title = ? WHERE id = ?", (new_title, product_id))
+    cursor.execute("UPDATE products SET title = %s WHERE id = %s", (new_title, product_id))
     conn.commit()
+    cursor.close()
     conn.close()
 
     await message.answer(f"✅ Назву змінено на **{new_title}**! Напишіть /admin.", parse_mode="Markdown")
@@ -778,10 +777,11 @@ async def save_quantity(message: Message, state: FSMContext):
     try:
         new_qty = int(message.text.strip())
         if new_qty < 0: raise ValueError()
-        conn = sqlite3.connect(DB_NAME)
+        conn = get_db_connection()
         cursor = conn.cursor()
-        cursor.execute("UPDATE products SET quantity = ? WHERE id = ?", (new_qty, product_id))
+        cursor.execute("UPDATE products SET quantity = %s WHERE id = %s", (new_qty, product_id))
         conn.commit()
+        cursor.close()
         conn.close()
         await message.answer(f"✅ Кількість на складі змінено на {new_qty} шт.! Напишіть /admin.")
         await state.clear()
@@ -806,10 +806,11 @@ async def save_category(message: Message, state: FSMContext):
     product_id = data.get("editing_product_id")
     new_cat = message.text.strip()
 
-    conn = sqlite3.connect(DB_NAME)
+    conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute("UPDATE products SET category = ? WHERE id = ?", (new_cat, product_id))
+    cursor.execute("UPDATE products SET category = %s WHERE id = %s", (new_cat, product_id))
     conn.commit()
+    cursor.close()
     conn.close()
 
     await message.answer(f"✅ Категорію змінено на **{new_cat}**! Напишіть /admin.", parse_mode="Markdown")
@@ -836,10 +837,11 @@ async def save_img_photo(message: Message, state: FSMContext):
     file = await message.bot.get_file(photo.file_id)
     file_url = f"https://api.telegram.org/file/bot{TOKEN}/{file.file_path}"
 
-    conn = sqlite3.connect(DB_NAME)
+    conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute("UPDATE products SET img = ? WHERE id = ?", (file_url, product_id))
+    cursor.execute("UPDATE products SET img = %s WHERE id = %s", (file_url, product_id))
     conn.commit()
+    cursor.close()
     conn.close()
 
     await message.answer("✅ Головне фото успішно оновлено! Напишіть /admin.")
@@ -866,16 +868,17 @@ async def save_gallery_photo(message: Message, state: FSMContext):
     file = await message.bot.get_file(photo.file_id)
     file_url = f"https://api.telegram.org/file/bot{TOKEN}/{file.file_path}"
 
-    conn = sqlite3.connect(DB_NAME)
+    conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT gallery FROM products WHERE id = ?", (product_id,))
+    cursor.execute("SELECT gallery FROM products WHERE id = %s", (product_id,))
     row = cursor.fetchone()
 
-    current_gallery = row[0] if row and row[0] else ""
+    current_gallery = row['gallery'] if row and row['gallery'] else ""
     new_gallery = f"{current_gallery},{file_url}" if current_gallery else file_url
 
-    cursor.execute("UPDATE products SET gallery = ? WHERE id = ?", (new_gallery, product_id))
+    cursor.execute("UPDATE products SET gallery = %s WHERE id = %s", (new_gallery, product_id))
     conn.commit()
+    cursor.close()
     conn.close()
 
     await message.answer("✅ Фото додано до галереї! Напишіть /admin.")
@@ -936,7 +939,7 @@ async def main():
     await bot.delete_webhook(drop_pending_updates=True)
 
     asyncio.create_task(dp.start_polling(bot))
-    print("Telegram-бот запущено і готовий до роботи з SQLite та динамічними блоками!")
+    print("Telegram-бот запущено і готовий до роботи з PostgreSQL та динамічними блоками!")
 
     port = int(os.environ.get("PORT", 8000))
     config = uvicorn.Config(app, host="0.0.0.0", port=port, log_level="info")
