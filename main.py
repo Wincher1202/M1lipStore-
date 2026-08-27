@@ -3,9 +3,9 @@ import json
 import logging
 import os
 import urllib.parse
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
-from aiogram import Bot, Dispatcher, F, Router
+from aiogram import Bot, Dispatcher, F, Router as AiogramRouter
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
@@ -41,61 +41,29 @@ def init_db():
     cursor.execute("""
                    CREATE TABLE IF NOT EXISTS products
                    (
-                       id
-                       TEXT
-                       PRIMARY
-                       KEY,
-                       brand
-                       TEXT,
-                       title
-                       TEXT
-                       NOT
-                       NULL,
-                       price
-                       INTEGER
-                       NOT
-                       NULL,
-                       tag
-                       TEXT,
-                       category
-                       TEXT
-                       NOT
-                       NULL,
-                       quantity
-                       INTEGER
-                       NOT
-                       NULL,
-                       colors
-                       TEXT,
-                       description
-                       TEXT,
-                       img
-                       TEXT,
-                       gallery
-                       TEXT,
-                       specs
-                       TEXT,
-                       color_images
-                       TEXT,
-                       color_quantities
-                       TEXT
+                       id TEXT PRIMARY KEY,
+                       brand TEXT,
+                       title TEXT NOT NULL,
+                       price INTEGER NOT NULL,
+                       tag TEXT,
+                       category TEXT NOT NULL,
+                       quantity INTEGER NOT NULL,
+                       colors TEXT,
+                       description TEXT,
+                       img TEXT,
+                       gallery TEXT,
+                       specs TEXT,
+                       color_images TEXT,
+                       color_quantities TEXT
                    )
                    """)
     cursor.execute("""
                    CREATE TABLE IF NOT EXISTS orders
                    (
-                       id
-                       SERIAL
-                       PRIMARY
-                       KEY,
-                       order_id
-                       TEXT,
-                       data
-                       JSONB,
-                       created_at
-                       TIMESTAMP
-                       DEFAULT
-                       CURRENT_TIMESTAMP
+                       id SERIAL PRIMARY KEY,
+                       order_id TEXT,
+                       data JSONB,
+                       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                    )
                    """)
     cursor.execute("""
@@ -149,12 +117,6 @@ def get_db_products():
 
 app = FastAPI()
 
-
-@app.get("/")
-async def root():
-    return {"status": "ok", "message": "M1lipStore API is running!"}
-
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -163,15 +125,21 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-router = Router()
+# Роутер для FastAPI (отдельно от aiogram)
+api_router = APIRouter()
 
 
-@app.get("/api/products")
+@app.get("/")
+async def root():
+    return {"status": "ok", "message": "M1lipStore API is running!"}
+
+
+@api_router.get("/api/products")
 async def get_products():
     return get_db_products()
 
 
-@app.post("/api/orders")
+@api_router.post("/api/orders")
 async def create_order(request: Request):
     data = await request.json()
     import random
@@ -189,7 +157,7 @@ async def create_order(request: Request):
 
     # Надсилання сповіщення адмінам в Telegram
     try:
-        bot = Bot(token=TOKEN)
+        bot_notify = Bot(token=TOKEN)
         customer = data.get("customer", {})
         items = data.get("items", [])
         totals = data.get("totals", 0)
@@ -212,19 +180,19 @@ async def create_order(request: Request):
         )
 
         for admin_id in ADMIN_IDS:
-            await bot.send_message(admin_id, msg_text, parse_mode="Markdown")
-        await bot.session.close()
+            await bot_notify.send_message(admin_id, msg_text, parse_mode="Markdown")
+        await bot_notify.session.close()
     except Exception as e:
         logging.error(f"Error sending order notification: {e}")
 
     return {"status": "success", "orderId": order_id_str}
 
 
-async def get_file_url(bot: Bot, file_id: str) -> str:
+async def get_file_url(bot_inst: Bot, file_id: str) -> str:
     if not file_id:
         return ""
     try:
-        file = await bot.get_file(file_id)
+        file = await bot_inst.get_file(file_id)
         if file and file.file_path:
             return f"https://api.telegram.org/file/bot{TOKEN}/{file.file_path}"
     except Exception as e:
@@ -232,7 +200,11 @@ async def get_file_url(bot: Bot, file_id: str) -> str:
     return file_id
 
 
-@router.message(Command("start"))
+# Роутер для Telegram-бота (aiogram)
+aiogram_router = AiogramRouter()
+
+
+@aiogram_router.message(Command("start"))
 async def cmd_start(message: Message):
     shop_reply_keyboard = ReplyKeyboardMarkup(
         keyboard=[[
@@ -253,7 +225,7 @@ async def cmd_start(message: Message):
     )
 
 
-@router.message(Command("admin"))
+@aiogram_router.message(Command("admin"))
 async def cmd_admin(message: Message):
     if message.from_user.id not in ADMIN_IDS:
         await message.answer("❌ У вас немає прав доступу до адмін-панелі.")
@@ -279,7 +251,7 @@ async def cmd_admin(message: Message):
     )
 
 
-@router.callback_query(F.data == "back_to_admin")
+@aiogram_router.callback_query(F.data == "back_to_admin")
 async def process_back_to_admin(callback: CallbackQuery):
     if callback.from_user.id not in ADMIN_IDS: return
     products = get_db_products()
@@ -307,7 +279,7 @@ async def process_back_to_admin(callback: CallbackQuery):
     await callback.answer()
 
 
-@router.callback_query(F.data.startswith("manage_"))
+@aiogram_router.callback_query(F.data.startswith("manage_"))
 async def process_manage_product(callback: CallbackQuery):
     if callback.from_user.id not in ADMIN_IDS:
         await callback.answer("Доступ заборонено!", show_alert=True)
@@ -363,7 +335,7 @@ async def process_manage_product(callback: CallbackQuery):
     await callback.answer()
 
 
-@router.callback_query(F.data.startswith("delete_prod_"))
+@aiogram_router.callback_query(F.data.startswith("delete_prod_"))
 async def process_delete_product(callback: CallbackQuery):
     if callback.from_user.id not in ADMIN_IDS: return
     product_id = callback.data.replace("delete_prod_", "")
@@ -379,10 +351,12 @@ async def process_delete_product(callback: CallbackQuery):
     await process_back_to_admin(callback)
 
 
+# Регистрация роутеров в приложениях
+app.include_router(api_router)
+
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
-dp.include_router(router)
-app.include_router(router)
+dp.include_router(aiogram_router)
 
 
 async def main():
