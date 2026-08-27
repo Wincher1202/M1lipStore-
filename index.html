@@ -1659,12 +1659,10 @@
                 const activeColor = colors[selectedColorIndex];
                 if (colorNameEl) colorNameEl.innerText = `(${formatColorEnglish(activeColor.name).toUpperCase()})`;
 
-                // Якщо для кольору задано конкретне фото в color_images
                 if (activeColor.image) {
                     activeImg = activeColor.image;
                     currentGalleryImages = [activeColor.image];
                 } else {
-                    // Якщо окремого фото немає, беремо загальні загальні фото або дефолтне
                     currentGalleryImages = currentModalProduct.gallery || [currentModalProduct.img];
                 }
 
@@ -1687,7 +1685,7 @@
                 }
             } else {
                 if (colorNameEl) colorNameEl.innerText = 'не вибрано';
-                // Якщо колір НЕ вибрано — показуємо всі загальні фото товару (як у PS Boost)
+                // Коли колір НЕ вибрано — показуються всі загальні фото товару
                 currentGalleryImages = currentModalProduct.gallery || [currentModalProduct.img];
                 activeImg = currentGalleryImages[0] || currentModalProduct.img;
 
