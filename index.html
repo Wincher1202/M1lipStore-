@@ -94,7 +94,6 @@
         ::-webkit-scrollbar-track { background: var(--bg-primary); }
         ::-webkit-scrollbar-thumb { background: var(--border-hover); border-radius: 3px; }
 
-        /* HEADER & MARKETPLACE LOGO STYLE (Удалена точка) */
         @keyframes floating {
             0% { transform: translateY(0px); }
             50% { transform: translateY(-3px); }
@@ -169,7 +168,6 @@
             margin-left: 1px;
             position: relative;
         }
-        /* Точка у логотипа полностью удалена */
 
         .nav-right {
             display: flex;
@@ -248,7 +246,6 @@
             justify-content: center;
         }
 
-        /* HERO SECTION */
         .hero {
             min-height: 90vh;
             padding: 140px 20px 60px;
@@ -430,7 +427,6 @@
             object-fit: cover;
             display: block;
             border-radius: var(--radius-md);
-            /* Плавный переход для фото */
             transition: opacity 0.3s ease-in-out, transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
@@ -438,7 +434,6 @@
             transform: scale(1.05);
         }
 
-        /* SECTIONS & CATALOG */
         .section-padding {
             padding: 50px 20px;
             max-width: 1440px;
@@ -503,7 +498,6 @@
             box-shadow: 0 4px 12px rgba(87, 100, 226, 0.1);
         }
 
-        /* 1. СМЯГЧЕНИЕ СВЕЧЕНИЯ АКТИВНОЙ КНОПКИ */
         .filter-btn.active {
             background: var(--accent);
             color: white;
@@ -526,7 +520,6 @@
             .catalog-grid { grid-template-columns: repeat(3, 1fr); }
         }
 
-        /* PRODUCT CARD */
         .product-card {
             background: var(--bg-secondary);
             border: 1px solid var(--border-light);
@@ -621,7 +614,6 @@
             object-fit: cover;
             display: block;
             border-radius: var(--radius-md);
-            /* 2. ПЛАВНАЯ СМЕНА ФОТОГРАФИЙ */
             transition: opacity 0.3s ease-in-out, transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
@@ -669,7 +661,6 @@
         .product-title-group h3 { font-size: 1.1rem; font-weight: 800; margin-top: 2px; }
         .product-price { font-size: 1.15rem; font-weight: 600; }
 
-        /* ADVANTAGES BLOCK */
         .advantages-section {
             padding: 30px 20px;
             max-width: 1440px;
@@ -728,7 +719,6 @@
             line-height: 1.4;
         }
 
-        /* FOOTER */
         footer {
             background: var(--bg-secondary);
             border-top: 1px solid var(--border-light);
@@ -777,7 +767,6 @@
             .footer-bottom { flex-direction: row; justify-content: space-between; } 
         }
 
-        /* OVERLAYS & MODALS */
         .overlay-backdrop {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -864,7 +853,6 @@
         .search-result-item { display: flex; align-items: center; justify-content: space-between; padding: 10px; background: var(--bg-primary); border-radius: var(--radius-sm); text-decoration: none; color: var(--text-primary); cursor: pointer; transition: var(--transition-smooth); }
         .search-result-item:hover { background: var(--accent-light); transform: translateX(4px); }
 
-        /* PRODUCT MODAL */
         .product-modal {
             position: fixed;
             top: 50%; left: 50%;
@@ -925,7 +913,6 @@
             height: 100%; 
             object-fit: cover; 
             border-radius: var(--radius-md); 
-            /* Плавный переход изображений */
             transition: opacity 0.3s ease-in-out, transform 0.4s ease; 
         }
         .modal-main-img:hover { transform: scale(1.03); }
@@ -1015,8 +1002,6 @@
         }
         .stock-status.in-stock { color: #2E7D32; }
         .stock-status.out-of-stock { color: #D32F2F; }
-        
-        /* 3. МЕНЕЕ ЗАМЕТНАЯ НАДПИСЬ «ОБЕРІТЬ КОЛІР» */
         .stock-status.not-selected { 
             color: var(--text-muted); 
             font-weight: 500; 
@@ -1031,14 +1016,11 @@
     </style>
 </head>
 <body data-theme="light">
-    <!-- TOP ANCHOR FOR SCROLL -->
     <div id="top"></div>
 
-    <!-- HEADER -->
     <header id="site-header">
         <a class="logo" id="logo-scroll-btn">
             <div class="logo-text-wrap">
-                <!-- Точка удалена из текста логотипа -->
                 <span class="logo-part-1">M1Lip</span><span class="logo-part-2">Store</span>
             </div>
         </a>
@@ -1076,7 +1058,6 @@
         </div>
     </header>
 
-    <!-- HERO SECTION -->
     <section class="hero">
         <div class="hero-content">
             <div class="hero-badge-group">
@@ -1099,7 +1080,6 @@
         </div>
     </section>
 
-    <!-- CATALOG -->
     <section class="section-padding" id="catalog">
         <div class="section-header">
             <div>
@@ -1117,7 +1097,6 @@
         <div class="catalog-grid" id="catalog-container"></div>
     </section>
 
-    <!-- ADVANTAGES BLOCK -->
     <section class="advantages-section">
         <div class="advantages-grid">
             <div class="advantage-card">
@@ -1152,11 +1131,9 @@
         </div>
     </section>
 
-    <!-- FOOTER -->
     <footer>
         <div class="footer-grid">
             <div class="footer-col">
-                <!-- Нижний логотип также очищен от точки -->
                 <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px; cursor: pointer;" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
                     <div class="logo" style="font-size: 1.3rem; animation: none;">
                         <div class="logo-text-wrap">
@@ -1201,10 +1178,8 @@
         </div>
     </footer>
 
-    <!-- OVERLAYS & DRAWERS -->
     <div class="overlay-backdrop" id="backdrop" onclick="closeAllDrawers()"></div>
 
-    <!-- CART DRAWER -->
     <div class="drawer" id="cart-drawer">
         <div class="drawer-header">
             <h3 style="font-weight: 800;">Кошик</h3>
@@ -1220,7 +1195,6 @@
         </div>
     </div>
 
-    <!-- WISHLIST DRAWER -->
     <div class="drawer" id="wishlist-drawer">
         <div class="drawer-header">
             <h3 style="font-weight: 800;">Обране</h3>
@@ -1229,7 +1203,6 @@
         <div class="drawer-body" id="wishlist-items-container"></div>
     </div>
 
-    <!-- SEARCH MODAL -->
     <div class="search-modal" id="search-modal">
         <div class="search-container">
             <div class="search-input-wrap">
@@ -1241,7 +1214,6 @@
         </div>
     </div>
 
-    <!-- PRODUCT MODAL -->
     <div class="product-modal" id="product-modal">
         <button class="close-drawer" style="position: absolute; top: 16px; right: 16px; z-index: 10;" onclick="closeProductModal()">✕</button>
         <div class="modal-grid">
@@ -1287,7 +1259,6 @@
         </div>
     </div>
 
-    <!-- INFO MODAL -->
     <div class="product-modal" id="info-modal" style="max-width: 450px; height: auto;">
         <button class="close-drawer" style="position: absolute; top: 16px; right: 16px; z-index: 10;" onclick="closeInfoModal()">✕</button>
         <div style="padding: 30px 24px; text-align: left;">
@@ -1450,7 +1421,8 @@
                         img: item.img || (parsedGallery.length > 0 ? parsedGallery[0] : ''),
                         gallery: Array.from(allImagesSet),
                         specs: parsedSpecs,
-                        colors: parsedColors
+                        colors: parsedColors,
+                        colorImagesMap: rawColors || {}
                     };
                 });
             } catch (e) {
@@ -1522,10 +1494,7 @@
 
             document.getElementById('logo-scroll-btn')?.addEventListener('click', (e) => {
                 e.preventDefault();
-                window.scrollTo({
-                    top: 0,
-                    behavior: 'smooth'
-                });
+                window.scrollTo({ top: 0, behavior: 'smooth' });
             });
 
             const themeBtn = document.getElementById('theme-toggle-btn');
@@ -1672,6 +1641,7 @@
             document.getElementById('backdrop').classList.add('active');
         }
 
+        // --- ЛОГІКА PS BOOST ДЛЯ ГАЛЕРЕЇ ТА КОЛЬОРІВ ---
         function updateModalGalleryAndColor() {
             if (!currentModalProduct) return;
             const colors = currentModalProduct.colors || [];
@@ -1683,13 +1653,19 @@
             const thumbsContainer = document.getElementById('modal-thumbs');
 
             let activeImg = currentModalProduct.img;
+            let currentGalleryImages = [];
 
             if (selectedColorIndex !== null && colors[selectedColorIndex]) {
                 const activeColor = colors[selectedColorIndex];
                 if (colorNameEl) colorNameEl.innerText = `(${formatColorEnglish(activeColor.name).toUpperCase()})`;
 
+                // Якщо для кольору задано конкретне фото в color_images
                 if (activeColor.image) {
                     activeImg = activeColor.image;
+                    currentGalleryImages = [activeColor.image];
+                } else {
+                    // Якщо окремого фото немає, беремо загальні загальні фото або дефолтне
+                    currentGalleryImages = currentModalProduct.gallery || [currentModalProduct.img];
                 }
 
                 if (stockStatusEl) {
@@ -1711,6 +1687,10 @@
                 }
             } else {
                 if (colorNameEl) colorNameEl.innerText = 'не вибрано';
+                // Якщо колір НЕ вибрано — показуємо всі загальні фото товару (як у PS Boost)
+                currentGalleryImages = currentModalProduct.gallery || [currentModalProduct.img];
+                activeImg = currentGalleryImages[0] || currentModalProduct.img;
+
                 if (stockStatusEl) {
                     stockStatusEl.innerText = 'Будь ласка, оберіть колір товару';
                     stockStatusEl.className = 'stock-status not-selected';
@@ -1722,7 +1702,6 @@
             }
 
             if (mainImg) {
-                // Плавное затухание/появление при смене фото через цвет
                 mainImg.style.opacity = '0';
                 setTimeout(() => {
                     mainImg.src = activeImg;
@@ -1730,8 +1709,8 @@
                 }, 150);
             }
 
-            if (thumbsContainer && currentModalProduct.gallery) {
-                thumbsContainer.innerHTML = currentModalProduct.gallery.map((imgUrl) => {
+            if (thumbsContainer) {
+                thumbsContainer.innerHTML = currentGalleryImages.map((imgUrl) => {
                     const isActive = imgUrl === activeImg ? 'active' : '';
                     return `
                         <img class="modal-thumb ${isActive}" src="${imgUrl}" onclick="changeModalImage('${imgUrl}', this)" alt="thumb">
