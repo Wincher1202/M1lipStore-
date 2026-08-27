@@ -94,7 +94,13 @@
         ::-webkit-scrollbar-track { background: var(--bg-primary); }
         ::-webkit-scrollbar-thumb { background: var(--border-hover); border-radius: 3px; }
 
-        /* HEADER */
+        /* HEADER & FLOATING LOGO ANIMATION */
+        @keyframes floating {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-4px); }
+            100% { transform: translateY(0px); }
+        }
+
         header {
             position: fixed;
             top: 0;
@@ -137,6 +143,12 @@
             display: flex;
             align-items: center;
             gap: 8px;
+            animation: floating 3s ease-in-out infinite;
+            transition: transform 0.2s ease;
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
         }
 
         .logo img {
@@ -993,9 +1005,12 @@
     </style>
 </head>
 <body data-theme="light">
+    <!-- TOP ANCHOR FOR SCROLL -->
+    <div id="top"></div>
+
     <!-- HEADER -->
     <header id="site-header">
-        <a class="logo" onclick="scrollToSection('catalog')">
+        <a class="logo" id="logo-scroll-btn">
             <img src="logo-milipstore.png" alt="M1lipStore Logo">
             <div class="logo-text-wrap">
                 <span class="logo-part-1">M1Lip</span><span class="logo-part-2">Store</span>
@@ -1279,7 +1294,23 @@
 
         const API_URL = "https://m1lipstore.onrender.com/api/products";
 
-        // Мапа для перетворення назви кольору в дійсний CSS код (щоб кружечки точно відповідали кольору)
+        // Функция перевода названия цвета на стильный английский для вывода в интерфейсе
+        function formatColorEnglish(name) {
+            if (!name) return 'Selected';
+            let lower = name.toLowerCase().trim();
+            if (lower.includes('pink') || lower.includes('рожев')) return 'pink';
+            if (lower.includes('white') || lower.includes('біл')) return 'white';
+            if (lower.includes('black') || lower.includes('чорн')) return 'black';
+            if (lower.includes('red') || lower.includes('червон')) return 'red';
+            if (lower.includes('blue') || lower.includes('блакит') || lower.includes('син')) return 'blue';
+            if (lower.includes('green') || lower.includes('зелен')) return 'green';
+            if (lower.includes('purple') || lower.includes('фіолет')) return 'purple';
+            if (lower.includes('yellow') || lower.includes('жовт')) return 'yellow';
+            if (lower.includes('grey') || lower.includes('gray') || lower.includes('сір')) return 'grey';
+            if (lower.includes('orange') || lower.includes('помаранч')) return 'orange';
+            return lower;
+        }
+
         function getColorHex(name) {
             if (!name) return '#ccc';
             let lower = name.toLowerCase().trim();
@@ -1293,7 +1324,7 @@
             if (lower.includes('yellow') || lower.includes('жовт')) return '#fbc02d';
             if (lower.includes('grey') || lower.includes('gray') || lower.includes('сір')) return '#9e9e9e';
             if (lower.includes('orange') || lower.includes('помаранч')) return '#fb8c00';
-            return lower; // Якщо це введений гех-код або стандартна назва кольору CSS
+            return lower;
         }
 
         async function fetchProducts() {
@@ -1323,7 +1354,7 @@
                             }
                             
                             return {
-                                name: colorName, // Англійська / оригінальна назва з бази
+                                name: colorName,
                                 isOut: stockVal <= 0,
                                 stock: stockVal,
                                 image: rawColors[colorName]
@@ -1454,6 +1485,15 @@
                 }
             });
 
+            // Плавная прокрутка наверх при клике на плавающий логотип
+            document.getElementById('logo-scroll-btn')?.addEventListener('click', (e) => {
+                e.preventDefault();
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            });
+
             const themeBtn = document.getElementById('theme-toggle-btn');
             if (themeBtn) {
                 themeBtn.addEventListener('click', () => {
@@ -1557,12 +1597,12 @@
             currentModalProduct = product;
             modalQty = 1;
             
-            // Автоматично вибираємо перший доступний колір, якщо він є, інакше null (Не вибрано)
+            // Если цвет кликнули прямо из каталога (превью), берем его, иначе автоматически выбираем первый доступный
             if (colorIdx !== null && product.colors[colorIdx] && !product.colors[colorIdx].isOut) {
                 selectedColorIndex = colorIdx;
             } else {
                 let firstAvailable = product.colors.findIndex(c => !c.isOut);
-                selectedColorIndex = firstAvailable !== -1 ? firstAvailable : null;
+                selectedColorIndex = firstAvailable !== -1 ? firstAvailable : (product.colors.length > 0 ? 0 : null);
             }
 
             document.getElementById('modal-tag').innerText = product.tag || 'НОВИНКА';
@@ -1621,7 +1661,7 @@
 
             if (selectedColorIndex !== null && colors[selectedColorIndex]) {
                 const activeColor = colors[selectedColorIndex];
-                if (colorNameEl) colorNameEl.innerText = activeColor.name; // Показує англійську/оригінальну назву кольору
+                if (colorNameEl) colorNameEl.innerText = formatColorEnglish(activeColor.name); // Стильный английский текст цвета
 
                 if (activeColor.image) {
                     const mainImg = document.getElementById('modal-img');
@@ -1680,7 +1720,7 @@
 
         function selectModalColor(idx) {
             const colors = currentModalProduct.colors || [];
-            if (colors[idx] && colors[idx].isOut) return; // Не можна вибрати те, чого немає в наявності
+            if (colors[idx] && colors[idx].isOut) return;
             selectedColorIndex = idx;
             updateModalGalleryAndColor();
         }
@@ -1708,7 +1748,7 @@
         function addCurrentProductToCart() {
             if (!currentModalProduct || selectedColorIndex === null) return;
             const colors = currentModalProduct.colors || [];
-            let selectedColorName = colors[selectedColorIndex].name;
+            let selectedColorName = formatColorEnglish(colors[selectedColorIndex].name);
             
             const existingIndex = cart.findIndex(item => item.id === currentModalProduct.id && item.color === selectedColorName);
             if (existingIndex > -1) {
@@ -1830,7 +1870,7 @@
                         <div style="flex-grow: 1;">
                             <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted);">${item.brand}</div>
                             <div style="font-size: 0.95rem; font-weight: 800;">${item.title}</div>
-                            <div style="font-size: 0.75rem; color: var(--text-secondary);">Колір: ${item.color}</div>
+                            <div style="font-size: 0.75rem; color: var(--text-secondary);">Color: ${item.color}</div>
                             <div style="font-size: 0.9rem; font-weight: 700; color: var(--accent); margin-top: 4px;">${formatPrice(item.price * item.qty)}</div>
                         </div>
                         <div class="quantity-controls">
@@ -1936,7 +1976,7 @@
             let orderText = "🛒 *Нове замовлення M1lipStore*:\n\n";
             let total = 0;
             cart.forEach((item, i) => {
-                orderText += `${i + 1}. *${item.brand} ${item.title}*\n   Колір: ${item.color} | Кількість: ${item.qty} шт. | Сума: ${item.price * item.qty} ₴\n`;
+                orderText += `${i + 1}. *${item.brand} ${item.title}*\n   Color: ${item.color} | Кількість: ${item.qty} шт. | Сума: ${item.price * item.qty} ₴\n`;
                 total += item.price * item.qty;
             });
             orderText += `\n💰 *Загальна сума*: ${total} ₴`;
