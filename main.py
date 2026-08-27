@@ -42,29 +42,61 @@ def init_db():
     cursor.execute("""
                    CREATE TABLE IF NOT EXISTS products
                    (
-                       id TEXT PRIMARY KEY,
-                       brand TEXT,
-                       title TEXT NOT NULL,
-                       price INTEGER NOT NULL,
-                       tag TEXT,
-                       category TEXT NOT NULL,
-                       quantity INTEGER NOT NULL,
-                       colors TEXT,
-                       description TEXT,
-                       img TEXT,
-                       gallery TEXT,
-                       specs TEXT,
-                       color_images TEXT,
-                       color_quantities TEXT
+                       id
+                       TEXT
+                       PRIMARY
+                       KEY,
+                       brand
+                       TEXT,
+                       title
+                       TEXT
+                       NOT
+                       NULL,
+                       price
+                       INTEGER
+                       NOT
+                       NULL,
+                       tag
+                       TEXT,
+                       category
+                       TEXT
+                       NOT
+                       NULL,
+                       quantity
+                       INTEGER
+                       NOT
+                       NULL,
+                       colors
+                       TEXT,
+                       description
+                       TEXT,
+                       img
+                       TEXT,
+                       gallery
+                       TEXT,
+                       specs
+                       TEXT,
+                       color_images
+                       TEXT,
+                       color_quantities
+                       TEXT
                    )
                    """)
     cursor.execute("""
                    CREATE TABLE IF NOT EXISTS orders
                    (
-                       id SERIAL PRIMARY KEY,
-                       order_id TEXT,
-                       data JSONB,
-                       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                       id
+                       SERIAL
+                       PRIMARY
+                       KEY,
+                       order_id
+                       TEXT,
+                       data
+                       JSONB,
+                       created_at
+                       TIMESTAMP
+                       DEFAULT
+                       CURRENT_TIMESTAMP
                    )
                    """)
     cursor.execute("""
@@ -110,20 +142,54 @@ def get_db_products():
     result = []
     for row in rows:
         p = dict(row)
+
+        # Гарантуємо, що color_images завжди повертається як валідний об'єкт
         try:
-            p["colorImages"] = json.loads(p["color_images"]) if p["color_images"] else {}
+            ci = p.get("color_images")
+            if isinstance(ci, str):
+                p["colorImages"] = json.loads(ci) if ci.strip() else {}
+            elif isinstance(ci, dict):
+                p["colorImages"] = ci
+            else:
+                p["colorImages"] = {}
         except Exception:
             p["colorImages"] = {}
 
+        # Гарантуємо, що specs завжди список
         try:
-            p["specs"] = json.loads(p["specs"]) if p["specs"] else []
+            sp = p.get("specs")
+            if isinstance(sp, str):
+                p["specs"] = json.loads(sp) if sp.strip() else []
+            elif isinstance(sp, list):
+                p["specs"] = sp
+            else:
+                p["specs"] = []
         except Exception:
             p["specs"] = []
 
+        # Гарантуємо, що color_quantities завжди об'єкт
         try:
-            p["colorQuantities"] = json.loads(p["color_quantities"]) if p.get("color_quantities") else {}
+            cq = p.get("color_quantities")
+            if isinstance(cq, str):
+                p["colorQuantities"] = json.loads(cq) if cq.strip() else {}
+            elif isinstance(cq, dict):
+                p["colorQuantities"] = cq
+            else:
+                p["colorQuantities"] = {}
         except Exception:
             p["colorQuantities"] = {}
+
+        # Гарантуємо, що gallery завжди список
+        try:
+            gal = p.get("gallery")
+            if isinstance(gal, str):
+                p["gallery"] = json.loads(gal) if gal.strip() else []
+            elif isinstance(gal, list):
+                p["gallery"] = gal
+            else:
+                p["gallery"] = []
+        except Exception:
+            p["gallery"] = []
 
         result.append(p)
     return result
