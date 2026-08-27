@@ -42,61 +42,29 @@ def init_db():
     cursor.execute("""
                    CREATE TABLE IF NOT EXISTS products
                    (
-                       id
-                       TEXT
-                       PRIMARY
-                       KEY,
-                       brand
-                       TEXT,
-                       title
-                       TEXT
-                       NOT
-                       NULL,
-                       price
-                       INTEGER
-                       NOT
-                       NULL,
-                       tag
-                       TEXT,
-                       category
-                       TEXT
-                       NOT
-                       NULL,
-                       quantity
-                       INTEGER
-                       NOT
-                       NULL,
-                       colors
-                       TEXT,
-                       description
-                       TEXT,
-                       img
-                       TEXT,
-                       gallery
-                       TEXT,
-                       specs
-                       TEXT,
-                       color_images
-                       TEXT,
-                       color_quantities
-                       TEXT
+                       id TEXT PRIMARY KEY,
+                       brand TEXT,
+                       title TEXT NOT NULL,
+                       price INTEGER NOT NULL,
+                       tag TEXT,
+                       category TEXT NOT NULL,
+                       quantity INTEGER NOT NULL,
+                       colors TEXT,
+                       description TEXT,
+                       img TEXT,
+                       gallery TEXT,
+                       specs TEXT,
+                       color_images TEXT,
+                       color_quantities TEXT
                    )
                    """)
     cursor.execute("""
                    CREATE TABLE IF NOT EXISTS orders
                    (
-                       id
-                       SERIAL
-                       PRIMARY
-                       KEY,
-                       order_id
-                       TEXT,
-                       data
-                       JSONB,
-                       created_at
-                       TIMESTAMP
-                       DEFAULT
-                       CURRENT_TIMESTAMP
+                       id SERIAL PRIMARY KEY,
+                       order_id TEXT,
+                       data JSONB,
+                       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                    )
                    """)
     cursor.execute("""
@@ -118,11 +86,9 @@ def init_db():
 init_db()
 
 
-# Допоміжна функція для конвертації Telegram file_id у пряме URL-посилання
 async def get_file_url(bot: Bot, file_id: str) -> str:
     if not file_id:
         return ""
-    # Якщо це вже посилання (наприклад, пропущено або введено вручну)
     if file_id.startswith("http"):
         return file_id
     try:
@@ -737,7 +703,7 @@ async def process_color_main_photo(message: Message, state: FSMContext):
         [InlineKeyboardButton(text="✅ Готово (перейти далі)", callback_data="col_gallery_done")]
     ])
     await message.answer(
-        f"📸 Надішліть **додаткові фото** для кольору **{current_color}** (можна альбомом або кілька окремо).\n\nКоли закінчите, натисніть кнопку нижче або надішліть `/done`:",
+        f"✅ Головне фото для кольору **{current_color}** збережено!\n\n📸 Надішліть **додаткові фото** для галереї кольору **{current_color}** (можна альбомом або кілька окремо).\n\nКоли закінчите, натисніть кнопку нижче або надішліть `/done`:",
         reply_markup=done_markup,
         parse_mode="Markdown"
     )
@@ -772,7 +738,10 @@ async def process_color_gallery_photo(message: Message, state: FSMContext):
         if not photos:
             return
 
-        ci_dict[current_color]["gallery"].extend(photos)
+        for p in photos:
+            if p not in ci_dict[current_color]["gallery"]:
+                ci_dict[current_color]["gallery"].append(p)
+
         await state.update_data(color_images_dict=ci_dict)
 
         await message.answer(
@@ -780,7 +749,8 @@ async def process_color_gallery_photo(message: Message, state: FSMContext):
             parse_mode="Markdown"
         )
     else:
-        ci_dict[current_color]["gallery"].append(photo_url)
+        if photo_url not in ci_dict[current_color]["gallery"]:
+            ci_dict[current_color]["gallery"].append(photo_url)
         await state.update_data(color_images_dict=ci_dict)
 
         await message.answer(
@@ -903,13 +873,17 @@ async def add_general_gallery_photo(message: Message, state: FSMContext):
         if not photos:
             return
 
-        gallery_list.extend(photos)
+        for p in photos:
+            if p not in gallery_list:
+                gallery_list.append(p)
+
         await state.update_data(gallery_list=gallery_list)
         await message.answer(
             f"✅ Додано фото в загальну галерею ({len(gallery_list)}). Надішліть ще або напишіть /done щоб зберегти товар."
         )
     else:
-        gallery_list.append(photo_url)
+        if photo_url not in gallery_list:
+            gallery_list.append(photo_url)
         await state.update_data(gallery_list=gallery_list)
         await message.answer(
             f"✅ Додано фото в загальну галерею ({len(gallery_list)}). Надішліть ще або напишіть /done щоб зберегти товар."
