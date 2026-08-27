@@ -94,7 +94,7 @@
         ::-webkit-scrollbar-track { background: var(--bg-primary); }
         ::-webkit-scrollbar-thumb { background: var(--border-hover); border-radius: 3px; }
 
-        /* HEADER & MARKETPLACE LOGO STYLE */
+        /* HEADER & MARKETPLACE LOGO STYLE (Удалена точка) */
         @keyframes floating {
             0% { transform: translateY(0px); }
             50% { transform: translateY(-3px); }
@@ -169,18 +169,7 @@
             margin-left: 1px;
             position: relative;
         }
-
-        .logo-part-2::after {
-            content: '';
-            position: absolute;
-            bottom: 4px;
-            right: -6px;
-            width: 5px;
-            height: 5px;
-            background-color: #5764e2;
-            border-radius: 50%;
-            box-shadow: 0 0 8px #5764e2;
-        }
+        /* Точка у логотипа полностью удалена */
 
         .nav-right {
             display: flex;
@@ -441,7 +430,8 @@
             object-fit: cover;
             display: block;
             border-radius: var(--radius-md);
-            transition: opacity 0.4s ease, transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            /* Плавный переход для фото */
+            transition: opacity 0.3s ease-in-out, transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .hero-card-3d:hover img {
@@ -474,7 +464,6 @@
             font-size: 0.9rem;
         }
 
-        /* КАТЕГОРИИ ТОВАРОВ - Плавная анимация и отсутствие обрезки */
         .catalog-filters {
             display: flex;
             gap: 10px;
@@ -502,17 +491,6 @@
             overflow: hidden;
         }
 
-        .filter-btn::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: var(--accent);
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            z-index: 0;
-            border-radius: 30px;
-        }
-
         .filter-btn span {
             position: relative;
             z-index: 1;
@@ -522,15 +500,16 @@
             border-color: var(--accent);
             color: var(--accent);
             transform: translateY(-3px) scale(1.02);
-            box-shadow: 0 6px 20px rgba(87, 100, 226, 0.15);
+            box-shadow: 0 4px 12px rgba(87, 100, 226, 0.1);
         }
 
+        /* 1. СМЯГЧЕНИЕ СВЕЧЕНИЯ АКТИВНОЙ КНОПКИ */
         .filter-btn.active {
             background: var(--accent);
             color: white;
             border-color: var(--accent);
             transform: translateY(-3px) scale(1.03);
-            box-shadow: 0 8px 25px rgba(87, 100, 226, 0.3);
+            box-shadow: 0 4px 14px rgba(87, 100, 226, 0.25);
         }
 
         .catalog-grid {
@@ -642,7 +621,8 @@
             object-fit: cover;
             display: block;
             border-radius: var(--radius-md);
-            transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            /* 2. ПЛАВНАЯ СМЕНА ФОТОГРАФИЙ */
+            transition: opacity 0.3s ease-in-out, transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .product-card:hover .product-img-wrap img { 
@@ -940,7 +920,14 @@
             justify-content: center;
             overflow: hidden;
         }
-        .modal-main-img { width: 100%; height: 100%; object-fit: cover; border-radius: var(--radius-md); transition: transform 0.4s ease; }
+        .modal-main-img { 
+            width: 100%; 
+            height: 100%; 
+            object-fit: cover; 
+            border-radius: var(--radius-md); 
+            /* Плавный переход изображений */
+            transition: opacity 0.3s ease-in-out, transform 0.4s ease; 
+        }
         .modal-main-img:hover { transform: scale(1.03); }
         
         .modal-thumbs { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -1028,7 +1015,13 @@
         }
         .stock-status.in-stock { color: #2E7D32; }
         .stock-status.out-of-stock { color: #D32F2F; }
-        .stock-status.not-selected { color: #E65100; }
+        
+        /* 3. МЕНЕЕ ЗАМЕТНАЯ НАДПИСЬ «ОБЕРІТЬ КОЛІР» */
+        .stock-status.not-selected { 
+            color: var(--text-muted); 
+            font-weight: 500; 
+            opacity: 0.75; 
+        }
 
         .specs-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin: 12px 0; }
         .spec-box { background: var(--bg-primary); padding: 8px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-light); transition: var(--transition-smooth); }
@@ -1045,6 +1038,7 @@
     <header id="site-header">
         <a class="logo" id="logo-scroll-btn">
             <div class="logo-text-wrap">
+                <!-- Точка удалена из текста логотипа -->
                 <span class="logo-part-1">M1Lip</span><span class="logo-part-2">Store</span>
             </div>
         </a>
@@ -1162,9 +1156,8 @@
     <footer>
         <div class="footer-grid">
             <div class="footer-col">
-                <!-- Отдельный логотип снизу с картинкой logo-milipstore.png -->
+                <!-- Нижний логотип также очищен от точки -->
                 <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px; cursor: pointer;" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
-                    <img src="logo-milipstore.png" alt="M1lipStore Logo" style="width: 36px; height: 36px; object-fit: contain; border-radius: 8px;">
                     <div class="logo" style="font-size: 1.3rem; animation: none;">
                         <div class="logo-text-wrap">
                             <span class="logo-part-1">M1Lip</span><span class="logo-part-2">Store</span>
@@ -1728,7 +1721,14 @@
                 }
             }
 
-            if (mainImg) mainImg.src = activeImg;
+            if (mainImg) {
+                // Плавное затухание/появление при смене фото через цвет
+                mainImg.style.opacity = '0';
+                setTimeout(() => {
+                    mainImg.src = activeImg;
+                    mainImg.style.opacity = '1';
+                }, 150);
+            }
 
             if (thumbsContainer && currentModalProduct.gallery) {
                 thumbsContainer.innerHTML = currentModalProduct.gallery.map((imgUrl) => {
@@ -1764,7 +1764,13 @@
 
         function changeModalImage(url, thumbEl) {
             const mainImg = document.getElementById('modal-img');
-            if (mainImg) mainImg.src = url;
+            if (mainImg) {
+                mainImg.style.opacity = '0';
+                setTimeout(() => {
+                    mainImg.src = url;
+                    mainImg.style.opacity = '1';
+                }, 150);
+            }
             document.querySelectorAll('.modal-thumb').forEach(t => t.classList.remove('active'));
             if (thumbEl) thumbEl.classList.add('active');
         }
