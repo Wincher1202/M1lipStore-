@@ -3,6 +3,7 @@ import json
 import logging
 import os
 import re
+import uuid
 import psycopg2
 from psycopg2.extras import RealDictCursor
 from fastapi import FastAPI
@@ -525,7 +526,6 @@ async def handle_photo_steps_skip_or_done(callback: CallbackQuery, state: FSMCon
         await callback.message.answer(f"🖼 Надішліть головне фото для наступного кольору **{colors_list[idx]}**:",
                                       reply_markup=skip_markup, parse_mode="Markdown")
     else:
-        # Усі кроки пройдено — зберігаємо товар у БД
         await finalize_and_save_product(callback.message, state, ci_dict)
     await callback.answer()
 
@@ -568,7 +568,6 @@ async def finalize_and_save_product(message: Message, state: FSMContext, color_i
     color_quantities = data.get("color_quantities_dict", {})
     total_quantity = sum(color_quantities.values()) if color_quantities else 5
 
-    # Знаходимо перше доступне головне фото як дефолтне
     main_img = ""
     color_images_flat = {}
     for col_name, img_data in color_images_dict.items():
@@ -615,7 +614,7 @@ async def main():
     dp = Dispatcher()
     dp.include_router(router)
 
-    config = uvicorn.Config(app, host="0.0.5.0", port=8000, log_level="info")
+    config = uvicorn.Config(app, host="0.0.0.0", port=8000, log_level="info")
     server = uvicorn.Server(config)
 
     await asyncio.gather(
