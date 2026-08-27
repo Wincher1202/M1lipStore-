@@ -87,10 +87,16 @@ def get_db_products():
 
 app = FastAPI()
 
+# --- КОРЕНЕВИЙ ШЛЯХ ДЛЯ МОНІТОРИНГУ (ВИПРАВЛЯЄ 404 ПОМИЛКУ) ---
+@app.get("/")
+async def root():
+    return {"status": "ok", "message": "M1lipStore API is running!"}
+
+
 # НАЛАШТУВАННЯ CORS (виправляє помилку блокування запитів з GitHub Pages на Render)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Дозволяє запити з будь-яких джерел (включно з твоїм сайтом на GitHub Pages)
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -112,12 +118,9 @@ class AddProductStates(StatesGroup):
     waiting_for_tag = State()
     waiting_for_category = State()
     waiting_for_qty = State()
-    # Динамічні характеристики
     waiting_for_specs = State()
-    # Кольори та фото
     waiting_for_colors = State()
     waiting_for_color_photo = State()
-    # Опис та медіа
     waiting_for_description = State()
     waiting_for_img = State()
     waiting_for_gallery = State()
@@ -344,8 +347,6 @@ async def process_delete_product(callback: CallbackQuery):
             reply_markup=back_markup
         )
 
-
-# --- ПРОЦЕС СТВОРЕННЯ ТОВАРУ ТА ДИНАМІЧНИХ БЛОКІВ ---
 
 @router.callback_query(F.data == "add_new_product")
 async def process_add_new(callback: CallbackQuery, state: FSMContext):
@@ -672,8 +673,6 @@ async def finish_product_creation(callback: CallbackQuery, state: FSMContext):
     await callback.answer()
 
 
-# --- РЕДАГУВАННЯ ПОЛІВ ІЗ ПАНЕЛІ КЕРУВАННЯ ---
-
 @router.callback_query(F.data.startswith("set_tag_"))
 async def process_set_tag(callback: CallbackQuery, state: FSMContext):
     if callback.from_user.id not in ADMIN_IDS: return
@@ -884,8 +883,6 @@ async def save_gallery_photo(message: Message, state: FSMContext):
     await message.answer("✅ Фото додано до галереї! Напишіть /admin.")
     await state.clear()
 
-
-# --- ОБРОБКА ЗАМОВЛЕНЬ ІЗ САЙТУ ---
 
 @router.message(F.web_app_data)
 async def process_web_app_order(message: Message):
