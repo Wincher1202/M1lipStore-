@@ -624,25 +624,57 @@ async def add_img(message: Message, state: FSMContext):
         "📸 Надішліть додаткові фото для галереї (можете надіслати кілька окремо або одним альбомом, або надішліть текст «пропустити»):")
 
 
-# Прийом галереї фото (файли чи альбом)
-@router.message(AddProductStates.waiting_for_gallery, F.photo | F.text)
-async def add_gallery_and_save(message: Message, state: FSMContext):
-    if message.from_user.id not in ADMIN_IDS: return
-    data = await state.get_data()
+# Кеш для збирання фотографій альбому (медіагруп) без зависань
+album_cache = {}
 
-    gallery_list = data.get("gallery_list", [])
-    if message.photo:
-        gallery_list.append(message.photo[-1].file_id)
+
+# Прийом галереї фото (файли чи альбом) із захистом від зависання
+@router.message(AddProductStates.waiting_for_gallery, F.photo)
+async def add_gallery_photo(message: Message, state: FSMContext):
+    if message.from_user.id not in ADMIN_IDS: return
+    photo_file_id = message.photo[-1].file_id
+
+    if message.media_group_id:
+        # Якщо це альбом (кількість фоток одразу)
+        if message.media_group_id not in album_cache:
+            album_cache[message.media_group_id] = []
+        album_cache[message.media_group_id].append(photo_file_id)
+
+        # Чекаємо невеликий проміжок часу, поки прийдуть інші фото з цього ж альбому
+        await asyncio.sleep(0.7)
+
+        photos = album_cache.pop(message.media_group_id, None)
+        if not photos:
+            return  # Вже оброблено іншим потоком
+
+        data = await state.get_data()
+        gallery_list = data.get("gallery_list", [])
+        gallery_list.extend(photos)
         await state.update_data(gallery_list=gallery_list)
+
         await message.answer(
             f"✅ Додано фото в галерею ({len(gallery_list)}). Надішліть ще або напишіть /done щоб зберегти товар.")
-        return
+    else:
+        # Одиночне фото
+        data = await state.get_data()
+        gallery_list = data.get("gallery_list", [])
+        gallery_list.append(photo_file_id)
+        await state.update_data(gallery_list=gallery_list)
 
-    text_content = message.text.strip().lower() if message.text else ""
+        await message.answer(
+            f"✅ Додано фото в галерею ({len(gallery_list)}). Надішліть ще або напишіть /done щоб зберегти товар.")
+
+
+@router.message(AddProductStates.waiting_for_gallery, F.text)
+async def add_gallery_text(message: Message, state: FSMContext):
+    if message.from_user.id not in ADMIN_IDS: return
+    data = await state.get_data()
+    gallery_list = data.get("gallery_list", [])
+
+    text_content = message.text.strip().lower()
     if text_content == '/done' or text_content == 'пропустити' or text_content == 'готово':
         pass
     else:
-        # Якщо кинули текстом через кому
         specs_gal = [g.strip() for g in message.text.split(",") if g.strip()]
         gallery_list.extend(specs_gal)
 
