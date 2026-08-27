@@ -104,7 +104,7 @@
             padding: 16px 20px;
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            justify-content: flex-end;
             background: rgba(248, 249, 250, 0.85);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
@@ -728,22 +728,6 @@
             .footer-bottom { flex-direction: row; justify-content: space-between; } 
         }
 
-        .footer-socials {
-            display: flex;
-            gap: 16px;
-        }
-
-        .footer-socials a {
-            color: var(--text-secondary);
-            text-decoration: none;
-            font-weight: 600;
-            transition: var(--transition-smooth);
-        }
-
-        .footer-socials a:hover {
-            color: var(--accent);
-        }
-
         /* OVERLAYS & MODALS */
         .overlay-backdrop {
             position: fixed;
@@ -938,6 +922,12 @@
             cursor: pointer;
         }
 
+        .color-option-item.disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
         .color-circle-big {
             width: 20px;
             height: 20px;
@@ -950,6 +940,7 @@
         .color-circle-big.white { background-color: #FFFFFF; }
         .color-circle-big.black { background-color: #1a1a1a; }
         .color-circle-big.pink { background-color: #ff2a85; }
+        .color-circle-big.out-of-stock { background-color: #9ca3af !important; border-color: #6b7280; }
 
         .color-circle-big.active {
             box-shadow: 0 0 0 3px var(--accent);
@@ -976,10 +967,6 @@
 <body data-theme="light">
     <!-- HEADER -->
     <header id="site-header">
-        <a class="logo" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
-            <img src="https://i.ibb.co/3ykX17N0/logo-milipstore.jpg" alt="Logo"> M1lip<span>Store</span>
-        </a>
-
         <div class="nav-right">
             <div class="icon-btn-wrapper">
                 <button class="icon-btn" id="theme-toggle-btn" aria-label="Змінити тему">
@@ -1124,19 +1111,14 @@
             <div class="footer-col">
                 <h4>КОНТАКТИ</h4>
                 <ul>
-                    <li><a>Email: support@m1lipstore.com</a></li>
-                    <li><a href="https://t.me/milipmanager" target="_blank">Менеджер: @milipmanager</a>[cite: 4]</li>
-                    <li><a href="https://t.me/+vyhe-i9vGwAwNjAy" target="_blank">Telegram канал: перейти</a>[cite: 4]</li>
-                    <li><a href="https://www.tiktok.com/@m1lipstore" target="_blank">TikTok: @m1lipstore</a>[cite: 4]</li>
+                    <li><a href="https://t.me/milipmanager" target="_blank">Менеджер: @milipmanager</a></li>
+                    <li><a href="https://m1lipstore.mssg.me/" target="_blank">Telegram канал: перейти</a></li>
+                    <li><a href="https://www.tiktok.com/@m1lipstore" target="_blank">TikTok: @m1lipstore</a></li>
                 </ul>
             </div>
         </div>
         <div class="footer-bottom">
             <span>© 2026 M1lipStore. Усі права захищено.</span>
-            <div class="footer-socials">
-                <a href="https://t.me/+vyhe-i9vGwAwNjAy" target="_blank">Telegram</a>[cite: 4]
-                <a href="https://www.tiktok.com/@m1lipstore" target="_blank">TikTok</a>[cite: 4]
-            </div>
         </div>
     </footer>
 
@@ -1269,23 +1251,32 @@
                 products = backendData.map(item => {
                     let parsedColors = [];
                     let rawColors = item.color_images || item.colorImages;
+                    let colorStocks = item.color_stocks || item.colorStocks || {};
                     
                     if (rawColors) {
                         if (typeof rawColors === 'string') {
                             try { rawColors = JSON.parse(rawColors); } catch(err) { rawColors = {}; }
                         }
+                        if (typeof colorStocks === 'string') {
+                            try { colorStocks = JSON.parse(colorStocks); } catch(err) { colorStocks = {}; }
+                        }
+
                         parsedColors = Object.keys(rawColors).map(colorName => {
                             let lower = colorName.toLowerCase();
                             let cls = 'white';
                             if (lower.includes('чорн') || lower.includes('black')) cls = 'black';
-                            else if (lower.includes(' розов') || lower.includes('pink')) cls = 'pink';
+                            else if (lower.includes('розов') || lower.includes('pink')) cls = 'pink';
                             
                             let stockVal = 5;
-                            if (item.stock !== undefined) stockVal = Number(item.stock);
+                            if (colorStocks[colorName] !== undefined) {
+                                stockVal = Number(colorStocks[colorName]);
+                            } else if (item.stock !== undefined) {
+                                stockVal = Number(item.stock);
+                            }
                             
                             return {
                                 name: colorName,
-                                class: cls,
+                                class: stockVal <= 0 ? 'out-of-stock' : cls,
                                 stock: stockVal,
                                 image: rawColors[colorName]
                             };
@@ -1298,13 +1289,19 @@
                             let lower = colorName.toLowerCase();
                             let cls = 'white';
                             if (lower.includes('чорн') || lower.includes('black')) cls = 'black';
-                            else if (lower.includes(' розов') || lower.includes('pink')) cls = 'pink';
-                            return { name: colorName, class: cls, stock: item.stock !== undefined ? Number(item.stock) : 5 };
+                            else if (lower.includes('розов') || lower.includes('pink')) cls = 'pink';
+                            let stockVal = item.stock !== undefined ? Number(item.stock) : 5;
+                            return { 
+                                name: colorName, 
+                                class: stockVal <= 0 ? 'out-of-stock' : cls, 
+                                stock: stockVal 
+                            };
                         });
                     }
 
                     if (parsedColors.length === 0) {
-                        parsedColors = [{ name: 'White', class: 'white', stock: item.stock !== undefined ? Number(item.stock) : 5 }];
+                        let defaultStock = item.stock !== undefined ? Number(item.stock) : 5;
+                        parsedColors = [{ name: 'White', class: defaultStock <= 0 ? 'out-of-stock' : 'white', stock: defaultStock }];
                     }
 
                     let parsedGallery = [];
@@ -1834,7 +1831,8 @@
         function selectModalColor(index) {
             if (!currentModalProduct || !currentModalProduct.colors) return;
             const colorObj = currentModalProduct.colors[index];
-            if (!colorObj) return;
+            if (!colorObj || colorObj.stock <= 0) return; // Заборона вибору якщо немає в наявності
+            
             selectedColorIndex = index;
             updateModalColorDisplay();
             updateModalWishlistBtn();
@@ -1858,15 +1856,18 @@
             
             const selectorContainer = document.getElementById('modal-color-selector');
             if (selectorContainer) {
-                selectorContainer.innerHTML = currentModalProduct.colors.map((c, idx) => `
-                    <div class="color-option-item" onclick="selectModalColor(${idx})">
-                        <div class="color-circle-big ${c.class} ${idx === selectedColorIndex ? 'active' : ''}" title="${c.name}"></div>
-                    </div>
-                `).join('');
+                selectorContainer.innerHTML = currentModalProduct.colors.map((c, idx) => {
+                    const isOut = c.stock <= 0;
+                    return `
+                        <div class="color-option-item ${isOut ? 'disabled' : ''}" onclick="${isOut ? '' : `selectModalColor(${idx})`}">
+                            <div class="color-circle-big ${isOut ? 'out-of-stock' : c.class} ${idx === selectedColorIndex ? 'active' : ''}" title="${c.name} (${c.stock} шт.)"></div>
+                        </div>
+                    `;
+                }).join('');
             }
 
             const activeColorObj = currentModalProduct.colors[selectedColorIndex];
-            setElementText('modal-color-name', activeColorObj ? activeColorObj.name : 'White');
+            setElementText('modal-color-name', activeColorObj ? `${activeColorObj.name}` : 'White');
 
             const stockStatusEl = document.getElementById('modal-stock-status');
             const addCartBtn = document.getElementById('modal-add-cart-btn');
@@ -1898,7 +1899,10 @@
         }
 
         function adjustModalQty(change) {
-            modalQty = Math.max(1, modalQty + change);
+            const activeColorObj = currentModalProduct?.colors[selectedColorIndex];
+            const maxStock = activeColorObj ? activeColorObj.stock : 99;
+            
+            modalQty = Math.max(1, Math.min(maxStock, modalQty + change));
             setElementText('modal-qty', modalQty);
         }
 
