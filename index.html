@@ -1045,8 +1045,7 @@
                             if (lower.includes('чорн') || lower.includes('black')) cls = 'black';
                             else if (lower.includes(' розов') || lower.includes('pink')) cls = 'pink';
                             
-                            // Визначаємо наявність для цього кольору (stock / quantity / available)
-                            let stockVal = 5; // дефолт, якщо не прийшло
+                            let stockVal = 5;
                             if (item.stock !== undefined) stockVal = Number(item.stock);
                             
                             return {
@@ -1493,7 +1492,6 @@
                 if (firstAvailableIdx !== -1) selectedColorIndex = firstAvailableIdx;
             }
 
-            // Об'єднуємо загальну галерею та фотографії кольорів у єдиний набір мініатюр
             let allImages = [];
             if (product.gallery && product.gallery.length > 0) {
                 allImages = [...product.gallery];
@@ -1501,7 +1499,6 @@
                 allImages = [product.img];
             }
 
-            // Додаємо картинки кольорів, якщо їх ще немає в галереї
             if (product.colors) {
                 product.colors.forEach(c => {
                     if (c.image && !allImages.includes(c.image)) {
@@ -1558,7 +1555,6 @@
             updateModalColorDisplay();
             updateModalWishlistBtn();
 
-            // Якщо у кольору є власне фото — показуємо його як головне і знаходимо відповідний таб
             if (colorObj.image) {
                 const modalImg = document.getElementById('modal-img');
                 if (modalImg) modalImg.src = colorObj.image;
@@ -1588,7 +1584,6 @@
             const activeColorObj = currentModalProduct.colors[selectedColorIndex];
             setElementText('modal-color-name', activeColorObj ? activeColorObj.name : 'White');
 
-            // Оновлюємо статус наявності та стан кнопки купівлі
             const stockStatusEl = document.getElementById('modal-stock-status');
             const addCartBtn = document.getElementById('modal-add-cart-btn');
 
