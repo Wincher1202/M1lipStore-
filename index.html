@@ -17,14 +17,14 @@
             --text-primary: #111315;
             --text-secondary: #656D76;
             --text-muted: #8C959F;
-            --accent: #0066FF;
-            --accent-hover: #0052CC;
-            --accent-light: rgba(0, 102, 255, 0.08);
+            --accent: #5764e2;
+            --accent-hover: #4551d0;
+            --accent-light: rgba(87, 100, 226, 0.08);
             --border-light: rgba(0, 0, 0, 0.08);
             --border-hover: rgba(0, 0, 0, 0.16);
             --shadow-subtle: 0 4px 24px rgba(0, 0, 0, 0.04);
             --shadow-card: 0 10px 30px rgba(0, 0, 0, 0.06);
-            --shadow-hover: 0 20px 40px rgba(0, 102, 255, 0.15);
+            --shadow-hover: 0 20px 40px rgba(87, 100, 226, 0.15);
             --radius-lg: 20px;
             --radius-md: 14px;
             --radius-sm: 8px;
@@ -38,14 +38,14 @@
             --text-primary: #F4F5F7;
             --text-secondary: #9DA3AF;
             --text-muted: #6B7280;
-            --accent: #2B7FFF;
-            --accent-hover: #1A6FE8;
-            --accent-light: rgba(43, 127, 255, 0.15);
+            --accent: #5764e2;
+            --accent-hover: #6c78ff;
+            --accent-light: rgba(87, 100, 226, 0.15);
             --border-light: rgba(255, 255, 255, 0.08);
             --border-hover: rgba(255, 255, 255, 0.16);
             --shadow-subtle: 0 4px 24px rgba(0, 0, 0, 0.2);
             --shadow-card: 0 10px 30px rgba(0, 0, 0, 0.3);
-            --shadow-hover: 0 20px 40px rgba(43, 127, 255, 0.25);
+            --shadow-hover: 0 20px 40px rgba(87, 100, 226, 0.25);
         }
 
         *, *::before, *::after {
@@ -136,10 +136,16 @@
             text-decoration: none;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 2px;
         }
 
-        .logo span { color: var(--accent); }
+        .logo-part-1 {
+            color: var(--text-primary);
+        }
+
+        .logo-part-2 {
+            color: #5764e2;
+        }
 
         .nav-right {
             display: flex;
@@ -979,7 +985,7 @@
     <!-- HEADER -->
     <header id="site-header">
         <a class="logo" onclick="scrollToSection('catalog')">
-            MyLip M1Lip Store
+            <span class="logo-part-1">M1Lip</span><span class="logo-part-2">Store</span>
         </a>
         <div class="nav-right">
             <div class="icon-btn-wrapper">
@@ -1096,7 +1102,7 @@
         <div class="footer-grid">
             <div class="footer-col">
                 <a class="logo" style="margin-bottom: 12px;">
-                    <img src="logo-milipstore.png" alt="Logo" style="height: 32px; width: 32px; object-fit: cover; border-radius: 6px;"> M1lip<span>Store</span>
+                    <span class="logo-part-1">M1Lip</span><span class="logo-part-2">Store</span>
                 </a>
                 <p style="color: var(--text-secondary); max-width: 280px; font-size: 0.9rem; margin-bottom: 12px;">Gaming hardware для твого ідеального setup. Преміальний вибір техніки для тих, хто цінує якість, комфорт і продуктивність.</p>
                 <p style="font-size: 0.85rem; font-weight: 700; color: var(--text-primary);">Обирай. Грай. Перемагай.</p>
@@ -1194,7 +1200,7 @@
 
                 <div class="modal-options-row">
                     <div class="option-group">
-                        <label>Color: <span id="modal-color-name">White</span></label>
+                        <label>Color: (<span id="modal-color-name">White</span>)</label>
                         <div class="color-selector-large" id="modal-color-selector"></div>
                         <div id="modal-stock-status" class="stock-status"></div>
                     </div>
@@ -1487,11 +1493,9 @@
             container.innerHTML = filteredProducts.map((p) => {
                 const isFav = wishlist.some(item => item.id === p.id);
                 
-                // Відображення кольорів у вигляді простих точок (без цифр та слова "колір")
                 const colorDotsHtml = p.colors && p.colors.length > 0 ? p.colors.map((c, idx) => {
                     const isOut = c.stock <= 0;
                     const dotClass = isOut ? 'out-of-stock' : c.class;
-                    // Якщо колір є в наявності — крапка клікабельна і відкриває картку товару одразу з цим кольором
                     return `<span class="color-dot ${dotClass}" title="${c.name}" ${isOut ? '' : `onclick="event.stopPropagation(); openProductModal(products.find(x => x.id === '${p.id}'), ${idx})"`}></span>`;
                 }).join('') : '';
 
@@ -1604,7 +1608,7 @@
                     <img src="${item.img}" alt="${item.title}" onclick="toggleWishlistDrawer(false); openProductModal(products.find(x => x.id === '${item.id}'))" title="Перейти до опису">
                     <div style="flex-grow: 1;">
                         <h4 style="font-size: 0.9rem; font-weight: 700; cursor: pointer;" onclick="toggleWishlistDrawer(false); openProductModal(products.find(x => x.id === '${item.id}'))">${item.brand} ${item.title}</h4>
-                        <p style="font-size: 0.75rem; color: var(--text-secondary);">Color: <strong>${item.color}</strong></p>
+                        <p style="font-size: 0.75rem; color: var(--text-secondary);">Color: <strong>(${item.color})</strong></p>
                         <p style="font-size: 0.85rem; font-weight: 600;">${formatPrice(item.price)}</p>
                         <div style="display: flex; gap: 8px; margin-top: 6px;">
                             <button class="btn-primary" style="padding: 4px 10px; font-size: 0.75rem;" onclick="addWishlistItemToCart('${item.id}', '${item.color}')">В кошик</button>
@@ -1707,7 +1711,7 @@
                     <img src="${item.img}" alt="${item.title}">
                     <div style="flex-grow: 1;">
                         <h4 style="font-size: 0.9rem; font-weight: 700;">${item.brand} ${item.title}</h4>
-                        <p style="font-size: 0.75rem; color: var(--text-secondary);">Color: <strong>${item.color}</strong></p>
+                        <p style="font-size: 0.75rem; color: var(--text-secondary);">Color: <strong>(${item.color})</strong></p>
                         <p style="font-size: 0.85rem; font-weight: 600;">${formatPrice(item.price)}</p>
                         <div class="quantity-controls" style="margin-top: 4px;">
                             <button onclick="updateCartQty('${item.id}', '${item.color}', -1)">−</button>
