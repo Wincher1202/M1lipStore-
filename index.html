@@ -139,6 +139,12 @@
             gap: 6px;
         }
 
+        .logo img {
+            height: 32px;
+            width: auto;
+            border-radius: 6px;
+        }
+
         .logo span { color: var(--accent); }
 
         .nav-right {
@@ -277,7 +283,6 @@
             text-transform: uppercase;
         }
 
-        /* Online Status */
         .store-status {
             display: inline-flex;
             align-items: center;
@@ -971,7 +976,9 @@
 <body data-theme="light">
     <!-- HEADER -->
     <header id="site-header">
-        <a class="logo" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">M1lip<span>Store</span></a>
+        <a class="logo" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+            <img src="https://i.ibb.co/3ykX17N0/logo-milipstore.jpg" alt="Logo"> M1lip<span>Store</span>
+        </a>
 
         <div class="nav-right">
             <div class="icon-btn-wrapper">
@@ -1089,44 +1096,46 @@
     <footer>
         <div class="footer-grid">
             <div class="footer-col">
-                <a class="logo" style="margin-bottom: 12px;">M1lip<span>Store</span></a>
+                <a class="logo" style="margin-bottom: 12px;">
+                    <img src="https://i.ibb.co/3ykX17N0/logo-milipstore.jpg" alt="Logo"> M1lip<span>Store</span>
+                </a>
                 <p style="color: var(--text-secondary); max-width: 280px; font-size: 0.9rem; margin-bottom: 12px;">Gaming hardware для твого ідеального setup. Преміальний вибір техніки для тих, хто цінує якість, комфорт і продуктивність.</p>
-                <p style="font-size: 0.85font; font-weight: 700; color: var(--text-primary);">Обирай. Грай. Перемагай.</p>
+                <p style="font-size: 0.85rem; font-weight: 700; color: var(--text-primary);">Обирай. Грай. Перемагай.</p>
             </div>
             <div class="footer-col">
                 <h4>ДОПОМОГА</h4>
                 <ul>
-                    <li><a>Доставка</a></li>
-                    <li><a>Оплата</a></li>
-                    <li><a>Гарантія</a></li>
-                    <li><a>Повернення</a></li>
-                    <li><a>Часті запитання</a></li>
+                    <li><a onclick="showInfoModal('Доставка', 'Відправляємо Новою поштою щодня. Доставка за тарифами перевізника.')">Доставка</a></li>
+                    <li><a onclick="showInfoModal('Оплата', 'Доступна оплата при отриманні (накладений платіж) або повна передплата на реквізити.')">Оплата</a></li>
+                    <li><a onclick="showInfoModal('Гарантія', 'На всю продукцію поширюється офіційна гарантія від виробника та магазину.')">Гарантія</a></li>
+                    <li><a onclick="showInfoModal('Повернення', 'Обмін та повернення товару можливі протягом 14 днів з моменту покупки за умови збереження товарного вигляду.')">Повернення</a></li>
+                    <li><a onclick="showInfoModal('Часті запитання', 'Звʼяжіться з нашим менеджером у Telegram (@milipmanager), щоб отримати відповіді на будь-які запитання.')">Часті запитання</a></li>
                 </ul>
             </div>
             <div class="footer-col">
                 <h4>ПРО M1lipStore</h4>
                 <ul>
-                    <li><a>Про магазин</a></li>
-                    <li><a>Новинки</a></li>
-                    <li><a>Хіти продажу</a></li>
-                    <li><a>Знижки</a></li>
+                    <li><a onclick="showInfoModal('Про магазин', 'M1lipStore — ваш надійний постачальник перевіреної ігрової периферії найвищої якості.')">Про магазин</a></li>
+                    <li><a onclick="scrollToSection('catalog')">Новинки</a></li>
+                    <li><a onclick="scrollToSection('catalog')">Хіти продажу</a></li>
+                    <li><a onclick="showInfoModal('Знижки', 'Слідкуйте за акціями та спеціальними пропозиціями в нашому Telegram-каналі!')">Знижки</a></li>
                 </ul>
             </div>
             <div class="footer-col">
                 <h4>КОНТАКТИ</h4>
                 <ul>
                     <li><a>Email: support@m1lipstore.com</a></li>
-                    <li><a href="https://t.me/m1lipstore" target="_blank">Telegram: @m1lipstore</a></li>
-                    <li><a href="https://instagram.com/m1lipstore" target="_blank">Instagram: @m1lipstore</a></li>
+                    <li><a href="https://t.me/milipmanager" target="_blank">Менеджер: @milipmanager</a>[cite: 4]</li>
+                    <li><a href="https://t.me/+vyhe-i9vGwAwNjAy" target="_blank">Telegram канал: перейти</a>[cite: 4]</li>
+                    <li><a href="https://www.tiktok.com/@m1lipstore" target="_blank">TikTok: @m1lipstore</a>[cite: 4]</li>
                 </ul>
             </div>
         </div>
         <div class="footer-bottom">
             <span>© 2026 M1lipStore. Усі права захищено.</span>
             <div class="footer-socials">
-                <a href="https://t.me/m1lipstore" target="_blank">Telegram</a>
-                <a href="https://tiktok.com/@m1lipstore" target="_blank">TikTok</a>
-                <a href="https://instagram.com/m1lipstore" target="_blank">Instagram</a>
+                <a href="https://t.me/+vyhe-i9vGwAwNjAy" target="_blank">Telegram</a>[cite: 4]
+                <a href="https://www.tiktok.com/@m1lipstore" target="_blank">TikTok</a>[cite: 4]
             </div>
         </div>
     </footer>
@@ -1214,6 +1223,16 @@
 
                 <div class="specs-grid" id="modal-specs"></div>
             </div>
+        </div>
+    </div>
+
+    <!-- INFO MODAL -->
+    <div class="product-modal" id="info-modal" style="max-width: 450px; height: auto;">
+        <button class="close-drawer" style="position: absolute; top: 16px; right: 16px; z-index: 10;" onclick="closeInfoModal()">✕</button>
+        <div style="padding: 30px 24px; text-align: left;">
+            <h3 id="info-modal-title" style="font-size: 1.2rem; font-weight: 800; margin-bottom: 12px;">Заголовок</h3>
+            <p id="info-modal-text" style="color: var(--text-secondary); font-size: 0.95rem; line-height: 1.6; margin-bottom: 20px;"></p>
+            <button class="btn-primary" style="width: 100%; justify-content: center;" onclick="closeInfoModal()">Зрозуміло</button>
         </div>
     </div>
 
@@ -1372,7 +1391,6 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            // Restore theme from localStorage
             const savedTheme = localStorage.getItem('m1lip_theme');
             if (savedTheme) {
                 setTheme(savedTheme, false);
@@ -1424,6 +1442,18 @@
 
         function scrollToSection(id) {
             document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function showInfoModal(title, text) {
+            document.getElementById('info-modal-title').innerText = title;
+            document.getElementById('info-modal-text').innerText = text;
+            document.getElementById('info-modal').classList.add('active');
+            document.getElementById('backdrop').classList.add('active');
+        }
+
+        function closeInfoModal() {
+            document.getElementById('info-modal').classList.remove('active');
+            document.getElementById('backdrop').classList.remove('active');
         }
 
         function renderCatalog() {
@@ -1712,6 +1742,7 @@
             toggleWishlistDrawer(false);
             toggleSearch(false);
             closeProductModal();
+            closeInfoModal();
         }
 
         function handleSearch(query) {
