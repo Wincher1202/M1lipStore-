@@ -139,13 +139,6 @@
             gap: 6px;
         }
 
-        .logo img {
-            height: 32px;
-            width: 32px;
-            object-fit: cover;
-            border-radius: 6px;
-        }
-
         .logo span { color: var(--accent); }
 
         .nav-right {
@@ -599,10 +592,12 @@
             height: 12px;
             border-radius: 50%;
             border: 1px solid var(--border-hover);
+            display: inline-block;
         }
         .color-dot.white { background-color: #FFFFFF; }
         .color-dot.black { background-color: #1a1a1a; }
         .color-dot.pink { background-color: #ff2a85; }
+        .color-dot.out-of-stock { background-color: #9ca3af !important; border-color: #6b7280; opacity: 0.6; cursor: not-allowed; }
         .color-dot.active { box-shadow: 0 0 0 2px var(--accent); }
 
         .product-info {
@@ -936,6 +931,7 @@
             border-radius: 50%;
             border: 2px solid var(--border-hover);
             transition: var(--transition-smooth);
+            display: inline-block;
         }
 
         .color-circle-big:hover { transform: scale(1.15); }
@@ -1089,7 +1085,7 @@
         <div class="footer-grid">
             <div class="footer-col">
                 <a class="logo" style="margin-bottom: 12px;">
-                    <img src="https://i.ibb.co/3ykX17N0/logo-milipstore.jpg" alt="Logo"> M1lip<span>Store</span>
+                    <img src="https://i.ibb.co/3ykX17N0/logo-milipstore.jpg" alt="Logo" style="height: 32px; width: 32px; object-fit: cover; border-radius: 6px;"> M1lip<span>Store</span>
                 </a>
                 <p style="color: var(--text-secondary); max-width: 280px; font-size: 0.9rem; margin-bottom: 12px;">Gaming hardware для твого ідеального setup. Преміальний вибір техніки для тих, хто цінує якість, комфорт і продуктивність.</p>
                 <p style="font-size: 0.85rem; font-weight: 700; color: var(--text-primary);">Обирай. Грай. Перемагай.</p>
@@ -1257,16 +1253,16 @@
                 products = backendData.map(item => {
                     let parsedColors = [];
                     let rawColors = item.color_images || item.colorImages;
-                    let colorStocks = item.color_stocks || item.colorStocks || {};
+                    let colorStocks = item.color_quantities || item.colorQuantities || {};
                     
-                    if (rawColors) {
-                        if (typeof rawColors === 'string') {
-                            try { rawColors = JSON.parse(rawColors); } catch(err) { rawColors = {}; }
-                        }
-                        if (typeof colorStocks === 'string') {
-                            try { colorStocks = JSON.parse(colorStocks); } catch(err) { colorStocks = {}; }
-                        }
+                    if (typeof rawColors === 'string') {
+                        try { rawColors = JSON.parse(rawColors); } catch(err) { rawColors = {}; }
+                    }
+                    if (typeof colorStocks === 'string') {
+                        try { colorStocks = JSON.parse(colorStocks); } catch(err) { colorStocks = {}; }
+                    }
 
+                    if (rawColors && Object.keys(rawColors).length > 0) {
                         parsedColors = Object.keys(rawColors).map(colorName => {
                             let lower = colorName.toLowerCase();
                             let cls = 'white';
@@ -1296,7 +1292,12 @@
                             let cls = 'white';
                             if (lower.includes('чорн') || lower.includes('black')) cls = 'black';
                             else if (lower.includes('розов') || lower.includes('pink')) cls = 'pink';
-                            let stockVal = item.stock !== undefined ? Number(item.stock) : 5;
+                            let stockVal = 5;
+                            if (colorStocks[colorName] !== undefined) {
+                                stockVal = Number(colorStocks[colorName]);
+                            } else if (item.stock !== undefined) {
+                                stockVal = Number(item.stock);
+                            }
                             return { 
                                 name: colorName, 
                                 class: stockVal <= 0 ? 'out-of-stock' : cls, 
@@ -1473,20 +1474,28 @@
             }
 
             container.innerHTML = filteredProducts.map((p) => {
-                const firstColorClass = p.colors && p.colors[0] ? p.colors[0].class : 'white';
                 const isFav = wishlist.some(item => item.id === p.id);
+                
+                // Рендеримо всі наявні/ненаявні кольори точками в каталозі
+                const colorDotsHtml = p.colors && p.colors.length > 0 ? p.colors.map((c, idx) => {
+                    const isOut = c.stock <= 0;
+                    const dotClass = isOut ? 'out-of-stock' : c.class;
+                    // Якщо колір має прив'язане фото, при кліку у каталозі одразу відкриваємо модальне вікно і вибираємо цей колір
+                    return `<span class="color-dot ${dotClass}" title="${c.name}" ${isOut ? '' : `onclick="event.stopPropagation(); openProductModal(products.find(x => x.id === '${p.id}'), ${idx})"`}></span>`;
+                }).join('') : '';
+
                 return `
                     <div class="product-card" onclick="openProductModal(products.find(x => x.id === '${p.id}'))">
                         <span class="product-tag new">${p.tag || ''}</span>
                         <button class="wishlist-btn ${isFav ? 'active' : ''}" id="wishlist-btn-${p.id}" onclick="event.stopPropagation(); toggleWishlist('${p.id}')">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="${isFav ? '#FF3B30' : 'none'}" stroke="${isFav ? '#FF3B30' : 'currentColor'}" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
                         </button>
-                        <div class="product-img-wrap">
-                            <img src="${p.img}" alt="${p.title}">
+                        <div class="product-img-wrap" id="card-img-wrap-${p.id}">
+                            <img src="${p.img}" alt="${p.title}" id="card-img-${p.id}">
                         </div>
                         
                         <div class="color-picker-preview">
-                            <div class="color-dot ${firstColorClass} active" title="Колір"></div>
+                            ${colorDotsHtml}
                         </div>
 
                         <div class="product-info">
@@ -1768,13 +1777,13 @@
             `).join('');
         }
 
-        function openProductModal(product) {
+        function openProductModal(product, initialColorIdx = 0) {
             if (!product) return;
             currentModalProduct = product;
             modalQty = 1;
-            selectedColorIndex = 0;
+            selectedColorIndex = initialColorIdx;
             
-            if (product.colors && product.colors.length > 0) {
+            if (product.colors && product.colors[selectedColorIndex] && product.colors[selectedColorIndex].stock <= 0) {
                 const firstAvailableIdx = product.colors.findIndex(c => c.stock > 0);
                 if (firstAvailableIdx !== -1) selectedColorIndex = firstAvailableIdx;
             }
@@ -1796,13 +1805,19 @@
 
             currentModalProduct._allImages = allImages;
 
+            // Якщо вибраний колір має своє фото, підтягуємо його одразу в головне фото модалки
+            let initialImg = allImages[0];
+            if (product.colors && product.colors[selectedColorIndex] && product.colors[selectedColorIndex].image) {
+                initialImg = product.colors[selectedColorIndex].image;
+            }
+
             const modalImg = document.getElementById('modal-img');
-            if (modalImg) modalImg.src = allImages[0];
+            if (modalImg) modalImg.src = initialImg;
             
             const thumbsContainer = document.getElementById('modal-thumbs');
             if (thumbsContainer) {
                 thumbsContainer.innerHTML = allImages.map((imgSrc, index) => `
-                    <img class="modal-thumb ${index === 0 ? 'active' : ''}" src="${imgSrc}" onclick="changeModalMainImage('${imgSrc}', this)">
+                    <img class="modal-thumb ${imgSrc === initialImg ? 'active' : ''}" src="${imgSrc}" onclick="changeModalMainImage('${imgSrc}', this)">
                 `).join('');
             }
 
@@ -1837,12 +1852,13 @@
         function selectModalColor(index) {
             if (!currentModalProduct || !currentModalProduct.colors) return;
             const colorObj = currentModalProduct.colors[index];
-            if (!colorObj || colorObj.stock <= 0) return; // Заборона вибору якщо немає в наявності
+            if (!colorObj || colorObj.stock <= 0) return; // Заборона вибору, якщо немає в наявності
             
             selectedColorIndex = index;
             updateModalColorDisplay();
             updateModalWishlistBtn();
 
+            // Автоматично підтягуємо фото, прикріплене до цього кольору
             if (colorObj.image) {
                 const modalImg = document.getElementById('modal-img');
                 if (modalImg) modalImg.src = colorObj.image;
@@ -1866,7 +1882,7 @@
                     const isOut = c.stock <= 0;
                     return `
                         <div class="color-option-item ${isOut ? 'disabled' : ''}" onclick="${isOut ? '' : `selectModalColor(${idx})`}">
-                            <div class="color-circle-big ${isOut ? 'out-of-stock' : c.class} ${idx === selectedColorIndex ? 'active' : ''}" title="${c.name} (${c.stock} шт.)"></div>
+                            <div class="color-circle-big ${isOut ? 'out-of-stock' : c.class} ${idx === selectedColorIndex ? 'active' : ''}" title="${c.name}"></div>
                         </div>
                     `;
                 }).join('');
