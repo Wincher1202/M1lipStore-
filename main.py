@@ -162,10 +162,11 @@ class AddProductStates(StatesGroup):
     waiting_for_specs = State()
     waiting_for_colors = State()
     waiting_for_color_qty = State()
-    waiting_for_color_photo = State()  # Очікування фото файлом для кожного кольору
+    waiting_for_color_main_photo = State()  # Головне фото для кожного кольору
+    waiting_for_color_gallery_photos = State()  # Додаткові фото для кожного кольору
     waiting_for_description = State()
     waiting_for_img = State()  # Головне фото каталогу
-    waiting_for_gallery = State()
+    waiting_for_gallery = State()  # Загальна галерея
 
 
 class AdminStates(StatesGroup):
@@ -385,7 +386,7 @@ async def save_edited_color_qty(message: Message, state: FSMContext):
         await message.answer("❌ Будь ласка, введіть ціле число (0 або більше):")
 
 
-# --- СТВОРЕННЯ НОВОГО ТОВАРУ З КНОПКАМИ КАТЕГОРІЙ ТА ФОТОФАЙЛАМИ ---
+# --- СТВОРЕННЯ НОВОГО ТОВАРУ ---
 
 @router.callback_query(F.data == "add_new_product")
 async def process_add_new(callback: CallbackQuery, state: FSMContext):
@@ -572,17 +573,63 @@ async def process_color_qty_input(message: Message, state: FSMContext):
             next_color = colors_list[idx]
             await message.answer(f"📦 Введіть кількість для кольору **{next_color}**:", parse_mode="Markdown")
         else:
-            await state.update_data(color_quantities_dict=cq_dict, current_color_photo_index=0, color_images_dict={})
-            await state.set_state(AddProductStates.waiting_for_color_photo)
+            # Усі кількості зібрано. Переходимо до фото для кожного кольору (по черзі)
+            await state.update_data(
+                color_quantities_dict=cq_dict,
+                current_color_photo_index=0,
+                color_images_dict={}
+            )
+            await state.set_state(AddProductStates.waiting_for_color_main_photo)
+
             first_c = colors_list[0]
-            await message.answer(f"🖼 Надішліть **фото** (файл) для кольору **{first_c}**:", parse_mode="Markdown")
+            skip_markup = InlineKeyboardMarkup(inline_keyboard=[
+                [InlineKeyboardButton(text="⏭ Пропустити головне фото", callback_data="skip_col_main_photo")]
+            ])
+            await message.answer(
+                f"🖼 Надішліть **головне фото** для кольору **{first_c}** (або пропустіть):",
+                reply_markup=skip_markup,
+                parse_mode="Markdown"
+            )
     except ValueError:
         await message.answer("❌ Будь ласка, введіть ціле число (0 або більше):")
 
 
-# Прийом фото файлом для кольору
-@router.message(AddProductStates.waiting_for_color_photo, F.photo)
-async def process_color_photo_input(message: Message, state: FSMContext):
+# --- КЕРУВАННЯ ФОТОГРАФІЯМИ ДЛЯ КОЖНОГО КОЛЬОРУ ---
+
+@router.callback_query(F.data == "skip_col_main_photo", AddProductStates.waiting_for_color_main_photo)
+async def skip_col_main_photo_cb(callback: CallbackQuery, state: FSMContext):
+    data = await state.get_data()
+    colors_list = data.get("selected_colors", [])
+    idx = data.get("current_color_photo_index", 0)
+    ci_dict = data.get("color_images_dict", {})
+
+    current_color = colors_list[idx]
+    if current_color not in ci_dict:
+        ci_dict[current_color] = {"main": "", "gallery": []}
+    else:
+        ci_dict[current_color]["main"] = ""
+
+    await state.update_data(color_images_dict=ci_dict)
+    await state.set_state(AddProductStates.waiting_for_color_gallery_photos)
+
+    try:
+        await callback.message.delete()
+    except Exception:
+        pass
+
+    done_markup = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="✅ Готово (перейти далі)", callback_data="col_gallery_done")]
+    ])
+    await callback.message.answer(
+        f"📸 Надішліть **додаткові фото** для кольору **{current_color}** (можна альбомом або кілька окремо).\n\nКоли закінчите, натисніть кнопку нижче або надішліть `/done`:",
+        reply_markup=done_markup,
+        parse_mode="Markdown"
+    )
+    await callback.answer()
+
+
+@router.message(AddProductStates.waiting_for_color_main_photo, F.photo)
+async def process_color_main_photo(message: Message, state: FSMContext):
     if message.from_user.id not in ADMIN_IDS: return
     photo_file_id = message.photo[-1].file_id
 
@@ -592,17 +639,122 @@ async def process_color_photo_input(message: Message, state: FSMContext):
     ci_dict = data.get("color_images_dict", {})
 
     current_color = colors_list[idx]
-    ci_dict[current_color] = photo_file_id
-    idx += 1
-
-    if idx < len(colors_list):
-        await state.update_data(current_color_photo_index=idx, color_images_dict=ci_dict)
-        next_color = colors_list[idx]
-        await message.answer(f"🖼 Надішліть **фото** для наступного кольору — **{next_color}**:", parse_mode="Markdown")
+    if current_color not in ci_dict:
+        ci_dict[current_color] = {"main": photo_file_id, "gallery": []}
     else:
+        ci_dict[current_color]["main"] = photo_file_id
+
+    await state.update_data(color_images_dict=ci_dict)
+    await state.set_state(AddProductStates.waiting_for_color_gallery_photos)
+
+    done_markup = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="✅ Готово (перейти далі)", callback_data="col_gallery_done")]
+    ])
+    await message.answer(
+        f"📸 Надішліть **додаткові фото** для кольору **{current_color}** (можна альбомом або кілька окремо).\n\nКоли закінчите, натисніть кнопку нижче або надішліть `/done`:",
+        reply_markup=done_markup,
+        parse_mode="Markdown"
+    )
+
+
+# Кеш для збирання медіагруп (альбомів) без зависань
+album_cache = {}
+
+
+@router.message(AddProductStates.waiting_for_color_gallery_photos, F.photo)
+async def process_color_gallery_photo(message: Message, state: FSMContext):
+    if message.from_user.id not in ADMIN_IDS: return
+    photo_file_id = message.photo[-1].file_id
+
+    data = await state.get_data()
+    colors_list = data.get("selected_colors", [])
+    idx = data.get("current_color_photo_index", 0)
+    current_color = colors_list[idx]
+
+    ci_dict = data.get("color_images_dict", {})
+    if current_color not in ci_dict:
+        ci_dict[current_color] = {"main": "", "gallery": []}
+
+    if message.media_group_id:
+        if message.media_group_id not in album_cache:
+            album_cache[message.media_group_id] = []
+        album_cache[message.media_group_id].append(photo_file_id)
+
+        await asyncio.sleep(0.7)
+        photos = album_cache.pop(message.media_group_id, None)
+        if not photos:
+            return
+
+        ci_dict[current_color]["gallery"].extend(photos)
         await state.update_data(color_images_dict=ci_dict)
+
+        await message.answer(
+            f"✅ Додано фото в галерею кольору **{current_color}** (всього: {len(ci_dict[current_color]['gallery'])}).\nНадішліть ще або натисніть «Готово».",
+            parse_mode="Markdown"
+        )
+    else:
+        ci_dict[current_color]["gallery"].append(photo_file_id)
+        await state.update_data(color_images_dict=ci_dict)
+
+        await message.answer(
+            f"✅ Додано фото в галерею кольору **{current_color}** (всього: {len(ci_dict[current_color]['gallery'])}).\nНадішліть ще або натисніть «Готово».",
+            parse_mode="Markdown"
+        )
+
+
+@router.callback_query(F.data == "col_gallery_done", AddProductStates.waiting_for_color_gallery_photos)
+async def col_gallery_done_cb(callback: CallbackQuery, state: FSMContext):
+    await advance_to_next_color_or_desc(callback.message, state, from_callback=True, callback_query=callback)
+
+
+@router.message(AddProductStates.waiting_for_color_gallery_photos, F.text)
+async def col_gallery_text_done(message: Message, state: FSMContext):
+    if message.from_user.id not in ADMIN_IDS: return
+    text = message.text.strip().lower()
+    if text in ['/done', 'готово', 'пропустити', 'далі']:
+        await advance_to_next_color_or_desc(message, state, from_callback=False)
+    else:
+        await message.answer("❌ Будь ласка, надішліть фото або натисніть кнопку «Готово» / надішліть `/done`.")
+
+
+async def advance_to_next_color_or_desc(message_or_callback_msg, state: FSMContext, from_callback=False,
+                                        callback_query=None):
+    data = await state.get_data()
+    colors_list = data.get("selected_colors", [])
+    idx = data.get("current_color_photo_index", 0)
+
+    if from_callback and callback_query:
+        try:
+            await callback_query.message.delete()
+        except Exception:
+            pass
+        target_msg = callback_query.message
+    else:
+        target_msg = message_or_callback_msg
+
+    idx += 1
+    if idx < len(colors_list):
+        # Наступний колір
+        await state.update_data(current_color_photo_index=idx)
+        await state.set_state(AddProductStates.waiting_for_color_main_photo)
+        next_color = colors_list[idx]
+
+        skip_markup = InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton(text="⏭ Пропустити головне фото", callback_data="skip_col_main_photo")]
+        ])
+        await target_msg.answer(
+            f"🖼 Надішліть **головне фото** для наступного кольору — **{next_color}** (або пропустіть):",
+            reply_markup=skip_markup,
+            parse_mode="Markdown"
+        )
+        if callback_query:
+            await callback_query.answer()
+    else:
+        # Усі кольори пройдені -> переходимо до опису
         await state.set_state(AddProductStates.waiting_for_description)
-        await message.answer("📝 Введіть короткий опис товару:")
+        await target_msg.answer("📝 Введіть короткий опис товару:", parse_mode="Markdown")
+        if callback_query:
+            await callback_query.answer()
 
 
 @router.message(AddProductStates.waiting_for_description)
@@ -610,73 +762,90 @@ async def add_description(message: Message, state: FSMContext):
     if message.from_user.id not in ADMIN_IDS: return
     await state.update_data(description=message.text.strip())
     await state.set_state(AddProductStates.waiting_for_img)
-    await message.answer("🖼 Надішліть **головне фото** товару (це буде головне фото каталогу №1):")
+    await message.answer("🖼 Надішліть **головне фото** товару (це буде головне фото каталогу №1):",
+                         parse_mode="Markdown")
 
 
-# Прийом головного фото файлом
+# Головне фото каталогу
 @router.message(AddProductStates.waiting_for_img, F.photo)
 async def add_img(message: Message, state: FSMContext):
     if message.from_user.id not in ADMIN_IDS: return
     main_photo_id = message.photo[-1].file_id
     await state.update_data(img=main_photo_id)
     await state.set_state(AddProductStates.waiting_for_gallery)
+
+    skip_gal_markup = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="⏭ Пропустити / Завершити", callback_data="skip_general_gallery")]
+    ])
     await message.answer(
-        "📸 Надішліть додаткові фото для галереї (можете надіслати кілька окремо або одним альбомом, або надішліть текст «пропустити»):")
+        "📸 Надішліть загальні додаткові фото для галереї (можете надіслати альбомом або кілька окремо), або натисніть «Пропустити»:",
+        reply_markup=skip_gal_markup,
+        parse_mode="Markdown"
+    )
 
 
-# Кеш для збирання фотографій альбому (медіагруп) без зависань
-album_cache = {}
+@router.callback_query(F.data == "skip_general_gallery", AddProductStates.waiting_for_gallery)
+async def skip_general_gallery_cb(callback: CallbackQuery, state: FSMContext):
+    try:
+        await callback.message.delete()
+    except Exception:
+        pass
+    await save_product_to_db(callback.message, state, gallery_list=[])
+    await callback.answer()
 
 
-# Прийом галереї фото (файли чи альбом) із захистом від зависання
+# Загальна галерея (або завершення через текст /done)
 @router.message(AddProductStates.waiting_for_gallery, F.photo)
-async def add_gallery_photo(message: Message, state: FSMContext):
+async def add_general_gallery_photo(message: Message, state: FSMContext):
     if message.from_user.id not in ADMIN_IDS: return
     photo_file_id = message.photo[-1].file_id
 
+    data = await state.get_data()
+    gallery_list = data.get("gallery_list", [])
+
     if message.media_group_id:
-        # Якщо це альбом (кількість фоток одразу)
         if message.media_group_id not in album_cache:
             album_cache[message.media_group_id] = []
         album_cache[message.media_group_id].append(photo_file_id)
 
-        # Чекаємо невеликий проміжок часу, поки прийдуть інші фото з цього ж альбому
         await asyncio.sleep(0.7)
-
         photos = album_cache.pop(message.media_group_id, None)
         if not photos:
-            return  # Вже оброблено іншим потоком
+            return
 
-        data = await state.get_data()
-        gallery_list = data.get("gallery_list", [])
         gallery_list.extend(photos)
         await state.update_data(gallery_list=gallery_list)
-
         await message.answer(
-            f"✅ Додано фото в галерею ({len(gallery_list)}). Надішліть ще або напишіть /done щоб зберегти товар.")
+            f"✅ Додано фото в загальну галерею ({len(gallery_list)}). Надішліть ще або напишіть /done щоб зберегти товар.")
     else:
-        # Одиночне фото
-        data = await state.get_data()
-        gallery_list = data.get("gallery_list", [])
         gallery_list.append(photo_file_id)
         await state.update_data(gallery_list=gallery_list)
-
         await message.answer(
-            f"✅ Додано фото в галерею ({len(gallery_list)}). Надішліть ще або напишіть /done щоб зберегти товар.")
+            f"✅ Додано фото в загальну галерею ({len(gallery_list)}). Надішліть ще або напишіть /done щоб зберегти товар.")
 
 
 @router.message(AddProductStates.waiting_for_gallery, F.text)
-async def add_gallery_text(message: Message, state: FSMContext):
+async def add_general_gallery_text(message: Message, state: FSMContext):
     if message.from_user.id not in ADMIN_IDS: return
     data = await state.get_data()
     gallery_list = data.get("gallery_list", [])
 
     text_content = message.text.strip().lower()
-    if text_content == '/done' or text_content == 'пропустити' or text_content == 'готово':
+    if text_content in ['/done', 'пропустити', 'готово', 'далі']:
         pass
     else:
         specs_gal = [g.strip() for g in message.text.split(",") if g.strip()]
         gallery_list.extend(specs_gal)
+
+    await save_product_to_db(message, state, gallery_list=gallery_list)
+
+
+async def save_product_to_db(message: Message, state: FSMContext, gallery_list=None):
+    if gallery_list is None:
+        data = await state.get_data()
+        gallery_list = data.get("gallery_list", [])
+
+    data = await state.get_data()
 
     import uuid
     product_id = "prod-" + str(uuid.uuid4())[:8]
@@ -713,7 +882,7 @@ async def add_gallery_text(message: Message, state: FSMContext):
 
     await state.clear()
     await message.answer(
-        f"🎉 Товар **{brand} {title}** успішно створено та додано в базу з усіма фото та кнопками!\n\nНапишіть /admin для керування.",
+        f"🎉 Товар **{brand} {title}** успішно створено та додано в базу з усіма фото по кольорах та характеристиками!\n\nНапишіть /admin для керування.",
         parse_mode="Markdown")
 
 
