@@ -283,13 +283,20 @@ async def process_manage_product(callback: CallbackQuery):
     cq = product.get('colorQuantities', {})
     colors_info = ", ".join([f"{c}: {q} шт." for c, q in cq.items()]) if cq else product.get('colors', 'не вказано')
 
+    brand_text = product.get('brand', '')
+    title_text = product.get('title', '')
+    category_text = product.get('category', 'Не вказано')
+    price_val = product.get('price', 0)
+    tag_val = product.get('tag') or 'немає'
+    qty_val = product.get('quantity', 0)
+
     caption = (
-        f"🛠 **Керування товаром: {product.get('brand', '')} {product['title']}**\n\n"
-        f"• Бренд: {product.get('brand', 'не вказано')}\n"
-        f"• Категорія: {product.get('category', 'Не вказано')}\n"
-        f"• Ціна: {product.get('price', 0)} ₴\n"
-        f"• Тег: `{product.get('tag') or 'немає'}`\n"
-        f"• Загалом на складі: **{product.get('quantity', 0)} шт.**\n"
+        f"🛠 *Керування товаром:* {brand_text} {title_text}\n\n"
+        f"• Бренд: {brand_text or 'не вказано'}\n"
+        f"• Категорія: {category_text}\n"
+        f"• Ціна: {price_val} ₴\n"
+        f"• Тег: `{tag_val}`\n"
+        f"• Загалом на складі: *{qty_val} шт.*\n"
         f"• Кольори та наявність: _{colors_info}_\n"
         f"• Блоків характеристик: {specs_count} шт."
     )
@@ -320,7 +327,8 @@ async def process_manage_product(callback: CallbackQuery):
             await callback.message.edit_caption(caption=caption, parse_mode="Markdown", reply_markup=action_markup)
         else:
             await callback.message.edit_text(text=caption, parse_mode="Markdown", reply_markup=action_markup)
-    except Exception:
+    except Exception as e:
+        logging.error(f"Error updating manage product message: {e}")
         try:
             await callback.message.delete()
         except Exception:
@@ -328,12 +336,12 @@ async def process_manage_product(callback: CallbackQuery):
         photo_url = product.get('img', '')
         try:
             if photo_url and photo_url.startswith("http"):
-                await callback.message.answer_photo(photo=photo_url, caption=caption, parse_mode="Markdown",
-                                                    reply_markup=action_markup)
+                await callback.message.answer_photo(photo=photo_url, caption=caption, parse_mode="Markdown", reply_markup=action_markup)
             else:
                 await callback.message.answer(caption, parse_mode="Markdown", reply_markup=action_markup)
         except Exception:
-            await callback.message.answer(caption, parse_mode="Markdown", reply_markup=action_markup)
+            plain_caption = caption.replace("*", "").replace("_", "").replace("`", "")
+            await callback.message.answer(plain_caption, reply_markup=action_markup)
 
     await callback.answer()
 
