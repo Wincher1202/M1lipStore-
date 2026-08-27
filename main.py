@@ -42,29 +42,61 @@ def init_db():
     cursor.execute("""
                    CREATE TABLE IF NOT EXISTS products
                    (
-                       id TEXT PRIMARY KEY,
-                       brand TEXT,
-                       title TEXT NOT NULL,
-                       price INTEGER NOT NULL,
-                       tag TEXT,
-                       category TEXT NOT NULL,
-                       quantity INTEGER NOT NULL,
-                       colors TEXT,
-                       description TEXT,
-                       img TEXT,
-                       gallery TEXT,
-                       specs TEXT,
-                       color_images TEXT,
-                       color_quantities TEXT
+                       id
+                       TEXT
+                       PRIMARY
+                       KEY,
+                       brand
+                       TEXT,
+                       title
+                       TEXT
+                       NOT
+                       NULL,
+                       price
+                       INTEGER
+                       NOT
+                       NULL,
+                       tag
+                       TEXT,
+                       category
+                       TEXT
+                       NOT
+                       NULL,
+                       quantity
+                       INTEGER
+                       NOT
+                       NULL,
+                       colors
+                       TEXT,
+                       description
+                       TEXT,
+                       img
+                       TEXT,
+                       gallery
+                       TEXT,
+                       specs
+                       TEXT,
+                       color_images
+                       TEXT,
+                       color_quantities
+                       TEXT
                    )
                    """)
     cursor.execute("""
                    CREATE TABLE IF NOT EXISTS orders
                    (
-                       id SERIAL PRIMARY KEY,
-                       order_id TEXT,
-                       data JSONB,
-                       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                       id
+                       SERIAL
+                       PRIMARY
+                       KEY,
+                       order_id
+                       TEXT,
+                       data
+                       JSONB,
+                       created_at
+                       TIMESTAMP
+                       DEFAULT
+                       CURRENT_TIMESTAMP
                    )
                    """)
     cursor.execute("""
@@ -84,6 +116,21 @@ def init_db():
 
 
 init_db()
+
+
+# Допоміжна функція для конвертації Telegram file_id у пряме URL-посилання
+async def get_file_url(bot: Bot, file_id: str) -> str:
+    if not file_id:
+        return ""
+    # Якщо це вже посилання (наприклад, пропущено або введено вручну)
+    if file_id.startswith("http"):
+        return file_id
+    try:
+        file_info = await bot.get_file(file_id)
+        return f"https://api.telegram.org/file/bot{TOKEN}/{file_info.file_path}"
+    except Exception as e:
+        logging.error(f"Error getting file URL for {file_id}: {e}")
+        return file_id
 
 
 def get_db_products():
@@ -163,7 +210,9 @@ async def create_order(request: Request):
         payment = data.get("payment", {})
 
         items_str = "\n".join(
-            [f"• {i.get('brand', '')} {i.get('title', '')} ({i.get('color', '')}) x {i['qty']} — {i['price'] * i['qty']} ₴" for i in items]
+            [
+                f"• {i.get('brand', '')} {i.get('title', '')} ({i.get('color', '')}) x {i['qty']} — {i['price'] * i['qty']} ₴"
+                for i in items]
         )
 
         msg_text = (
@@ -342,9 +391,8 @@ async def process_manage_product(callback: CallbackQuery):
     photo_url = product.get('img')
     try:
         if photo_url and photo_url.startswith("http"):
-            await callback.message.answer_photo(photo=photo_url, caption=caption, parse_mode="Markdown", reply_markup=action_markup)
-        elif photo_url:
-            await callback.message.answer_photo(photo=photo_url, caption=caption, parse_mode="Markdown", reply_markup=action_markup)
+            await callback.message.answer_photo(photo=photo_url, caption=caption, parse_mode="Markdown",
+                                                reply_markup=action_markup)
         else:
             await callback.message.answer(caption, parse_mode="Markdown", reply_markup=action_markup)
     except Exception:
@@ -497,7 +545,8 @@ async def ask_category_step(message: Message, state: FSMContext):
             InlineKeyboardButton(text="🔌 Аксесуари", callback_data="cat_Аксесуари")
         ]
     ])
-    await message.answer("📁 Оберіть **категорію** товару за допомогою кнопок:", reply_markup=category_markup, parse_mode="Markdown")
+    await message.answer("📁 Оберіть **категорію** товару за допомогою кнопок:", reply_markup=category_markup,
+                         parse_mode="Markdown")
 
 
 @router.callback_query(F.data.startswith("cat_"), AddProductStates.waiting_for_category)
@@ -576,7 +625,8 @@ async def select_color_cb(callback: CallbackQuery, state: FSMContext):
             pass
 
         first_color = colors_list[0]
-        await callback.message.answer(f"📦 Введіть кількість на складі для кольору **{first_color}** (ціле число):", parse_mode="Markdown")
+        await callback.message.answer(f"📦 Введіть кількість на складі для кольору **{first_color}** (ціле число):",
+                                      parse_mode="Markdown")
         await callback.answer()
         return
 
@@ -667,6 +717,7 @@ async def process_color_main_photo(message: Message, state: FSMContext):
     if message.from_user.id not in ADMIN_IDS:
         return
     photo_file_id = message.photo[-1].file_id
+    photo_url = await get_file_url(message.bot, photo_file_id)
 
     data = await state.get_data()
     colors_list = data.get("selected_colors", [])
@@ -675,9 +726,9 @@ async def process_color_main_photo(message: Message, state: FSMContext):
 
     current_color = colors_list[idx]
     if current_color not in ci_dict:
-        ci_dict[current_color] = {"main": photo_file_id, "gallery": []}
+        ci_dict[current_color] = {"main": photo_url, "gallery": []}
     else:
-        ci_dict[current_color]["main"] = photo_file_id
+        ci_dict[current_color]["main"] = photo_url
 
     await state.update_data(color_images_dict=ci_dict)
     await state.set_state(AddProductStates.waiting_for_color_gallery_photos)
@@ -700,6 +751,7 @@ async def process_color_gallery_photo(message: Message, state: FSMContext):
     if message.from_user.id not in ADMIN_IDS:
         return
     photo_file_id = message.photo[-1].file_id
+    photo_url = await get_file_url(message.bot, photo_file_id)
 
     data = await state.get_data()
     colors_list = data.get("selected_colors", [])
@@ -713,7 +765,7 @@ async def process_color_gallery_photo(message: Message, state: FSMContext):
     if message.media_group_id:
         if message.media_group_id not in album_cache:
             album_cache[message.media_group_id] = []
-        album_cache[message.media_group_id].append(photo_file_id)
+        album_cache[message.media_group_id].append(photo_url)
 
         await asyncio.sleep(0.7)
         photos = album_cache.pop(message.media_group_id, None)
@@ -728,7 +780,7 @@ async def process_color_gallery_photo(message: Message, state: FSMContext):
             parse_mode="Markdown"
         )
     else:
-        ci_dict[current_color]["gallery"].append(photo_file_id)
+        ci_dict[current_color]["gallery"].append(photo_url)
         await state.update_data(color_images_dict=ci_dict)
 
         await message.answer(
@@ -753,7 +805,8 @@ async def col_gallery_text_done(message: Message, state: FSMContext):
         await message.answer("❌ Будь ласка, надішліть фото або натисніть кнопку «Готово» / надішліть `/done`.")
 
 
-async def advance_to_next_color_or_desc(message_or_callback_msg, state: FSMContext, from_callback=False, callback_query=None):
+async def advance_to_next_color_or_desc(message_or_callback_msg, state: FSMContext, from_callback=False,
+                                        callback_query=None):
     data = await state.get_data()
     colors_list = data.get("selected_colors", [])
     idx = data.get("current_color_photo_index", 0)
@@ -796,7 +849,8 @@ async def add_description(message: Message, state: FSMContext):
         return
     await state.update_data(description=message.text.strip())
     await state.set_state(AddProductStates.waiting_for_img)
-    await message.answer("🖼 Надішліть **головне фото** товару (це буде головне фото каталогу №1):", parse_mode="Markdown")
+    await message.answer("🖼 Надішліть **головне фото** товару (це буде головне фото каталогу №1):",
+                         parse_mode="Markdown")
 
 
 @router.message(AddProductStates.waiting_for_img, F.photo)
@@ -804,7 +858,9 @@ async def add_img(message: Message, state: FSMContext):
     if message.from_user.id not in ADMIN_IDS:
         return
     main_photo_id = message.photo[-1].file_id
-    await state.update_data(img=main_photo_id)
+    main_photo_url = await get_file_url(message.bot, main_photo_id)
+
+    await state.update_data(img=main_photo_url)
     await state.set_state(AddProductStates.waiting_for_gallery)
 
     skip_gal_markup = InlineKeyboardMarkup(inline_keyboard=[
@@ -832,6 +888,7 @@ async def add_general_gallery_photo(message: Message, state: FSMContext):
     if message.from_user.id not in ADMIN_IDS:
         return
     photo_file_id = message.photo[-1].file_id
+    photo_url = await get_file_url(message.bot, photo_file_id)
 
     data = await state.get_data()
     gallery_list = data.get("gallery_list", [])
@@ -839,7 +896,7 @@ async def add_general_gallery_photo(message: Message, state: FSMContext):
     if message.media_group_id:
         if message.media_group_id not in album_cache:
             album_cache[message.media_group_id] = []
-        album_cache[message.media_group_id].append(photo_file_id)
+        album_cache[message.media_group_id].append(photo_url)
 
         await asyncio.sleep(0.7)
         photos = album_cache.pop(message.media_group_id, None)
@@ -852,7 +909,7 @@ async def add_general_gallery_photo(message: Message, state: FSMContext):
             f"✅ Додано фото в загальну галерею ({len(gallery_list)}). Надішліть ще або напишіть /done щоб зберегти товар."
         )
     else:
-        gallery_list.append(photo_file_id)
+        gallery_list.append(photo_url)
         await state.update_data(gallery_list=gallery_list)
         await message.answer(
             f"✅ Додано фото в загальну галерею ({len(gallery_list)}). Надішліть ще або напишіть /done щоб зберегти товар."
@@ -917,7 +974,7 @@ async def save_product_to_db(message: Message, state: FSMContext, gallery_list=N
 
     await state.clear()
     await message.answer(
-        f"🎉 Товар **{brand} {title}** успішно створено та додано в базу з усіма фото по кольорах та характеристиками!\n\nНапишіть /admin для керування.",
+        f"🎉 Товар **{brand} {title}** успішно створено та додано в базу з усіма посиланнями на фото!\n\nНапишіть /admin для керування.",
         parse_mode="Markdown"
     )
 
