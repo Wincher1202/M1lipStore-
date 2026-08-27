@@ -501,55 +501,74 @@ async def process_edit_colors(callback: CallbackQuery):
     cq = product.get('colorQuantities', {})
     buttons = []
     for color in cq.keys():
-        buttons.append([InlineKeyboardButton(text=f"Змінити залишок: {color} (зараз: {cq[color]} шт.)",
-                                             callback_data=f"ch_cqty_{product_id}_{color}")])
+        buttons.append([InlineKeyboardButton(
+            text=f"Змінити залишок: {color} (зараз: {cq[color]} шт.)",
+            callback_data=f"ch_cqty_{product_id}_{color}"
+        )])
     buttons.append([InlineKeyboardButton(text="🔙 Назад до товару", callback_data=f"manage_{product_id}")])
 
     markup = InlineKeyboardMarkup(inline_keyboard=buttons)
     try:
-        await callback.message.edit_reply_markup(reply_markup=markup)
+        await callback.message.edit_text(
+            f"🎨 Керування кольорами для **{product['title']}**\nОберіть колір, залишок якого хочете змінити:",
+            reply_markup=markup,
+            parse_mode="Markdown"
+        )
     except Exception:
-        await callback.message.answer("Оберіть колір для редагування залишку:", reply_markup=markup)
+        await callback.message.answer(
+            f"🎨 Керування кольорами для **{product['title']}**\nОберіть колір, залишок якого хочете змінити:",
+            reply_markup=markup,
+            parse_mode="Markdown"
+        )
     await callback.answer()
 
 
 @router.callback_query(F.data.startswith("ch_cqty_"))
-async def process_change_color_qty(callback: CallbackQuery, state: FSMContext):
+async def start_change_color_qty(callback: CallbackQuery, state: FSMContext):
     if callback.from_user.id not in ADMIN_IDS: return
     parts = callback.data.replace("ch_cqty_", "").split("_", 1)
-    await state.update_data(editing_product_id=parts[0], editing_color_name=parts[1])
+    pid = parts[0]
+    color_name = parts[1]
+
+    await state.update_data(editing_product_id=pid, editing_color_name=color_name)
     await state.set_state(AdminEditStates.waiting_for_color_qty_edit)
-    await callback.message.answer(f"📦 Введіть нову кількість для кольору **{parts[1]}**:", parse_mode="Markdown")
+    await callback.message.answer(f"📦 Введіть нову кількість для кольору **{color_name}** (тільки число):",
+                                  parse_mode="Markdown")
     await callback.answer()
 
 
 @router.message(AdminEditStates.waiting_for_color_qty_edit)
-async def save_edited_color_qty(message: Message, state: FSMContext):
+async def save_color_qty_edit(message: Message, state: FSMContext):
     if message.from_user.id not in ADMIN_IDS: return
     data = await state.get_data()
     try:
         new_q = int(message.text.strip())
         if new_q < 0: raise ValueError()
 
+        pid = data.get("editing_product_id")
+        cname = data.get("editing_color_name")
+
         products = get_db_products()
-        product = next((p for p in products if p["id"] == data.get("editing_product_id")), None)
+        product = next((p for p in products if p["id"] == pid), None)
         if product:
-            cq = product.get("colorQuantities", {})
-            cq[data.get("editing_color_name")] = new_q
+            cq = product.get('colorQuantities', {})
+            cq[cname] = new_q
             total_qty = sum(cq.values())
 
             conn = get_db_connection()
             cursor = conn.cursor()
-            cursor.execute("UPDATE products SET color_quantities = %s, quantity = %s WHERE id = %s",
-                           (json.dumps(cq, ensure_ascii=False), total_qty, data.get("editing_product_id")))
+            cursor.execute(
+                "UPDATE products SET color_quantities = %s, quantity = %s WHERE id = %s",
+                (json.dumps(cq, ensure_ascii=False), total_qty, pid)
+            )
             conn.commit()
             cursor.close()
             conn.close()
 
-        await message.answer("✅ Кількість оновлено! Напишіть /admin.", parse_mode="Markdown")
-        await state.clear()
+            await message.answer(f"✅ Залишок для кольору '{cname}' успішно оновлено до {new_q} шт.! Напишіть /admin.")
+            await state.clear()
     except ValueError:
-        await message.answer("❌ Будь ласка, введіть ціле число (0 або більше):")
+        await message.answer("❌ Будь ласка, введіть коректне ціле число (0 або більше):")
 
 
 # --- СТВОРЕННЯ НОВОГО ТОВАРУ ---
@@ -1077,3 +1096,4 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+```[cite: 11]
