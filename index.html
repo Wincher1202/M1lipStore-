@@ -28,7 +28,7 @@
             --radius-lg: 20px;
             --radius-md: 14px;
             --radius-sm: 8px;
-            --transition-smooth: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+            --transition-smooth: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         [data-theme="dark"] {
@@ -71,7 +71,7 @@
             min-height: 100%;
             display: flex;
             flex-direction: column;
-            transition: background-color 0.3s ease, color 0.3s ease;
+            transition: background-color 0.4s ease, color 0.4s ease;
         }
 
         .product-price, .cart-total {
@@ -144,7 +144,7 @@
             align-items: center;
             gap: 2px;
             animation: floating 3s ease-in-out infinite;
-            transition: transform 0.2s ease;
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .logo:hover {
@@ -209,7 +209,7 @@
             opacity: 0;
             visibility: hidden;
             pointer-events: none;
-            transition: all 0.25s cubic-bezier(0.25, 1, 0.5, 1);
+            transition: var(--transition-smooth);
             box-shadow: var(--shadow-subtle);
             z-index: 1010;
         }
@@ -441,7 +441,7 @@
             object-fit: cover;
             display: block;
             border-radius: var(--radius-md);
-            transition: opacity 0.4s ease, transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+            transition: opacity 0.4s ease, transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .hero-card-3d:hover img {
@@ -474,32 +474,63 @@
             font-size: 0.9rem;
         }
 
+        /* КАТЕГОРИИ ТОВАРОВ - Плавная анимация и отсутствие обрезки */
         .catalog-filters {
             display: flex;
-            gap: 8px;
-            margin-bottom: 24px;
+            gap: 10px;
+            margin-bottom: 28px;
             overflow-x: auto;
-            padding-bottom: 6px;
+            padding: 6px 4px 12px 4px;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
         }
 
         .filter-btn {
             background: var(--bg-secondary);
             border: 1px solid var(--border-light);
-            padding: 8px 16px;
+            padding: 10px 20px;
             border-radius: 30px;
             font-size: 0.85rem;
             font-weight: 600;
             color: var(--text-secondary);
             cursor: pointer;
             white-space: nowrap;
-            transition: var(--transition-smooth);
+            flex-shrink: 0;
+            box-shadow: var(--shadow-subtle);
+            transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+            overflow: hidden;
         }
 
-        .filter-btn:hover, .filter-btn.active {
+        .filter-btn::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: var(--accent);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 0;
+            border-radius: 30px;
+        }
+
+        .filter-btn span {
+            position: relative;
+            z-index: 1;
+        }
+
+        .filter-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 6px 20px rgba(87, 100, 226, 0.15);
+        }
+
+        .filter-btn.active {
             background: var(--accent);
             color: white;
             border-color: var(--accent);
-            transform: translateY(-2px);
+            transform: translateY(-3px) scale(1.03);
+            box-shadow: 0 8px 25px rgba(87, 100, 226, 0.3);
         }
 
         .catalog-grid {
@@ -530,9 +561,7 @@
             height: 100%;
             min-height: 450px;
             will-change: transform;
-            transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), 
-                        box-shadow 0.4s cubic-bezier(0.25, 1, 0.5, 1),
-                        border-color 0.4s ease;
+            transition: var(--transition-smooth);
         }
 
         .product-card:hover {
@@ -613,7 +642,7 @@
             object-fit: cover;
             display: block;
             border-radius: var(--radius-md);
-            transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+            transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .product-card:hover .product-img-wrap img { 
@@ -645,9 +674,6 @@
             border-color: #6b7280 !important; 
             opacity: 0.5; 
             cursor: not-allowed; 
-        }
-        .color-dot.out-of-stock:hover {
-            transform: none;
         }
 
         .product-info {
@@ -794,7 +820,7 @@
             box-shadow: -10px 0 40px rgba(0,0,0,0.15);
             display: flex;
             flex-direction: column;
-            transition: right 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
         @media(min-width: 500px) { .drawer { width: 420px; right: -420px; } }
 
@@ -847,7 +873,7 @@
             z-index: 2002;
             padding: 30px 20px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            transition: top 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: top 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .search-modal.active { top: 0; }
@@ -873,7 +899,7 @@
             overflow-y: auto;
             opacity: 0;
             visibility: hidden;
-            transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         @media(min-width: 768px) {
@@ -987,9 +1013,6 @@
             opacity: 0.5; 
             cursor: not-allowed; 
         }
-        .color-circle-big.out-of-stock:hover {
-            transform: none;
-        }
 
         .color-circle-big.active {
             box-shadow: 0 0 0 3px var(--accent);
@@ -1091,11 +1114,11 @@
             </div>
         </div>
         <div class="catalog-filters" id="catalog-filters">
-            <button class="filter-btn active" onclick="filterByCategory('All')">Всі товари</button>
-            <button class="filter-btn" onclick="filterByCategory('Миші')">Миші</button>
-            <button class="filter-btn" onclick="filterByCategory('Клавіатури')">Клавіатури</button>
-            <button class="filter-btn" onclick="filterByCategory('Гарнітури')">Гарнітури</button>
-            <button class="filter-btn" onclick="filterByCategory('Аксесуари')">Аксесуари</button>
+            <button class="filter-btn active" onclick="filterByCategory('All')"><span>Всі товари</span></button>
+            <button class="filter-btn" onclick="filterByCategory('Миші')"><span>Миші</span></button>
+            <button class="filter-btn" onclick="filterByCategory('Клавіатури')"><span>Клавіатури</span></button>
+            <button class="filter-btn" onclick="filterByCategory('Гарнітури')"><span>Гарнітури</span></button>
+            <button class="filter-btn" onclick="filterByCategory('Аксесуари')"><span>Аксесуари</span></button>
         </div>
         <div class="catalog-grid" id="catalog-container"></div>
     </section>
@@ -1139,13 +1162,17 @@
     <footer>
         <div class="footer-grid">
             <div class="footer-col">
-                <a class="logo" style="margin-bottom: 10px; font-size: 1.3rem;">
-                    <div class="logo-text-wrap">
-                        <span class="logo-part-1">M1Lip</span><span class="logo-part-2">Store</span>
+                <!-- Отдельный логотип снизу с картинкой logo-milipstore.png -->
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px; cursor: pointer;" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+                    <img src="logo-milipstore.png" alt="M1lipStore Logo" style="width: 36px; height: 36px; object-fit: contain; border-radius: 8px;">
+                    <div class="logo" style="font-size: 1.3rem; animation: none;">
+                        <div class="logo-text-wrap">
+                            <span class="logo-part-1">M1Lip</span><span class="logo-part-2">Store</span>
+                        </div>
                     </div>
-                </a>
+                </div>
                 <p style="color: var(--text-secondary); max-width: 260px; font-size: 0.85rem; margin-bottom: 8px; line-height: 1.4;">Gaming hardware для твого ідеального setup. Преміальний вибір техніки.</p>
-                <p style="font-size: 0.8rem; font-weight: 700; color: var(--text-primary);">Обирай. Грай. Перемагай.</p>
+                <p style="font-size: 0.8rem; font-weight: 700; color: var(--text-primary);">Обирай. Грай. Перемагай</p>
             </div>
             <div class="footer-col">
                 <h4>ДОПОМОГА</h4>
@@ -1240,7 +1267,7 @@
 
                 <div class="modal-options-row">
                     <div class="option-group">
-                        <label>Колір: (<span id="modal-color-name">Колір не вибрано</span>)</label>
+                        <label>Колір <span id="modal-color-name">не вибрано</span></label>
                         <div class="color-selector-large" id="modal-color-selector"></div>
                         <div id="modal-stock-status" class="stock-status"></div>
                     </div>
@@ -1403,7 +1430,6 @@
                         parsedGallery = [item.img];
                     }
 
-                    // Збираємо всі унікальні зображення для повноцінної галереї (головне + галерея + фото кольорів)
                     let allImagesSet = new Set();
                     if (item.img) allImagesSet.add(item.img);
                     parsedGallery.forEach(img => allImagesSet.add(img));
@@ -1473,7 +1499,8 @@
         function filterByCategory(category) {
             currentCategoryFilter = category;
             document.querySelectorAll('.filter-btn').forEach(btn => {
-                if ((category === 'All' && btn.innerText.includes('Всі')) || btn.innerText.includes(category)) {
+                let btnText = btn.innerText.trim();
+                if ((category === 'All' && btnText.includes('Всі')) || btnText.includes(category)) {
                     btn.classList.add('active');
                 } else {
                     btn.classList.remove('active');
@@ -1611,7 +1638,6 @@
             currentModalProduct = product;
             modalQty = 1;
             
-            // Якщо передано конкретний колір (клік на кружок у каталозі), вибираємо його. Інакше — null (стан без вибраного кольору)
             if (colorIdx !== null && product.colors[colorIdx] && !product.colors[colorIdx].isOut) {
                 selectedColorIndex = colorIdx;
             } else {
@@ -1667,7 +1693,7 @@
 
             if (selectedColorIndex !== null && colors[selectedColorIndex]) {
                 const activeColor = colors[selectedColorIndex];
-                if (colorNameEl) colorNameEl.innerText = formatColorEnglish(activeColor.name);
+                if (colorNameEl) colorNameEl.innerText = `(${formatColorEnglish(activeColor.name).toUpperCase()})`;
 
                 if (activeColor.image) {
                     activeImg = activeColor.image;
@@ -1691,7 +1717,7 @@
                     }
                 }
             } else {
-                if (colorNameEl) colorNameEl.innerText = 'Колір не вибрано';
+                if (colorNameEl) colorNameEl.innerText = 'не вибрано';
                 if (stockStatusEl) {
                     stockStatusEl.innerText = 'Будь ласка, оберіть колір товару';
                     stockStatusEl.className = 'stock-status not-selected';
@@ -1704,7 +1730,6 @@
 
             if (mainImg) mainImg.src = activeImg;
 
-            // Рендеримо мініатюри галереї та підсвічуємо активну картинку
             if (thumbsContainer && currentModalProduct.gallery) {
                 thumbsContainer.innerHTML = currentModalProduct.gallery.map((imgUrl) => {
                     const isActive = imgUrl === activeImg ? 'active' : '';
