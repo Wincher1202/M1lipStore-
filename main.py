@@ -152,7 +152,6 @@ async def get_products():
     return get_db_products()
 
 
-# --- ДОПОМІЖНА ФУНКЦІЯ ДЛЯ ОТРИМАННЯ ПРЯМОГО URL ФОТО ВІД TELEGRAM ---
 async def get_file_url(bot: Bot, file_id: str) -> str:
     if not file_id:
         return ""
@@ -165,7 +164,6 @@ async def get_file_url(bot: Bot, file_id: str) -> str:
     return file_id
 
 
-# --- FSM СТАНИ ДЛЯ СТВОРЕННЯ ТОВАРУ ---
 class AddProductStates(StatesGroup):
     waiting_for_brand = State()
     waiting_for_title = State()
@@ -175,11 +173,11 @@ class AddProductStates(StatesGroup):
     waiting_for_specs = State()
     waiting_for_colors = State()
     waiting_for_color_qty = State()
-    waiting_for_color_main_photo = State()  # Головне фото для кожного кольору
-    waiting_for_color_gallery_photos = State()  # Додаткові фото для кожного кольору
+    waiting_for_color_main_photo = State()
+    waiting_for_color_gallery_photos = State()
     waiting_for_description = State()
-    waiting_for_img = State()  # Головне фото каталогу
-    waiting_for_gallery = State()  # Загальна галерея
+    waiting_for_img = State()
+    waiting_for_gallery = State()
 
 
 class AdminStates(StatesGroup):
@@ -288,10 +286,10 @@ async def process_manage_product(callback: CallbackQuery):
     caption = (
         f"🛠 **Керування товаром: {product.get('brand', '')} {product['title']}**\n\n"
         f"• Бренд: {product.get('brand', 'не вказано')}\n"
-        f"• Категорія: {product['category']}\n"
-        f"• Ціна: {product['price']} ₴\n"
-        f"• Тег: `{product['tag'] or 'немає'}`\n"
-        f"• Загалом на складі: **{product['quantity']} шт.**\n"
+        f"• Категорія: {product.get('category', 'Не вказано')}\n"
+        f"• Ціна: {product.get('price', 0)} ₴\n"
+        f"• Тег: `{product.get('tag') or 'немає'}`\n"
+        f"• Загалом на складі: **{product.get('quantity', 0)} шт.**\n"
         f"• Кольори та наявність: _{colors_info}_\n"
         f"• Блоків характеристик: {specs_count} шт."
     )
@@ -318,20 +316,25 @@ async def process_manage_product(callback: CallbackQuery):
     ])
 
     try:
-        await callback.message.delete()
-    except Exception:
-        pass
-
-    photo_url = product['img']
-    try:
-        if photo_url and photo_url.startswith("http"):
-            await callback.message.answer_photo(photo=photo_url, caption=caption, parse_mode="Markdown",
-                                                reply_markup=action_markup)
+        if callback.message.photo:
+            await callback.message.edit_caption(caption=caption, parse_mode="Markdown", reply_markup=action_markup)
         else:
-            await callback.message.answer_photo(photo=photo_url, caption=caption, parse_mode="Markdown",
-                                                reply_markup=action_markup)
+            await callback.message.edit_text(text=caption, parse_mode="Markdown", reply_markup=action_markup)
     except Exception:
-        await callback.message.answer(caption, parse_mode="Markdown", reply_markup=action_markup)
+        try:
+            await callback.message.delete()
+        except Exception:
+            pass
+        photo_url = product.get('img', '')
+        try:
+            if photo_url and photo_url.startswith("http"):
+                await callback.message.answer_photo(photo=photo_url, caption=caption, parse_mode="Markdown",
+                                                    reply_markup=action_markup)
+            else:
+                await callback.message.answer(caption, parse_mode="Markdown", reply_markup=action_markup)
+        except Exception:
+            await callback.message.answer(caption, parse_mode="Markdown", reply_markup=action_markup)
+
     await callback.answer()
 
 
@@ -398,8 +401,6 @@ async def save_edited_color_qty(message: Message, state: FSMContext):
     except ValueError:
         await message.answer("❌ Будь ласка, введіть ціле число (0 або більше):")
 
-
-# --- СТВОРЕННЯ НОВОГО ТОВАРУ ---
 
 @router.callback_query(F.data == "add_new_product")
 async def process_add_new(callback: CallbackQuery, state: FSMContext):
@@ -605,8 +606,6 @@ async def process_color_qty_input(message: Message, state: FSMContext):
     except ValueError:
         await message.answer("❌ Будь ласка, введіть ціле число (0 або більше):")
 
-
-# --- КЕРУВАННЯ ФОТОГРАФІЯМИ ДЛЯ КОЖНОГО КОЛЬОРУ ---
 
 @router.callback_query(F.data == "skip_col_main_photo", AddProductStates.waiting_for_color_main_photo)
 async def skip_col_main_photo_cb(callback: CallbackQuery, state: FSMContext):
