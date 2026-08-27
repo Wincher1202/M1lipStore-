@@ -101,7 +101,7 @@
             left: 0;
             width: 100%;
             z-index: 1000;
-            padding: 16px 20px;
+            padding: 12px 20px;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -117,7 +117,7 @@
         }
 
         header.scrolled {
-            padding: 12px 20px;
+            padding: 10px 20px;
             background: rgba(248, 249, 250, 0.92);
             border-bottom: 1px solid var(--border-light);
             box-shadow: var(--shadow-subtle);
@@ -128,12 +128,25 @@
         }
 
         .logo {
-            font-size: 1.2rem;
+            font-size: 1.35rem;
             font-weight: 800;
             letter-spacing: -0.02em;
             color: var(--text-primary);
             cursor: pointer;
             text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo img {
+            height: 34px;
+            width: auto;
+            object-fit: contain;
+            border-radius: 6px;
+        }
+
+        .logo-text-wrap {
             display: flex;
             align-items: center;
             gap: 2px;
@@ -415,7 +428,7 @@
 
         /* SECTIONS & CATALOG */
         .section-padding {
-            padding: 60px 20px;
+            padding: 50px 20px;
             max-width: 1440px;
             margin: 0 auto;
             width: 100%;
@@ -590,6 +603,7 @@
             gap: 6px;
             margin: 6px 0;
             align-items: center;
+            min-height: 16px;
         }
 
         .color-dot {
@@ -604,13 +618,10 @@
         .color-dot:hover {
             transform: scale(1.2);
         }
-        .color-dot.white { background-color: #FFFFFF; }
-        .color-dot.black { background-color: #1a1a1a; }
-        .color-dot.pink { background-color: #ff2a85; }
         .color-dot.out-of-stock { 
             background-color: #9ca3af !important; 
-            border-color: #6b7280; 
-            opacity: 0.6; 
+            border-color: #6b7280 !important; 
+            opacity: 0.5; 
             cursor: not-allowed; 
         }
         .color-dot.out-of-stock:hover {
@@ -632,7 +643,7 @@
 
         /* ADVANTAGES BLOCK */
         .advantages-section {
-            padding: 40px 20px;
+            padding: 30px 20px;
             max-width: 1440px;
             margin: 0 auto;
             width: 100%;
@@ -652,7 +663,7 @@
             background: var(--bg-secondary);
             border: 1px solid var(--border-light);
             border-radius: var(--radius-md);
-            padding: 24px;
+            padding: 20px;
             display: flex;
             align-items: flex-start;
             gap: 16px;
@@ -668,8 +679,8 @@
         .advantage-icon {
             background: var(--accent-light);
             color: var(--accent);
-            width: 44px;
-            height: 44px;
+            width: 40px;
+            height: 40px;
             border-radius: 12px;
             display: flex;
             align-items: center;
@@ -693,7 +704,7 @@
         footer {
             background: var(--bg-secondary);
             border-top: 1px solid var(--border-light);
-            padding: 60px 20px 30px;
+            padding: 35px 20px 20px;
             max-width: 1440px;
             margin: 0 auto;
             width: 100%;
@@ -702,37 +713,37 @@
         .footer-grid {
             display: grid;
             grid-template-columns: 1fr;
-            gap: 32px;
-            margin-bottom: 40px;
+            gap: 24px;
+            margin-bottom: 24px;
         }
 
         @media(min-width: 768px) {
-            .footer-grid { grid-template-columns: 2fr 1fr 1fr 1fr; gap: 40px; }
+            .footer-grid { grid-template-columns: 2fr 1fr 1fr 1fr; gap: 30px; }
         }
 
         .footer-col h4 {
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             text-transform: uppercase;
             letter-spacing: 0.05em;
             color: var(--text-muted);
-            margin-bottom: 16px;
+            margin-bottom: 12px;
             font-weight: 800;
         }
 
-        .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
-        .footer-col a { text-decoration: none; color: var(--text-secondary); font-weight: 600; font-size: 0.9rem; transition: var(--transition-smooth); cursor: pointer; }
+        .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+        .footer-col a { text-decoration: none; color: var(--text-secondary); font-weight: 600; font-size: 0.85rem; transition: var(--transition-smooth); cursor: pointer; }
         .footer-col a:hover { color: var(--text-primary); transform: translateX(2px); }
         
         .footer-bottom { 
             border-top: 1px solid var(--border-light); 
-            padding-top: 24px; 
+            padding-top: 16px; 
             display: flex; 
             flex-direction: column; 
-            gap: 12px; 
+            gap: 8px; 
             align-items: center; 
             text-align: center; 
             color: var(--text-muted); 
-            font-size: 0.8rem; 
+            font-size: 0.75rem; 
         }
         @media(min-width: 768px) { 
             .footer-bottom { flex-direction: row; justify-content: space-between; } 
@@ -948,10 +959,15 @@
         }
 
         .color-circle-big:hover { transform: scale(1.15); }
-        .color-circle-big.white { background-color: #FFFFFF; }
-        .color-circle-big.black { background-color: #1a1a1a; }
-        .color-circle-big.pink { background-color: #ff2a85; }
-        .color-circle-big.out-of-stock { background-color: #9ca3af !important; border-color: #6b7280; }
+        .color-circle-big.out-of-stock { 
+            background-color: #9ca3af !important; 
+            border-color: #6b7280 !important; 
+            opacity: 0.5; 
+            cursor: not-allowed; 
+        }
+        .color-circle-big.out-of-stock:hover {
+            transform: none;
+        }
 
         .color-circle-big.active {
             box-shadow: 0 0 0 3px var(--accent);
@@ -967,6 +983,7 @@
         }
         .stock-status.in-stock { color: #2E7D32; }
         .stock-status.out-of-stock { color: #D32F2F; }
+        .stock-status.not-selected { color: #E65100; }
 
         .specs-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin: 12px 0; }
         .spec-box { background: var(--bg-primary); padding: 8px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-light); transition: var(--transition-smooth); }
@@ -979,7 +996,10 @@
     <!-- HEADER -->
     <header id="site-header">
         <a class="logo" onclick="scrollToSection('catalog')">
-            <span class="logo-part-1">M1Lip</span><span class="logo-part-2">Store</span>
+            <img src="logo-milipstore.png" alt="M1lipStore Logo">
+            <div class="logo-text-wrap">
+                <span class="logo-part-1">M1Lip</span><span class="logo-part-2">Store</span>
+            </div>
         </a>
         <div class="nav-right">
             <div class="icon-btn-wrapper">
@@ -1061,7 +1081,7 @@
         <div class="advantages-grid">
             <div class="advantage-card">
                 <div class="advantage-icon">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
                 </div>
                 <div class="advantage-text">
                     <h4>Відправка в день замовлення</h4>
@@ -1071,7 +1091,7 @@
 
             <div class="advantage-card">
                 <div class="advantage-icon">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
                 </div>
                 <div class="advantage-text">
                     <h4>Зручна оплата</h4>
@@ -1081,7 +1101,7 @@
 
             <div class="advantage-card">
                 <div class="advantage-icon">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                 </div>
                 <div class="advantage-text">
                     <h4>Гарантія від виробника</h4>
@@ -1095,11 +1115,14 @@
     <footer>
         <div class="footer-grid">
             <div class="footer-col">
-                <a class="logo" style="margin-bottom: 12px;">
-                    <span class="logo-part-1">M1Lip</span><span class="logo-part-2">Store</span>
+                <a class="logo" style="margin-bottom: 10px;">
+                    <img src="logo-milipstore.png" alt="M1lipStore Logo" style="height: 28px;">
+                    <div class="logo-text-wrap" style="font-size: 1.15rem;">
+                        <span class="logo-part-1">M1Lip</span><span class="logo-part-2">Store</span>
+                    </div>
                 </a>
-                <p style="color: var(--text-secondary); max-width: 280px; font-size: 0.9rem; margin-bottom: 12px;">Gaming hardware для твого ідеального setup. Преміальний вибір техніки для тих, хто цінує якість, комфорт і продуктивність.</p>
-                <p style="font-size: 0.85rem; font-weight: 700; color: var(--text-primary);">Обирай. Грай. Перемагай.</p>
+                <p style="color: var(--text-secondary); max-width: 260px; font-size: 0.85rem; margin-bottom: 8px; line-height: 1.4;">Gaming hardware для твого ідеального setup. Преміальний вибір техніки.</p>
+                <p style="font-size: 0.8rem; font-weight: 700; color: var(--text-primary);">Обирай. Грай. Перемагай.</p>
             </div>
             <div class="footer-col">
                 <h4>ДОПОМОГА</h4>
@@ -1124,7 +1147,7 @@
                 <h4>КОНТАКТИ</h4>
                 <ul>
                     <li><a href="https://t.me/milipmanager" target="_blank">Менеджер: @milipmanager</a></li>
-                    <li><a href="https://m1lipstore.mssg.me/" target="_blank">Telegram канал</a></li>
+                    <li><a href="https://t.me/+vyhe-i9vGwAwNjAy" target="_blank">Telegram канал: M1lipStore</a></li>
                     <li><a href="https://www.instagram.com/m1lip.store" target="_blank">Instagram: @m1lip.store</a></li>
                     <li><a href="https://www.tiktok.com/@m1lipstore" target="_blank">TikTok: @m1lipstore</a></li>
                 </ul>
@@ -1194,7 +1217,7 @@
 
                 <div class="modal-options-row">
                     <div class="option-group">
-                        <label>Колір: (<span id="modal-color-name">White</span>)</label>
+                        <label>Колір: (<span id="modal-color-name">Не вибрано</span>)</label>
                         <div class="color-selector-large" id="modal-color-selector"></div>
                         <div id="modal-stock-status" class="stock-status"></div>
                     </div>
@@ -1250,11 +1273,28 @@
         let wishlist = JSON.parse(localStorage.getItem('m1lip_wishlist')) || [];
         let currentModalProduct = null;
         let modalQty = 1;
-        let selectedColorIndex = 0;
+        let selectedColorIndex = null;
         let currentCategoryFilter = 'All';
         let heroIndex = 0;
 
         const API_URL = "https://m1lipstore.onrender.com/api/products";
+
+        // Мапа для перетворення назви кольору в дійсний CSS код (щоб кружечки точно відповідали кольору)
+        function getColorHex(name) {
+            if (!name) return '#ccc';
+            let lower = name.toLowerCase().trim();
+            if (lower.includes('pink') || lower.includes('рожев')) return '#ff2a85';
+            if (lower.includes('white') || lower.includes('біл')) return '#ffffff';
+            if (lower.includes('black') || lower.includes('чорн')) return '#1a1a1a';
+            if (lower.includes('red') || lower.includes('червон')) return '#e53935';
+            if (lower.includes('blue') || lower.includes('блакит') || lower.includes('син')) return '#1e88e5';
+            if (lower.includes('green') || lower.includes('зелен')) return '#43a047';
+            if (lower.includes('purple') || lower.includes('фіолет')) return '#8e24aa';
+            if (lower.includes('yellow') || lower.includes('жовт')) return '#fbc02d';
+            if (lower.includes('grey') || lower.includes('gray') || lower.includes('сір')) return '#9e9e9e';
+            if (lower.includes('orange') || lower.includes('помаранч')) return '#fb8c00';
+            return lower; // Якщо це введений гех-код або стандартна назва кольору CSS
+        }
 
         async function fetchProducts() {
             try {
@@ -1275,11 +1315,6 @@
 
                     if (rawColors && Object.keys(rawColors).length > 0) {
                         parsedColors = Object.keys(rawColors).map(colorName => {
-                            let lower = colorName.toLowerCase();
-                            let cls = 'white';
-                            if (lower.includes('чорн') || lower.includes('black')) cls = 'black';
-                            else if (lower.includes('розов') || lower.includes('pink')) cls = 'pink';
-                            
                             let stockVal = 5;
                             if (colorStocks[colorName] !== undefined) {
                                 stockVal = Number(colorStocks[colorName]);
@@ -1288,8 +1323,8 @@
                             }
                             
                             return {
-                                name: colorName,
-                                class: stockVal <= 0 ? 'out-of-stock' : cls,
+                                name: colorName, // Англійська / оригінальна назва з бази
+                                isOut: stockVal <= 0,
                                 stock: stockVal,
                                 image: rawColors[colorName]
                             };
@@ -1299,10 +1334,6 @@
                     if (parsedColors.length === 0 && item.colors) {
                         let colorNames = typeof item.colors === 'string' ? item.colors.split(',').map(s => s.trim()) : item.colors;
                         parsedColors = colorNames.map(colorName => {
-                            let lower = colorName.toLowerCase();
-                            let cls = 'white';
-                            if (lower.includes('чорн') || lower.includes('black')) cls = 'black';
-                            else if (lower.includes('розов') || lower.includes('pink')) cls = 'pink';
                             let stockVal = 5;
                             if (colorStocks[colorName] !== undefined) {
                                 stockVal = Number(colorStocks[colorName]);
@@ -1311,7 +1342,7 @@
                             }
                             return { 
                                 name: colorName, 
-                                class: stockVal <= 0 ? 'out-of-stock' : cls, 
+                                isOut: stockVal <= 0, 
                                 stock: stockVal 
                             };
                         });
@@ -1319,7 +1350,7 @@
 
                     if (parsedColors.length === 0) {
                         let defaultStock = item.stock !== undefined ? Number(item.stock) : 5;
-                        parsedColors = [{ name: 'White', class: defaultStock <= 0 ? 'out-of-stock' : 'white', stock: defaultStock }];
+                        parsedColors = [{ name: 'Default', isOut: defaultStock <= 0, stock: defaultStock }];
                     }
 
                     let parsedGallery = [];
@@ -1488,9 +1519,11 @@
                 const isFav = wishlist.some(item => item.id === p.id);
                 
                 const colorDotsHtml = p.colors && p.colors.length > 0 ? p.colors.map((c, idx) => {
-                    const isOut = c.stock <= 0;
-                    const dotClass = isOut ? 'out-of-stock' : c.class;
-                    return `<span class="color-dot ${dotClass}" title="${c.name}" ${isOut ? '' : `onclick="event.stopPropagation(); openProductModal(products.find(x => x.id === '${p.id}'), ${idx})"`}></span>`;
+                    const bgHex = getColorHex(c.name);
+                    const isOut = c.isOut;
+                    const dotClass = isOut ? 'out-of-stock' : '';
+                    const styleAttr = isOut ? '' : `background-color: ${bgHex};`;
+                    return `<span class="color-dot ${dotClass}" style="${styleAttr}" title="${c.name}" ${isOut ? '' : `onclick="event.stopPropagation(); openProductModal(products.find(x => x.id === '${p.id}'), ${idx})"`}></span>`;
                 }).join('') : '';
 
                 return `
@@ -1519,11 +1552,18 @@
             }).join('');
         }
 
-        function openProductModal(product, colorIdx = 0) {
+        function openProductModal(product, colorIdx = null) {
             if (!product) return;
             currentModalProduct = product;
             modalQty = 1;
-            selectedColorIndex = colorIdx;
+            
+            // Автоматично вибираємо перший доступний колір, якщо він є, інакше null (Не вибрано)
+            if (colorIdx !== null && product.colors[colorIdx] && !product.colors[colorIdx].isOut) {
+                selectedColorIndex = colorIdx;
+            } else {
+                let firstAvailable = product.colors.findIndex(c => !c.isOut);
+                selectedColorIndex = firstAvailable !== -1 ? firstAvailable : null;
+            }
 
             document.getElementById('modal-tag').innerText = product.tag || 'НОВИНКА';
             document.getElementById('modal-brand').innerText = product.brand;
@@ -1579,11 +1619,9 @@
             const stockStatusEl = document.getElementById('modal-stock-status');
             const addCartBtn = document.getElementById('modal-add-cart-btn');
 
-            if (colors.length > 0) {
-                if (selectedColorIndex >= colors.length) selectedColorIndex = 0;
+            if (selectedColorIndex !== null && colors[selectedColorIndex]) {
                 const activeColor = colors[selectedColorIndex];
-                
-                if (colorNameEl) colorNameEl.innerText = activeColor.name;
+                if (colorNameEl) colorNameEl.innerText = activeColor.name; // Показує англійську/оригінальну назву кольору
 
                 if (activeColor.image) {
                     const mainImg = document.getElementById('modal-img');
@@ -1610,28 +1648,39 @@
                         }
                     }
                 }
-
-                if (colorSelector) {
-                    colorSelector.innerHTML = colors.map((c, idx) => {
-                        const isOut = c.stock <= 0;
-                        const circleClass = isOut ? 'out-of-stock' : c.class;
-                        const activeClass = idx === selectedColorIndex ? 'active' : '';
-                        return `
-                            <div class="color-option-item ${isOut ? 'disabled' : ''}" onclick="selectModalColor(${idx})">
-                                <span class="color-circle-big ${circleClass} ${activeClass}" title="${c.name}"></span>
-                            </div>
-                        `;
-                    }).join('');
-                }
             } else {
-                if (colorSelector) colorSelector.innerHTML = '';
-                if (stockStatusEl) stockStatusEl.innerText = '';
+                if (colorNameEl) colorNameEl.innerText = 'Не вибрано';
+                if (stockStatusEl) {
+                    stockStatusEl.innerText = 'Колір не вибрано';
+                    stockStatusEl.className = 'stock-status not-selected';
+                }
+                if (addCartBtn) {
+                    addCartBtn.disabled = true;
+                    addCartBtn.innerText = 'Оберіть колір';
+                }
                 const mainImg = document.getElementById('modal-img');
                 if (mainImg && currentModalProduct.img) mainImg.src = currentModalProduct.img;
+            }
+
+            if (colorSelector) {
+                colorSelector.innerHTML = colors.map((c, idx) => {
+                    const bgHex = getColorHex(c.name);
+                    const isOut = c.isOut;
+                    const circleClass = isOut ? 'out-of-stock' : '';
+                    const activeClass = idx === selectedColorIndex ? 'active' : '';
+                    const styleAttr = isOut ? '' : `background-color: ${bgHex};`;
+                    return `
+                        <div class="color-option-item ${isOut ? 'disabled' : ''}" ${isOut ? '' : `onclick="selectModalColor(${idx})"`}>
+                            <span class="color-circle-big ${circleClass} ${activeClass}" style="${styleAttr}" title="${c.name}"></span>
+                        </div>
+                    `;
+                }).join('');
             }
         }
 
         function selectModalColor(idx) {
+            const colors = currentModalProduct.colors || [];
+            if (colors[idx] && colors[idx].isOut) return; // Не можна вибрати те, чого немає в наявності
             selectedColorIndex = idx;
             updateModalGalleryAndColor();
         }
@@ -1657,9 +1706,9 @@
         }
 
         function addCurrentProductToCart() {
-            if (!currentModalProduct) return;
+            if (!currentModalProduct || selectedColorIndex === null) return;
             const colors = currentModalProduct.colors || [];
-            let selectedColorName = colors.length > 0 ? colors[selectedColorIndex].name : 'Default';
+            let selectedColorName = colors[selectedColorIndex].name;
             
             const existingIndex = cart.findIndex(item => item.id === currentModalProduct.id && item.color === selectedColorName);
             if (existingIndex > -1) {
