@@ -580,6 +580,7 @@
             transform: scale(1.05); 
         }
 
+        /* КОЛЬОРИ В КАТАЛОЗІ (ТІЛЬКИ КРАПКИ) */
         .color-picker-preview {
             display: flex;
             gap: 6px;
@@ -588,17 +589,29 @@
         }
 
         .color-dot {
-            width: 12px;
-            height: 12px;
+            width: 14px;
+            height: 14px;
             border-radius: 50%;
             border: 1px solid var(--border-hover);
             display: inline-block;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .color-dot:hover {
+            transform: scale(1.2);
         }
         .color-dot.white { background-color: #FFFFFF; }
         .color-dot.black { background-color: #1a1a1a; }
         .color-dot.pink { background-color: #ff2a85; }
-        .color-dot.out-of-stock { background-color: #9ca3af !important; border-color: #6b7280; opacity: 0.6; cursor: not-allowed; }
-        .color-dot.active { box-shadow: 0 0 0 2px var(--accent); }
+        .color-dot.out-of-stock { 
+            background-color: #9ca3af !important; 
+            border-color: #6b7280; 
+            opacity: 0.6; 
+            cursor: not-allowed; 
+        }
+        .color-dot.out-of-stock:hover {
+            transform: none;
+        }
 
         .product-info {
             display: flex;
@@ -971,9 +984,7 @@
         <div class="nav-right">
             <div class="icon-btn-wrapper">
                 <button class="icon-btn" id="theme-toggle-btn" aria-label="Змінити тему">
-                    <!-- SVG Moon for Light Theme -->
                     <svg class="theme-icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-                    <!-- SVG Sun for Dark Theme -->
                     <svg class="theme-icon-sun" style="display: none;" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
                 </button>
                 <span class="tooltip">Змінити тему</span>
@@ -1085,7 +1096,7 @@
         <div class="footer-grid">
             <div class="footer-col">
                 <a class="logo" style="margin-bottom: 12px;">
-                    <img src="https://i.ibb.co/3ykX17N0/logo-milipstore.jpg" alt="Logo" style="height: 32px; width: 32px; object-fit: cover; border-radius: 6px;"> M1lip<span>Store</span>
+                    <img src="logo-milipstore.png" alt="Logo" style="height: 32px; width: 32px; object-fit: cover; border-radius: 6px;"> M1lip<span>Store</span>
                 </a>
                 <p style="color: var(--text-secondary); max-width: 280px; font-size: 0.9rem; margin-bottom: 12px;">Gaming hardware для твого ідеального setup. Преміальний вибір техніки для тих, хто цінує якість, комфорт і продуктивність.</p>
                 <p style="font-size: 0.85rem; font-weight: 700; color: var(--text-primary);">Обирай. Грай. Перемагай.</p>
@@ -1476,11 +1487,11 @@
             container.innerHTML = filteredProducts.map((p) => {
                 const isFav = wishlist.some(item => item.id === p.id);
                 
-                // Рендеримо всі наявні/ненаявні кольори точками в каталозі
+                // Відображення кольорів у вигляді простих точок (без цифр та слова "колір")
                 const colorDotsHtml = p.colors && p.colors.length > 0 ? p.colors.map((c, idx) => {
                     const isOut = c.stock <= 0;
                     const dotClass = isOut ? 'out-of-stock' : c.class;
-                    // Якщо колір має прив'язане фото, при кліку у каталозі одразу відкриваємо модальне вікно і вибираємо цей колір
+                    // Якщо колір є в наявності — крапка клікабельна і відкриває картку товару одразу з цим кольором
                     return `<span class="color-dot ${dotClass}" title="${c.name}" ${isOut ? '' : `onclick="event.stopPropagation(); openProductModal(products.find(x => x.id === '${p.id}'), ${idx})"`}></span>`;
                 }).join('') : '';
 
@@ -1805,7 +1816,6 @@
 
             currentModalProduct._allImages = allImages;
 
-            // Якщо вибраний колір має своє фото, підтягуємо його одразу в головне фото модалки
             let initialImg = allImages[0];
             if (product.colors && product.colors[selectedColorIndex] && product.colors[selectedColorIndex].image) {
                 initialImg = product.colors[selectedColorIndex].image;
@@ -1852,13 +1862,12 @@
         function selectModalColor(index) {
             if (!currentModalProduct || !currentModalProduct.colors) return;
             const colorObj = currentModalProduct.colors[index];
-            if (!colorObj || colorObj.stock <= 0) return; // Заборона вибору, якщо немає в наявності
+            if (!colorObj || colorObj.stock <= 0) return;
             
             selectedColorIndex = index;
             updateModalColorDisplay();
             updateModalWishlistBtn();
 
-            // Автоматично підтягуємо фото, прикріплене до цього кольору
             if (colorObj.image) {
                 const modalImg = document.getElementById('modal-img');
                 if (modalImg) modalImg.src = colorObj.image;
