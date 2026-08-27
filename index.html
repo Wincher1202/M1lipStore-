@@ -154,7 +154,6 @@
             margin-left: auto;
         }
 
-        /* Tooltip & Icon Buttons */
         .icon-btn-wrapper {
             position: relative;
             display: inline-flex;
@@ -586,7 +585,6 @@
             transform: scale(1.05); 
         }
 
-        /* КОЛЬОРИ В КАТАЛОЗІ (ТІЛЬКИ КРАПКИ) */
         .color-picker-preview {
             display: flex;
             gap: 6px;
@@ -631,10 +629,6 @@
         .product-title-group h4 { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; }
         .product-title-group h3 { font-size: 1.1rem; font-weight: 800; margin-top: 2px; }
         .product-price { font-size: 1.15rem; font-weight: 600; }
-
-        .product-action-hover {
-            margin-top: 12px;
-        }
 
         /* ADVANTAGES BLOCK */
         .advantages-section {
@@ -1200,7 +1194,7 @@
 
                 <div class="modal-options-row">
                     <div class="option-group">
-                        <label>Color: (<span id="modal-color-name">White</span>)</label>
+                        <label>Колір: (<span id="modal-color-name">White</span>)</label>
                         <div class="color-selector-large" id="modal-color-selector"></div>
                         <div id="modal-stock-status" class="stock-status"></div>
                     </div>
@@ -1520,453 +1514,397 @@
                             </div>
                             <div class="product-price">${formatPrice(p.price)}</div>
                         </div>
-                        <div class="product-action-hover">
-                            <button class="btn-primary" style="width: 100%; justify-content: center; padding: 10px; font-size: 0.85rem;" onclick="event.stopPropagation(); addDirectToCart('${p.id}')">В кошик</button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function openProductModal(product, colorIdx = 0) {
+            if (!product) return;
+            currentModalProduct = product;
+            modalQty = 1;
+            selectedColorIndex = colorIdx;
+
+            document.getElementById('modal-tag').innerText = product.tag || 'НОВИНКА';
+            document.getElementById('modal-brand').innerText = product.brand;
+            document.getElementById('modal-title').innerText = product.title;
+            document.getElementById('modal-desc').innerText = product.desc;
+            document.getElementById('modal-price').innerHTML = formatPrice(product.price);
+            document.getElementById('modal-qty').innerText = modalQty;
+
+            updateModalGalleryAndColor();
+
+            const thumbsContainer = document.getElementById('modal-thumbs');
+            if (thumbsContainer) {
+                let thumbsHtml = '';
+                if (product.gallery && product.gallery.length > 0) {
+                    thumbsHtml = product.gallery.map((imgUrl, i) => `
+                        <img class="modal-thumb ${i === 0 ? 'active' : ''}" src="${imgUrl}" onclick="changeModalImage('${imgUrl}', this)" alt="thumb">
+                    `).join('');
+                }
+                thumbsContainer.innerHTML = thumbsHtml;
+            }
+
+            const specsContainer = document.getElementById('modal-specs');
+            if (specsContainer) {
+                if (product.specs && product.specs.length > 0) {
+                    specsContainer.innerHTML = product.specs.map(s => `
+                        <div class="spec-box">
+                            <span>${s.label || s.key || 'Характеристика'}</span>
+                            <strong>${s.value || ''}</strong>
+                        </div>
+                    `).join('');
+                } else {
+                    specsContainer.innerHTML = '';
+                }
+            }
+
+            const isFav = wishlist.some(item => item.id === product.id);
+            const wishBtn = document.getElementById('modal-wishlist-btn');
+            if (wishBtn) {
+                wishBtn.classList.toggle('active', isFav);
+                wishBtn.querySelector('svg').style.fill = isFav ? '#FF3B30' : 'none';
+                wishBtn.querySelector('svg').style.stroke = isFav ? '#FF3B30' : 'currentColor';
+            }
+
+            document.getElementById('product-modal').classList.add('active');
+            document.getElementById('backdrop').classList.add('active');
+        }
+
+        function updateModalGalleryAndColor() {
+            if (!currentModalProduct) return;
+            const colors = currentModalProduct.colors || [];
+            const colorSelector = document.getElementById('modal-color-selector');
+            const colorNameEl = document.getElementById('modal-color-name');
+            const stockStatusEl = document.getElementById('modal-stock-status');
+            const addCartBtn = document.getElementById('modal-add-cart-btn');
+
+            if (colors.length > 0) {
+                if (selectedColorIndex >= colors.length) selectedColorIndex = 0;
+                const activeColor = colors[selectedColorIndex];
+                
+                if (colorNameEl) colorNameEl.innerText = activeColor.name;
+
+                if (activeColor.image) {
+                    const mainImg = document.getElementById('modal-img');
+                    if (mainImg) mainImg.src = activeColor.image;
+                } else if (currentModalProduct.gallery && currentModalProduct.gallery.length > 0) {
+                    const mainImg = document.getElementById('modal-img');
+                    if (mainImg) mainImg.src = currentModalProduct.gallery[0];
+                }
+
+                if (stockStatusEl) {
+                    if (activeColor.stock > 0) {
+                        stockStatusEl.innerText = `В наявності (${activeColor.stock} шт.)`;
+                        stockStatusEl.className = 'stock-status in-stock';
+                        if (addCartBtn) {
+                            addCartBtn.disabled = false;
+                            addCartBtn.innerText = 'Додати в кошик';
+                        }
+                    } else {
+                        stockStatusEl.innerText = 'Немає в наявності';
+                        stockStatusEl.className = 'stock-status out-of-stock';
+                        if (addCartBtn) {
+                            addCartBtn.disabled = true;
+                            addCartBtn.innerText = 'Немає в наявності';
+                        }
+                    }
+                }
+
+                if (colorSelector) {
+                    colorSelector.innerHTML = colors.map((c, idx) => {
+                        const isOut = c.stock <= 0;
+                        const circleClass = isOut ? 'out-of-stock' : c.class;
+                        const activeClass = idx === selectedColorIndex ? 'active' : '';
+                        return `
+                            <div class="color-option-item ${isOut ? 'disabled' : ''}" onclick="selectModalColor(${idx})">
+                                <span class="color-circle-big ${circleClass} ${activeClass}" title="${c.name}"></span>
+                            </div>
+                        `;
+                    }).join('');
+                }
+            } else {
+                if (colorSelector) colorSelector.innerHTML = '';
+                if (stockStatusEl) stockStatusEl.innerText = '';
+                const mainImg = document.getElementById('modal-img');
+                if (mainImg && currentModalProduct.img) mainImg.src = currentModalProduct.img;
+            }
+        }
+
+        function selectModalColor(idx) {
+            selectedColorIndex = idx;
+            updateModalGalleryAndColor();
+        }
+
+        function changeModalImage(url, thumbEl) {
+            const mainImg = document.getElementById('modal-img');
+            if (mainImg) mainImg.src = url;
+            document.querySelectorAll('.modal-thumb').forEach(t => t.classList.remove('active'));
+            if (thumbEl) thumbEl.classList.add('active');
+        }
+
+        function closeProductModal() {
+            document.getElementById('product-modal').classList.remove('active');
+            document.getElementById('backdrop').classList.remove('active');
+            currentModalProduct = null;
+        }
+
+        function adjustModalQty(delta) {
+            modalQty += delta;
+            if (modalQty < 1) modalQty = 1;
+            const qtyEl = document.getElementById('modal-qty');
+            if (qtyEl) qtyEl.innerText = modalQty;
+        }
+
+        function addCurrentProductToCart() {
+            if (!currentModalProduct) return;
+            const colors = currentModalProduct.colors || [];
+            let selectedColorName = colors.length > 0 ? colors[selectedColorIndex].name : 'Default';
+            
+            const existingIndex = cart.findIndex(item => item.id === currentModalProduct.id && item.color === selectedColorName);
+            if (existingIndex > -1) {
+                cart[existingIndex].qty += modalQty;
+            } else {
+                cart.push({
+                    id: currentModalProduct.id,
+                    title: currentModalProduct.title,
+                    brand: currentModalProduct.brand,
+                    price: currentModalProduct.price,
+                    img: currentModalProduct.img,
+                    color: selectedColorName,
+                    qty: modalQty
+                });
+            }
+
+            saveCart();
+            closeProductModal();
+            toggleCart(true);
+        }
+
+        function toggleCart(open) {
+            const drawer = document.getElementById('cart-drawer');
+            const backdrop = document.getElementById('backdrop');
+            if (open) {
+                drawer.classList.add('active');
+                backdrop.classList.add('active');
+                renderCartItems();
+            } else {
+                drawer.classList.remove('active');
+                if (!document.getElementById('wishlist-drawer').classList.contains('active')) {
+                    backdrop.classList.remove('active');
+                }
+            }
+        }
+
+        function toggleWishlistDrawer(open) {
+            const drawer = document.getElementById('wishlist-drawer');
+            const backdrop = document.getElementById('backdrop');
+            if (open) {
+                drawer.classList.add('active');
+                backdrop.classList.add('active');
+                renderWishlistItems();
+            } else {
+                drawer.classList.remove('active');
+                if (!document.getElementById('cart-drawer').classList.contains('active')) {
+                    backdrop.classList.remove('active');
+                }
+            }
+        }
+
+        function closeAllDrawers() {
+            document.getElementById('cart-drawer').classList.remove('active');
+            document.getElementById('wishlist-drawer').classList.remove('active');
+            document.getElementById('backdrop').classList.remove('active');
+            closeProductModal();
+            toggleSearch(false);
+            closeInfoModal();
+        }
+
+        function toggleSearch(open) {
+            const modal = document.getElementById('search-modal');
+            if (open) {
+                modal.classList.add('active');
+                setTimeout(() => document.getElementById('search-input')?.focus(), 100);
+            } else {
+                modal.classList.remove('active');
+            }
+        }
+
+        function handleSearch(query) {
+            const resultsContainer = document.getElementById('search-results');
+            if (!resultsContainer) return;
+
+            if (!query.trim()) {
+                resultsContainer.innerHTML = '';
+                return;
+            }
+
+            const q = query.toLowerCase();
+            const filtered = products.filter(p => p.title.toLowerCase().includes(q) || p.brand.toLowerCase().includes(q) || p.category.toLowerCase().includes(q));
+
+            if (filtered.length === 0) {
+                resultsContainer.innerHTML = `<p style="color: var(--text-secondary); padding: 10px;">Нічого не знайдено</p>`;
+                return;
+            }
+
+            resultsContainer.innerHTML = filtered.map(p => `
+                <div class="search-result-item" onclick="toggleSearch(false); openProductModal(products.find(x => x.id === '${p.id}'))">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <img src="${p.img}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;" alt="">
+                        <div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted);">${p.brand}</div>
+                            <div style="font-weight: 700;">${p.title}</div>
+                        </div>
+                    </div>
+                    <div style="font-weight: 700; color: var(--accent);">${formatPrice(p.price)}</div>
+                </div>
+            `).join('');
+        }
+
+        function renderCartItems() {
+            const container = document.getElementById('cart-items-container');
+            const totalEl = document.getElementById('cart-total-price');
+            if (!container) return;
+
+            if (cart.length === 0) {
+                container.innerHTML = `<p style="color: var(--text-secondary); text-align: center; padding: 40px;">Кошик порожній</p>`;
+                if (totalEl) totalEl.innerHTML = formatPrice(0);
+                return;
+            }
+
+            let total = 0;
+            container.innerHTML = cart.map((item, index) => {
+                total += item.price * item.qty;
+                return `
+                    <div class="cart-item">
+                        <img src="${item.img}" onclick="openProductModal(products.find(x => x.id === '${item.id}'))" alt="">
+                        <div style="flex-grow: 1;">
+                            <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted);">${item.brand}</div>
+                            <div style="font-size: 0.95rem; font-weight: 800;">${item.title}</div>
+                            <div style="font-size: 0.75rem; color: var(--text-secondary);">Колір: ${item.color}</div>
+                            <div style="font-size: 0.9rem; font-weight: 700; color: var(--accent); margin-top: 4px;">${formatPrice(item.price * item.qty)}</div>
+                        </div>
+                        <div class="quantity-controls">
+                            <button onclick="updateCartQty(${index}, -1)">−</button>
+                            <span>${item.qty}</span>
+                            <button onclick="updateCartQty(${index}, 1)">+</button>
                         </div>
                     </div>
                 `;
             }).join('');
+
+            if (totalEl) totalEl.innerHTML = formatPrice(total);
+        }
+
+        function updateCartQty(index, delta) {
+            cart[index].qty += delta;
+            if (cart[index].qty <= 0) {
+                cart.splice(index, 1);
+            }
+            saveCart();
+            renderCartItems();
+        }
+
+        function renderWishlistItems() {
+            const container = document.getElementById('wishlist-items-container');
+            if (!container) return;
+
+            if (wishlist.length === 0) {
+                container.innerHTML = `<p style="color: var(--text-secondary); text-align: center; padding: 40px;">Список обраного порожній</p>`;
+                return;
+            }
+
+            container.innerHTML = wishlist.map(item => `
+                <div class="wishlist-item-card">
+                    <img src="${item.img}" onclick="openProductModal(products.find(x => x.id === '${item.id}'))" alt="">
+                    <div style="flex-grow: 1;">
+                        <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted);">${item.brand}</div>
+                        <div style="font-size: 0.95rem; font-weight: 800;">${item.title}</div>
+                        <div style="font-size: 0.9rem; font-weight: 700; color: var(--accent); margin-top: 4px;">${formatPrice(item.price)}</div>
+                    </div>
+                    <button class="icon-btn" onclick="toggleWishlist('${item.id}')" style="width: 32px; height: 32px; border: none;">✕</button>
+                </div>
+            `).join('');
         }
 
         function toggleWishlist(productId) {
             const product = products.find(p => p.id === productId);
             if (!product) return;
 
-            const activeColors = product.colors || [{ name: 'White', stock: 5 }];
-            const colorObj = activeColors[selectedColorIndex] || activeColors[0];
-
-            const existingIndex = wishlist.findIndex(item => item.id === productId && item.color === colorObj.name);
-            const isAdding = existingIndex === -1;
-
-            if (isAdding) {
+            const index = wishlist.findIndex(item => item.id === productId);
+            if (index > -1) {
+                wishlist.splice(index, 1);
+            } else {
                 wishlist.push({
                     id: product.id,
-                    brand: product.brand,
                     title: product.title,
+                    brand: product.brand,
                     price: product.price,
-                    img: product.img,
-                    color: colorObj.name,
-                    qty: currentModalProduct && currentModalProduct.id === productId ? modalQty : 1
+                    img: product.img
                 });
-            } else {
-                wishlist.splice(existingIndex, 1);
             }
 
-            localStorage.setItem('m1lip_wishlist', JSON.stringify(wishlist));
-            
-            const btnEl = document.getElementById(`wishlist-btn-${productId}`);
-            if (btnEl) {
-                btnEl.classList.toggle('active', isAdding);
-                const svg = btnEl.querySelector('svg');
-                if (svg) {
-                    svg.style.animation = 'none';
-                    svg.offsetHeight; 
-                    svg.style.animation = '';
-                    svg.setAttribute('fill', isAdding ? '#FF3B30' : 'none');
-                    svg.setAttribute('stroke', isAdding ? '#FF3B30' : 'currentColor');
+            saveWishlist();
+            renderCatalog();
+            if (currentModalProduct && currentModalProduct.id === productId) {
+                const isFav = wishlist.some(item => item.id === productId);
+                const wishBtn = document.getElementById('modal-wishlist-btn');
+                if (wishBtn) {
+                    wishBtn.classList.toggle('active', isFav);
+                    wishBtn.querySelector('svg').style.fill = isFav ? '#FF3B30' : 'none';
+                    wishBtn.querySelector('svg').style.stroke = isFav ? '#FF3B30' : 'currentColor';
                 }
             }
-
-            updateBadges();
-            renderWishlistItems();
-            if (currentModalProduct && currentModalProduct.id === productId) updateModalWishlistBtn();
         }
 
         function toggleCurrentWishlist() {
-            if (currentModalProduct) toggleWishlist(currentModalProduct.id);
-        }
-
-        function updateModalWishlistBtn() {
-            const btn = document.getElementById('modal-wishlist-btn');
-            if (!btn || !currentModalProduct) return;
-            const activeColors = currentModalProduct.colors || [{ name: 'White' }];
-            const colorObj = activeColors[selectedColorIndex] || activeColors[0];
-            const isFav = wishlist.some(item => item.id === currentModalProduct.id && item.color === colorObj.name);
-            btn.classList.toggle('active', isFav);
-            const svg = btn.querySelector('svg');
-            if (svg) {
-                svg.setAttribute('fill', isFav ? '#FF3B30' : 'none');
-                svg.setAttribute('stroke', isFav ? '#FF3B30' : 'currentColor');
+            if (currentModalProduct) {
+                toggleWishlist(currentModalProduct.id);
             }
         }
 
-        function renderWishlistItems() {
-            const container = document.getElementById('wishlist-items-container');
-            if (!container) return;
-            if (wishlist.length === 0) {
-                container.innerHTML = `
-                    <div style="text-align: center; margin-top: 50px; padding: 20px;">
-                        <p style="font-weight: 700; font-size: 1.05rem; margin-bottom: 6px;">В обраному поки нічого немає</p>
-                        <p style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 20px;">Додайте товари, які вам сподобалися.</p>
-                        <button class="btn-primary" onclick="toggleWishlistDrawer(false); scrollToSection('catalog')">Переглянути товари</button>
-                    </div>
-                `;
-                return;
-            }
-            container.innerHTML = wishlist.map((item, index) => `
-                <div class="wishlist-item-card">
-                    <img src="${item.img}" alt="${item.title}" onclick="toggleWishlistDrawer(false); openProductModal(products.find(x => x.id === '${item.id}'))" title="Перейти до опису">
-                    <div style="flex-grow: 1;">
-                        <h4 style="font-size: 0.9rem; font-weight: 700; cursor: pointer;" onclick="toggleWishlistDrawer(false); openProductModal(products.find(x => x.id === '${item.id}'))">${item.brand} ${item.title}</h4>
-                        <p style="font-size: 0.75rem; color: var(--text-secondary);">Color: <strong>(${item.color})</strong></p>
-                        <p style="font-size: 0.85rem; font-weight: 600;">${formatPrice(item.price)}</p>
-                        <div style="display: flex; gap: 8px; margin-top: 6px;">
-                            <button class="btn-primary" style="padding: 4px 10px; font-size: 0.75rem;" onclick="addWishlistItemToCart('${item.id}', '${item.color}')">В кошик</button>
-                            <button class="filter-btn" style="padding: 4px 10px; font-size: 0.75rem; color: #FF3B30; border-color: #FF3B30;" onclick="removeWishlistItem(${index})">Видалити</button>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
+        function saveCart() {
+            localStorage.setItem('m1lip_cart', JSON.stringify(cart));
+            updateBadges();
         }
 
-        function removeWishlistItem(index) {
-            const removed = wishlist.splice(index, 1)[0];
+        function saveWishlist() {
             localStorage.setItem('m1lip_wishlist', JSON.stringify(wishlist));
-            renderWishlistItems();
             updateBadges();
-            if (removed) {
-                const btnEl = document.getElementById(`wishlist-btn-${removed.id}`);
-                if (btnEl) {
-                    btnEl.classList.remove('active');
-                    const svg = btnEl.querySelector('svg');
-                    if (svg) {
-                        svg.setAttribute('fill', 'none');
-                        svg.setAttribute('stroke', 'currentColor');
-                    }
-                }
-            }
-        }
-
-        function addWishlistItemToCart(productId, colorName) {
-            const product = products.find(p => p.id === productId);
-            if (!product) return;
-            addToCartFull(product, colorName, 1);
-        }
-
-        function addDirectToCart(productId) {
-            const product = products.find(p => p.id === productId);
-            if (!product) return;
-            const defaultColorObj = product.colors && product.colors.find(c => c.stock > 0) ? product.colors.find(c => c.stock > 0) : product.colors[0];
-            if (!defaultColorObj || defaultColorObj.stock <= 0) {
-                alert("Цей товар наразі відсутній на складі.");
-                return;
-            }
-            addToCartFull(product, defaultColorObj.name, 1);
-        }
-
-        function addToCartFull(product, colorName, qty) {
-            const existing = cart.find(item => item.id === product.id && item.color === colorName);
-            if (existing) {
-                existing.qty += qty;
-            } else {
-                cart.push({
-                    id: product.id,
-                    brand: product.brand,
-                    title: product.title,
-                    price: product.price,
-                    img: product.img,
-                    color: colorName,
-                    qty: qty
-                });
-            }
-
-            localStorage.setItem('m1lip_cart', JSON.stringify(cart));
-            updateBadges();
-            renderCartItems();
-            toggleCart(true);
-            updateTelegramMainButton();
-        }
-
-        function updateCartQty(productId, colorName, change) {
-            const item = cart.find(i => i.id === productId && i.color === colorName);
-            if (!item) return;
-            item.qty += change;
-            if (item.qty <= 0) {
-                cart = cart.filter(i => !(i.id === productId && i.color === colorName));
-            }
-            localStorage.setItem('m1lip_cart', JSON.stringify(cart));
-            updateBadges();
-            renderCartItems();
-            updateTelegramMainButton();
-        }
-
-        function renderCartItems() {
-            const container = document.getElementById('cart-items-container');
-            if (!container) return;
-            if (cart.length === 0) {
-                container.innerHTML = `
-                    <div style="text-align: center; margin-top: 50px; padding: 20px;">
-                        <p style="font-weight: 700; font-size: 1.05rem; margin-bottom: 6px;">Кошик порожній</p>
-                        <p style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 20px;">Додайте товари, які хочете придбати.</p>
-                        <button class="btn-primary" onclick="toggleCart(false); scrollToSection('catalog')">Перейти до каталогу</button>
-                    </div>
-                `;
-                const totalPriceEl = document.getElementById('cart-total-price');
-                if (totalPriceEl) totalPriceEl.innerHTML = formatPrice(0);
-                if (tg && tg.MainButton) tg.MainButton.hide();
-                return;
-            }
-            container.innerHTML = cart.map(item => `
-                <div class="cart-item">
-                    <img src="${item.img}" alt="${item.title}">
-                    <div style="flex-grow: 1;">
-                        <h4 style="font-size: 0.9rem; font-weight: 700;">${item.brand} ${item.title}</h4>
-                        <p style="font-size: 0.75rem; color: var(--text-secondary);">Color: <strong>(${item.color})</strong></p>
-                        <p style="font-size: 0.85rem; font-weight: 600;">${formatPrice(item.price)}</p>
-                        <div class="quantity-controls" style="margin-top: 4px;">
-                            <button onclick="updateCartQty('${item.id}', '${item.color}', -1)">−</button>
-                            <span style="font-weight: 700;">${item.qty}</span>
-                            <button onclick="updateCartQty('${item.id}', '${item.color}', 1)">+</button>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-            const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-            const totalPriceEl = document.getElementById('cart-total-price');
-            if (totalPriceEl) totalPriceEl.innerHTML = formatPrice(total);
-            updateTelegramMainButton();
-        }
-
-        function updateTelegramMainButton() {
-            if (!tg || !tg.MainButton) return;
-            const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-            if (cart.length > 0) {
-                tg.MainButton.text = 'Оформити замовлення: ' + total.toLocaleString('uk-UA') + ' ₴';
-                tg.MainButton.show();
-                tg.MainButton.onClick(checkout);
-            } else {
-                tg.MainButton.hide();
-            }
         }
 
         function updateBadges() {
             const cartCountEl = document.getElementById('cart-count');
             const wishlistCountEl = document.getElementById('wishlist-count');
-            if (cartCountEl) cartCountEl.innerText = cart.reduce((sum, item) => sum + item.qty, 0);
+            
+            const totalCartItems = cart.reduce((sum, item) => sum + item.qty, 0);
+            if (cartCountEl) cartCountEl.innerText = totalCartItems;
             if (wishlistCountEl) wishlistCountEl.innerText = wishlist.length;
         }
 
-        function toggleCart(open) {
-            document.getElementById('cart-drawer')?.classList.toggle('active', open);
-            document.getElementById('backdrop')?.classList.toggle('active', open);
-            if (open) renderCartItems();
-        }
-
-        function toggleWishlistDrawer(open) {
-            document.getElementById('wishlist-drawer')?.classList.toggle('active', open);
-            document.getElementById('backdrop')?.classList.toggle('active', open);
-            if (open) renderWishlistItems();
-        }
-
-        function toggleSearch(open) {
-            document.getElementById('search-modal')?.classList.toggle('active', open);
-            document.getElementById('backdrop')?.classList.toggle('active', open);
-            if (open) document.getElementById('search-input')?.focus();
-        }
-
-        function closeAllDrawers() {
-            toggleCart(false);
-            toggleWishlistDrawer(false);
-            toggleSearch(false);
-            closeProductModal();
-            closeInfoModal();
-        }
-
-        function handleSearch(query) {
-            const container = document.getElementById('search-results');
-            if (!container) return;
-            if (!query.trim()) { container.innerHTML = ''; return; }
-            const filtered = products.filter(p => p.title.toLowerCase().includes(query.toLowerCase()) || p.brand.toLowerCase().includes(query.toLowerCase()));
-            if (filtered.length === 0) {
-                container.innerHTML = `<p style="color: var(--text-secondary); text-align: center; padding: 15px;">Нічого не знайдено</p>`;
-                return;
-            }
-            container.innerHTML = filtered.map(p => `
-                <div class="search-result-item" onclick="toggleSearch(false); openProductModal(products.find(x => x.id === '${p.id}'))">
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <img src="${p.img}" style="width: 38px; height: 38px; object-fit: cover; border-radius: 6px;">
-                        <div><strong style="font-size: 0.9rem;">${p.brand} ${p.title}</strong></div>
-                    </div>
-                    <span style="font-weight: 600; font-size: 0.9rem;">${formatPrice(p.price)}</span>
-                </div>
-            `).join('');
-        }
-
-        function openProductModal(product, initialColorIdx = 0) {
-            if (!product) return;
-            currentModalProduct = product;
-            modalQty = 1;
-            selectedColorIndex = initialColorIdx;
-            
-            if (product.colors && product.colors[selectedColorIndex] && product.colors[selectedColorIndex].stock <= 0) {
-                const firstAvailableIdx = product.colors.findIndex(c => c.stock > 0);
-                if (firstAvailableIdx !== -1) selectedColorIndex = firstAvailableIdx;
-            }
-
-            let allImages = [];
-            if (product.gallery && product.gallery.length > 0) {
-                allImages = [...product.gallery];
-            } else if (product.img) {
-                allImages = [product.img];
-            }
-
-            if (product.colors) {
-                product.colors.forEach(c => {
-                    if (c.image && !allImages.includes(c.image)) {
-                        allImages.push(c.image);
-                    }
-                });
-            }
-
-            currentModalProduct._allImages = allImages;
-
-            let initialImg = allImages[0];
-            if (product.colors && product.colors[selectedColorIndex] && product.colors[selectedColorIndex].image) {
-                initialImg = product.colors[selectedColorIndex].image;
-            }
-
-            const modalImg = document.getElementById('modal-img');
-            if (modalImg) modalImg.src = initialImg;
-            
-            const thumbsContainer = document.getElementById('modal-thumbs');
-            if (thumbsContainer) {
-                thumbsContainer.innerHTML = allImages.map((imgSrc, index) => `
-                    <img class="modal-thumb ${imgSrc === initialImg ? 'active' : ''}" src="${imgSrc}" onclick="changeModalMainImage('${imgSrc}', this)">
-                `).join('');
-            }
-
-            setElementText('modal-tag', product.tag || '');
-            setElementText('modal-brand', product.brand);
-            setElementText('modal-title', product.title);
-            setElementText('modal-desc', product.desc);
-            
-            const priceEl = document.getElementById('modal-price');
-            if (priceEl) priceEl.innerHTML = formatPrice(product.price);
-            
-            setElementText('modal-qty', modalQty);
-
-            const specsEl = document.getElementById('modal-specs');
-            if (specsEl && product.specs) {
-                specsEl.innerHTML = product.specs.map(s => `
-                    <div class="spec-box"><span>${s.label}</span><strong>${s.value}</strong></div>
-                `).join('');
-            }
-            
-            updateModalColorDisplay();
-            updateModalWishlistBtn();
-            document.getElementById('product-modal')?.classList.add('active');
-            document.getElementById('backdrop')?.classList.add('active');
-        }
-
-        function setElementText(id, text) {
-            const el = document.getElementById(id);
-            if (el) el.innerText = text;
-        }
-
-        function selectModalColor(index) {
-            if (!currentModalProduct || !currentModalProduct.colors) return;
-            const colorObj = currentModalProduct.colors[index];
-            if (!colorObj || colorObj.stock <= 0) return;
-            
-            selectedColorIndex = index;
-            updateModalColorDisplay();
-            updateModalWishlistBtn();
-
-            if (colorObj.image) {
-                const modalImg = document.getElementById('modal-img');
-                if (modalImg) modalImg.src = colorObj.image;
-                
-                const thumbs = document.querySelectorAll('.modal-thumb');
-                thumbs.forEach(t => {
-                    t.classList.remove('active');
-                    if (t.src.includes(colorObj.image)) {
-                        t.classList.add('active');
-                    }
-                });
-            }
-        }
-
-        function updateModalColorDisplay() {
-            if (!currentModalProduct || !currentModalProduct.colors) return;
-            
-            const selectorContainer = document.getElementById('modal-color-selector');
-            if (selectorContainer) {
-                selectorContainer.innerHTML = currentModalProduct.colors.map((c, idx) => {
-                    const isOut = c.stock <= 0;
-                    return `
-                        <div class="color-option-item ${isOut ? 'disabled' : ''}" onclick="${isOut ? '' : `selectModalColor(${idx})`}">
-                            <div class="color-circle-big ${isOut ? 'out-of-stock' : c.class} ${idx === selectedColorIndex ? 'active' : ''}" title="${c.name}"></div>
-                        </div>
-                    `;
-                }).join('');
-            }
-
-            const activeColorObj = currentModalProduct.colors[selectedColorIndex];
-            setElementText('modal-color-name', activeColorObj ? `${activeColorObj.name}` : 'White');
-
-            const stockStatusEl = document.getElementById('modal-stock-status');
-            const addCartBtn = document.getElementById('modal-add-cart-btn');
-
-            if (activeColorObj) {
-                const stock = activeColorObj.stock !== undefined ? activeColorObj.stock : 5;
-                if (stock > 0) {
-                    stockStatusEl.innerText = `В наявності: ${stock} шт.`;
-                    stockStatusEl.className = 'stock-status in-stock';
-                    if (addCartBtn) addCartBtn.removeAttribute('disabled');
-                } else {
-                    stockStatusEl.innerText = `Немає в наявності`;
-                    stockStatusEl.className = 'stock-status out-of-stock';
-                    if (addCartBtn) addCartBtn.setAttribute('disabled', 'true');
-                }
-            }
-        }
-
-        function changeModalMainImage(src, thumbElement) {
-            const modalImg = document.getElementById('modal-img');
-            if (modalImg) modalImg.src = src;
-            document.querySelectorAll('.modal-thumb').forEach(t => t.classList.remove('active'));
-            thumbElement.classList.add('active');
-        }
-
-        function closeProductModal() {
-            document.getElementById('product-modal')?.classList.remove('active');
-            document.getElementById('backdrop')?.classList.remove('active');
-        }
-
-        function adjustModalQty(change) {
-            const activeColorObj = currentModalProduct?.colors[selectedColorIndex];
-            const maxStock = activeColorObj ? activeColorObj.stock : 99;
-            
-            modalQty = Math.max(1, Math.min(maxStock, modalQty + change));
-            setElementText('modal-qty', modalQty);
-        }
-
-        function addCurrentProductToCart() {
-            if (currentModalProduct) {
-                const activeColors = currentModalProduct.colors || [{ name: 'White', stock: 5 }];
-                const colorObj = activeColors[selectedColorIndex] || activeColors[0];
-                if (!colorObj || colorObj.stock <= 0) return;
-                
-                addToCartFull(currentModalProduct, colorObj.name, modalQty);
-                closeProductModal();
-            }
-        }
-
         function checkout() {
-            if (tg && tg.sendData) {
-                tg.sendData(JSON.stringify(cart));
-                tg.close();
+            if (cart.length === 0) return;
+            let orderText = "🛒 *Нове замовлення M1lipStore*:\n\n";
+            let total = 0;
+            cart.forEach((item, i) => {
+                orderText += `${i + 1}. *${item.brand} ${item.title}*\n   Колір: ${item.color} | Кількість: ${item.qty} шт. | Сума: ${item.price * item.qty} ₴\n`;
+                total += item.price * item.qty;
+            });
+            orderText += `\n💰 *Загальна сума*: ${total} ₴`;
+
+            if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) {
+                orderText += `\n👤 Клієнт: @${tg.initDataUnsafe.user.username || tg.initDataUnsafe.user.first_name}`;
+            }
+
+            const encoded = encodeURIComponent(orderText);
+            const managerUrl = `https://t.me/milipmanager?text=${encoded}`;
+            
+            if (tg && tg.openTelegramLink) {
+                tg.openTelegramLink(managerUrl);
             } else {
-                alert("Замовлення успішно оформлено! Дякуємо за покупку в M1lipStore.");
-                cart = [];
-                localStorage.setItem('m1lip_cart', JSON.stringify(cart));
-                updateBadges();
-                renderCartItems();
-                toggleCart(false);
+                window.open(managerUrl, '_blank');
             }
         }
-
-        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeAllDrawers(); });
     </script>
 </body>
 </html>
