@@ -8,7 +8,7 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@700;800;900&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg-primary: #F8F9FA;
@@ -74,7 +74,7 @@
             transition: background-color 0.3s ease, color 0.3s ease;
         }
 
-        .product-price, .cart-total, header .logo span {
+        .product-price, .cart-total {
             font-family: 'Inter', sans-serif;
             font-weight: 600;
         }
@@ -94,10 +94,10 @@
         ::-webkit-scrollbar-track { background: var(--bg-primary); }
         ::-webkit-scrollbar-thumb { background: var(--border-hover); border-radius: 3px; }
 
-        /* HEADER & FLOATING LOGO ANIMATION */
+        /* HEADER & MARKETPLACE LOGO STYLE */
         @keyframes floating {
             0% { transform: translateY(0px); }
-            50% { transform: translateY(-4px); }
+            50% { transform: translateY(-3px); }
             100% { transform: translateY(0px); }
         }
 
@@ -107,7 +107,7 @@
             left: 0;
             width: 100%;
             z-index: 1000;
-            padding: 12px 20px;
+            padding: 14px 20px;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -134,42 +134,52 @@
         }
 
         .logo {
-            font-size: 1.35rem;
-            font-weight: 800;
-            letter-spacing: -0.02em;
-            color: var(--text-primary);
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.55rem;
+            font-weight: 900;
+            letter-spacing: -0.03em;
             cursor: pointer;
             text-decoration: none;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 2px;
             animation: floating 3s ease-in-out infinite;
             transition: transform 0.2s ease;
         }
 
         .logo:hover {
-            transform: scale(1.05);
-        }
-
-        .logo img {
-            height: 34px;
-            width: auto;
-            object-fit: contain;
-            border-radius: 6px;
+            transform: scale(1.03);
         }
 
         .logo-text-wrap {
             display: flex;
             align-items: center;
-            gap: 2px;
         }
 
         .logo-part-1 {
             color: var(--text-primary);
+            text-transform: uppercase;
         }
 
         .logo-part-2 {
-            color: #5764e2;
+            background: linear-gradient(135deg, #5764e2 0%, #8c9eff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-transform: uppercase;
+            margin-left: 1px;
+            position: relative;
+        }
+
+        .logo-part-2::after {
+            content: '';
+            position: absolute;
+            bottom: 4px;
+            right: -6px;
+            width: 5px;
+            height: 5px;
+            background-color: #5764e2;
+            border-radius: 50%;
+            box-shadow: 0 0 8px #5764e2;
         }
 
         .nav-right {
@@ -1011,7 +1021,6 @@
     <!-- HEADER -->
     <header id="site-header">
         <a class="logo" id="logo-scroll-btn">
-            <img src="logo-milipstore.png" alt="M1lipStore Logo">
             <div class="logo-text-wrap">
                 <span class="logo-part-1">M1Lip</span><span class="logo-part-2">Store</span>
             </div>
@@ -1130,9 +1139,8 @@
     <footer>
         <div class="footer-grid">
             <div class="footer-col">
-                <a class="logo" style="margin-bottom: 10px;">
-                    <img src="logo-milipstore.png" alt="M1lipStore Logo" style="height: 28px;">
-                    <div class="logo-text-wrap" style="font-size: 1.15rem;">
+                <a class="logo" style="margin-bottom: 10px; font-size: 1.3rem;">
+                    <div class="logo-text-wrap">
                         <span class="logo-part-1">M1Lip</span><span class="logo-part-2">Store</span>
                     </div>
                 </a>
@@ -1232,7 +1240,7 @@
 
                 <div class="modal-options-row">
                     <div class="option-group">
-                        <label>Колір: (<span id="modal-color-name">Не вибрано</span>)</label>
+                        <label>Колір: (<span id="modal-color-name">Колір не вибрано</span>)</label>
                         <div class="color-selector-large" id="modal-color-selector"></div>
                         <div id="modal-stock-status" class="stock-status"></div>
                     </div>
@@ -1248,7 +1256,7 @@
                 </div>
 
                 <div style="display: flex; gap: 10px; margin-top: 14px; align-items: center;">
-                    <button class="btn-primary" id="modal-add-cart-btn" style="flex-grow: 1; justify-content: center; padding: 12px;" onclick="addCurrentProductToCart()">Додати в кошик</button>
+                    <button class="btn-primary" id="modal-add-cart-btn" style="flex-grow: 1; justify-content: center; padding: 12px;" onclick="addCurrentProductToCart()" disabled>Оберіть колір</button>
                     <button class="wishlist-btn" id="modal-wishlist-btn" onclick="toggleCurrentWishlist()" style="position: static; width: 42px; height: 42px; flex-shrink: 0;">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
                     </button>
@@ -1294,7 +1302,6 @@
 
         const API_URL = "https://m1lipstore.onrender.com/api/products";
 
-        // Функция перевода названия цвета на стильный английский для вывода в интерфейсе
         function formatColorEnglish(name) {
             if (!name) return 'Selected';
             let lower = name.toLowerCase().trim();
@@ -1396,6 +1403,14 @@
                         parsedGallery = [item.img];
                     }
 
+                    // Збираємо всі унікальні зображення для повноцінної галереї (головне + галерея + фото кольорів)
+                    let allImagesSet = new Set();
+                    if (item.img) allImagesSet.add(item.img);
+                    parsedGallery.forEach(img => allImagesSet.add(img));
+                    parsedColors.forEach(c => {
+                        if (c.image) allImagesSet.add(c.image);
+                    });
+
                     let parsedSpecs = [];
                     if (item.specs) {
                         if (typeof item.specs === 'string') {
@@ -1414,7 +1429,7 @@
                         category: item.category || 'Аксесуари',
                         desc: item.description || item.desc || 'Якісний ігровий девайс.',
                         img: item.img || (parsedGallery.length > 0 ? parsedGallery[0] : ''),
-                        gallery: parsedGallery,
+                        gallery: Array.from(allImagesSet),
                         specs: parsedSpecs,
                         colors: parsedColors
                     };
@@ -1485,7 +1500,6 @@
                 }
             });
 
-            // Плавная прокрутка наверх при клике на плавающий логотип
             document.getElementById('logo-scroll-btn')?.addEventListener('click', (e) => {
                 e.preventDefault();
                 window.scrollTo({
@@ -1597,12 +1611,11 @@
             currentModalProduct = product;
             modalQty = 1;
             
-            // Если цвет кликнули прямо из каталога (превью), берем его, иначе автоматически выбираем первый доступный
+            // Якщо передано конкретний колір (клік на кружок у каталозі), вибираємо його. Інакше — null (стан без вибраного кольору)
             if (colorIdx !== null && product.colors[colorIdx] && !product.colors[colorIdx].isOut) {
                 selectedColorIndex = colorIdx;
             } else {
-                let firstAvailable = product.colors.findIndex(c => !c.isOut);
-                selectedColorIndex = firstAvailable !== -1 ? firstAvailable : (product.colors.length > 0 ? 0 : null);
+                selectedColorIndex = null;
             }
 
             document.getElementById('modal-tag').innerText = product.tag || 'НОВИНКА';
@@ -1613,17 +1626,6 @@
             document.getElementById('modal-qty').innerText = modalQty;
 
             updateModalGalleryAndColor();
-
-            const thumbsContainer = document.getElementById('modal-thumbs');
-            if (thumbsContainer) {
-                let thumbsHtml = '';
-                if (product.gallery && product.gallery.length > 0) {
-                    thumbsHtml = product.gallery.map((imgUrl, i) => `
-                        <img class="modal-thumb ${i === 0 ? 'active' : ''}" src="${imgUrl}" onclick="changeModalImage('${imgUrl}', this)" alt="thumb">
-                    `).join('');
-                }
-                thumbsContainer.innerHTML = thumbsHtml;
-            }
 
             const specsContainer = document.getElementById('modal-specs');
             if (specsContainer) {
@@ -1658,17 +1660,17 @@
             const colorNameEl = document.getElementById('modal-color-name');
             const stockStatusEl = document.getElementById('modal-stock-status');
             const addCartBtn = document.getElementById('modal-add-cart-btn');
+            const mainImg = document.getElementById('modal-img');
+            const thumbsContainer = document.getElementById('modal-thumbs');
+
+            let activeImg = currentModalProduct.img;
 
             if (selectedColorIndex !== null && colors[selectedColorIndex]) {
                 const activeColor = colors[selectedColorIndex];
-                if (colorNameEl) colorNameEl.innerText = formatColorEnglish(activeColor.name); // Стильный английский текст цвета
+                if (colorNameEl) colorNameEl.innerText = formatColorEnglish(activeColor.name);
 
                 if (activeColor.image) {
-                    const mainImg = document.getElementById('modal-img');
-                    if (mainImg) mainImg.src = activeColor.image;
-                } else if (currentModalProduct.gallery && currentModalProduct.gallery.length > 0) {
-                    const mainImg = document.getElementById('modal-img');
-                    if (mainImg) mainImg.src = currentModalProduct.gallery[0];
+                    activeImg = activeColor.image;
                 }
 
                 if (stockStatusEl) {
@@ -1689,17 +1691,27 @@
                     }
                 }
             } else {
-                if (colorNameEl) colorNameEl.innerText = 'Не вибрано';
+                if (colorNameEl) colorNameEl.innerText = 'Колір не вибрано';
                 if (stockStatusEl) {
-                    stockStatusEl.innerText = 'Колір не вибрано';
+                    stockStatusEl.innerText = 'Будь ласка, оберіть колір товару';
                     stockStatusEl.className = 'stock-status not-selected';
                 }
                 if (addCartBtn) {
                     addCartBtn.disabled = true;
                     addCartBtn.innerText = 'Оберіть колір';
                 }
-                const mainImg = document.getElementById('modal-img');
-                if (mainImg && currentModalProduct.img) mainImg.src = currentModalProduct.img;
+            }
+
+            if (mainImg) mainImg.src = activeImg;
+
+            // Рендеримо мініатюри галереї та підсвічуємо активну картинку
+            if (thumbsContainer && currentModalProduct.gallery) {
+                thumbsContainer.innerHTML = currentModalProduct.gallery.map((imgUrl) => {
+                    const isActive = imgUrl === activeImg ? 'active' : '';
+                    return `
+                        <img class="modal-thumb ${isActive}" src="${imgUrl}" onclick="changeModalImage('${imgUrl}', this)" alt="thumb">
+                    `;
+                }).join('');
             }
 
             if (colorSelector) {
@@ -1759,7 +1771,7 @@
                     title: currentModalProduct.title,
                     brand: currentModalProduct.brand,
                     price: currentModalProduct.price,
-                    img: currentModalProduct.img,
+                    img: colors[selectedColorIndex].image || currentModalProduct.img,
                     color: selectedColorName,
                     qty: modalQty
                 });
