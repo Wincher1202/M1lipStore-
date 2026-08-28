@@ -152,14 +152,19 @@ def get_db_products():
                 else:
                     parsed = default
 
+                # ВИПРАВЛЕНО: тепер зберігаємо повну структуру з main та gallery для кожного кольору
                 if key == "color_images" and isinstance(parsed, dict):
-                    flat_ci = {}
+                    formatted_ci = {}
                     for col_name, col_data in parsed.items():
                         if isinstance(col_data, dict):
-                            flat_ci[col_name] = col_data.get("main", "")
+                            formatted_ci[col_name] = {
+                                "main": col_data.get("main", ""),
+                                "gallery": col_data.get("gallery", [])
+                            }
                         else:
-                            flat_ci[col_name] = col_data
-                    p[mapKey] = flat_ci
+                            # Захист для старих записів, якщо раптом збереглись як простий рядок
+                            formatted_ci[col_name] = {"main": str(col_data), "gallery": []}
+                    p[mapKey] = formatted_ci
                 else:
                     p[mapKey] = parsed
             except Exception:
