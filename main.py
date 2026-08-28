@@ -652,46 +652,19 @@ async def process_color_qty_input(message: Message, state: FSMContext):
             await state.update_data(color_quantities_dict=cq_dict, current_color_photo_index=0, color_images_dict={})
             await state.set_state(AddProductStates.waiting_for_color_main_photo)
             first_c = colors_list[0]
-            skip_markup = InlineKeyboardMarkup(inline_keyboard=[
-                [InlineKeyboardButton(text="⏭ Пропустити головне фото", callback_data="skip_col_main_photo")]])
-            await message.answer(f"🖼 Надішліть **головне фото** для кольору **{first_c}** (або пропустіть):",
-                                 reply_markup=skip_markup, parse_mode="Markdown")
+            await message.answer(f"🖼 Надішліть **обов'язкове головне фото** для кольору **{first_c}**:",
+                                 parse_mode="Markdown")
     except ValueError:
         await message.answer("❌ Будь ласка, введіть ціле число (0 або більше):")
-
-
-@router.callback_query(F.data == "skip_col_main_photo", AddProductStates.waiting_for_color_main_photo)
-async def skip_col_main_photo_cb(callback: CallbackQuery, state: FSMContext):
-    data = await state.get_data()
-    colors_list = data.get("selected_colors", [])
-    idx = data.get("current_color_photo_index", 0)
-    ci_dict = data.get("color_images_dict", {})
-    current_color = colors_list[idx]
-
-    if current_color not in ci_dict:
-        ci_dict[current_color] = {"main": "", "gallery": []}
-    else:
-        ci_dict[current_color]["main"] = ""
-
-    await state.update_data(color_images_dict=ci_dict)
-    await state.set_state(AddProductStates.waiting_for_color_gallery_photos)
-    try:
-        await callback.message.delete()
-    except Exception:
-        pass
-    done_markup = InlineKeyboardMarkup(
-        inline_keyboard=[[InlineKeyboardButton(text="✅ Готово (перейти далі)", callback_data="col_gallery_done")]])
-    await callback.message.answer(
-        f"📸 Надішліть **додаткові фото** для кольору **{current_color}** (або натисніть Готово):",
-        reply_markup=done_markup, parse_mode="Markdown")
-    await callback.answer()
 
 
 @router.message(AddProductStates.waiting_for_color_main_photo, F.photo)
 async def process_color_main_photo(message: Message, state: FSMContext):
     if message.from_user.id not in ADMIN_IDS: return
+
     photo_file_id = message.photo[-1].file_id
     photo_url = await get_file_url(message.bot, photo_file_id)
+
     data = await state.get_data()
     colors_list = data.get("selected_colors", [])
     idx = data.get("current_color_photo_index", 0)
@@ -705,11 +678,21 @@ async def process_color_main_photo(message: Message, state: FSMContext):
 
     await state.update_data(color_images_dict=ci_dict)
     await state.set_state(AddProductStates.waiting_for_color_gallery_photos)
+
     done_markup = InlineKeyboardMarkup(
-        inline_keyboard=[[InlineKeyboardButton(text="✅ Готово (перейти далі)", callback_data="col_gallery_done")]])
+        inline_keyboard=[[InlineKeyboardButton(text="✅ Готово (перейти далі)", callback_data="col_gallery_done")]]
+    )
     await message.answer(
-        f"✅ Головне фото для кольору **{current_color}** збережено!\n\n📸 Надішліть **додаткові фото**:",
-        reply_markup=done_markup, parse_mode="Markdown")
+        f"✅ Головне фото для кольору **{current_color}** успішно збережено!\n\n📸 Тепер надішліть додаткові фото галереї (або натисніть «Готово»):",
+        reply_markup=done_markup, parse_mode="Markdown"
+    )
+
+
+@router.message(AddProductStates.waiting_for_color_main_photo)
+async def process_color_main_photo_wrong(message: Message, state: FSMContext):
+    if message.from_user.id not in ADMIN_IDS: return
+    await message.answer("❌ Будь ласка, надішліть **головне фото** для цього кольору (це обов'язкове поле):",
+                         parse_mode="Markdown")
 
 
 album_cache = {}
@@ -766,9 +749,7 @@ async def advance_to_next_color_or_desc(message_or_callback_msg, state: FSMConte
         await state.update_data(current_color_photo_index=idx)
         await state.set_state(AddProductStates.waiting_for_color_main_photo)
         next_color = colors_list[idx]
-        skip_markup = InlineKeyboardMarkup(
-            inline_keyboard=[[InlineKeyboardButton(text="⏭ Пропустити", callback_data="skip_col_main_photo")]])
-        await target_msg.answer(f"🖼 Надішліть головне фото для кольору **{next_color}**:", reply_markup=skip_markup,
+        await target_msg.answer(f"🖼 Надішліть **обов'язкове головне фото** для наступного кольору **{next_color}**:",
                                 parse_mode="Markdown")
         if callback_query: await callback_query.answer()
     else:
