@@ -206,8 +206,8 @@ async def create_order(request: Request):
         payment = data.get("payment", {})
 
         items_str = "\n".join([
-                                  f"• {i.get('brand', '')} {i.get('title', '')} ({i.get('color', '')}) x {i['qty']} — {i['price'] * i['qty']} ₴"
-                                  for i in items])
+            f"• {i.get('brand', '')} {i.get('title', '')} ({i.get('color', '')}) x {i['qty']} — {i['price'] * i['qty']} ₴"
+            for i in items])
         msg_text = (
             f"🚨 *Нове замовлення #{order_id_str}*!\n\n"
             f"👤 *Клієнт:* {customer.get('firstName')} {customer.get('lastName')} ({customer.get('phone')})\n"
@@ -398,7 +398,7 @@ async def process_edit_field_save(message: Message, state: FSMContext):
     prod_id = data.get("edit_product_id")
     field = data.get("edit_field_name")
 
-    new_value = message.text.strip()
+    new_value = message.text.strip() if message.text else ""
     if field == "price":
         try:
             new_value = int(new_value)
@@ -667,7 +667,12 @@ async def skip_col_main_photo_cb(callback: CallbackQuery, state: FSMContext):
     idx = data.get("current_color_photo_index", 0)
     ci_dict = data.get("color_images_dict", {})
     current_color = colors_list[idx]
-    ci_dict[current_color] = {"main": "", "gallery": []}
+
+    if current_color not in ci_dict:
+        ci_dict[current_color] = {"main": "", "gallery": []}
+    else:
+        ci_dict[current_color]["main"] = ""
+
     await state.update_data(color_images_dict=ci_dict)
     await state.set_state(AddProductStates.waiting_for_color_gallery_photos)
     try:
@@ -676,8 +681,9 @@ async def skip_col_main_photo_cb(callback: CallbackQuery, state: FSMContext):
         pass
     done_markup = InlineKeyboardMarkup(
         inline_keyboard=[[InlineKeyboardButton(text="✅ Готово (перейти далі)", callback_data="col_gallery_done")]])
-    await callback.message.answer(f"📸 Надішліть **додаткові фото** для кольору **{current_color}**:",
-                                  reply_markup=done_markup, parse_mode="Markdown")
+    await callback.message.answer(
+        f"📸 Надішліть **додаткові фото** для кольору **{current_color}** (або натисніть Готово):",
+        reply_markup=done_markup, parse_mode="Markdown")
     await callback.answer()
 
 
@@ -691,7 +697,12 @@ async def process_color_main_photo(message: Message, state: FSMContext):
     idx = data.get("current_color_photo_index", 0)
     ci_dict = data.get("color_images_dict", {})
     current_color = colors_list[idx]
-    ci_dict[current_color] = {"main": photo_url, "gallery": []}
+
+    if current_color not in ci_dict:
+        ci_dict[current_color] = {"main": photo_url, "gallery": []}
+    else:
+        ci_dict[current_color]["main"] = photo_url
+
     await state.update_data(color_images_dict=ci_dict)
     await state.set_state(AddProductStates.waiting_for_color_gallery_photos)
     done_markup = InlineKeyboardMarkup(
