@@ -591,18 +591,20 @@
         .partner-brands-marquee {
             overflow: hidden;
             width: 100%;
-            padding: 18px 0 22px 0;
-            margin: -10px 0;
-            -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 40px, #000 calc(100% - 40px), transparent 100%);
-            mask-image: linear-gradient(90deg, transparent 0, #000 40px, #000 calc(100% - 40px), transparent 100%);
+            padding: 16px 0 20px 0;
+            margin: -6px 0;
+            position: relative;
+            -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 30px, #000 calc(100% - 30px), transparent 100%);
+            mask-image: linear-gradient(90deg, transparent 0, #000 30px, #000 calc(100% - 30px), transparent 100%);
         }
 
         .partner-brands-track {
             display: flex;
             align-items: center;
             width: max-content;
-            padding: 4px 10px;
-            animation: partnerBrandsScroll 34s linear infinite;
+            padding: 6px 0;
+            animation: partnerBrandsScroll 28s linear infinite;
+            will-change: transform;
         }
 
         .partner-brands-marquee:hover .partner-brands-track {
@@ -610,15 +612,15 @@
         }
 
         @keyframes partnerBrandsScroll {
-            from { transform: translateX(0); }
-            to { transform: translateX(-50%); }
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
         }
 
         .partner-brand-tile {
             flex-shrink: 0;
-            width: 140px;
-            height: 74px;
-            margin: 0 12px;
+            width: 136px;
+            height: 72px;
+            margin: 0 10px;
             background: #FFFFFF;
             border: 2px solid var(--border-light);
             border-radius: var(--radius-md);
@@ -626,12 +628,40 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 10px 16px;
+            padding: 8px 14px;
             cursor: pointer;
             position: relative;
             overflow: visible;
             transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
             user-select: none;
+            box-sizing: border-box;
+        }
+
+        .partner-brand-tile img {
+            max-width: 100%;
+            max-height: 44px;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            pointer-events: none;
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            display: block;
+        }
+
+        .partner-brand-tile span.brand-text-fallback {
+            font-weight: 800;
+            font-size: 0.95rem;
+            color: var(--text-primary);
+            letter-spacing: 0.5px;
+            display: none;
+        }
+
+        .partner-brand-tile.fallback-styled img {
+            display: none;
+        }
+
+        .partner-brand-tile.fallback-styled span.brand-text-fallback {
+            display: inline-block;
         }
 
         .partner-brand-tile::after {
@@ -1628,95 +1658,47 @@
         </div>
         <div class="partner-brands-marquee">
             <div class="partner-brands-track">
-                <div class="partner-brand-tile" onclick="filterByBrand('Attack Shark', this)">
-                    <div class="brand-logo-svg">
-                        <svg viewBox="0 0 145 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M12 6L26 18L12 30L17 18L12 6Z" fill="#18181b"/>
-                            <path d="M5 11L14 18L5 25L8 18L5 11Z" fill="#5764e2"/>
-                            <text x="32" y="24" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="12.5" letter-spacing="0.5" fill="#18181b">ATTACK SHARK</text>
-                        </svg>
-                    </div>
-                </div>
-                <div class="partner-brand-tile" onclick="filterByBrand('Ajazz', this)">
-                    <div class="brand-logo-svg">
-                        <svg viewBox="0 0 115 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M16 5L28 29H21L16 19L11 29H4L16 5Z" fill="#e53935"/>
-                            <path d="M16 11L21 22H11L16 11Z" fill="#ffffff"/>
-                            <text x="35" y="24" font-family="system-ui, -apple-system, sans-serif" font-weight="800" font-size="15" letter-spacing="1" fill="#18181b">AJAZZ</text>
-                        </svg>
-                    </div>
-                </div>
-                <div class="partner-brand-tile" onclick="filterByBrand('Aula', this)">
-                    <div class="brand-logo-svg">
-                        <svg viewBox="0 0 110 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M16 4L28 14L16 32L4 14L16 4Z" stroke="#0284c7" stroke-width="2.2" fill="none"/>
-                            <path d="M16 10L22 15L16 23L10 15L16 10Z" fill="#0284c7"/>
-                            <text x="35" y="24" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="15.5" letter-spacing="1.2" fill="#0284c7">AULA</text>
-                        </svg>
-                    </div>
-                </div>
-                <div class="partner-brand-tile" onclick="filterByBrand('Mchose', this)">
-                    <div class="brand-logo-svg">
-                        <svg viewBox="0 0 120 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <rect x="4" y="6" width="24" height="24" rx="5" fill="#18181b"/>
-                            <text x="9" y="23" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="13" fill="#ffffff">M</text>
-                            <text x="35" y="24" font-family="system-ui, -apple-system, sans-serif" font-weight="800" font-size="14" letter-spacing="0.8" fill="#18181b">MCHOSE</text>
-                        </svg>
-                    </div>
-                </div>
-                <div class="partner-brand-tile" onclick="filterByBrand('VGN', this)">
-                    <div class="brand-logo-svg">
-                        <svg viewBox="0 0 100 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <text x="6" y="26" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="20" letter-spacing="1.5" fill="#18181b">VGN</text>
-                            <circle cx="76" cy="18" r="5" fill="#5764e2"/>
-                        </svg>
-                    </div>
-                </div>
-                <!-- duplicated for infinite smooth loop -->
-                <div class="partner-brand-tile" onclick="filterByBrand('Attack Shark', this)">
-                    <div class="brand-logo-svg">
-                        <svg viewBox="0 0 145 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M12 6L26 18L12 30L17 18L12 6Z" fill="#18181b"/>
-                            <path d="M5 11L14 18L5 25L8 18L5 11Z" fill="#5764e2"/>
-                            <text x="32" y="24" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="12.5" letter-spacing="0.5" fill="#18181b">ATTACK SHARK</text>
-                        </svg>
-                    </div>
-                </div>
-                <div class="partner-brand-tile" onclick="filterByBrand('Ajazz', this)">
-                    <div class="brand-logo-svg">
-                        <svg viewBox="0 0 115 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M16 5L28 29H21L16 19L11 29H4L16 5Z" fill="#e53935"/>
-                            <path d="M16 11L21 22H11L16 11Z" fill="#ffffff"/>
-                            <text x="35" y="24" font-family="system-ui, -apple-system, sans-serif" font-weight="800" font-size="15" letter-spacing="1" fill="#18181b">AJAZZ</text>
-                        </svg>
-                    </div>
-                </div>
-                <div class="partner-brand-tile" onclick="filterByBrand('Aula', this)">
-                    <div class="brand-logo-svg">
-                        <svg viewBox="0 0 110 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M16 4L28 14L16 32L4 14L16 4Z" stroke="#0284c7" stroke-width="2.2" fill="none"/>
-                            <path d="M16 10L22 15L16 23L10 15L16 10Z" fill="#0284c7"/>
-                            <text x="35" y="24" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="15.5" letter-spacing="1.2" fill="#0284c7">AULA</text>
-                        </svg>
-                    </div>
-                </div>
-                <div class="partner-brand-tile" onclick="filterByBrand('Mchose', this)">
-                    <div class="brand-logo-svg">
-                        <svg viewBox="0 0 120 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <rect x="4" y="6" width="24" height="24" rx="5" fill="#18181b"/>
-                            <text x="9" y="23" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="13" fill="#ffffff">M</text>
-                            <text x="35" y="24" font-family="system-ui, -apple-system, sans-serif" font-weight="800" font-size="14" letter-spacing="0.8" fill="#18181b">MCHOSE</text>
-                        </svg>
-                    </div>
-                </div>
-                <div class="partner-brand-tile" onclick="filterByBrand('VGN', this)">
-                    <div class="brand-logo-svg">
-                        <svg viewBox="0 0 100 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <text x="6" y="26" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="20" letter-spacing="1.5" fill="#18181b">VGN</text>
-                            <circle cx="76" cy="18" r="5" fill="#5764e2"/>
-                        </svg>
-                    </div>
-                </div>
+                <!-- Set 1 -->
+                <div class="partner-brand-tile" onclick="filterByBrand('Attack Shark', this)"><img src="attack-shark.jpg" alt="Attack Shark" loading="lazy" onerror="this.parentElement.classList.add('fallback-styled')"><span class="brand-text-fallback">Attack Shark</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Ajazz', this)"><img src="ajazz.webp" alt="Ajazz" loading="lazy" onerror="this.parentElement.classList.add('fallback-styled')"><span class="brand-text-fallback">Ajazz</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Aula', this)"><img src="aula.png" alt="Aula" loading="lazy" onerror="this.parentElement.classList.add('fallback-styled')"><span class="brand-text-fallback">Aula</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Mchose', this)"><img src="mchose.png" alt="Mchose" loading="lazy" onerror="this.parentElement.classList.add('fallback-styled')"><span class="brand-text-fallback">Mchose</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('VGN', this)"><img src="vgn.jpg" alt="VGN" loading="lazy" onerror="this.parentElement.classList.add('fallback-styled')"><span class="brand-text-fallback">VGN</span></div>
+
+                <!-- Set 2 -->
+                <div class="partner-brand-tile" onclick="filterByBrand('Attack Shark', this)"><img src="attack-shark.jpg" alt="Attack Shark" loading="lazy" onerror="this.parentElement.classList.add('fallback-styled')"><span class="brand-text-fallback">Attack Shark</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Ajazz', this)"><img src="ajazz.webp" alt="Ajazz" loading="lazy" onerror="this.parentElement.classList.add('fallback-styled')"><span class="brand-text-fallback">Ajazz</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Aula', this)"><img src="aula.png" alt="Aula" loading="lazy" onerror="this.parentElement.classList.add('fallback-styled')"><span class="brand-text-fallback">Aula</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Mchose', this)"><img src="mchose.png" alt="Mchose" loading="lazy" onerror="this.parentElement.classList.add('fallback-styled')"><span class="brand-text-fallback">Mchose</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('VGN', this)"><img src="vgn.jpg" alt="VGN" loading="lazy" onerror="this.parentElement.classList.add('fallback-styled')"><span class="brand-text-fallback">VGN</span></div>
+
+                <!-- Set 3 -->
+                <div class="partner-brand-tile" onclick="filterByBrand('Attack Shark', this)"><img src="attack-shark.jpg" alt="Attack Shark" loading="lazy" onerror="this.parentElement.classList.add('fallback-styled')"><span class="brand-text-fallback">Attack Shark</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Ajazz', this)"><img src="ajazz.webp" alt="Ajazz" loading="lazy" onerror="this.parentElement.classList.add('fallback-styled')"><span class="brand-text-fallback">Ajazz</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Aula', this)"><img src="aula.png" alt="Aula" loading="lazy" onerror="this.parentElement.classList.add('fallback-styled')"><span class="brand-text-fallback">Aula</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Mchose', this)"><img src="mchose.png" alt="Mchose" loading="lazy" onerror="this.parentElement.classList.add('fallback-styled')"><span class="brand-text-fallback">Mchose</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('VGN', this)"><img src="vgn.jpg" alt="VGN" loading="lazy" onerror="this.parentElement.classList.add('fallback-styled')"><span class="brand-text-fallback">VGN</span></div>
+
+                <!-- Set 4 (Duplicated for 100% seamless loop) -->
+                <div class="partner-brand-tile" onclick="filterByBrand('Attack Shark', this)"><img src="attack-shark.jpg" alt="Attack Shark" loading="lazy" onerror="this.parentElement.classList.add('fallback-styled')"><span class="brand-text-fallback">Attack Shark</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Ajazz', this)"><img src="ajazz.webp" alt="Ajazz" loading="lazy" onerror="this.parentElement.classList.add('fallback-styled')"><span class="brand-text-fallback">Ajazz</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Aula', this)"><img src="aula.png" alt="Aula" loading="lazy" onerror="this.parentElement.classList.add('fallback-styled')"><span class="brand-text-fallback">Aula</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Mchose', this)"><img src="mchose.png" alt="Mchose" loading="lazy" onerror="this.parentElement.classList.add('fallback-styled')"><span class="brand-text-fallback">Mchose</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('VGN', this)"><img src="vgn.jpg" alt="VGN" loading="lazy" onerror="this.parentElement.classList.add('fallback-styled')"><span class="brand-text-fallback">VGN</span></div>
+
+                <!-- Set 5 (Duplicated for 100% seamless loop) -->
+                <div class="partner-brand-tile" onclick="filterByBrand('Attack Shark', this)"><img src="attack-shark.jpg" alt="Attack Shark" loading="lazy" onerror="this.parentElement.classList.add('fallback-styled')"><span class="brand-text-fallback">Attack Shark</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Ajazz', this)"><img src="ajazz.webp" alt="Ajazz" loading="lazy" onerror="this.parentElement.classList.add('fallback-styled')"><span class="brand-text-fallback">Ajazz</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Aula', this)"><img src="aula.png" alt="Aula" loading="lazy" onerror="this.parentElement.classList.add('fallback-styled')"><span class="brand-text-fallback">Aula</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Mchose', this)"><img src="mchose.png" alt="Mchose" loading="lazy" onerror="this.parentElement.classList.add('fallback-styled')"><span class="brand-text-fallback">Mchose</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('VGN', this)"><img src="vgn.jpg" alt="VGN" loading="lazy" onerror="this.parentElement.classList.add('fallback-styled')"><span class="brand-text-fallback">VGN</span></div>
+
+                <!-- Set 6 (Duplicated for 100% seamless loop) -->
+                <div class="partner-brand-tile" onclick="filterByBrand('Attack Shark', this)"><img src="attack-shark.jpg" alt="Attack Shark" loading="lazy" onerror="this.parentElement.classList.add('fallback-styled')"><span class="brand-text-fallback">Attack Shark</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Ajazz', this)"><img src="ajazz.webp" alt="Ajazz" loading="lazy" onerror="this.parentElement.classList.add('fallback-styled')"><span class="brand-text-fallback">Ajazz</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Aula', this)"><img src="aula.png" alt="Aula" loading="lazy" onerror="this.parentElement.classList.add('fallback-styled')"><span class="brand-text-fallback">Aula</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Mchose', this)"><img src="mchose.png" alt="Mchose" loading="lazy" onerror="this.parentElement.classList.add('fallback-styled')"><span class="brand-text-fallback">Mchose</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('VGN', this)"><img src="vgn.jpg" alt="VGN" loading="lazy" onerror="this.parentElement.classList.add('fallback-styled')"><span class="brand-text-fallback">VGN</span></div>
             </div>
         </div>
     </section>
