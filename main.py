@@ -46,7 +46,7 @@ from delivery import delivery_service, DeliveryProviderNotConfigured, DeliveryPr
 # ONLY in the platform's environment variables, and delete the fallback
 # strings below once you've confirmed the env vars are set.
 # ============================================================================
-TOKEN = os.environ.get("8993086388:AAETWcnRI-uxvm-lI2r6mQCKIXtuXq0nwpo8993086388:AAETWcnRI-uxvm-lI2r6mQCKIXtuXq0nwpo", "")
+TOKEN = os.environ.get("BOT_TOKEN", "")
 ADMIN_IDS = [int(x) for x in os.environ.get("ADMIN_IDS", "1929165295,1248134309").split(",") if x.strip()]
 ADMIN_PANEL_URL = os.environ.get("ADMIN_PANEL_URL", "https://wincher1202.github.io/M1lipStore-/admin.html")
 SHOP_URL = os.environ.get("SHOP_URL", "https://wincher1202.github.io/M1lipStore-/")
