@@ -579,12 +579,29 @@
             align-items: center;
             justify-content: center;
             padding: 10px 14px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            user-select: none;
+        }
+
+        .partner-brand-tile:hover {
+            border-color: var(--accent);
+            transform: translateY(-3px) scale(1.03);
+            box-shadow: 0 8px 20px rgba(87, 100, 226, 0.18);
+        }
+
+        .partner-brand-tile.active {
+            border-color: var(--accent);
+            background: var(--accent-light);
+            box-shadow: 0 0 0 3px var(--accent);
+            transform: translateY(-2px) scale(1.02);
         }
 
         .partner-brand-tile img {
             max-width: 100%;
             max-height: 100%;
             object-fit: contain;
+            pointer-events: none;
         }
 
         @media(min-width: 768px) {
@@ -1471,35 +1488,30 @@
     </section>
 
     <section class="partner-brands-section">
-        <div class="section-header">
+        <div class="section-header" style="align-items: center;">
             <div>
                 <h2 class="section-title" style="font-size: 1.1rem;">Популярні бренди</h2>
+            </div>
+            <div id="active-brand-indicator" style="display: none; align-items: center; gap: 8px;">
+                <span id="active-brand-text" style="font-size: 0.8rem; font-weight: 700; color: var(--accent);"></span>
+                <button class="filter-btn active" style="padding: 4px 10px; font-size: 0.75rem; border-radius: 14px;" onclick="filterByBrand('All')">Скинути ✕</button>
             </div>
         </div>
         <div class="partner-brands-marquee">
             <div class="partner-brands-track">
-                <div class="partner-brand-tile"><img src="attack-shark.jpg" alt="Attack Shark" loading="lazy"></div>
-                <div class="partner-brand-tile"><img src="ajazz.webp" alt="Ajazz" loading="lazy"></div>
-                <div class="partner-brand-tile"><img src="aula.png" alt="Aula" loading="lazy"></div>
-                <div class="partner-brand-tile"><img src="mchose.png" alt="Mchose" loading="lazy"></div>
-                <div class="partner-brand-tile"><img src="vgn.jpg" alt="VGN" loading="lazy"></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Attack Shark', this)"><img src="attack-shark.jpg" alt="Attack Shark" loading="lazy"></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Ajazz', this)"><img src="ajazz.webp" alt="Ajazz" loading="lazy"></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Aula', this)"><img src="aula.png" alt="Aula" loading="lazy"></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Mchose', this)"><img src="mchose.png" alt="Mchose" loading="lazy"></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('VGN', this)"><img src="vgn.jpg" alt="VGN" loading="lazy"></div>
                 <!-- duplicated so the strip loops seamlessly -->
-                <div class="partner-brand-tile"><img src="attack-shark.jpg" alt="Attack Shark" loading="lazy"></div>
-                <div class="partner-brand-tile"><img src="ajazz.webp" alt="Ajazz" loading="lazy"></div>
-                <div class="partner-brand-tile"><img src="aula.png" alt="Aula" loading="lazy"></div>
-                <div class="partner-brand-tile"><img src="mchose.png" alt="Mchose" loading="lazy"></div>
-                <div class="partner-brand-tile"><img src="vgn.jpg" alt="VGN" loading="lazy"></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Attack Shark', this)"><img src="attack-shark.jpg" alt="Attack Shark" loading="lazy"></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Ajazz', this)"><img src="ajazz.webp" alt="Ajazz" loading="lazy"></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Aula', this)"><img src="aula.png" alt="Aula" loading="lazy"></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Mchose', this)"><img src="mchose.png" alt="Mchose" loading="lazy"></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('VGN', this)"><img src="vgn.jpg" alt="VGN" loading="lazy"></div>
             </div>
         </div>
-    </section>
-
-    <section class="brands-section" id="brands-section" style="display: none;">
-        <div class="section-header" style="padding: 0 0 6px 0;">
-            <div>
-                <h2 class="section-title" style="font-size: 1.1rem;">Популярні бренди</h2>
-            </div>
-        </div>
-        <div class="brands-strip" id="brands-strip"></div>
     </section>
 
     <section class="section-padding" id="catalog">
@@ -1838,7 +1850,7 @@
         let searchDebounceTimer = null;
         let heroIndex = 0;
 
-        const API_BASE = "https://m1lipstore.onrender.com/api";
+        const API_BASE = window.location.origin + "/api";
         const API_URL = API_BASE + "/products";
         const CATEGORIES_API_URL = API_BASE + "/categories";
         const BRANDS_API_URL = API_BASE + "/brands";
@@ -2039,7 +2051,6 @@
                 console.warn("Не вдалося завантажити бренди:", e);
                 brands = [];
             }
-            renderBrandsStrip();
         }
 
         function renderCategoryFilters() {
@@ -2055,49 +2066,49 @@
             `).join('');
         }
 
-        function renderBrandsStrip() {
-            const section = document.getElementById('brands-section');
-            const container = document.getElementById('brands-strip');
-            if (!container || !section) return;
-            if (!brands || brands.length === 0) {
-                section.style.display = 'none';
-                return;
-            }
-            section.style.display = 'block';
-            const items = [{ id: 'All', name: 'Всі', logo: '' }, ...brands];
-            container.innerHTML = items.map(b => `
-                <div class="brand-card ${b.id === currentBrandFilter || (b.id === 'All' && currentBrandFilter === 'All') ? 'active' : ''}"
-                     onclick="filterByBrand('${b.id === 'All' ? 'All' : b.name.replace(/'/g, "\\'")}', this)">
-                    <div class="brand-logo-wrap">
-                        ${b.logo ? `<img src="${b.logo}" alt="${b.name}">` : (b.name || '').slice(0, 2).toUpperCase()}
-                    </div>
-                    <span>${b.name}</span>
-                </div>
-            `).join('');
-        }
-
         function filterByBrand(brandName, el) {
-            currentBrandFilter = brandName;
-            document.querySelectorAll('.brand-card').forEach(card => card.classList.remove('active'));
-            if (el) el.classList.add('active');
-            else {
-                document.querySelectorAll('.brand-card span').forEach(span => {
-                    if (span.textContent === (brandName === 'All' ? 'Всі' : brandName)) {
-                        span.closest('.brand-card')?.classList.add('active');
-                    }
-                });
+            if (currentBrandFilter.toLowerCase() === brandName.toLowerCase() && brandName !== 'All') {
+                currentBrandFilter = 'All';
+            } else {
+                currentBrandFilter = brandName;
             }
+
+            document.querySelectorAll('.partner-brand-tile').forEach(tile => {
+                const img = tile.querySelector('img');
+                const alt = img ? img.getAttribute('alt') || '' : '';
+                const isActive = currentBrandFilter !== 'All' && alt.toLowerCase().includes(currentBrandFilter.toLowerCase());
+                tile.classList.toggle('active', isActive);
+            });
+
+            const indicator = document.getElementById('active-brand-indicator');
+            const indicatorText = document.getElementById('active-brand-text');
+            if (indicator && indicatorText) {
+                if (currentBrandFilter !== 'All') {
+                    indicator.style.display = 'inline-flex';
+                    indicatorText.innerText = `Бренд: ${currentBrandFilter}`;
+                } else {
+                    indicator.style.display = 'none';
+                }
+            }
+
             renderCatalog();
+            if (brandName !== 'All') {
+                scrollToSection('catalog');
+            }
         }
 
         function getFilteredProducts() {
             let list = products;
 
             if (currentCategoryFilter !== 'All') {
-                list = list.filter(p => p.category === currentCategoryFilter);
+                list = list.filter(p => (p.category || '').toLowerCase() === currentCategoryFilter.toLowerCase());
             }
             if (currentBrandFilter !== 'All') {
-                list = list.filter(p => p.brand === currentBrandFilter);
+                const bQuery = currentBrandFilter.toLowerCase().trim();
+                list = list.filter(p => {
+                    const prodBrand = (p.brand || '').toLowerCase().trim();
+                    return prodBrand.includes(bQuery) || bQuery.includes(prodBrand);
+                });
             }
             return [...list];
         }
