@@ -6,10 +6,7 @@ import random
 import uuid
 import re
 import hashlib
-import secrets
 import time
-import smtplib
-from email.message import EmailMessage
 import hmac
 from urllib.parse import parse_qsl
 from fastapi import FastAPI, Request, APIRouter, UploadFile, File, HTTPException
@@ -57,12 +54,6 @@ if not TOKEN:
     logging.warning("BOT_TOKEN is not set. Telegram bot features will not work until it is configured.")
 
 logging.basicConfig(level=logging.INFO)
-
-# Email verification state. Codes are short-lived and never returned by the API.
-EMAIL_VERIFY_TTL = 10 * 60
-EMAIL_VERIFY_RATE = 60
-_email_verification = {}
-_email_send_last = {}
 
 NAME_RE = re.compile(r"^[A-Za-zА-Яа-яІіЇїЄєҐґ'’\-]{2,40}$", re.UNICODE)
 EMAIL_RE = re.compile(r"^[^\s@]+@[^\s@]+\.[^\s@]{2,}$")
@@ -560,78 +551,6 @@ def normalize_email(raw: str) -> str:
     return email
 
 
-def _send_verification_email(email: str, code: str):
-    host = os.environ.get("SMTP_HOST", "")
-    port = int(os.environ.get("SMTP_PORT", "587"))
-    user = os.environ.get("SMTP_USER", "")
-    password = os.environ.get("SMTP_PASSWORD", "")
-    sender = os.environ.get("SMTP_FROM", user)
-    if not host or not user or not password or not sender:
-        raise RuntimeError("SMTP is not configured")
-
-    msg = EmailMessage()
-    msg["Subject"] = "Підтвердження e-mail — M1lipStore"
-    msg["From"] = sender
-    msg["To"] = email
-    msg.set_content(
-        "Ваш код підтвердження M1lipStore: " + code + "\n\n"
-        "Код дійсний 10 хвилин. Якщо ви не оформлювали замовлення, просто проігноруйте цей лист."
-    )
-
-    with smtplib.SMTP(host, port, timeout=15) as smtp:
-        smtp.starttls()
-        smtp.login(user, password)
-        smtp.send_message(msg)
-
-
-@api_router.post("/api/verify-email/send")
-async def send_email_verification(request: Request):
-    body = await request.json()
-    email = normalize_email(body.get("email"))
-    now = time.time()
-    if now - _email_send_last.get(email, 0) < EMAIL_VERIFY_RATE:
-        raise HTTPException(status_code=429, detail="Зачекайте хвилину перед повторним надсиланням коду")
-
-    code = f"{secrets.randbelow(1_000_000):06d}"
-    token = secrets.token_urlsafe(32)
-    _email_verification[email] = {
-        "code_hash": hashlib.sha256(code.encode()).hexdigest(),
-        "token": token,
-        "expires": now + EMAIL_VERIFY_TTL,
-        "attempts": 0,
-    }
-    _email_send_last[email] = now
-
-    try:
-        await asyncio.to_thread(_send_verification_email, email, code)
-    except Exception as exc:
-        _email_verification.pop(email, None)
-        logging.error("Email verification send failed: %s", exc)
-        raise HTTPException(status_code=503, detail="Не вдалося надіслати код на e-mail. Перевірте налаштування пошти магазину.")
-
-    return {"status": "sent", "message": "Код надіслано на e-mail"}
-
-
-@api_router.post("/api/verify-email/confirm")
-async def confirm_email_verification(request: Request):
-    body = await request.json()
-    email = normalize_email(body.get("email"))
-    code = str(body.get("code") or "").strip()
-    item = _email_verification.get(email)
-    if not item or time.time() > item["expires"]:
-        _email_verification.pop(email, None)
-        raise HTTPException(status_code=400, detail="Код недійсний або строк його дії минув")
-    if not re.fullmatch(r"\d{6}", code):
-        raise HTTPException(status_code=400, detail="Введіть 6-значний код")
-    item["attempts"] += 1
-    if item["attempts"] > 5:
-        _email_verification.pop(email, None)
-        raise HTTPException(status_code=429, detail="Забагато невдалих спроб. Надішліть новий код")
-    if not hmac.compare_digest(item["code_hash"], hashlib.sha256(code.encode()).hexdigest()):
-        raise HTTPException(status_code=400, detail="Невірний код")
-    return {"status": "verified", "verificationToken": item["token"]}
-
-
 @api_router.post("/api/orders")
 async def create_order(request: Request):
     body = await request.json()
@@ -653,11 +572,6 @@ async def create_order(request: Request):
         raise HTTPException(status_code=400, detail="Введіть коректне прізвище: тільки літери")
     if not customer.get("phone"):
         raise HTTPException(status_code=400, detail="Вкажіть номер телефону")
-
-    verification = _email_verification.get(email)
-    verification_token = str(customer.get("emailVerificationToken") or "")
-    if not verification or not verification_token or verification.get("token") != verification_token or time.time() > verification.get("expires", 0):
-        raise HTTPException(status_code=400, detail="Спочатку підтвердіть e-mail кодом")
 
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -691,7 +605,6 @@ async def create_order(request: Request):
         customer["lastName"] = last_name
         customer["email"] = email
         customer["phone"] = phone
-        customer["emailVerified"] = True
         clean_items = [{k: v for k, v in it.items() if k != "_cq"} for it in priced_items]
         order_id_str = f"MLP-{random.randint(100000, 999999)}"
         order_data = {

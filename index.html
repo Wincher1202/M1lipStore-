@@ -1156,13 +1156,6 @@
         }
         .checkout-group .field-hint { font-size: 0.72rem; color: var(--text-muted); }
         .checkout-group .field-error { font-size: 0.72rem; color: #e53935; }
-        .email-verify-row { display:flex; gap:8px; align-items:stretch; }
-        .email-verify-row input { flex:1; min-width:0; }
-        .email-verify-btn { white-space:nowrap; padding:0 12px; border:1px solid var(--border-light); border-radius:8px; background:var(--bg-secondary); cursor:pointer; font-weight:700; }
-        .email-verify-btn:disabled { opacity:.55; cursor:not-allowed; }
-        .email-verify-status { font-size:.75rem; margin-top:6px; }
-        .email-verify-status.ok { color:#2e7d32; }
-        .email-verify-status.error { color:#e53935; }
         .phone-hint { font-size:.72rem; color:var(--text-muted); margin-top:5px; }
 
 
@@ -1491,7 +1484,7 @@
             <div class="footer-col">
                 <h4>КОНТАКТИ</h4>
                 <ul>
-                    <li><a href="https://t.me/lnvinciblee" target="_blank">Менеджер: @lnvinciblee</a></li>
+                    <li><a href="https://t.me/milipmanager" target="_blank">Менеджер: @milipmanager</a></li>
                     <li><a href="https://t.me/+vyhe-i9vGwAwNjAy" target="_blank">Telegram канал: M1lipStore</a></li>
                     <li><a href="https://www.instagram.com/m1lip.store" target="_blank">Instagram: @m1lip.store</a></li>
                     <li><a href="https://www.tiktok.com/@m1lipstore" target="_blank">TikTok: @m1lipstore</a></li>
@@ -1548,17 +1541,7 @@
                     </div>
                     <div class="checkout-group">
                         <label>E-mail</label>
-                        <div class="email-verify-row">
-                            <input type="email" id="chk-email" autocomplete="email" maxlength="120" placeholder="you@example.com">
-                            <button type="button" class="email-verify-btn" id="chk-email-send-btn" onclick="sendEmailCode()">Надіслати код</button>
-                        </div>
-                        <div id="email-code-wrap" style="display:none; margin-top:8px;">
-                            <div class="email-verify-row">
-                                <input type="text" id="chk-email-code" inputmode="numeric" maxlength="6" placeholder="6-значний код">
-                                <button type="button" class="email-verify-btn" onclick="confirmEmailCode()">Підтвердити</button>
-                            </div>
-                        </div>
-                        <div id="email-verify-status" class="email-verify-status"></div>
+                        <input type="email" id="chk-email" autocomplete="email" maxlength="120" placeholder="you@example.com">
                     </div>
                     <div class="checkout-group">
                         <label>Номер телефону</label>
@@ -1770,8 +1753,6 @@
         let deliveryProviders = [];       // [{id, name, configured}]
         let myProfile = null;             // { first_name, last_name, phone, saved_deliveries }
         let checkoutStepIndex = 1;
-        let verifiedEmailToken = '';
-        let verifiedEmailAddress = '';
         let checkoutDelivery = {          // what actually gets sent on the order
             provider: '', city: '', cityRef: '', department: '', warehouseRef: ''
         };
@@ -2062,7 +2043,6 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             setupPhoneInput();
-            document.getElementById('chk-email')?.addEventListener('input', resetEmailVerification);
             const savedTheme = localStorage.getItem('m1lip_theme');
             if (savedTheme) {
                 setTheme(savedTheme, false);
@@ -2488,55 +2468,6 @@
             input.value = normalizePhoneDisplay(input.value);
         }
 
-        function setEmailStatus(text, ok=false) {
-            const el = document.getElementById('email-verify-status');
-            el.textContent = text || '';
-            el.className = 'email-verify-status ' + (ok ? 'ok' : (text ? 'error' : ''));
-        }
-
-        async function sendEmailCode() {
-            const emailInput = document.getElementById('chk-email');
-            const email = emailInput.value.trim().toLowerCase();
-            const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
-            if (!emailRe.test(email)) { setEmailStatus('Введіть коректний e-mail.'); return; }
-            const btn = document.getElementById('chk-email-send-btn');
-            btn.disabled = true;
-            try {
-                const res = await fetch(API_BASE + '/verify-email/send', {
-                    method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({email})
-                });
-                const data = await res.json().catch(()=>({}));
-                if (!res.ok) throw new Error(data.detail || 'Не вдалося надіслати код.');
-                verifiedEmailToken = ''; verifiedEmailAddress = '';
-                document.getElementById('email-code-wrap').style.display = '';
-                setEmailStatus('Код надіслано. Перевірте пошту.');
-            } catch (e) { setEmailStatus(e.message || 'Не вдалося надіслати код.'); }
-            finally { btn.disabled = false; }
-        }
-
-        async function confirmEmailCode() {
-            const email = document.getElementById('chk-email').value.trim().toLowerCase();
-            const code = document.getElementById('chk-email-code').value.trim();
-            if (!/^\d{6}$/.test(code)) { setEmailStatus('Введіть 6-значний код.'); return; }
-            try {
-                const res = await fetch(API_BASE + '/verify-email/confirm', {
-                    method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({email, code})
-                });
-                const data = await res.json().catch(()=>({}));
-                if (!res.ok) throw new Error(data.detail || 'Невірний код.');
-                verifiedEmailToken = data.verificationToken;
-                verifiedEmailAddress = email;
-                setEmailStatus('E-mail підтверджено.', true);
-            } catch (e) { verifiedEmailToken=''; verifiedEmailAddress=''; setEmailStatus(e.message || 'Невірний код.'); }
-        }
-
-        function resetEmailVerification() {
-            verifiedEmailToken = ''; verifiedEmailAddress = '';
-            document.getElementById('email-code-wrap').style.display = 'none';
-            document.getElementById('chk-email-code').value = '';
-            setEmailStatus('');
-        }
-
         function validateCheckoutStep(step) {
             if (step === 1) {
                 const name = document.getElementById('chk-name').value.trim();
@@ -2548,10 +2479,6 @@
                 if (!nameRe.test(name)) { alert("Введіть коректне ім'я: тільки літери."); return false; }
                 if (!nameRe.test(surname)) { alert("Введіть коректне прізвище: тільки літери."); return false; }
                 if (!emailRe.test(email)) { alert("Введіть коректний e-mail."); return false; }
-                if (!verifiedEmailToken || verifiedEmailAddress !== email) {
-                    alert("Спочатку підтвердіть e-mail кодом, який ми надіслали на вашу пошту.");
-                    return false;
-                }
                 if (!/^\+380 \d{2} \d{3} \d{2} \d{2}$/.test(phone)) {
                     alert("Введіть коректний номер телефону у форматі +380 67 123 45 67.");
                     return false;
@@ -2806,8 +2733,6 @@
                     lastName: surname,
                     phone: phone,
                     email: document.getElementById('chk-email').value.trim().toLowerCase(),
-                    emailVerified: true,
-                    emailVerificationToken: verifiedEmailToken,
                     telegram: tg?.initDataUnsafe?.user?.username ? `@${tg.initDataUnsafe.user.username}` : ''
                 },
                 items: cart,
