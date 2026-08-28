@@ -282,6 +282,7 @@ async def show_admin_panel(message_or_callback_msg, edit_mode=False):
             callback_data=f"manage_{product['id']}"
         )])
     keyboard_buttons.append([InlineKeyboardButton(text="➕ Додати новий товар", callback_data="add_new_product")])
+    keyboard_buttons.append([InlineKeyboardButton(text="📦 Переглянути замовлення", callback_data="view_orders")])
     admin_markup = InlineKeyboardMarkup(inline_keyboard=keyboard_buttons)
 
     text = "⚙️ **Панель адміністратора M1lipStore**\n\nОберіть товар для редагування або створіть новий:"
@@ -292,6 +293,91 @@ async def show_admin_panel(message_or_callback_msg, edit_mode=False):
         except Exception:
             pass
     await message_or_callback_msg.answer(text, reply_markup=admin_markup, parse_mode="Markdown")
+
+
+@router.callback_query(F.data == "view_orders")
+async def process_view_orders(callback: CallbackQuery):
+    if callback.from_user.id not in ADMIN_IDS:
+        await callback.answer("Доступ заборонено!", show_alert=True)
+        return
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT order_id, data, created_at FROM orders ORDER BY id DESC LIMIT 10")
+    orders = cursor.fetchall()
+    cursor.close()
+    conn.close()
+
+    if not orders:
+        await callback.answer("Замовлень поки немає.", show_alert=True)
+        return
+
+    buttons = []
+    for ord_row in orders:
+        o_id = ord_row['order_id']
+        data = ord_row['data'] if isinstance(ord_row['data'], dict) else json.loads(ord_row['data'])
+        customer = data.get("customer", {})
+        name = f"{customer.get('firstName', '')} {customer.get('lastName', '')}".strip() or "Клієнт"
+        totals = data.get("totals", 0)
+        buttons.append(
+            [InlineKeyboardButton(text=f"#{o_id} | {name} | {totals} ₴", callback_data=f"show_order_{o_id}")])
+
+    buttons.append([InlineKeyboardButton(text="🔙 Назад до адмін-панелі", callback_data="back_to_admin")])
+    markup = InlineKeyboardMarkup(inline_keyboard=buttons)
+
+    try:
+        await callback.message.edit_text("📦 **Останні замовлення:**", reply_markup=markup, parse_mode="Markdown")
+    except Exception:
+        await callback.message.answer("📦 **Останні замовлення:**", reply_markup=markup, parse_mode="Markdown")
+    await callback.answer()
+
+
+@router.callback_query(F.data.startswith("show_order_"))
+async def process_show_order_details(callback: CallbackQuery):
+    if callback.from_user.id not in ADMIN_IDS: return
+    o_id = callback.data.replace("show_order_", "")
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT data, created_at FROM orders WHERE order_id = %s", (o_id,))
+    row = cursor.fetchone()
+    cursor.close()
+    conn.close()
+
+    if not row:
+        await callback.answer("Замовлення не знайдено!", show_alert=True)
+        return
+
+    data = row['data'] if isinstance(row['data'], dict) else json.loads(row['data'])
+    customer = data.get("customer", {})
+    items = data.get("items", [])
+    totals = data.get("totals", 0)
+    delivery = data.get("delivery", {})
+    payment = data.get("payment", {})
+
+    items_str = "\n".join([
+        f"• {i.get('brand', '')} {i.get('title', '')} ({i.get('color', '')}) x {i['qty']} — {i['price'] * i['qty']} ₴"
+        for i in items])
+    msg_text = (
+        f"📋 *Деталі замовлення #{o_id}*\n"
+        f"📅 *Дата:* {row['created_at']}\n\n"
+        f"👤 *Клієнт:* {customer.get('firstName')} {customer.get('lastName')} ({customer.get('phone')})\n"
+        f"💬 *Telegram:* {customer.get('telegram', 'не вказано')}\n\n"
+        f"📦 *Товари:*\n{items_str}\n\n"
+        f"🚚 *Доставка:* Нова пошта, м. {delivery.get('city')}, відділ. {delivery.get('department')}\n"
+        f"💳 *Оплата:* {payment.get('method')}\n"
+        f"💰 *Сума:* *{totals} ₴*\n"
+        f"📝 *Коментар:* {data.get('comment', 'відсутній')}"
+    )
+
+    markup = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="🔙 До списку замовлень", callback_data="view_orders")]
+    ])
+    try:
+        await callback.message.edit_text(msg_text, reply_markup=markup, parse_mode="Markdown")
+    except Exception:
+        await callback.message.answer(msg_text, reply_markup=markup, parse_mode="Markdown")
+    await callback.answer()
 
 
 @router.callback_query(F.data == "back_to_admin")
