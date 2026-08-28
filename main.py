@@ -5,7 +5,10 @@ import os
 import random
 import uuid
 import re
-from fastapi import FastAPI, Request, APIRouter
+import hashlib
+import hmac
+from urllib.parse import parse_qsl
+from fastapi import FastAPI, Request, APIRouter, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from aiogram import Bot, Dispatcher, F, Router
 from aiogram.filters import Command
@@ -19,6 +22,7 @@ from aiogram.types import (
     InlineKeyboardButton,
     InlineKeyboardMarkup,
     CallbackQuery,
+    BufferedInputFile,
 )
 import uvicorn
 import psycopg2
@@ -26,6 +30,7 @@ from psycopg2.extras import RealDictCursor
 
 TOKEN = "8993086388:AAETWcnRI-uxvm-lI2r6mQCKIXtuXq0nwpo"
 ADMIN_IDS = [1929165295, 1248134309]
+ADMIN_PANEL_URL = "https://wincher1202.github.io/M1lipStore-/admin.html"
 
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
@@ -129,6 +134,43 @@ async def get_file_url(bot: Bot, file_id: str) -> str:
         return file_id
 
 
+def validate_init_data(init_data: str, bot_token: str):
+    """Validates Telegram WebApp initData signature and returns the user dict, or None if invalid."""
+    try:
+        if not init_data:
+            return None
+        parsed = dict(parse_qsl(init_data, strict_parsing=True))
+        received_hash = parsed.pop("hash", None)
+        if not received_hash:
+            return None
+        data_check_string = "\n".join(f"{k}={v}" for k, v in sorted(parsed.items()))
+        secret_key = hmac.new(b"WebAppData", bot_token.encode(), hashlib.sha256).digest()
+        calculated_hash = hmac.new(secret_key, data_check_string.encode(), hashlib.sha256).hexdigest()
+        if not hmac.compare_digest(calculated_hash, received_hash):
+            return None
+        user_json = parsed.get("user")
+        return json.loads(user_json) if user_json else {}
+    except Exception as e:
+        logging.error(f"initData validation error: {e}")
+        return None
+
+
+def get_admin_user(request: Request):
+    """Reads X-Init-Data header, validates it, and returns the Telegram user if they're an admin."""
+    init_data = request.headers.get("X-Init-Data", "")
+    user = validate_init_data(init_data, TOKEN)
+    if not user or user.get("id") not in ADMIN_IDS:
+        return None
+    return user
+
+
+def require_admin(request: Request):
+    user = get_admin_user(request)
+    if not user:
+        raise HTTPException(status_code=403, detail="Доступ заборонено")
+    return user
+
+
 def get_db_products():
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -230,6 +272,164 @@ async def create_order(request: Request):
     return {"status": "success", "orderId": order_id_str}
 
 
+def _product_row_to_admin_json(product: dict) -> dict:
+    """Reshapes a get_db_products() row into the flat colors[] shape the admin panel edits."""
+    cq = product.get("colorQuantities", {}) or {}
+    ci = product.get("colorImages", {}) or {}
+    color_names = list(cq.keys()) or [c.strip() for c in (product.get("colors") or "").split(",") if c.strip()]
+    colors = []
+    for name in color_names:
+        img = ci.get(name, {})
+        colors.append({
+            "name": name,
+            "quantity": cq.get(name, 0),
+            "main": img.get("main", ""),
+            "gallery": img.get("gallery", []),
+        })
+    return {
+        "id": product.get("id"),
+        "brand": product.get("brand", ""),
+        "title": product.get("title", ""),
+        "price": product.get("price", 0),
+        "tag": product.get("tag", ""),
+        "category": product.get("category", ""),
+        "description": product.get("description", ""),
+        "img": product.get("img", ""),
+        "gallery": product.get("gallery", []) or [],
+        "specs": product.get("specs", []) or [],
+        "colors": colors,
+    }
+
+
+def _save_admin_product(body: dict, product_id: str = None) -> str:
+    product_id = product_id or ("prod-" + str(uuid.uuid4())[:8])
+    brand = (body.get("brand") or "M1LIP").strip()
+    title = (body.get("title") or "Товар").strip()
+    price = int(body.get("price") or 0)
+    tag = (body.get("tag") or "").strip()
+    category = (body.get("category") or "Аксесуари").strip()
+    description = (body.get("description") or "").strip()
+    img = body.get("img") or ""
+    gallery = body.get("gallery") or []
+    specs = body.get("specs") or []
+    colors = body.get("colors") or []
+
+    colors_str = ", ".join([c.get("name", "") for c in colors if c.get("name")])
+    cq_dict = {c["name"]: int(c.get("quantity") or 0) for c in colors if c.get("name")}
+    ci_dict = {c["name"]: {"main": c.get("main", ""), "gallery": c.get("gallery") or []} for c in colors if
+               c.get("name")}
+    total_qty = sum(cq_dict.values())
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT id FROM products WHERE id = %s", (product_id,))
+    exists = cursor.fetchone()
+
+    if exists:
+        cursor.execute("""
+                       UPDATE products
+                       SET brand=%s, title=%s, price=%s, tag=%s, category=%s, quantity=%s, colors=%s,
+                           description=%s, img=%s, gallery=%s, specs=%s, color_images=%s, color_quantities=%s
+                       WHERE id = %s
+                       """, (brand, title, price, tag, category, total_qty, colors_str, description, img,
+                             json.dumps(gallery, ensure_ascii=False), json.dumps(specs, ensure_ascii=False),
+                             json.dumps(ci_dict, ensure_ascii=False), json.dumps(cq_dict, ensure_ascii=False),
+                             product_id))
+    else:
+        cursor.execute("""
+                       INSERT INTO products (id, brand, title, price, tag, category, quantity, colors, description,
+                                             img, gallery, specs, color_images, color_quantities)
+                       VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                       """, (product_id, brand, title, price, tag, category, total_qty, colors_str, description, img,
+                             json.dumps(gallery, ensure_ascii=False), json.dumps(specs, ensure_ascii=False),
+                             json.dumps(ci_dict, ensure_ascii=False), json.dumps(cq_dict, ensure_ascii=False)))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return product_id
+
+
+@api_router.get("/api/admin/check")
+async def admin_check(request: Request):
+    user = require_admin(request)
+    return {"ok": True, "user": {"id": user.get("id"), "first_name": user.get("first_name", "")}}
+
+
+@api_router.get("/api/admin/products")
+async def admin_list_products(request: Request):
+    require_admin(request)
+    return [_product_row_to_admin_json(p) for p in get_db_products()]
+
+
+@api_router.post("/api/admin/products")
+async def admin_create_product(request: Request):
+    require_admin(request)
+    body = await request.json()
+    new_id = _save_admin_product(body)
+    return {"status": "created", "id": new_id}
+
+
+@api_router.put("/api/admin/products/{product_id}")
+async def admin_update_product(product_id: str, request: Request):
+    require_admin(request)
+    body = await request.json()
+    _save_admin_product(body, product_id=product_id)
+    return {"status": "updated", "id": product_id}
+
+
+@api_router.delete("/api/admin/products/{product_id}")
+async def admin_delete_product(product_id: str, request: Request):
+    require_admin(request)
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM products WHERE id = %s", (product_id,))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return {"status": "deleted", "id": product_id}
+
+
+@api_router.post("/api/admin/upload")
+async def admin_upload_image(request: Request, file: UploadFile = File(...)):
+    user = require_admin(request)
+    contents = await file.read()
+    if len(contents) > 19 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="Файл занадто великий (макс. 19 МБ)")
+
+    bot_upload = Bot(token=TOKEN)
+    try:
+        sent = await bot_upload.send_photo(
+            chat_id=user["id"],
+            photo=BufferedInputFile(contents, filename=file.filename or "photo.jpg"),
+        )
+        photo_file_id = sent.photo[-1].file_id
+        url = await get_file_url(bot_upload, photo_file_id)
+        return {"url": url}
+    except Exception as e:
+        logging.error(f"Upload error: {e}")
+        raise HTTPException(status_code=500,
+                             detail="Не вдалося завантажити фото. Переконайтесь, що ви писали боту /start.")
+    finally:
+        await bot_upload.session.close()
+
+
+@api_router.get("/api/admin/orders")
+async def admin_list_orders(request: Request):
+    require_admin(request)
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT order_id, data, created_at FROM orders ORDER BY id DESC LIMIT 200")
+    rows = cursor.fetchall()
+    cursor.close()
+    conn.close()
+
+    result = []
+    for r in rows:
+        d = r["data"] if isinstance(r["data"], dict) else json.loads(r["data"])
+        result.append({"order_id": r["order_id"], "created_at": str(r["created_at"]), "data": d})
+    return result
+
+
 app.include_router(api_router)
 router = Router()
 
@@ -269,7 +469,21 @@ async def cmd_admin(message: Message):
     if message.from_user.id not in ADMIN_IDS:
         await message.answer("❌ У вас немає прав доступу.")
         return
-    await show_admin_panel(message)
+    open_panel_markup = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="🖥 Відкрити адмін-панель", web_app=WebAppInfo(url=ADMIN_PANEL_URL))],
+        [InlineKeyboardButton(text="📋 Класична текстова панель", callback_data="show_classic_admin")],
+    ])
+    await message.answer(
+        "⚙️ **Адмін-панель M1lipStore**\n\nНатисніть кнопку нижче, щоб відкрити зручну панель керування:",
+        reply_markup=open_panel_markup, parse_mode="Markdown"
+    )
+
+
+@router.callback_query(F.data == "show_classic_admin")
+async def show_classic_admin_cb(callback: CallbackQuery):
+    if callback.from_user.id not in ADMIN_IDS: return
+    await show_admin_panel(callback.message)
+    await callback.answer()
 
 
 async def show_admin_panel(message_or_callback_msg, edit_mode=False):
