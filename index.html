@@ -1922,9 +1922,6 @@
             try {
                 const response = await fetch(CATEGORIES_API_URL);
                 const data = await response.json();
-                // A down/erroring backend returns a JSON object like {"detail": "..."} ,
-                // not an array — guard against that so the page doesn't crash trying
-                // to iterate it.
                 categories = (response.ok && Array.isArray(data)) ? data : [];
             } catch (e) {
                 console.warn("Не вдалося завантажити категорії:", e);
@@ -1984,7 +1981,6 @@
             document.querySelectorAll('.brand-card').forEach(card => card.classList.remove('active'));
             if (el) el.classList.add('active');
             else {
-                // triggered programmatically (e.g. reset) — sync active state by name match
                 document.querySelectorAll('.brand-card span').forEach(span => {
                     if (span.textContent === (brandName === 'All' ? 'Всі' : brandName)) {
                         span.closest('.brand-card')?.classList.add('active');
@@ -2053,7 +2049,6 @@
             fetchBrands();
             updateBadges();
             renderRecentSearches();
-
 
             setInterval(updateHeroBanner, 4000);
 
@@ -2350,10 +2345,6 @@
         function addCurrentProductToCart() {
             if (!currentModalProduct || selectedColorIndex === null) return;
             const colors = currentModalProduct.colors || [];
-            // IMPORTANT: cart/order must carry the *original* color name exactly as the
-            // admin entered it (e.g. "Чорний"), because that's the key the backend's
-            // color_quantities dict uses to validate stock and price server-side.
-            // formatColorEnglish() is for display only — never send it to the API.
             let originalColorName = colors[selectedColorIndex].name;
 
             const existingIndex = cart.findIndex(item => item.id === currentModalProduct.id && item.color === originalColorName);
@@ -2411,8 +2402,6 @@
             renderCheckoutStep();
             toggleCheckoutDrawer(true);
 
-            // Best-effort prefill — a signed-out browser tab (outside Telegram)
-            // just won't have anything to prefill, which is fine.
             if (tg?.initData) {
                 await Promise.all([loadDeliveryProviders(), loadMyProfile()]);
             } else {
@@ -2422,9 +2411,6 @@
             renderSavedDeliveriesBlock();
         }
 
-        // ---------------------------------------------------------------
-        // Checkout stepper
-        // ---------------------------------------------------------------
         const CHECKOUT_STEP_COUNT = 4;
 
         function renderCheckoutStep() {
@@ -2512,9 +2498,6 @@
             renderCheckoutStep();
         }
 
-        // ---------------------------------------------------------------
-        // Delivery — providers, city/warehouse search, saved addresses
-        // ---------------------------------------------------------------
         async function loadDeliveryProviders() {
             try {
                 const res = await fetch(DELIVERY_PROVIDERS_URL);
@@ -2540,119 +2523,121 @@
             checkoutDelivery = { provider: providerId, city: '', cityRef: '', department: '', warehouseRef: '' };
             renderProviderChips();
 
-            const provider = deliveryProviders.find(p => p.id === providerId && p.configured);
             const configuredFlow = document.getElementById('delivery-configured-flow');
+            configuredFlow.style.display = 'flex';
             document.getElementById('city-search-results').style.display = 'none';
             document.getElementById('city-selected-pill').innerHTML = '';
             document.getElementById('warehouse-selected-pill').innerHTML = '';
             document.getElementById('warehouse-search-results').innerHTML = '';
             document.getElementById('delivery-warehouse-group').style.display = 'none';
-            document.getElementById('delivery-api-error-block').innerHTML = '';
-            document.getElementById('chk-city-search').value = '';
-            document.getElementById('chk-warehouse-search').value = '';
-            configuredFlow.style.display = provider ? 'flex' : 'none';
-        }
-
-        function showDeliveryApiError(message, retryFn) {
-            const block = document.getElementById('delivery-api-error-block');
-            block.innerHTML = `<div class="delivery-api-error"><span>${message}</span><button class="btn-secondary" id="delivery-retry-btn">Повторити</button></div>`;
-            document.getElementById('delivery-retry-btn').addEventListener('click', retryFn);
         }
 
         async function searchDeliveryCities(query) {
             const resultsBox = document.getElementById('city-search-results');
-            document.getElementById('delivery-api-error-block').innerHTML = '';
-            if (!query || query.trim().length < 2) { resultsBox.style.display = 'none'; return; }
+            if (!query || query.length < 2) {
+                resultsBox.style.display = 'none';
+                return;
+            }
             try {
-                const res = await fetch(`${API_BASE}/delivery/${checkoutDelivery.provider}/cities?query=${encodeURIComponent(query.trim())}`);
-                if (!res.ok) {
-                    const err = await res.json().catch(() => ({}));
-                    resultsBox.style.display = 'none';
-                    showDeliveryApiError(err.detail || 'Не вдалося завантажити міста.', () => searchDeliveryCities(query));
+                const url = `${API_BASE}/delivery/cities?provider=${encodeURIComponent(checkoutDelivery.provider)}&query=${encodeURIComponent(query)}`;
+                const res = await fetch(url);
+                const data = res.ok ? await res.json() : [];
+                if (!Array.isArray(data) || data.length === 0) {
+                    resultsBox.innerHTML = '<div class="delivery-search-empty">Міст не знайдено</div>';
+                    resultsBox.style.display = 'block';
                     return;
                 }
-                const cities = await res.json();
-                if (!cities.length) {
-                    resultsBox.innerHTML = '<div class="delivery-search-empty">Місто не знайдено</div>';
-                } else {
-                    resultsBox.innerHTML = cities.map(c =>
-                        `<div class="delivery-search-result-item" onclick='selectDeliveryCity(${JSON.stringify(c)})'>${c.name}<div class="item-sub">${c.region || ''}</div></div>`
-                    ).join('');
-                }
+                resultsBox.innerHTML = data.map(item => `
+                    <div class="delivery-search-result-item" onclick="selectCity('${item.ref || item.id}', '${item.name.replace(/'/g, "\\'")}')">
+                        <div>${item.name}</div>
+                        ${item.region ? `<div class="item-sub">${item.region}</div>` : ''}
+                    </div>
+                `).join('');
                 resultsBox.style.display = 'block';
             } catch (err) {
                 resultsBox.style.display = 'none';
-                showDeliveryApiError('Не вдалося завантажити міста. Перевірте зʼєднання.', () => searchDeliveryCities(query));
             }
         }
 
-        function selectDeliveryCity(city) {
-            checkoutDelivery.city = city.name;
-            checkoutDelivery.cityRef = city.ref;
-            checkoutDelivery.department = '';
+        function selectCity(ref, name) {
+            checkoutDelivery.cityRef = ref;
+            checkoutDelivery.city = name;
             checkoutDelivery.warehouseRef = '';
+            checkoutDelivery.department = '';
             document.getElementById('city-search-results').style.display = 'none';
             document.getElementById('chk-city-search').value = '';
-            document.getElementById('city-selected-pill').innerHTML =
-                `<div class="selected-pill"><span>📍 ${city.name}</span><button onclick="clearDeliveryCity()">Змінити</button></div>`;
+            document.getElementById('city-selected-pill').innerHTML = `
+                <div class="selected-pill">
+                    <span>Місто: ${name}</span>
+                    <button onclick="clearCitySelection()">Змінити</button>
+                </div>
+            `;
+            document.getElementById('delivery-warehouse-group').style.display = 'flex';
+            document.getElementById('warehouse-search-results').innerHTML = '';
             document.getElementById('warehouse-selected-pill').innerHTML = '';
-            document.getElementById('chk-warehouse-search').value = '';
-            document.getElementById('delivery-warehouse-group').style.display = '';
         }
 
-        function clearDeliveryCity() {
-            checkoutDelivery.city = ''; checkoutDelivery.cityRef = '';
-            checkoutDelivery.department = ''; checkoutDelivery.warehouseRef = '';
+        function clearCitySelection() {
+            checkoutDelivery.cityRef = '';
+            checkoutDelivery.city = '';
+            checkoutDelivery.warehouseRef = '';
+            checkoutDelivery.department = '';
             document.getElementById('city-selected-pill').innerHTML = '';
-            document.getElementById('warehouse-selected-pill').innerHTML = '';
             document.getElementById('delivery-warehouse-group').style.display = 'none';
         }
 
         async function searchDeliveryWarehouses(query) {
             const resultsBox = document.getElementById('warehouse-search-results');
-            document.getElementById('delivery-api-error-block').innerHTML = '';
             if (!checkoutDelivery.cityRef) return;
             try {
-                const res = await fetch(`${API_BASE}/delivery/${checkoutDelivery.provider}/warehouses?city_ref=${encodeURIComponent(checkoutDelivery.cityRef)}&query=${encodeURIComponent(query.trim())}`);
-                if (!res.ok) {
-                    const err = await res.json().catch(() => ({}));
-                    resultsBox.style.display = 'none';
-                    showDeliveryApiError(err.detail || 'Не вдалося завантажити відділення.', () => searchDeliveryWarehouses(query));
+                const url = `${API_BASE}/delivery/warehouses?provider=${encodeURIComponent(checkoutDelivery.provider)}&city_ref=${encodeURIComponent(checkoutDelivery.cityRef)}&query=${encodeURIComponent(query || '')}`;
+                const res = await fetch(url);
+                const data = res.ok ? await res.json() : [];
+                if (!Array.isArray(data) || data.length === 0) {
+                    resultsBox.innerHTML = '<div class="delivery-search-empty">Відділень не знайдено</div>';
+                    resultsBox.style.display = 'block';
                     return;
                 }
-                const warehouses = await res.json();
-                if (!warehouses.length) {
-                    resultsBox.innerHTML = '<div class="delivery-search-empty">Такого відділення не знайдено. Оберіть відділення зі списку.</div>';
-                } else {
-                    resultsBox.innerHTML = warehouses.map(w =>
-                        `<div class="delivery-search-result-item" onclick='selectDeliveryWarehouse(${JSON.stringify(w)})'>${w.name}${w.type === 'postomat' ? ' 📦' : ''}<div class="item-sub">${w.address || ''}</div></div>`
-                    ).join('');
-                }
+                resultsBox.innerHTML = data.map(item => `
+                    <div class="delivery-search-result-item" onclick="selectWarehouse('${item.ref || item.id}', '${item.name.replace(/'/g, "\\'")}')">
+                        <div>${item.name}</div>
+                    </div>
+                `).join('');
                 resultsBox.style.display = 'block';
             } catch (err) {
                 resultsBox.style.display = 'none';
-                showDeliveryApiError('Не вдалося завантажити відділення. Перевірте зʼєднання.', () => searchDeliveryWarehouses(query));
             }
         }
 
-        function selectDeliveryWarehouse(warehouse) {
-            checkoutDelivery.department = warehouse.name;
-            checkoutDelivery.warehouseRef = warehouse.ref;
+        function selectWarehouse(ref, name) {
+            checkoutDelivery.warehouseRef = ref;
+            checkoutDelivery.department = name;
             document.getElementById('warehouse-search-results').style.display = 'none';
             document.getElementById('chk-warehouse-search').value = '';
-            document.getElementById('warehouse-selected-pill').innerHTML =
-                `<div class="selected-pill"><span>📦 ${warehouse.name}</span><button onclick="clearDeliveryWarehouse()">Змінити</button></div>`;
+            document.getElementById('warehouse-selected-pill').innerHTML = `
+                <div class="selected-pill">
+                    <span>Відділення: ${name}</span>
+                    <button onclick="clearWarehouseSelection()">Змінити</button>
+                </div>
+            `;
         }
 
-        function clearDeliveryWarehouse() {
-            checkoutDelivery.department = ''; checkoutDelivery.warehouseRef = '';
+        function clearWarehouseSelection() {
+            checkoutDelivery.warehouseRef = '';
+            checkoutDelivery.department = '';
             document.getElementById('warehouse-selected-pill').innerHTML = '';
         }
 
         async function loadMyProfile() {
             try {
-                const res = await fetch(PROFILE_API_URL, { headers: { 'X-Init-Data': tg?.initData || '' } });
-                myProfile = res.ok ? await res.json() : null;
+                const res = await fetch(PROFILE_API_URL, {
+                    headers: { 'X-Telegram-Init-Data': tg.initData }
+                });
+                if (res.ok) {
+                    myProfile = await res.json();
+                    prefillContactsFromProfile();
+                    renderSavedDeliveriesBlock();
+                }
             } catch (err) {
                 myProfile = null;
             }
@@ -2660,119 +2645,133 @@
 
         function prefillContactsFromProfile() {
             if (!myProfile) return;
-            if (myProfile.first_name && !document.getElementById('chk-name').value) document.getElementById('chk-name').value = myProfile.first_name;
-            if (myProfile.last_name && !document.getElementById('chk-surname').value) document.getElementById('chk-surname').value = myProfile.last_name;
-            if (myProfile.phone && !document.getElementById('chk-phone').value) document.getElementById('chk-phone').value = myProfile.phone;
+            const nameEl = document.getElementById('chk-name');
+            const surnameEl = document.getElementById('chk-surname');
+            const phoneEl = document.getElementById('chk-phone');
+            if (nameEl && !nameEl.value && myProfile.first_name) nameEl.value = myProfile.first_name;
+            if (surnameEl && !surnameEl.value && myProfile.last_name) surnameEl.value = myProfile.last_name;
+            if (phoneEl && (!phoneEl.value || phoneEl.value === '+380') && myProfile.phone) {
+                phoneEl.value = normalizePhoneDisplay(myProfile.phone);
+            }
         }
 
         function renderSavedDeliveriesBlock() {
             const block = document.getElementById('saved-deliveries-block');
-            const saved = myProfile?.saved_deliveries || [];
-            if (!saved.length) { block.innerHTML = ''; return; }
-            block.innerHTML = `<div class="checkout-group"><label>Збережена доставка</label>` +
-                saved.map(d => `<div class="saved-delivery-chip">
-                    <span>${PROVIDER_LABELS[d.provider] || d.provider} — ${d.city}, ${d.warehouse}</span>
-                    <button class="btn-secondary" onclick='useSavedDelivery(${JSON.stringify(d)})'>Використати</button>
-                </div>`).join('') + `</div>`;
-        }
-
-        function useSavedDelivery(d) {
-            checkoutDelivery = { provider: d.provider, city: d.city, cityRef: d.cityRef, department: d.warehouse, warehouseRef: d.warehouseRef };
-            renderProviderChips();
-            const provider = deliveryProviders.find(p => p.id === d.provider);
-            const configuredFlow = document.getElementById('delivery-configured-flow');
-            if (provider && provider.configured && d.cityRef && d.warehouseRef) {
-                configuredFlow.style.display = 'flex';
-                document.getElementById('city-selected-pill').innerHTML = `<div class="selected-pill"><span>📍 ${d.city}</span><button onclick="clearDeliveryCity()">Змінити</button></div>`;
-                document.getElementById('delivery-warehouse-group').style.display = '';
-                document.getElementById('warehouse-selected-pill').innerHTML = `<div class="selected-pill"><span>📦 ${d.warehouse}</span><button onclick="clearDeliveryWarehouse()">Змінити</button></div>`;
-            } else {
-                configuredFlow.style.display = 'none';
+            if (!block || !myProfile || !Array.isArray(myProfile.saved_deliveries) || myProfile.saved_deliveries.length === 0) {
+                if (block) block.innerHTML = '';
+                return;
             }
+            block.innerHTML = `
+                <div class="checkout-group" style="margin-bottom: 12px;">
+                    <label>Збережені адреси доставки</label>
+                    <div style="display:flex; flex-direction:column; gap:6px;">
+                        ${myProfile.saved_deliveries.map((sd, i) => `
+                            <div class="saved-delivery-chip">
+                                <div><strong>${PROVIDER_LABELS[sd.provider] || sd.provider}</strong>: ${sd.city}, ${sd.department}</div>
+                                <button class="btn-secondary" onclick="useSavedDelivery(${i})">Обрати</button>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
         }
 
-        // ---------------------------------------------------------------
-        // Review step + submit
-        // ---------------------------------------------------------------
+        function useSavedDelivery(idx) {
+            const sd = myProfile.saved_deliveries[idx];
+            if (!sd) return;
+            selectDeliveryProvider(sd.provider);
+            selectCity(sd.city_ref, sd.city);
+            selectWarehouse(sd.warehouse_ref, sd.department);
+        }
+
         function renderReviewStep() {
+            const name = document.getElementById('chk-name').value.trim();
+            const surname = document.getElementById('chk-surname').value.trim();
+            const email = document.getElementById('chk-email').value.trim();
+            const phone = document.getElementById('chk-phone').value.trim();
+            const payment = document.getElementById('chk-payment').value;
+            const comment = document.getElementById('chk-comment').value.trim();
+
             const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-            document.getElementById('review-items-block').innerHTML = `<h5>Товари</h5>` +
-                cart.map(i => `<div class="review-line"><span>${i.title} (${i.color}) × ${i.qty}</span><span>${i.price * i.qty} ₴</span></div>`).join('') +
-                `<div class="review-line" style="font-weight:800; margin-top:4px;"><span>Разом</span><span>${total} ₴</span></div>`;
 
-            document.getElementById('review-contact-block').innerHTML = `<h5>Контакти</h5>
-                <div class="review-line"><span>Ім'я</span><span>${document.getElementById('chk-name').value.trim()} ${document.getElementById('chk-surname').value.trim()}</span></div>
-                <div class="review-line"><span>E-mail</span><span>${document.getElementById('chk-email').value.trim()}</span></div>
-                <div class="review-line"><span>Телефон</span><span>${document.getElementById('chk-phone').value.trim()}</span></div>`;
+            document.getElementById('review-items-block').innerHTML = `
+                <h5>Товари (${cart.reduce((s, i) => s + i.qty, 0)})</h5>
+                ${cart.map(item => `
+                    <div class="review-line">
+                        <span>${item.title} (${item.color}) × ${item.qty}</span>
+                        <span>${formatPrice(item.price * item.qty)}</span>
+                    </div>
+                `).join('')}
+                <div class="review-line" style="border-top:1px solid var(--border-light); margin-top:6px; padding-top:6px; font-weight:800;">
+                    <span>Разом до сплати:</span>
+                    <span>${formatPrice(total)}</span>
+                </div>
+            `;
 
-            const provLabel = PROVIDER_LABELS[checkoutDelivery.provider] || checkoutDelivery.provider || '—';
-            document.getElementById('review-delivery-block').innerHTML = `<h5>Доставка</h5>
-                <div class="review-line"><span>Служба</span><span>${provLabel}</span></div>
-                <div class="review-line"><span>Місто</span><span>${checkoutDelivery.city || '—'}</span></div>
-                <div class="review-line"><span>Відділення</span><span>${checkoutDelivery.department || '—'}</span></div>`;
+            document.getElementById('review-contact-block').innerHTML = `
+                <h5>Отримувач</h5>
+                <div class="review-line"><span>ПІБ:</span> <span>${name} ${surname}</span></div>
+                <div class="review-line"><span>Телефон:</span> <span>${phone}</span></div>
+                <div class="review-line"><span>E-mail:</span> <span>${email}</span></div>
+            `;
 
-            const paymentMethod = document.getElementById('chk-payment').value;
-            document.getElementById('review-payment-block').innerHTML = `<h5>Оплата</h5>
-                <div class="review-line"><span>Спосіб</span><span>${paymentMethod === 'online' ? 'Повна онлайн-оплата' : 'Накладений платіж'}</span></div>`;
+            const provName = PROVIDER_LABELS[checkoutDelivery.provider] || checkoutDelivery.provider;
+            document.getElementById('review-delivery-block').innerHTML = `
+                <h5>Доставка</h5>
+                <div class="review-line"><span>Служба:</span> <span>${provName}</span></div>
+                <div class="review-line"><span>Місто:</span> <span>${checkoutDelivery.city}</span></div>
+                <div class="review-line"><span>Відділення:</span> <span>${checkoutDelivery.department}</span></div>
+            `;
+
+            const payName = payment === 'online' ? 'Повна онлайн-оплата' : 'Накладений платіж';
+            document.getElementById('review-payment-block').innerHTML = `
+                <h5>Оплата</h5>
+                <div class="review-line"><span>Спосіб:</span> <span>${payName}</span></div>
+                ${comment ? `<div class="review-line"><span>Коментар:</span> <span>${comment}</span></div>` : ''}
+            `;
         }
 
         async function submitOrder() {
             if (!validateCheckoutStep(1) || !validateCheckoutStep(2)) return;
 
-            const name = document.getElementById('chk-name').value.trim();
-            const surname = document.getElementById('chk-surname').value.trim();
-            const phone = document.getElementById('chk-phone').value.trim();
-            const paymentMethod = document.getElementById('chk-payment').value;
-            const comment = document.getElementById('chk-comment').value.trim();
-
-            let totals = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-
-            let orderPayload = {
+            const payload = {
                 customer: {
-                    firstName: name,
-                    lastName: surname,
-                    phone: phone,
-                    email: document.getElementById('chk-email').value.trim().toLowerCase(),
-                    telegram: tg?.initDataUnsafe?.user?.username ? `@${tg.initDataUnsafe.user.username}` : ''
+                    first_name: document.getElementById('chk-name').value.trim(),
+                    last_name: document.getElementById('chk-surname').value.trim(),
+                    email: document.getElementById('chk-email').value.trim(),
+                    phone: document.getElementById('chk-phone').value.trim()
                 },
-                items: cart,
-                delivery: {
-                    provider: checkoutDelivery.provider || 'nova_poshta',
-                    service: PROVIDER_LABELS[checkoutDelivery.provider] || checkoutDelivery.provider,
-                    city: checkoutDelivery.city,
-                    cityRef: checkoutDelivery.cityRef,
-                    department: checkoutDelivery.department,
-                    warehouseRef: checkoutDelivery.warehouseRef
-                },
+                delivery: checkoutDelivery,
                 payment: {
-                    method: paymentMethod === 'online' ? "Повна онлайн-оплата" : "Накладений платіж",
-                    status: "pending"
+                    method: document.getElementById('chk-payment').value,
+                    comment: document.getElementById('chk-comment').value.trim()
                 },
-                totals: totals,
-                comment: comment,
+                items: cart.map(i => ({
+                    id: i.id,
+                    color: i.color,
+                    qty: i.qty
+                }))
             };
 
             const submitBtn = document.getElementById('chk-submit-btn');
-            if (submitBtn) { submitBtn.disabled = true; submitBtn.innerText = 'Оформлюємо...'; }
+            submitBtn.disabled = true;
+            submitBtn.innerText = 'Оформлюємо...';
 
             try {
-                let response = await fetch(ORDER_API_URL, {
+                const headers = { 'Content-Type': 'application/json' };
+                if (tg?.initData) headers['X-Telegram-Init-Data'] = tg.initData;
+
+                const res = await fetch(ORDER_API_URL, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-Init-Data': tg?.initData || ''
-                    },
-                    body: JSON.stringify(orderPayload)
+                    headers,
+                    body: JSON.stringify(payload)
                 });
+                const data = await res.json();
 
-                let result = await response.json();
-
-                if (!response.ok) {
-                    // Backend validates price/stock/delivery server-side and returns a
-                    // specific Ukrainian error message — show it as-is instead of a
-                    // generic one, and refresh the catalog so stock stays current.
-                    alert(result.detail || "Не вдалося створити замовлення. Спробуйте ще раз.");
-                    fetchProducts();
+                if (!res.ok) {
+                    alert(data.detail || "Помилка при оформленні замовлення.");
+                    submitBtn.disabled = false;
+                    submitBtn.innerText = 'Підтвердити замовлення';
                     return;
                 }
 
@@ -2780,21 +2779,186 @@
                 saveCart();
                 toggleCheckoutDrawer(false);
 
-                document.getElementById('success-order-id').innerText = `#${result.orderId}`;
+                const orderIdStr = data.order_id || data.id || '#MLP-2026-000000';
+                document.getElementById('success-order-id').innerText = orderIdStr;
                 document.getElementById('success-modal').classList.add('active');
                 document.getElementById('backdrop').classList.add('active');
-
             } catch (err) {
-                alert("Не вдалося створити замовлення. Перевірте з'єднання та спробуйте ще раз.");
-                console.error(err);
+                alert("Помилка мережі при відправці замовлення.");
             } finally {
-                if (submitBtn) { submitBtn.disabled = false; submitBtn.innerText = 'Підтвердити замовлення'; }
+                submitBtn.disabled = false;
+                submitBtn.innerText = 'Підтвердити замовлення';
+            }
+        }
+
+        async function toggleProfileDrawer(open) {
+            const drawer = document.getElementById('profile-drawer');
+            const backdrop = document.getElementById('backdrop');
+            if (open) {
+                drawer.classList.add('active');
+                backdrop.classList.add('active');
+                await renderProfileDrawerContent();
+            } else {
+                drawer.classList.remove('active');
+                backdrop.classList.remove('active');
+            }
+        }
+
+        async function renderProfileDrawerContent() {
+            const body = document.getElementById('profile-drawer-body');
+            if (!tg?.initData) {
+                body.innerHTML = `<div class="profile-signin-note">Профіль доступний лише при відкритті магазину через Telegram Web App.</div>`;
+                return;
+            }
+            body.innerHTML = `<div class="profile-signin-note">Завантаження профілю та замовлень...</div>`;
+
+            try {
+                const [profRes, ordersRes] = await Promise.all([
+                    fetch(PROFILE_API_URL, { headers: { 'X-Telegram-Init-Data': tg.initData } }),
+                    fetch(MY_ORDERS_API_URL, { headers: { 'X-Telegram-Init-Data': tg.initData } })
+                ]);
+
+                const profileData = profRes.ok ? await profRes.json() : null;
+                const ordersData = ordersRes.ok ? await ordersRes.json() : [];
+
+                if (!profileData) {
+                    body.innerHTML = `<div class="profile-signin-note">Не вдалося завантажити профіль користувача.</div>`;
+                    return;
+                }
+
+                body.innerHTML = `
+                    <div class="profile-section">
+                        <h4>Дані профілю</h4>
+                        <div class="review-block">
+                            <div class="review-line"><span>Ім'я:</span> <span>${profileData.first_name || ''} ${profileData.last_name || ''}</span></div>
+                            <div class="review-line"><span>Телефон:</span> <span>${profileData.phone || 'не вказано'}</span></div>
+                        </div>
+                    </div>
+                    <div class="profile-section">
+                        <h4>Історія замовлень</h4>
+                        ${Array.isArray(ordersData) && ordersData.length > 0 ? ordersData.map(o => `
+                            <div class="profile-order-card">
+                                <div class="order-top">
+                                    <span>${o.order_id || o.id}</span>
+                                    <span class="order-status-pill">${o.status || 'Нове'}</span>
+                                </div>
+                                <div class="order-meta">${o.created_at || ''} • ${formatPrice(o.total || 0)}</div>
+                            </div>
+                        `).join('') : '<div class="profile-empty-state">У вас ще немає замовлень</div>'}
+                    </div>
+                `;
+            } catch (err) {
+                body.innerHTML = `<div class="profile-signin-note">Помилка завантаження даних профілю.</div>`;
             }
         }
 
         function closeSuccessModal() {
             document.getElementById('success-modal').classList.remove('active');
             document.getElementById('backdrop').classList.remove('active');
+        }
+
+        function closeAllDrawers() {
+            toggleCart(false);
+            toggleWishlistDrawer(false);
+            toggleCheckoutDrawer(false);
+            toggleProfileDrawer(false);
+            toggleSearch(false);
+            closeProductModal();
+            closeSuccessModal();
+            closeInfoModal();
+        }
+
+        function saveCart() {
+            localStorage.setItem('m1lip_cart', JSON.stringify(cart));
+            updateBadges();
+            renderCartItems();
+        }
+
+        function renderCartItems() {
+            const container = document.getElementById('cart-items-container');
+            const totalEl = document.getElementById('cart-total-price');
+            if (!container) return;
+
+            if (cart.length === 0) {
+                container.innerHTML = `<p style="color: var(--text-secondary); text-align: center; padding: 40px 0;">Ваш кошик порожній</p>`;
+                if (totalEl) totalEl.innerHTML = formatPrice(0);
+                return;
+            }
+
+            let total = 0;
+            container.innerHTML = cart.map((item, index) => {
+                total += item.price * item.qty;
+                const displayColor = formatColorEnglish(item.color).toUpperCase();
+                return `
+                    <div class="cart-item">
+                        <img src="${item.img}" alt="${item.title}" onclick="openProductModal(products.find(x => x.id === '${item.id}'))">
+                        <div style="flex-grow: 1; overflow: hidden;">
+                            <h4 style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase;">${item.brand}</h4>
+                            <h3 style="font-size: 0.9rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${item.title}</h3>
+                            <div style="font-size: 0.72rem; color: var(--text-secondary);">Колір: ${displayColor}</div>
+                            <div class="product-price" style="font-size: 0.85rem; margin-top: 2px;">${formatPrice(item.price)}</div>
+                        </div>
+                        <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
+                            <button class="close-drawer" style="font-size: 0.85rem;" onclick="removeFromCart(${index})">✕</button>
+                            <div class="quantity-controls">
+                                <button onclick="adjustCartQty(${index}, -1)">−</button>
+                                <span style="font-weight: 800; font-size: 0.85rem; padding: 0 4px;">${item.qty}</span>
+                                <button onclick="adjustCartQty(${index}, 1)">+</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            if (totalEl) totalEl.innerHTML = formatPrice(total);
+        }
+
+        function adjustCartQty(index, delta) {
+            cart[index].qty += delta;
+            if (cart[index].qty < 1) cart[index].qty = 1;
+            saveCart();
+        }
+
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            saveCart();
+        }
+
+        function toggleWishlist(productId) {
+            const product = products.find(p => p.id === productId);
+            if (!product) return;
+
+            const index = wishlist.findIndex(item => item.id === productId);
+            if (index > -1) {
+                wishlist.splice(index, 1);
+            } else {
+                wishlist.push(product);
+            }
+
+            localStorage.setItem('m1lip_wishlist', JSON.stringify(wishlist));
+            updateBadges();
+            renderCatalog();
+            renderWishlistItems();
+
+            const wishBtn = document.getElementById(`wishlist-btn-${productId}`);
+            if (wishBtn) {
+                const isFav = index === -1;
+                wishBtn.classList.toggle('active', isFav);
+                wishBtn.querySelector('svg').style.fill = isFav ? '#FF3B30' : 'none';
+                wishBtn.querySelector('svg').style.stroke = isFav ? '#FF3B30' : 'currentColor';
+            }
+        }
+
+        function toggleCurrentWishlist() {
+            if (!currentModalProduct) return;
+            toggleWishlist(currentModalProduct.id);
+            const isFav = wishlist.some(item => item.id === currentModalProduct.id);
+            const wishBtn = document.getElementById('modal-wishlist-btn');
+            if (wishBtn) {
+                wishBtn.classList.toggle('active', isFav);
+                wishBtn.querySelector('svg').style.fill = isFav ? '#FF3B30' : 'none';
+                wishBtn.querySelector('svg').style.stroke = isFav ? '#FF3B30' : 'currentColor';
+            }
         }
 
         function toggleWishlistDrawer(open) {
@@ -2806,288 +2970,10 @@
                 renderWishlistItems();
             } else {
                 drawer.classList.remove('active');
-                if (!document.getElementById('cart-drawer').classList.contains('active')) {
+                if (!document.getElementById('cart-drawer').classList.contains('active') && !document.getElementById('checkout-drawer').classList.contains('active')) {
                     backdrop.classList.remove('active');
                 }
             }
-        }
-
-        // ---------------------------------------------------------------
-        // Profile drawer — contact info, saved deliveries, order history
-        // ---------------------------------------------------------------
-        async function toggleProfileDrawer(open) {
-            const drawer = document.getElementById('profile-drawer');
-            const backdrop = document.getElementById('backdrop');
-            if (!open) {
-                drawer.classList.remove('active');
-                backdrop.classList.remove('active');
-                return;
-            }
-            drawer.classList.add('active');
-            backdrop.classList.add('active');
-            await renderProfileDrawer();
-        }
-
-        async function renderProfileDrawer() {
-            const body = document.getElementById('profile-drawer-body');
-            if (!tg?.initData) {
-                body.innerHTML = `<div class="profile-signin-note">Відкрийте магазин через Telegram, щоб побачити профіль та історію замовлень.</div>`;
-                return;
-            }
-            body.innerHTML = `<div class="profile-signin-note">Завантаження...</div>`;
-
-            const [profileRes, ordersRes] = await Promise.all([
-                fetch(PROFILE_API_URL, { headers: { 'X-Init-Data': tg.initData } }).catch(() => null),
-                fetch(MY_ORDERS_API_URL, { headers: { 'X-Init-Data': tg.initData } }).catch(() => null),
-            ]);
-            myProfile = profileRes && profileRes.ok ? await profileRes.json() : null;
-            const orders = ordersRes && ordersRes.ok ? await ordersRes.json() : [];
-
-            const savedDeliveries = myProfile?.saved_deliveries || [];
-
-            body.innerHTML = `
-                <div class="profile-section">
-                    <h4>Мої дані</h4>
-                    <div class="checkout-group">
-                        <label>Ім'я</label>
-                        <input type="text" id="prof-first-name" value="${myProfile?.first_name || ''}">
-                    </div>
-                    <div class="checkout-group">
-                        <label>Прізвище</label>
-                        <input type="text" id="prof-last-name" value="${myProfile?.last_name || ''}">
-                    </div>
-                    <div class="checkout-group">
-                        <label>Телефон</label>
-                        <input type="tel" id="prof-phone" value="${myProfile?.phone || ''}" placeholder="+380XXXXXXXXX">
-                    </div>
-                    <button class="btn-primary" style="justify-content:center;" onclick="saveMyProfile()">Зберегти</button>
-                </div>
-
-                <div class="profile-section">
-                    <h4>Збережена доставка</h4>
-                    ${savedDeliveries.length ? savedDeliveries.map(d => `
-                        <div class="saved-delivery-chip">
-                            <span>${PROVIDER_LABELS[d.provider] || d.provider} — ${d.city}, ${d.warehouse}</span>
-                            <button class="btn-secondary" onclick="deleteSavedDeliveryFromProfile('${d.id}')">Видалити</button>
-                        </div>`).join('') : '<div class="profile-empty-state">Ще немає збережених адрес доставки.</div>'}
-                </div>
-
-                <div class="profile-section">
-                    <h4>Історія замовлень</h4>
-                    <div id="profile-orders-list">
-                        ${orders.length ? orders.map(o => `
-                            <div class="profile-order-card" onclick="showOrderDetail('${o.order_id}')">
-                                <div class="order-top"><span>#${o.order_id}</span><span class="order-status-pill">${orderStatusLabel(o.status)}</span></div>
-                                <div class="order-meta">${new Date(o.created_at).toLocaleDateString('uk-UA')} · ${o.total} ₴</div>
-                            </div>`).join('') : '<div class="profile-empty-state">Замовлень поки немає.</div>'}
-                    </div>
-                    <div id="order-detail-block"></div>
-                </div>
-            `;
-        }
-
-        function orderStatusLabel(status) {
-            const map = {
-                NEW: 'Нове', WAITING_PAYMENT: 'Очікує оплати', PAID: 'Оплачено',
-                PROCESSING: 'Збирається', SHIPPED: 'Відправлено', DELIVERED: 'Доставлено', CANCELLED: 'Скасовано'
-            };
-            return map[status] || status;
-        }
-
-        async function saveMyProfile() {
-            const first_name = document.getElementById('prof-first-name').value.trim();
-            const last_name = document.getElementById('prof-last-name').value.trim();
-            const phone = document.getElementById('prof-phone').value.trim();
-            try {
-                const res = await fetch(PROFILE_API_URL, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json', 'X-Init-Data': tg?.initData || '' },
-                    body: JSON.stringify({ first_name, last_name, phone })
-                });
-                if (!res.ok) {
-                    const err = await res.json().catch(() => ({}));
-                    alert(err.detail || 'Не вдалося зберегти дані.');
-                    return;
-                }
-                await loadMyProfile();
-            } catch (err) {
-                alert("Не вдалося зберегти дані. Перевірте з'єднання та спробуйте ще раз.");
-            }
-        }
-
-        async function deleteSavedDeliveryFromProfile(id) {
-            try {
-                await fetch(`${SAVED_DELIVERIES_API_URL}/${id}`, { method: 'DELETE', headers: { 'X-Init-Data': tg?.initData || '' } });
-                await renderProfileDrawer();
-            } catch (err) {
-                alert("Не вдалося видалити адресу. Спробуйте ще раз.");
-            }
-        }
-
-        async function showOrderDetail(orderId) {
-            const block = document.getElementById('order-detail-block');
-            block.innerHTML = `<div class="profile-empty-state">Завантаження...</div>`;
-            try {
-                const res = await fetch(`${API_BASE}/orders/${orderId}`, { headers: { 'X-Init-Data': tg?.initData || '' } });
-                if (!res.ok) { block.innerHTML = `<div class="profile-empty-state">Не вдалося завантажити замовлення.</div>`; return; }
-                const o = await res.json();
-                block.innerHTML = `
-                    <div class="review-block" style="margin-top:10px;">
-                        <h5>Замовлення #${o.order_id}</h5>
-                        ${(o.items || []).map(i => `<div class="review-line"><span>${i.title} (${i.color}) × ${i.qty}</span><span>${i.lineTotal} ₴</span></div>`).join('')}
-                        <div class="review-line" style="font-weight:800;"><span>Разом</span><span>${o.total} ₴</span></div>
-                        <div class="review-line"><span>Статус</span><span>${orderStatusLabel(o.status)}</span></div>
-                        ${o.tracking_number ? `<div class="review-line"><span>ТТН</span><span>${o.tracking_number}</span></div>` : ''}
-                    </div>`;
-            } catch (err) {
-                block.innerHTML = `<div class="profile-empty-state">Не вдалося завантажити замовлення.</div>`;
-            }
-        }
-
-        function closeAllDrawers() {
-            document.getElementById('cart-drawer').classList.remove('active');
-            document.getElementById('checkout-drawer').classList.remove('active');
-            document.getElementById('wishlist-drawer').classList.remove('active');
-            document.getElementById('profile-drawer')?.classList.remove('active');
-            document.getElementById('backdrop').classList.remove('active');
-            closeProductModal();
-            toggleSearch(false);
-            closeInfoModal();
-            closeSuccessModal();
-        }
-
-        function toggleSearch(open) {
-            const modal = document.getElementById('search-modal');
-            if (open) {
-                modal.classList.add('active');
-                renderRecentSearches();
-                setTimeout(() => document.getElementById('search-input')?.focus(), 100);
-            } else {
-                modal.classList.remove('active');
-            }
-        }
-
-        function getRecentSearches() {
-            try {
-                return JSON.parse(localStorage.getItem('m1lip_recent_searches')) || [];
-            } catch (e) {
-                return [];
-            }
-        }
-
-        function saveRecentSearch(query) {
-            const q = query.trim();
-            if (!q) return;
-            let recent = getRecentSearches().filter(item => item.toLowerCase() !== q.toLowerCase());
-            recent.unshift(q);
-            recent = recent.slice(0, 6);
-            localStorage.setItem('m1lip_recent_searches', JSON.stringify(recent));
-        }
-
-        function renderRecentSearches() {
-            const block = document.getElementById('recent-searches-block');
-            const input = document.getElementById('search-input');
-            if (!block) return;
-            const recent = getRecentSearches();
-            if (!recent.length || (input && input.value.trim())) {
-                block.innerHTML = '';
-                return;
-            }
-            block.innerHTML = `
-                <div style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); margin-top: 14px;">Нещодавні пошуки</div>
-                <div class="recent-searches">
-                    ${recent.map(q => `<span class="recent-search-chip" onclick="document.getElementById('search-input').value = '${q.replace(/'/g, "\\'")}'; handleSearch('${q.replace(/'/g, "\\'")}');">${q}</span>`).join('')}
-                </div>
-            `;
-        }
-
-        function handleSearch(query) {
-            const resultsContainer = document.getElementById('search-results');
-            if (!resultsContainer) return;
-
-            clearTimeout(searchDebounceTimer);
-
-            if (!query.trim()) {
-                resultsContainer.innerHTML = '';
-                renderRecentSearches();
-                return;
-            }
-
-            document.getElementById('recent-searches-block').innerHTML = '';
-
-            searchDebounceTimer = setTimeout(() => {
-                const q = query.toLowerCase();
-                const filtered = products.filter(p =>
-                    p.title.toLowerCase().includes(q) ||
-                    p.brand.toLowerCase().includes(q) ||
-                    p.category.toLowerCase().includes(q) ||
-                    (p.sku && p.sku.toLowerCase().includes(q))
-                );
-
-                if (filtered.length === 0) {
-                    resultsContainer.innerHTML = `<div class="search-empty-state">Нічого не знайдено за запитом «${query}»</div>`;
-                    return;
-                }
-
-                saveRecentSearch(query);
-
-                resultsContainer.innerHTML = filtered.map(p => `
-                    <div class="search-result-item" onclick="toggleSearch(false); openProductModal(products.find(x => x.id === '${p.id}'))">
-                        <div style="display: flex; align-items: center; gap: 10px;">
-                            <img src="${p.img}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;" alt="">
-                            <div>
-                                <div style="font-size: 0.75rem; color: var(--text-muted);">${p.brand}</div>
-                                <div style="font-weight: 700;">${p.title}</div>
-                            </div>
-                        </div>
-                        <div style="font-weight: 700; color: var(--accent);">${formatPrice(p.price)}</div>
-                    </div>
-                `).join('');
-            }, 300);
-        }
-
-        function renderCartItems() {
-            const container = document.getElementById('cart-items-container');
-            const totalEl = document.getElementById('cart-total-price');
-            if (!container) return;
-
-            if (cart.length === 0) {
-                container.innerHTML = `<p style="color: var(--text-secondary); text-align: center; padding: 40px;">Кошик порожній</p>`;
-                if (totalEl) totalEl.innerHTML = formatPrice(0);
-                return;
-            }
-
-            let total = 0;
-            container.innerHTML = cart.map((item, index) => {
-                total += item.price * item.qty;
-                return `
-                    <div class="cart-item">
-                        <img src="${item.img}" onclick="openProductModal(products.find(x => x.id === '${item.id}'))" alt="">
-                        <div style="flex-grow: 1;">
-                            <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted);">${item.brand}</div>
-                            <div style="font-size: 0.95rem; font-weight: 800;">${item.title}</div>
-                            <div style="font-size: 0.75rem; color: var(--text-secondary);">Колір: ${formatColorEnglish(item.color)}</div>
-                            <div style="font-size: 0.9rem; font-weight: 700; color: var(--accent); margin-top: 4px;">${formatPrice(item.price * item.qty)}</div>
-                        </div>
-                        <div class="quantity-controls">
-                            <button onclick="updateCartQty(${index}, -1)">−</button>
-                            <span>${item.qty}</span>
-                            <button onclick="updateCartQty(${index}, 1)">+</button>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-
-            if (totalEl) totalEl.innerHTML = formatPrice(total);
-        }
-
-        function updateCartQty(index, delta) {
-            cart[index].qty += delta;
-            if (cart[index].qty <= 0) {
-                cart.splice(index, 1);
-            }
-            saveCart();
-            renderCartItems();
         }
 
         function renderWishlistItems() {
@@ -3095,67 +2981,21 @@
             if (!container) return;
 
             if (wishlist.length === 0) {
-                container.innerHTML = `<p style="color: var(--text-secondary); text-align: center; padding: 40px;">Список обраного порожній</p>`;
+                container.innerHTML = `<p style="color: var(--text-secondary); text-align: center; padding: 40px 0;">Список обраного порожній</p>`;
                 return;
             }
 
-            container.innerHTML = wishlist.map(item => `
+            container.innerHTML = wishlist.map((item) => `
                 <div class="wishlist-item-card">
-                    <img src="${item.img}" onclick="openProductModal(products.find(x => x.id === '${item.id}'))" alt="">
-                    <div style="flex-grow: 1;">
-                        <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted);">${item.brand}</div>
-                        <div style="font-size: 0.95rem; font-weight: 800;">${item.title}</div>
-                        <div style="font-size: 0.9rem; font-weight: 700; color: var(--accent); margin-top: 4px;">${formatPrice(item.price)}</div>
+                    <img src="${item.img}" alt="${item.title}" onclick="openProductModal(products.find(x => x.id === '${item.id}'))">
+                    <div style="flex-grow: 1; overflow: hidden;" onclick="openProductModal(products.find(x => x.id === '${item.id}'))" style="cursor: pointer;">
+                        <h4 style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase;">${item.brand}</h4>
+                        <h3 style="font-size: 0.9rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${item.title}</h3>
+                        <div class="product-price" style="font-size: 0.85rem; margin-top: 2px;">${formatPrice(item.price)}</div>
                     </div>
-                    <button class="icon-btn" onclick="toggleWishlist('${item.id}')" style="width: 32px; height: 32px; border: none;">✕</button>
+                    <button class="close-drawer" style="font-size: 0.85rem;" onclick="toggleWishlist('${item.id}')">✕</button>
                 </div>
             `).join('');
-        }
-
-        function toggleWishlist(productId) {
-            const product = products.find(p => p.id === productId);
-            if (!product) return;
-
-            const index = wishlist.findIndex(item => item.id === productId);
-            if (index > -1) {
-                wishlist.splice(index, 1);
-            } else {
-                wishlist.push({
-                    id: product.id,
-                    title: product.title,
-                    brand: product.brand,
-                    price: product.price,
-                    img: product.img
-                });
-            }
-
-            saveWishlist();
-            renderCatalog();
-            if (currentModalProduct && currentModalProduct.id === productId) {
-                const isFav = wishlist.some(item => item.id === productId);
-                const wishBtn = document.getElementById('modal-wishlist-btn');
-                if (wishBtn) {
-                    wishBtn.classList.toggle('active', isFav);
-                    wishBtn.querySelector('svg').style.fill = isFav ? '#FF3B30' : 'none';
-                    wishBtn.querySelector('svg').style.stroke = isFav ? '#FF3B30' : 'currentColor';
-                }
-            }
-        }
-
-        function toggleCurrentWishlist() {
-            if (currentModalProduct) {
-                toggleWishlist(currentModalProduct.id);
-            }
-        }
-
-        function saveCart() {
-            localStorage.setItem('m1lip_cart', JSON.stringify(cart));
-            updateBadges();
-        }
-
-        function saveWishlist() {
-            localStorage.setItem('m1lip_wishlist', JSON.stringify(wishlist));
-            updateBadges();
         }
 
         function updateBadges() {
@@ -3165,6 +3005,82 @@
             const totalCartItems = cart.reduce((sum, item) => sum + item.qty, 0);
             if (cartCountEl) cartCountEl.innerText = totalCartItems;
             if (wishlistCountEl) wishlistCountEl.innerText = wishlist.length;
+        }
+
+        function toggleSearch(open) {
+            const modal = document.getElementById('search-modal');
+            const backdrop = document.getElementById('backdrop');
+            if (open) {
+                modal.classList.add('active');
+                backdrop.classList.add('active');
+                setTimeout(() => document.getElementById('search-input')?.focus(), 100);
+            } else {
+                modal.classList.remove('active');
+                backdrop.classList.remove('active');
+            }
+        }
+
+        function handleSearch(query) {
+            clearTimeout(searchDebounceTimer);
+            const resultsBox = document.getElementById('search-results');
+            if (!resultsBox) return;
+
+            const q = query.trim().toLowerCase();
+            if (!q) {
+                resultsBox.innerHTML = '';
+                return;
+            }
+
+            searchDebounceTimer = setTimeout(() => {
+                const matches = products.filter(p => 
+                    p.title.toLowerCase().includes(q) || 
+                    p.brand.toLowerCase().includes(q) || 
+                    p.category.toLowerCase().includes(q)
+                );
+
+                if (matches.length === 0) {
+                    resultsBox.innerHTML = `<div class="search-empty-state">Нічого не знайдено за запитом "${query}"</div>`;
+                    return;
+                }
+
+                resultsBox.innerHTML = matches.map(p => `
+                    <div class="search-result-item" onclick="saveRecentSearch('${query}'); toggleSearch(false); openProductModal(products.find(x => x.id === '${p.id}'))">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <img src="${p.img}" alt="${p.title}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 6px;">
+                            <div>
+                                <h4 style="font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase;">${p.brand}</h4>
+                                <h3 style="font-size: 0.9rem; font-weight: 700;">${p.title}</h3>
+                            </div>
+                        </div>
+                        <div class="product-price" style="font-size: 0.95rem;">${formatPrice(p.price)}</div>
+                    </div>
+                `).join('');
+            }, 250);
+        }
+
+        function saveRecentSearch(query) {
+            let searches = JSON.parse(localStorage.getItem('m1lip_recent_searches')) || [];
+            searches = [query, ...searches.filter(s => s !== query)].slice(0, 5);
+            localStorage.setItem('m1lip_recent_searches', JSON.stringify(searches));
+            renderRecentSearches();
+        }
+
+        function renderRecentSearches() {
+            const block = document.getElementById('recent-searches-block');
+            if (!block) return;
+            const searches = JSON.parse(localStorage.getItem('m1lip_recent_searches')) || [];
+            if (searches.length === 0) {
+                block.innerHTML = '';
+                return;
+            }
+            block.innerHTML = `
+                <div style="margin-top: 12px;">
+                    <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; margin-bottom: 6px;">Популярні та недавні пошуки:</div>
+                    <div class="recent-searches">
+                        ${searches.map(s => `<div class="recent-search-chip" onclick="document.getElementById('search-input').value = '${s}'; handleSearch('${s}')">${s}</div>`).join('')}
+                    </div>
+                </div>
+            `;
         }
     </script>
 </body>
