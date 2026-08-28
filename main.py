@@ -119,10 +119,8 @@ init_db()
 
 
 async def get_file_url(bot: Bot, file_id: str) -> str:
-    if not file_id:
-        return ""
-    if file_id.startswith("http"):
-        return file_id
+    if not file_id: return ""
+    if file_id.startswith("http"): return file_id
     try:
         file_info = await bot.get_file(file_id)
         return f"https://api.telegram.org/file/bot{TOKEN}/{file_info.file_path}"
@@ -208,8 +206,8 @@ async def create_order(request: Request):
         payment = data.get("payment", {})
 
         items_str = "\n".join([
-            f"• {i.get('brand', '')} {i.get('title', '')} ({i.get('color', '')}) x {i['qty']} — {i['price'] * i['qty']} ₴"
-            for i in items])
+                                  f"• {i.get('brand', '')} {i.get('title', '')} ({i.get('color', '')}) x {i['qty']} — {i['price'] * i['qty']} ₴"
+                                  for i in items])
         msg_text = (
             f"🚨 *Нове замовлення #{order_id_str}*!\n\n"
             f"👤 *Клієнт:* {customer.get('firstName')} {customer.get('lastName')} ({customer.get('phone')})\n"
@@ -230,7 +228,6 @@ async def create_order(request: Request):
 
 
 app.include_router(api_router)
-
 router = Router()
 
 
@@ -279,7 +276,8 @@ async def show_admin_panel(message_or_callback_msg, edit_mode=False):
         stock_status = f"📦 {product['quantity']} шт." if product['quantity'] > 0 else "❌ Немає"
         keyboard_buttons.append([InlineKeyboardButton(
             text=f"{product.get('brand', '')} {product['title']} | {product['price']} ₴ | {stock_status}",
-            callback_data=f"manage_{product['id']}")])
+            callback_data=f"manage_{product['id']}"
+        )])
     keyboard_buttons.append([InlineKeyboardButton(text="➕ Додати новий товар", callback_data="add_new_product")])
     admin_markup = InlineKeyboardMarkup(inline_keyboard=keyboard_buttons)
 
@@ -295,8 +293,7 @@ async def show_admin_panel(message_or_callback_msg, edit_mode=False):
 
 @router.callback_query(F.data == "back_to_admin")
 async def process_back_to_admin(callback: CallbackQuery):
-    if callback.from_user.id not in ADMIN_IDS:
-        return
+    if callback.from_user.id not in ADMIN_IDS: return
     try:
         await callback.message.delete()
     except Exception:
@@ -371,8 +368,7 @@ async def process_manage_product(callback: CallbackQuery):
 
 @router.callback_query(F.data.startswith("edit_field_"))
 async def process_edit_field_start(callback: CallbackQuery, state: FSMContext):
-    if callback.from_user.id not in ADMIN_IDS:
-        return
+    if callback.from_user.id not in ADMIN_IDS: return
     parts = callback.data.replace("edit_field_", "").split("_", 1)
     prod_id = parts[0]
     field_name = parts[1]
@@ -395,11 +391,9 @@ async def process_edit_field_start(callback: CallbackQuery, state: FSMContext):
 
 @router.message(AdminEditStates.waiting_for_new_value)
 async def process_edit_field_save(message: Message, state: FSMContext):
-    if message.from_user.id not in ADMIN_IDS:
-        return
+    if message.from_user.id not in ADMIN_IDS: return
     data = await state.get_data()
-    if data.get("edit_field_name") == "color_qty":
-        return
+    if data.get("edit_field_name") == "color_qty": return
 
     prod_id = data.get("edit_product_id")
     field = data.get("edit_field_name")
@@ -428,8 +422,7 @@ async def process_edit_field_save(message: Message, state: FSMContext):
 
 @router.callback_query(F.data.startswith("edit_colors_"))
 async def process_edit_colors(callback: CallbackQuery):
-    if callback.from_user.id not in ADMIN_IDS:
-        return
+    if callback.from_user.id not in ADMIN_IDS: return
     product_id = callback.data.replace("edit_colors_", "")
     products = get_db_products()
     product = next((p for p in products if p["id"] == product_id), None)
@@ -454,8 +447,7 @@ async def process_edit_colors(callback: CallbackQuery):
 
 @router.callback_query(F.data.startswith("ch_cqty_"))
 async def process_change_color_qty(callback: CallbackQuery, state: FSMContext):
-    if callback.from_user.id not in ADMIN_IDS:
-        return
+    if callback.from_user.id not in ADMIN_IDS: return
     parts = callback.data.replace("ch_cqty_", "").split("_", 1)
     await state.update_data(editing_product_id=parts[0], editing_color_name=parts[1], edit_field_name="color_qty")
     await state.set_state(AdminEditStates.waiting_for_new_value)
@@ -465,11 +457,9 @@ async def process_change_color_qty(callback: CallbackQuery, state: FSMContext):
 
 @router.message(AdminEditStates.waiting_for_new_value, F.text)
 async def save_edited_color_qty_proxy(message: Message, state: FSMContext):
-    if message.from_user.id not in ADMIN_IDS:
-        return
+    if message.from_user.id not in ADMIN_IDS: return
     data = await state.get_data()
-    if data.get("edit_field_name") != "color_qty":
-        return
+    if data.get("edit_field_name") != "color_qty": return
 
     try:
         new_q = int(message.text.strip())
@@ -498,8 +488,7 @@ async def save_edited_color_qty_proxy(message: Message, state: FSMContext):
 
 @router.callback_query(F.data == "add_new_product")
 async def process_add_new(callback: CallbackQuery, state: FSMContext):
-    if callback.from_user.id not in ADMIN_IDS:
-        return
+    if callback.from_user.id not in ADMIN_IDS: return
     await state.set_state(AddProductStates.waiting_for_brand)
     await callback.message.answer(
         "🏷 Введіть **бренд** товару\n\n*(Наприклад: `Logitech`, `Razer`, `AULA`, `AJAZZ`, `Hator`)*:",
