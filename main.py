@@ -2342,18 +2342,36 @@ async def process_delete_product(callback: CallbackQuery):
     await callback.answer()
 
 
-async def main():
-    bot = Bot(token=TOKEN)
-    dp = Dispatcher()
-    dp.include_router(router)
+async def run_server():
     port = int(os.environ.get("PORT", 10000))
     config = uvicorn.Config(app, host="0.0.0.0", port=port, log_level="info")
     server = uvicorn.Server(config)
-    await asyncio.gather(
-        bot.get_updates(offset=-1),
-        dp.start_polling(bot),
-        server.serve(),
-    )
+    await server.serve()
+
+
+async def run_bot():
+    if not TOKEN:
+        logging.warning("BOT_TOKEN не встановлено — бот вимкнено, працює лише сайт/API.")
+        return
+    bot = Bot(token=TOKEN)
+    dp = Dispatcher()
+    dp.include_router(router)
+    try:
+        # Clear any stale updates / webhook before polling starts. Do NOT also
+        # call bot.get_updates() separately — Telegram allows only ONE
+        # concurrent getUpdates connection per bot, and dp.start_polling()
+        # already owns that loop. Calling both at once causes a 409 Conflict
+        # that used to crash the entire process (site included).
+        await bot.delete_webhook(drop_pending_updates=True)
+        await dp.start_polling(bot)
+    except Exception:
+        logging.exception("Bot polling stopped due to an error. The site/API keeps running.")
+
+
+async def main():
+    # The web server and the Telegram bot are independent. If the bot crashes
+    # (bad token, Telegram outage, etc.) the site must stay up.
+    await asyncio.gather(run_server(), run_bot(), return_exceptions=True)
 
 
 if __name__ == "__main__":
