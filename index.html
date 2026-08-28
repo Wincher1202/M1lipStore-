@@ -1204,6 +1204,169 @@
             border-color: var(--accent);
             box-shadow: 0 0 0 2px var(--accent-light);
         }
+        .checkout-group .field-hint { font-size: 0.72rem; color: var(--text-muted); }
+        .checkout-group .field-error { font-size: 0.72rem; color: #e53935; }
+
+        /* ---- checkout stepper ---- */
+        .checkout-steps {
+            display: flex;
+            gap: 4px;
+            padding: 14px 20px 0 20px;
+        }
+        .checkout-step-dot {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.62rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            color: var(--text-muted);
+        }
+        .checkout-step-dot .dot-line { width: 100%; height: 3px; border-radius: 3px; background: var(--border-light); transition: var(--transition-smooth); }
+        .checkout-step-dot.active { color: var(--accent); }
+        .checkout-step-dot.active .dot-line, .checkout-step-dot.done .dot-line { background: var(--accent); }
+        .checkout-step-panel { display: none; }
+        .checkout-step-panel.active { display: flex; flex-direction: column; gap: 16px; }
+        .checkout-step-nav {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+        }
+        .btn-secondary {
+            flex: 0 0 auto;
+            padding: 12px 18px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-light);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+        }
+        .btn-secondary:hover { border-color: var(--border-hover); }
+
+        /* ---- delivery provider chips ---- */
+        .provider-chip-group { display: flex; flex-wrap: wrap; gap: 8px; }
+        .provider-chip {
+            padding: 10px 14px;
+            border-radius: 999px;
+            border: 1px solid var(--border-light);
+            background: var(--bg-primary);
+            font-size: 0.82rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+        }
+        .provider-chip.active { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+        .provider-chip .badge-soon { display: block; font-size: 0.6rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); }
+        .provider-chip.active .badge-soon { color: var(--accent); }
+
+        .delivery-search-results {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            max-height: 220px;
+            overflow-y: auto;
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-sm);
+        }
+        .delivery-search-result-item {
+            padding: 10px 12px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            border-bottom: 1px solid var(--border-light);
+        }
+        .delivery-search-result-item:last-child { border-bottom: none; }
+        .delivery-search-result-item:hover { background: var(--bg-primary); }
+        .delivery-search-result-item .item-sub { font-size: 0.7rem; color: var(--text-muted); }
+        .delivery-search-empty { padding: 12px; font-size: 0.8rem; color: var(--text-muted); text-align: center; }
+
+        .selected-pill {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--accent);
+            background: var(--accent-light);
+            font-size: 0.85rem;
+            font-weight: 700;
+        }
+        .selected-pill button { background: none; border: none; color: var(--accent); font-weight: 800; cursor: pointer; }
+
+        .delivery-fallback-note {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            background: var(--bg-primary);
+            border: 1px dashed var(--border-light);
+            border-radius: var(--radius-sm);
+            padding: 10px 12px;
+        }
+        .delivery-api-error {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            font-size: 0.8rem;
+            color: #e53935;
+            background: rgba(229,57,53,0.08);
+            border-radius: var(--radius-sm);
+            padding: 10px 12px;
+        }
+        .delivery-api-error button.btn-secondary { padding: 6px 12px; font-size: 0.78rem; }
+
+        .saved-delivery-chip {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-light);
+            background: var(--bg-primary);
+            font-size: 0.82rem;
+        }
+        .saved-delivery-chip button { padding: 6px 10px; font-size: 0.75rem; }
+
+        .review-block {
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-sm);
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .review-block h5 { font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted); font-weight: 800; }
+        .review-line { display: flex; justify-content: space-between; font-size: 0.85rem; gap: 10px; }
+        .review-line span:first-child { color: var(--text-muted); }
+
+        /* ---- profile drawer ---- */
+        .profile-section { display: flex; flex-direction: column; gap: 10px; margin-bottom: 22px; }
+        .profile-section h4 { font-size: 0.9rem; font-weight: 800; color: var(--accent); }
+        .profile-order-card {
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-sm);
+            padding: 12px;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+        }
+        .profile-order-card:hover { border-color: var(--border-hover); }
+        .profile-order-card .order-top { display: flex; justify-content: space-between; font-weight: 800; font-size: 0.9rem; }
+        .profile-order-card .order-meta { font-size: 0.75rem; color: var(--text-muted); margin-top: 4px; }
+        .order-status-pill {
+            font-size: 0.65rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            padding: 3px 8px;
+            border-radius: 999px;
+            background: var(--accent-light);
+            color: var(--accent);
+        }
+        .profile-empty-state { font-size: 0.85rem; color: var(--text-muted); text-align: center; padding: 18px 0; }
+        .profile-signin-note { font-size: 0.85rem; color: var(--text-muted); text-align: center; padding: 30px 10px; }
     </style>
 </head>
 <body data-theme="light">
@@ -1245,6 +1408,13 @@
                     <span class="badge-count" id="cart-count">0</span>
                 </button>
                 <span class="tooltip">Кошик</span>
+            </div>
+
+            <div class="icon-btn-wrapper">
+                <button class="icon-btn" id="profile-open-btn" aria-label="Профіль">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21a8 8 0 0 0-16 0"/><circle cx="12" cy="7" r="4"/></svg>
+                </button>
+                <span class="tooltip">Профіль</span>
             </div>
         </div>
     </header>
@@ -1438,52 +1608,114 @@
             <h3 style="font-weight: 800;">Оформлення замовлення</h3>
             <button class="close-drawer" onclick="toggleCheckoutDrawer(false)">✕</button>
         </div>
+        <div class="checkout-steps" id="checkout-steps-indicator">
+            <div class="checkout-step-dot" data-step="1"><span>Контакти</span><div class="dot-line"></div></div>
+            <div class="checkout-step-dot" data-step="2"><span>Доставка</span><div class="dot-line"></div></div>
+            <div class="checkout-step-dot" data-step="3"><span>Оплата</span><div class="dot-line"></div></div>
+            <div class="checkout-step-dot" data-step="4"><span>Перевірка</span><div class="dot-line"></div></div>
+        </div>
         <div class="drawer-body">
             <div class="checkout-container">
-                <h4 style="font-size: 0.9rem; font-weight: 800; color: var(--accent);">1. Контактні дані</h4>
-                <div class="checkout-group">
-                    <label>Ім'я</label>
-                    <input type="text" id="chk-name" placeholder="Введіть ваше ім'я">
-                </div>
-                <div class="checkout-group">
-                    <label>Прізвище</label>
-                    <input type="text" id="chk-surname" placeholder="Введіть ваше прізвище">
-                </div>
-                <div class="checkout-group">
-                    <label>Номер телефону</label>
-                    <input type="tel" id="chk-phone" placeholder="+380XXXXXXXXX">
+
+                <!-- STEP 1: contacts -->
+                <div class="checkout-step-panel" data-step-panel="1">
+                    <div class="checkout-group">
+                        <label>Ім'я</label>
+                        <input type="text" id="chk-name" placeholder="Введіть ваше ім'я">
+                    </div>
+                    <div class="checkout-group">
+                        <label>Прізвище</label>
+                        <input type="text" id="chk-surname" placeholder="Введіть ваше прізвище">
+                    </div>
+                    <div class="checkout-group">
+                        <label>Номер телефону</label>
+                        <input type="tel" id="chk-phone" placeholder="+380XXXXXXXXX">
+                    </div>
                 </div>
 
-                <h4 style="font-size: 0.9rem; font-weight: 800; color: var(--accent); margin-top: 10px;">2. Доставка</h4>
-                <div class="checkout-group">
-                    <label>Служба доставки</label>
-                    <input type="text" value="Нова пошта" disabled style="opacity: 0.7;">
-                </div>
-                <div class="checkout-group">
-                    <label>Місто</label>
-                    <input type="text" id="chk-city" placeholder="Наприклад, Київ, Львів...">
-                </div>
-                <div class="checkout-group">
-                    <label>Відділення / Поштомат</label>
-                    <input type="text" id="chk-department" placeholder="Номер відділення або адреса">
+                <!-- STEP 2: delivery -->
+                <div class="checkout-step-panel" data-step-panel="2">
+                    <div id="saved-deliveries-block"></div>
+
+                    <div class="checkout-group">
+                        <label>Служба доставки</label>
+                        <div class="provider-chip-group" id="provider-chip-group"></div>
+                    </div>
+
+                    <div id="delivery-configured-flow" style="display:none; flex-direction: column; gap: 16px;">
+                        <div class="checkout-group" id="delivery-city-group">
+                            <label>Місто</label>
+                            <input type="text" id="chk-city-search" placeholder="Почніть вводити назву міста...">
+                            <div class="delivery-search-results" id="city-search-results" style="display:none;"></div>
+                            <div id="city-selected-pill"></div>
+                        </div>
+                        <div class="checkout-group" id="delivery-warehouse-group" style="display:none;">
+                            <label>Відділення / Поштомат</label>
+                            <input type="text" id="chk-warehouse-search" placeholder="Пошук відділення...">
+                            <div class="delivery-search-results" id="warehouse-search-results" style="display:none;"></div>
+                            <div id="warehouse-selected-pill"></div>
+                        </div>
+                        <div id="delivery-api-error-block"></div>
+                    </div>
+
+                    <div id="delivery-fallback-flow" style="display:none; flex-direction: column; gap: 16px;">
+                        <div class="delivery-fallback-note" id="delivery-fallback-note"></div>
+                        <div class="checkout-group">
+                            <label>Місто</label>
+                            <input type="text" id="chk-city" placeholder="Наприклад, Київ, Львів...">
+                        </div>
+                        <div class="checkout-group">
+                            <label>Відділення / Поштомат</label>
+                            <input type="text" id="chk-department" placeholder="Номер відділення або адреса">
+                        </div>
+                    </div>
+
+                    <label style="display:flex; align-items:center; gap:8px; font-size:0.82rem; font-weight:600; margin-top: 4px;">
+                        <input type="checkbox" id="chk-save-delivery" style="width:auto;"> Зберегти цю доставку для наступного замовлення
+                    </label>
                 </div>
 
-                <h4 style="font-size: 0.9rem; font-weight: 800; color: var(--accent); margin-top: 10px;">3. Спосіб оплати</h4>
-                <div class="checkout-group">
-                    <label>Оберіть спосіб оплати</label>
-                    <select id="chk-payment" style="width: 100%; padding: 12px; border-radius: 8px;">
-                        <option value="online">Повна онлайн-оплата</option>
-                        <option value="cod">Накладений платіж</option>
-                    </select>
+                <!-- STEP 3: payment -->
+                <div class="checkout-step-panel" data-step-panel="3">
+                    <div class="checkout-group">
+                        <label>Оберіть спосіб оплати</label>
+                        <select id="chk-payment" style="width: 100%; padding: 12px; border-radius: 8px;">
+                            <option value="online">Повна онлайн-оплата</option>
+                            <option value="cod">Накладений платіж</option>
+                        </select>
+                    </div>
+                    <div class="checkout-group">
+                        <label>Коментар до замовлення (необов'язково)</label>
+                        <textarea id="chk-comment" rows="2" placeholder="Побажання до замовлення"></textarea>
+                    </div>
                 </div>
-                <div class="checkout-group">
-                    <label>Коментар до замовлення (необов'язково)</label>
-                    <textarea id="chk-comment" rows="2" placeholder="Побажання до замовлення"></textarea>
+
+                <!-- STEP 4: review -->
+                <div class="checkout-step-panel" data-step-panel="4">
+                    <div class="review-block" id="review-items-block"></div>
+                    <div class="review-block" id="review-contact-block"></div>
+                    <div class="review-block" id="review-delivery-block"></div>
+                    <div class="review-block" id="review-payment-block"></div>
                 </div>
+
             </div>
         </div>
         <div class="drawer-footer">
-            <button class="btn-primary" style="width: 100%; justify-content: center;" onclick="submitOrder()">Підтвердити замовлення</button>
+            <div class="checkout-step-nav">
+                <button class="btn-secondary" id="chk-back-btn" onclick="checkoutStepBack()" style="display:none;">← Назад</button>
+                <button class="btn-primary" id="chk-next-btn" style="flex:1; justify-content: center;" onclick="checkoutStepNext()">Далі →</button>
+                <button class="btn-primary" id="chk-submit-btn" style="flex:1; justify-content: center; display:none;" onclick="submitOrder()">Підтвердити замовлення</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="drawer" id="profile-drawer">
+        <div class="drawer-header">
+            <h3 style="font-weight: 800;">Профіль</h3>
+            <button class="close-drawer" onclick="toggleProfileDrawer(false)">✕</button>
+        </div>
+        <div class="drawer-body" id="profile-drawer-body">
+            <div class="profile-signin-note">Завантаження...</div>
         </div>
     </div>
 
@@ -1609,6 +1841,19 @@
         const CATEGORIES_API_URL = API_BASE + "/categories";
         const BRANDS_API_URL = API_BASE + "/brands";
         const ORDER_API_URL = API_BASE + "/orders";
+        const DELIVERY_PROVIDERS_URL = API_BASE + "/delivery/providers";
+        const PROFILE_API_URL = API_BASE + "/users/me/profile";
+        const SAVED_DELIVERIES_API_URL = API_BASE + "/users/me/deliveries";
+        const MY_ORDERS_API_URL = API_BASE + "/users/me/orders";
+
+        const PROVIDER_LABELS = { nova_poshta: "Нова Пошта", ukrposhta: "Укрпошта", mist: "MIST", pickup: "Самовивіз" };
+
+        let deliveryProviders = [];       // [{id, name, configured}]
+        let myProfile = null;             // { first_name, last_name, phone, saved_deliveries }
+        let checkoutStepIndex = 1;
+        let checkoutDelivery = {          // what actually gets sent on the order
+            provider: '', city: '', cityRef: '', department: '', warehouseRef: ''
+        };
 
         function formatColorEnglish(name) {
             if (!name) return 'Selected';
@@ -1994,6 +2239,20 @@
             document.getElementById('search-open-btn')?.addEventListener('click', () => toggleSearch(true));
             document.getElementById('wishlist-open-btn')?.addEventListener('click', () => toggleWishlistDrawer(true));
             document.getElementById('cart-open-btn')?.addEventListener('click', () => toggleCart(true));
+            document.getElementById('profile-open-btn')?.addEventListener('click', () => toggleProfileDrawer(true));
+
+            let citySearchTimer = null;
+            document.getElementById('chk-city-search')?.addEventListener('input', (e) => {
+                clearTimeout(citySearchTimer);
+                const q = e.target.value;
+                citySearchTimer = setTimeout(() => searchDeliveryCities(q), 350);
+            });
+            let warehouseSearchTimer = null;
+            document.getElementById('chk-warehouse-search')?.addEventListener('input', (e) => {
+                clearTimeout(warehouseSearchTimer);
+                const q = e.target.value;
+                warehouseSearchTimer = setTimeout(() => searchDeliveryWarehouses(q), 350);
+            });
         });
 
         function setTheme(theme, save = true) {
@@ -2303,24 +2562,320 @@
             }
         }
 
-        function openCheckoutModal() {
+        async function openCheckoutModal() {
             if (cart.length === 0) return;
+            checkoutStepIndex = 1;
+            checkoutDelivery = { provider: '', city: '', cityRef: '', department: '', warehouseRef: '' };
+            renderCheckoutStep();
             toggleCheckoutDrawer(true);
+
+            // Best-effort prefill — a signed-out browser tab (outside Telegram)
+            // just won't have anything to prefill, which is fine.
+            if (tg?.initData) {
+                await Promise.all([loadDeliveryProviders(), loadMyProfile()]);
+            } else {
+                renderProviderChips();
+            }
+            prefillContactsFromProfile();
+            renderSavedDeliveriesBlock();
+        }
+
+        // ---------------------------------------------------------------
+        // Checkout stepper
+        // ---------------------------------------------------------------
+        const CHECKOUT_STEP_COUNT = 4;
+
+        function renderCheckoutStep() {
+            document.querySelectorAll('.checkout-step-panel').forEach(panel => {
+                panel.classList.toggle('active', Number(panel.dataset.stepPanel) === checkoutStepIndex);
+            });
+            document.querySelectorAll('.checkout-step-dot').forEach(dot => {
+                const n = Number(dot.dataset.step);
+                dot.classList.toggle('active', n === checkoutStepIndex);
+                dot.classList.toggle('done', n < checkoutStepIndex);
+            });
+            document.getElementById('chk-back-btn').style.display = checkoutStepIndex > 1 ? '' : 'none';
+            const isLast = checkoutStepIndex === CHECKOUT_STEP_COUNT;
+            document.getElementById('chk-next-btn').style.display = isLast ? 'none' : '';
+            document.getElementById('chk-submit-btn').style.display = isLast ? '' : 'none';
+            if (isLast) renderReviewStep();
+        }
+
+        function validateCheckoutStep(step) {
+            if (step === 1) {
+                const name = document.getElementById('chk-name').value.trim();
+                const phone = document.getElementById('chk-phone').value.trim();
+                if (!name || !phone) {
+                    alert("Вкажіть ім'я та номер телефону.");
+                    return false;
+                }
+                return true;
+            }
+            if (step === 2) {
+                const configuredProvider = deliveryProviders.find(p => p.id === checkoutDelivery.provider && p.configured);
+                if (configuredProvider) {
+                    if (!checkoutDelivery.cityRef || !checkoutDelivery.warehouseRef) {
+                        alert("Оберіть місто та відділення зі списку.");
+                        return false;
+                    }
+                } else {
+                    const city = document.getElementById('chk-city').value.trim();
+                    const department = document.getElementById('chk-department').value.trim();
+                    if (!city || !department) {
+                        alert("Вкажіть місто та відділення доставки.");
+                        return false;
+                    }
+                    checkoutDelivery.city = city;
+                    checkoutDelivery.department = department;
+                }
+                return true;
+            }
+            return true;
+        }
+
+        function checkoutStepNext() {
+            if (!validateCheckoutStep(checkoutStepIndex)) return;
+            checkoutStepIndex = Math.min(CHECKOUT_STEP_COUNT, checkoutStepIndex + 1);
+            renderCheckoutStep();
+        }
+
+        function checkoutStepBack() {
+            checkoutStepIndex = Math.max(1, checkoutStepIndex - 1);
+            renderCheckoutStep();
+        }
+
+        // ---------------------------------------------------------------
+        // Delivery — providers, city/warehouse search, saved addresses
+        // ---------------------------------------------------------------
+        async function loadDeliveryProviders() {
+            try {
+                const res = await fetch(DELIVERY_PROVIDERS_URL);
+                deliveryProviders = res.ok ? await res.json() : [];
+            } catch (err) {
+                deliveryProviders = [];
+            }
+            renderProviderChips();
+        }
+
+        function renderProviderChips() {
+            const group = document.getElementById('provider-chip-group');
+            const known = ['nova_poshta', 'ukrposhta', 'mist', 'pickup'];
+            const byId = Object.fromEntries(deliveryProviders.map(p => [p.id, p]));
+            group.innerHTML = known.map(id => {
+                const p = byId[id] || { id, name: PROVIDER_LABELS[id], configured: false };
+                return `<div class="provider-chip ${checkoutDelivery.provider === id ? 'active' : ''}" onclick="selectDeliveryProvider('${id}')">
+                    ${p.name}
+                    ${!p.configured ? '<span class="badge-soon">вручну</span>' : ''}
+                </div>`;
+            }).join('');
+        }
+
+        function selectDeliveryProvider(providerId) {
+            checkoutDelivery = { provider: providerId, city: '', cityRef: '', department: '', warehouseRef: '' };
+            renderProviderChips();
+
+            const provider = deliveryProviders.find(p => p.id === providerId);
+            const configuredFlow = document.getElementById('delivery-configured-flow');
+            const fallbackFlow = document.getElementById('delivery-fallback-flow');
+            document.getElementById('city-search-results').style.display = 'none';
+            document.getElementById('city-selected-pill').innerHTML = '';
+            document.getElementById('warehouse-selected-pill').innerHTML = '';
+            document.getElementById('warehouse-search-results').innerHTML = '';
+            document.getElementById('delivery-warehouse-group').style.display = 'none';
+            document.getElementById('delivery-api-error-block').innerHTML = '';
+            document.getElementById('chk-city').value = '';
+            document.getElementById('chk-department').value = '';
+            document.getElementById('chk-city-search').value = '';
+            document.getElementById('chk-warehouse-search').value = '';
+
+            if (provider && provider.configured) {
+                configuredFlow.style.display = 'flex';
+                fallbackFlow.style.display = 'none';
+            } else {
+                configuredFlow.style.display = 'none';
+                fallbackFlow.style.display = 'flex';
+                document.getElementById('delivery-fallback-note').textContent =
+                    `Автоматичний пошук відділень для «${PROVIDER_LABELS[providerId] || providerId}» ще не підключено. Вкажіть місто та відділення вручну — ми звʼяжемось, якщо щось потрібно уточнити.`;
+            }
+        }
+
+        function showDeliveryApiError(message, retryFn) {
+            const block = document.getElementById('delivery-api-error-block');
+            block.innerHTML = `<div class="delivery-api-error"><span>${message}</span><button class="btn-secondary" id="delivery-retry-btn">Повторити</button></div>`;
+            document.getElementById('delivery-retry-btn').addEventListener('click', retryFn);
+        }
+
+        async function searchDeliveryCities(query) {
+            const resultsBox = document.getElementById('city-search-results');
+            document.getElementById('delivery-api-error-block').innerHTML = '';
+            if (!query || query.trim().length < 2) { resultsBox.style.display = 'none'; return; }
+            try {
+                const res = await fetch(`${API_BASE}/delivery/${checkoutDelivery.provider}/cities?query=${encodeURIComponent(query.trim())}`);
+                if (!res.ok) {
+                    const err = await res.json().catch(() => ({}));
+                    resultsBox.style.display = 'none';
+                    showDeliveryApiError(err.detail || 'Не вдалося завантажити міста.', () => searchDeliveryCities(query));
+                    return;
+                }
+                const cities = await res.json();
+                if (!cities.length) {
+                    resultsBox.innerHTML = '<div class="delivery-search-empty">Місто не знайдено</div>';
+                } else {
+                    resultsBox.innerHTML = cities.map(c =>
+                        `<div class="delivery-search-result-item" onclick='selectDeliveryCity(${JSON.stringify(c)})'>${c.name}<div class="item-sub">${c.region || ''}</div></div>`
+                    ).join('');
+                }
+                resultsBox.style.display = 'block';
+            } catch (err) {
+                resultsBox.style.display = 'none';
+                showDeliveryApiError('Не вдалося завантажити міста. Перевірте зʼєднання.', () => searchDeliveryCities(query));
+            }
+        }
+
+        function selectDeliveryCity(city) {
+            checkoutDelivery.city = city.name;
+            checkoutDelivery.cityRef = city.ref;
+            checkoutDelivery.department = '';
+            checkoutDelivery.warehouseRef = '';
+            document.getElementById('city-search-results').style.display = 'none';
+            document.getElementById('chk-city-search').value = '';
+            document.getElementById('city-selected-pill').innerHTML =
+                `<div class="selected-pill"><span>📍 ${city.name}</span><button onclick="clearDeliveryCity()">Змінити</button></div>`;
+            document.getElementById('warehouse-selected-pill').innerHTML = '';
+            document.getElementById('chk-warehouse-search').value = '';
+            document.getElementById('delivery-warehouse-group').style.display = '';
+        }
+
+        function clearDeliveryCity() {
+            checkoutDelivery.city = ''; checkoutDelivery.cityRef = '';
+            checkoutDelivery.department = ''; checkoutDelivery.warehouseRef = '';
+            document.getElementById('city-selected-pill').innerHTML = '';
+            document.getElementById('warehouse-selected-pill').innerHTML = '';
+            document.getElementById('delivery-warehouse-group').style.display = 'none';
+        }
+
+        async function searchDeliveryWarehouses(query) {
+            const resultsBox = document.getElementById('warehouse-search-results');
+            document.getElementById('delivery-api-error-block').innerHTML = '';
+            if (!checkoutDelivery.cityRef) return;
+            try {
+                const res = await fetch(`${API_BASE}/delivery/${checkoutDelivery.provider}/warehouses?city_ref=${encodeURIComponent(checkoutDelivery.cityRef)}&query=${encodeURIComponent(query.trim())}`);
+                if (!res.ok) {
+                    const err = await res.json().catch(() => ({}));
+                    resultsBox.style.display = 'none';
+                    showDeliveryApiError(err.detail || 'Не вдалося завантажити відділення.', () => searchDeliveryWarehouses(query));
+                    return;
+                }
+                const warehouses = await res.json();
+                if (!warehouses.length) {
+                    resultsBox.innerHTML = '<div class="delivery-search-empty">Такого відділення не знайдено. Оберіть відділення зі списку.</div>';
+                } else {
+                    resultsBox.innerHTML = warehouses.map(w =>
+                        `<div class="delivery-search-result-item" onclick='selectDeliveryWarehouse(${JSON.stringify(w)})'>${w.name}${w.type === 'postomat' ? ' 📦' : ''}<div class="item-sub">${w.address || ''}</div></div>`
+                    ).join('');
+                }
+                resultsBox.style.display = 'block';
+            } catch (err) {
+                resultsBox.style.display = 'none';
+                showDeliveryApiError('Не вдалося завантажити відділення. Перевірте зʼєднання.', () => searchDeliveryWarehouses(query));
+            }
+        }
+
+        function selectDeliveryWarehouse(warehouse) {
+            checkoutDelivery.department = warehouse.name;
+            checkoutDelivery.warehouseRef = warehouse.ref;
+            document.getElementById('warehouse-search-results').style.display = 'none';
+            document.getElementById('chk-warehouse-search').value = '';
+            document.getElementById('warehouse-selected-pill').innerHTML =
+                `<div class="selected-pill"><span>📦 ${warehouse.name}</span><button onclick="clearDeliveryWarehouse()">Змінити</button></div>`;
+        }
+
+        function clearDeliveryWarehouse() {
+            checkoutDelivery.department = ''; checkoutDelivery.warehouseRef = '';
+            document.getElementById('warehouse-selected-pill').innerHTML = '';
+        }
+
+        async function loadMyProfile() {
+            try {
+                const res = await fetch(PROFILE_API_URL, { headers: { 'X-Init-Data': tg?.initData || '' } });
+                myProfile = res.ok ? await res.json() : null;
+            } catch (err) {
+                myProfile = null;
+            }
+        }
+
+        function prefillContactsFromProfile() {
+            if (!myProfile) return;
+            if (myProfile.first_name && !document.getElementById('chk-name').value) document.getElementById('chk-name').value = myProfile.first_name;
+            if (myProfile.last_name && !document.getElementById('chk-surname').value) document.getElementById('chk-surname').value = myProfile.last_name;
+            if (myProfile.phone && !document.getElementById('chk-phone').value) document.getElementById('chk-phone').value = myProfile.phone;
+        }
+
+        function renderSavedDeliveriesBlock() {
+            const block = document.getElementById('saved-deliveries-block');
+            const saved = myProfile?.saved_deliveries || [];
+            if (!saved.length) { block.innerHTML = ''; return; }
+            block.innerHTML = `<div class="checkout-group"><label>Збережена доставка</label>` +
+                saved.map(d => `<div class="saved-delivery-chip">
+                    <span>${PROVIDER_LABELS[d.provider] || d.provider} — ${d.city}, ${d.warehouse}</span>
+                    <button class="btn-secondary" onclick='useSavedDelivery(${JSON.stringify(d)})'>Використати</button>
+                </div>`).join('') + `</div>`;
+        }
+
+        function useSavedDelivery(d) {
+            checkoutDelivery = { provider: d.provider, city: d.city, cityRef: d.cityRef, department: d.warehouse, warehouseRef: d.warehouseRef };
+            renderProviderChips();
+            const provider = deliveryProviders.find(p => p.id === d.provider);
+            const configuredFlow = document.getElementById('delivery-configured-flow');
+            const fallbackFlow = document.getElementById('delivery-fallback-flow');
+            if (provider && provider.configured && d.cityRef && d.warehouseRef) {
+                configuredFlow.style.display = 'flex';
+                fallbackFlow.style.display = 'none';
+                document.getElementById('city-selected-pill').innerHTML = `<div class="selected-pill"><span>📍 ${d.city}</span><button onclick="clearDeliveryCity()">Змінити</button></div>`;
+                document.getElementById('delivery-warehouse-group').style.display = '';
+                document.getElementById('warehouse-selected-pill').innerHTML = `<div class="selected-pill"><span>📦 ${d.warehouse}</span><button onclick="clearDeliveryWarehouse()">Змінити</button></div>`;
+            } else {
+                configuredFlow.style.display = 'none';
+                fallbackFlow.style.display = 'flex';
+                document.getElementById('delivery-fallback-note').textContent = `Автоматичний пошук для «${PROVIDER_LABELS[d.provider] || d.provider}» ще не підключено — перевірте, будь ласка, дані нижче.`;
+                document.getElementById('chk-city').value = d.city;
+                document.getElementById('chk-department').value = d.warehouse;
+            }
+        }
+
+        // ---------------------------------------------------------------
+        // Review step + submit
+        // ---------------------------------------------------------------
+        function renderReviewStep() {
+            const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+            document.getElementById('review-items-block').innerHTML = `<h5>Товари</h5>` +
+                cart.map(i => `<div class="review-line"><span>${i.title} (${i.color}) × ${i.qty}</span><span>${i.price * i.qty} ₴</span></div>`).join('') +
+                `<div class="review-line" style="font-weight:800; margin-top:4px;"><span>Разом</span><span>${total} ₴</span></div>`;
+
+            document.getElementById('review-contact-block').innerHTML = `<h5>Контакти</h5>
+                <div class="review-line"><span>Ім'я</span><span>${document.getElementById('chk-name').value.trim()} ${document.getElementById('chk-surname').value.trim()}</span></div>
+                <div class="review-line"><span>Телефон</span><span>${document.getElementById('chk-phone').value.trim()}</span></div>`;
+
+            const provLabel = PROVIDER_LABELS[checkoutDelivery.provider] || checkoutDelivery.provider || '—';
+            document.getElementById('review-delivery-block').innerHTML = `<h5>Доставка</h5>
+                <div class="review-line"><span>Служба</span><span>${provLabel}</span></div>
+                <div class="review-line"><span>Місто</span><span>${checkoutDelivery.city || '—'}</span></div>
+                <div class="review-line"><span>Відділення</span><span>${checkoutDelivery.department || '—'}</span></div>`;
+
+            const paymentMethod = document.getElementById('chk-payment').value;
+            document.getElementById('review-payment-block').innerHTML = `<h5>Оплата</h5>
+                <div class="review-line"><span>Спосіб</span><span>${paymentMethod === 'online' ? 'Повна онлайн-оплата' : 'Накладений платіж'}</span></div>`;
         }
 
         async function submitOrder() {
+            if (!validateCheckoutStep(1) || !validateCheckoutStep(2)) return;
+
             const name = document.getElementById('chk-name').value.trim();
             const surname = document.getElementById('chk-surname').value.trim();
             const phone = document.getElementById('chk-phone').value.trim();
-            const city = document.getElementById('chk-city').value.trim();
-            const department = document.getElementById('chk-department').value.trim();
             const paymentMethod = document.getElementById('chk-payment').value;
             const comment = document.getElementById('chk-comment').value.trim();
-
-            if (!name || !surname || !phone || !city || !department) {
-                alert("Будь ласка, заповніть усі обов'язкові поля доставки та контактів!");
-                return;
-            }
+            const saveDelivery = document.getElementById('chk-save-delivery').checked;
 
             let totals = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
 
@@ -2333,20 +2888,23 @@
                 },
                 items: cart,
                 delivery: {
-                    provider: "nova_poshta",
-                    service: "Нова пошта",
-                    city: city,
-                    department: department
+                    provider: checkoutDelivery.provider || 'nova_poshta',
+                    service: PROVIDER_LABELS[checkoutDelivery.provider] || checkoutDelivery.provider,
+                    city: checkoutDelivery.city,
+                    cityRef: checkoutDelivery.cityRef,
+                    department: checkoutDelivery.department,
+                    warehouseRef: checkoutDelivery.warehouseRef
                 },
                 payment: {
                     method: paymentMethod === 'online' ? "Повна онлайн-оплата" : "Накладений платіж",
                     status: paymentMethod === 'online' ? "paid" : "pending"
                 },
                 totals: totals,
-                comment: comment
+                comment: comment,
+                saveDelivery: saveDelivery
             };
 
-            const submitBtn = document.querySelector('#checkout-drawer .btn-primary');
+            const submitBtn = document.getElementById('chk-submit-btn');
             if (submitBtn) { submitBtn.disabled = true; submitBtn.innerText = 'Оформлюємо...'; }
 
             try {
@@ -2362,9 +2920,9 @@
                 let result = await response.json();
 
                 if (!response.ok) {
-                    // Backend validates price/stock server-side and returns a specific
-                    // Ukrainian error message — show it as-is instead of a generic one,
-                    // and refresh the catalog so the person sees up-to-date stock.
+                    // Backend validates price/stock/delivery server-side and returns a
+                    // specific Ukrainian error message — show it as-is instead of a
+                    // generic one, and refresh the catalog so stock stays current.
                     alert(result.detail || "Не вдалося створити замовлення. Спробуйте ще раз.");
                     fetchProducts();
                     return;
@@ -2406,10 +2964,143 @@
             }
         }
 
+        // ---------------------------------------------------------------
+        // Profile drawer — contact info, saved deliveries, order history
+        // ---------------------------------------------------------------
+        async function toggleProfileDrawer(open) {
+            const drawer = document.getElementById('profile-drawer');
+            const backdrop = document.getElementById('backdrop');
+            if (!open) {
+                drawer.classList.remove('active');
+                backdrop.classList.remove('active');
+                return;
+            }
+            drawer.classList.add('active');
+            backdrop.classList.add('active');
+            await renderProfileDrawer();
+        }
+
+        async function renderProfileDrawer() {
+            const body = document.getElementById('profile-drawer-body');
+            if (!tg?.initData) {
+                body.innerHTML = `<div class="profile-signin-note">Відкрийте магазин через Telegram, щоб побачити профіль та історію замовлень.</div>`;
+                return;
+            }
+            body.innerHTML = `<div class="profile-signin-note">Завантаження...</div>`;
+
+            const [profileRes, ordersRes] = await Promise.all([
+                fetch(PROFILE_API_URL, { headers: { 'X-Init-Data': tg.initData } }).catch(() => null),
+                fetch(MY_ORDERS_API_URL, { headers: { 'X-Init-Data': tg.initData } }).catch(() => null),
+            ]);
+            myProfile = profileRes && profileRes.ok ? await profileRes.json() : null;
+            const orders = ordersRes && ordersRes.ok ? await ordersRes.json() : [];
+
+            const savedDeliveries = myProfile?.saved_deliveries || [];
+
+            body.innerHTML = `
+                <div class="profile-section">
+                    <h4>Мої дані</h4>
+                    <div class="checkout-group">
+                        <label>Ім'я</label>
+                        <input type="text" id="prof-first-name" value="${myProfile?.first_name || ''}">
+                    </div>
+                    <div class="checkout-group">
+                        <label>Прізвище</label>
+                        <input type="text" id="prof-last-name" value="${myProfile?.last_name || ''}">
+                    </div>
+                    <div class="checkout-group">
+                        <label>Телефон</label>
+                        <input type="tel" id="prof-phone" value="${myProfile?.phone || ''}" placeholder="+380XXXXXXXXX">
+                    </div>
+                    <button class="btn-primary" style="justify-content:center;" onclick="saveMyProfile()">Зберегти</button>
+                </div>
+
+                <div class="profile-section">
+                    <h4>Збережена доставка</h4>
+                    ${savedDeliveries.length ? savedDeliveries.map(d => `
+                        <div class="saved-delivery-chip">
+                            <span>${PROVIDER_LABELS[d.provider] || d.provider} — ${d.city}, ${d.warehouse}</span>
+                            <button class="btn-secondary" onclick="deleteSavedDeliveryFromProfile('${d.id}')">Видалити</button>
+                        </div>`).join('') : '<div class="profile-empty-state">Ще немає збережених адрес доставки.</div>'}
+                </div>
+
+                <div class="profile-section">
+                    <h4>Історія замовлень</h4>
+                    <div id="profile-orders-list">
+                        ${orders.length ? orders.map(o => `
+                            <div class="profile-order-card" onclick="showOrderDetail('${o.order_id}')">
+                                <div class="order-top"><span>#${o.order_id}</span><span class="order-status-pill">${orderStatusLabel(o.status)}</span></div>
+                                <div class="order-meta">${new Date(o.created_at).toLocaleDateString('uk-UA')} · ${o.total} ₴</div>
+                            </div>`).join('') : '<div class="profile-empty-state">Замовлень поки немає.</div>'}
+                    </div>
+                    <div id="order-detail-block"></div>
+                </div>
+            `;
+        }
+
+        function orderStatusLabel(status) {
+            const map = {
+                NEW: 'Нове', WAITING_PAYMENT: 'Очікує оплати', PAID: 'Оплачено',
+                PROCESSING: 'Збирається', SHIPPED: 'Відправлено', DELIVERED: 'Доставлено', CANCELLED: 'Скасовано'
+            };
+            return map[status] || status;
+        }
+
+        async function saveMyProfile() {
+            const first_name = document.getElementById('prof-first-name').value.trim();
+            const last_name = document.getElementById('prof-last-name').value.trim();
+            const phone = document.getElementById('prof-phone').value.trim();
+            try {
+                const res = await fetch(PROFILE_API_URL, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'X-Init-Data': tg?.initData || '' },
+                    body: JSON.stringify({ first_name, last_name, phone })
+                });
+                if (!res.ok) {
+                    const err = await res.json().catch(() => ({}));
+                    alert(err.detail || 'Не вдалося зберегти дані.');
+                    return;
+                }
+                await loadMyProfile();
+            } catch (err) {
+                alert("Не вдалося зберегти дані. Перевірте з'єднання та спробуйте ще раз.");
+            }
+        }
+
+        async function deleteSavedDeliveryFromProfile(id) {
+            try {
+                await fetch(`${SAVED_DELIVERIES_API_URL}/${id}`, { method: 'DELETE', headers: { 'X-Init-Data': tg?.initData || '' } });
+                await renderProfileDrawer();
+            } catch (err) {
+                alert("Не вдалося видалити адресу. Спробуйте ще раз.");
+            }
+        }
+
+        async function showOrderDetail(orderId) {
+            const block = document.getElementById('order-detail-block');
+            block.innerHTML = `<div class="profile-empty-state">Завантаження...</div>`;
+            try {
+                const res = await fetch(`${API_BASE}/orders/${orderId}`, { headers: { 'X-Init-Data': tg?.initData || '' } });
+                if (!res.ok) { block.innerHTML = `<div class="profile-empty-state">Не вдалося завантажити замовлення.</div>`; return; }
+                const o = await res.json();
+                block.innerHTML = `
+                    <div class="review-block" style="margin-top:10px;">
+                        <h5>Замовлення #${o.order_id}</h5>
+                        ${(o.items || []).map(i => `<div class="review-line"><span>${i.title} (${i.color}) × ${i.qty}</span><span>${i.lineTotal} ₴</span></div>`).join('')}
+                        <div class="review-line" style="font-weight:800;"><span>Разом</span><span>${o.total} ₴</span></div>
+                        <div class="review-line"><span>Статус</span><span>${orderStatusLabel(o.status)}</span></div>
+                        ${o.tracking_number ? `<div class="review-line"><span>ТТН</span><span>${o.tracking_number}</span></div>` : ''}
+                    </div>`;
+            } catch (err) {
+                block.innerHTML = `<div class="profile-empty-state">Не вдалося завантажити замовлення.</div>`;
+            }
+        }
+
         function closeAllDrawers() {
             document.getElementById('cart-drawer').classList.remove('active');
             document.getElementById('checkout-drawer').classList.remove('active');
             document.getElementById('wishlist-drawer').classList.remove('active');
+            document.getElementById('profile-drawer')?.classList.remove('active');
             document.getElementById('filter-sheet').classList.remove('active');
             document.getElementById('backdrop').classList.remove('active');
             closeProductModal();

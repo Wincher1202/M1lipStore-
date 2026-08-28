@@ -28,6 +28,8 @@ import uvicorn
 import psycopg2
 from psycopg2.extras import RealDictCursor
 
+from delivery import delivery_service, DeliveryProviderNotConfigured, DeliveryProviderError
+
 # ============================================================================
 # SECRETS
 # ----------------------------------------------------------------------------
@@ -112,6 +114,17 @@ def init_db():
                        telegram_id BIGINT,
                        total INTEGER NOT NULL DEFAULT 0,
                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                   )
+                   """)
+    cursor.execute("""
+                   CREATE TABLE IF NOT EXISTS user_profiles
+                   (
+                       telegram_id BIGINT PRIMARY KEY,
+                       first_name TEXT,
+                       last_name TEXT,
+                       phone TEXT,
+                       saved_deliveries JSONB NOT NULL DEFAULT '[]',
                        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                    )
                    """)
@@ -553,10 +566,25 @@ async def create_order(request: Request):
         except OrderValidationError as e:
             raise HTTPException(status_code=400, detail=e.message)
 
-        if delivery.get("provider") == "nova_poshta" and not delivery.get("department"):
-            raise HTTPException(status_code=400, detail="Оберіть відділення Нової пошти зі списку")
-        if delivery.get("provider") == "ukrposhta" and not delivery.get("department"):
-            raise HTTPException(status_code=400, detail="Оберіть відділення Укрпошти зі списку")
+        provider_id = delivery.get("provider")
+        if provider_id in ("nova_poshta", "ukrposhta", "mist", "pickup"):
+            try:
+                provider = delivery_service.get(provider_id)
+            except KeyError:
+                provider = None
+            if provider and provider.configured:
+                # Real carrier search is live for this provider — a warehouse
+                # must have come from that search (it has a ref), never
+                # free-typed, so we can't end up with a fake department.
+                if not delivery.get("warehouseRef") or not delivery.get("department"):
+                    raise HTTPException(
+                        status_code=400,
+                        detail="Такого відділення не знайдено. Оберіть відділення зі списку",
+                    )
+            elif not delivery.get("department"):
+                # Carrier search isn't wired up yet — fall back to the manual
+                # city/department fields so checkout keeps working.
+                raise HTTPException(status_code=400, detail="Вкажіть відділення служби доставки")
 
         try:
             priced_items, total = _validate_and_price_items(cursor, raw_items)
@@ -583,6 +611,30 @@ async def create_order(request: Request):
                VALUES (%s, %s, 'NEW', %s, %s)""",
             (order_id_str, json.dumps(order_data, ensure_ascii=False), telegram_id, total),
         )
+
+        # Optional: "remember this delivery for next time" checkbox from checkout.
+        if telegram_id and body.get("saveDelivery") and delivery.get("city") and delivery.get("department"):
+            profile = _get_or_create_profile(cursor, telegram_id)
+            new_entry = {
+                "id": str(uuid.uuid4())[:8],
+                "provider": delivery.get("provider", ""),
+                "city": delivery.get("city", ""),
+                "cityRef": delivery.get("cityRef", ""),
+                "warehouse": delivery.get("department", ""),
+                "warehouseRef": delivery.get("warehouseRef", ""),
+                "label": "",
+            }
+            deliveries = [d for d in profile["saved_deliveries"]
+                          if not (d.get("provider") == new_entry["provider"] and d.get("warehouseRef") == new_entry["warehouseRef"])]
+            deliveries.insert(0, new_entry)
+            deliveries = deliveries[:5]
+            cursor.execute(
+                "UPDATE user_profiles SET saved_deliveries = %s, first_name = COALESCE(%s, first_name), "
+                "last_name = COALESCE(%s, last_name), phone = %s, updated_at = CURRENT_TIMESTAMP WHERE telegram_id = %s",
+                (json.dumps(deliveries, ensure_ascii=False), customer.get("firstName"), customer.get("lastName"),
+                 phone, telegram_id),
+            )
+
         conn.commit()
     except HTTPException:
         conn.rollback()
@@ -664,6 +716,199 @@ async def get_my_orders(request: Request):
     for r in rows:
         r["created_at"] = str(r["created_at"])
     return rows
+
+
+# ============================================================================
+# DELIVERY
+# Checkout never calls a carrier directly — only through delivery_service.
+# See delivery.py for the DeliveryService -> Provider -> API architecture.
+# ============================================================================
+
+@api_router.get("/api/delivery/providers")
+async def list_delivery_providers():
+    """All known carriers and whether each one is actually wired up yet, so
+    the frontend can hide/disable providers that have no API key configured
+    instead of pretending they work."""
+    return delivery_service.list_providers()
+
+
+@api_router.get("/api/delivery/{provider_id}/cities")
+async def delivery_search_cities(provider_id: str, query: str = ""):
+    try:
+        provider = delivery_service.get(provider_id)
+    except KeyError:
+        raise HTTPException(status_code=404, detail="Невідома служба доставки")
+    if not query or len(query.strip()) < 2:
+        return []
+    try:
+        return await provider.search_cities(query.strip())
+    except DeliveryProviderNotConfigured:
+        raise HTTPException(
+            status_code=503,
+            detail=f"Пошук міст для «{provider.label}» ще не підключено. Спробуйте іншу службу доставки.",
+        )
+    except DeliveryProviderError:
+        raise HTTPException(status_code=502, detail="Не вдалося отримати список міст. Спробуйте ще раз.")
+
+
+@api_router.get("/api/delivery/{provider_id}/warehouses")
+async def delivery_search_warehouses(provider_id: str, city_ref: str = "", query: str = ""):
+    try:
+        provider = delivery_service.get(provider_id)
+    except KeyError:
+        raise HTTPException(status_code=404, detail="Невідома служба доставки")
+    if not city_ref and provider_id != "pickup":
+        raise HTTPException(status_code=400, detail="Спочатку оберіть місто")
+    try:
+        return await provider.search_warehouses(city_ref, query.strip())
+    except DeliveryProviderNotConfigured:
+        raise HTTPException(
+            status_code=503,
+            detail=f"Пошук відділень для «{provider.label}» ще не підключено. Спробуйте іншу службу доставки.",
+        )
+    except DeliveryProviderError:
+        raise HTTPException(status_code=502, detail="Не вдалося отримати список відділень. Спробуйте ще раз.")
+
+
+# ============================================================================
+# USER PROFILE — saved contact info + saved delivery addresses
+# ============================================================================
+
+def _get_or_create_profile(cursor, telegram_id: int) -> dict:
+    cursor.execute("SELECT * FROM user_profiles WHERE telegram_id = %s", (telegram_id,))
+    row = cursor.fetchone()
+    if row:
+        profile = dict(row)
+        if isinstance(profile.get("saved_deliveries"), str):
+            try:
+                profile["saved_deliveries"] = json.loads(profile["saved_deliveries"])
+            except Exception:
+                profile["saved_deliveries"] = []
+        return profile
+    cursor.execute(
+        "INSERT INTO user_profiles (telegram_id) VALUES (%s) ON CONFLICT DO NOTHING",
+        (telegram_id,),
+    )
+    return {"telegram_id": telegram_id, "first_name": None, "last_name": None, "phone": None, "saved_deliveries": []}
+
+
+@api_router.get("/api/users/me/profile")
+async def get_my_profile(request: Request):
+    verified_user = get_verified_user(request)
+    if not verified_user:
+        raise HTTPException(status_code=403, detail="Доступ заборонено")
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        profile = _get_or_create_profile(cursor, verified_user["id"])
+        conn.commit()
+    finally:
+        cursor.close()
+        conn.close()
+    profile.pop("updated_at", None)
+    return profile
+
+
+@api_router.put("/api/users/me/profile")
+async def update_my_profile(request: Request):
+    """Saves the customer's own contact info (name/phone) so checkout can
+    prefill it next time — separate from saved delivery addresses."""
+    verified_user = get_verified_user(request)
+    if not verified_user:
+        raise HTTPException(status_code=403, detail="Доступ заборонено")
+    body = await request.json()
+    first_name = (body.get("first_name") or "").strip() or None
+    last_name = (body.get("last_name") or "").strip() or None
+    phone_raw = (body.get("phone") or "").strip()
+    phone = None
+    if phone_raw:
+        try:
+            phone = normalize_ua_phone(phone_raw)
+        except OrderValidationError as e:
+            raise HTTPException(status_code=400, detail=e.message)
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        _get_or_create_profile(cursor, verified_user["id"])
+        cursor.execute(
+            """UPDATE user_profiles
+               SET first_name = %s, last_name = %s, phone = COALESCE(%s, phone), updated_at = CURRENT_TIMESTAMP
+               WHERE telegram_id = %s""",
+            (first_name, last_name, phone, verified_user["id"]),
+        )
+        conn.commit()
+    finally:
+        cursor.close()
+        conn.close()
+    return {"status": "ok"}
+
+
+@api_router.post("/api/users/me/deliveries")
+async def add_saved_delivery(request: Request):
+    """Adds (or, with an existing id, replaces) one saved delivery address —
+    the 'use my saved warehouse' shortcut in checkout. Stores the carrier's
+    own ref ids, never just display text, so a saved address can't silently
+    drift from a real warehouse."""
+    verified_user = get_verified_user(request)
+    if not verified_user:
+        raise HTTPException(status_code=403, detail="Доступ заборонено")
+    body = await request.json()
+    provider = body.get("provider")
+    city = (body.get("city") or "").strip()
+    city_ref = (body.get("cityRef") or "").strip()
+    warehouse = (body.get("warehouse") or "").strip()
+    warehouse_ref = (body.get("warehouseRef") or "").strip()
+    if not provider or not city or not warehouse:
+        raise HTTPException(status_code=400, detail="Вкажіть службу доставки, місто та відділення")
+
+    entry = {
+        "id": body.get("id") or str(uuid.uuid4())[:8],
+        "provider": provider,
+        "city": city,
+        "cityRef": city_ref,
+        "warehouse": warehouse,
+        "warehouseRef": warehouse_ref,
+        "label": (body.get("label") or "").strip(),
+    }
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        profile = _get_or_create_profile(cursor, verified_user["id"])
+        deliveries = [d for d in profile["saved_deliveries"] if d.get("id") != entry["id"]]
+        deliveries.insert(0, entry)
+        deliveries = deliveries[:5]  # an address book, not an archive
+        cursor.execute(
+            "UPDATE user_profiles SET saved_deliveries = %s, updated_at = CURRENT_TIMESTAMP WHERE telegram_id = %s",
+            (json.dumps(deliveries, ensure_ascii=False), verified_user["id"]),
+        )
+        conn.commit()
+    finally:
+        cursor.close()
+        conn.close()
+    return {"status": "ok", "saved_deliveries": deliveries}
+
+
+@api_router.delete("/api/users/me/deliveries/{delivery_id}")
+async def delete_saved_delivery(delivery_id: str, request: Request):
+    verified_user = get_verified_user(request)
+    if not verified_user:
+        raise HTTPException(status_code=403, detail="Доступ заборонено")
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        profile = _get_or_create_profile(cursor, verified_user["id"])
+        deliveries = [d for d in profile["saved_deliveries"] if d.get("id") != delivery_id]
+        cursor.execute(
+            "UPDATE user_profiles SET saved_deliveries = %s, updated_at = CURRENT_TIMESTAMP WHERE telegram_id = %s",
+            (json.dumps(deliveries, ensure_ascii=False), verified_user["id"]),
+        )
+        conn.commit()
+    finally:
+        cursor.close()
+        conn.close()
+    return {"status": "ok", "saved_deliveries": deliveries}
 
 
 # ============================================================================
