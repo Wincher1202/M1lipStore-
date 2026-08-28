@@ -33,15 +33,6 @@ from delivery import delivery_service, DeliveryProviderNotConfigured, DeliveryPr
 
 # ============================================================================
 # SECRETS
-# ----------------------------------------------------------------------------
-# These now come from environment variables. The literal defaults below only
-# exist so the app keeps running if you haven't set the env vars yet — they
-# are the SAME values that used to be hardcoded here.
-#
-# ACTION NEEDED: this token has been sitting in source (and possibly a public
-# repo) in plain text. Rotate it via @BotFather -> /revoke, put the new one
-# ONLY in the platform's environment variables, and delete the fallback
-# strings below once you've confirmed the env vars are set.
 # ============================================================================
 TOKEN = os.environ.get("BOT_TOKEN", "")
 ADMIN_IDS = [int(x) for x in os.environ.get("ADMIN_IDS", "1929165295,1248134309").split(",") if x.strip()]
@@ -67,7 +58,6 @@ ORDER_STATUSES = [
     "DELIVERED",
     "CANCELLED",
 ]
-# Statuses that mean stock is being held / consumed for this order.
 STOCK_HELD_STATUSES = {"NEW", "WAITING_PAYMENT", "PAID", "PROCESSING", "SHIPPED", "DELIVERED"}
 
 
@@ -81,76 +71,182 @@ def init_db():
     cursor.execute("""
                    CREATE TABLE IF NOT EXISTS products
                    (
-                       id TEXT PRIMARY KEY,
-                       brand TEXT,
-                       title TEXT NOT NULL,
-                       price INTEGER NOT NULL,
-                       old_price INTEGER,
-                       tag TEXT,
-                       category TEXT NOT NULL,
-                       quantity INTEGER NOT NULL,
-                       colors TEXT,
-                       description TEXT,
-                       img TEXT,
-                       gallery TEXT,
-                       specs TEXT,
-                       color_images TEXT,
-                       color_quantities TEXT,
-                       sku TEXT,
-                       featured BOOLEAN DEFAULT FALSE,
-                       popular BOOLEAN DEFAULT FALSE,
-                       hidden BOOLEAN DEFAULT FALSE,
-                       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                       id
+                       TEXT
+                       PRIMARY
+                       KEY,
+                       brand
+                       TEXT,
+                       title
+                       TEXT
+                       NOT
+                       NULL,
+                       price
+                       INTEGER
+                       NOT
+                       NULL,
+                       old_price
+                       INTEGER,
+                       tag
+                       TEXT,
+                       category
+                       TEXT
+                       NOT
+                       NULL,
+                       quantity
+                       INTEGER
+                       NOT
+                       NULL,
+                       colors
+                       TEXT,
+                       description
+                       TEXT,
+                       img
+                       TEXT,
+                       gallery
+                       TEXT,
+                       specs
+                       TEXT,
+                       color_images
+                       TEXT,
+                       color_quantities
+                       TEXT,
+                       sku
+                       TEXT,
+                       featured
+                       BOOLEAN
+                       DEFAULT
+                       FALSE,
+                       popular
+                       BOOLEAN
+                       DEFAULT
+                       FALSE,
+                       hidden
+                       BOOLEAN
+                       DEFAULT
+                       FALSE,
+                       created_at
+                       TIMESTAMP
+                       DEFAULT
+                       CURRENT_TIMESTAMP
                    )
                    """)
     cursor.execute("""
                    CREATE TABLE IF NOT EXISTS orders
                    (
-                       id SERIAL PRIMARY KEY,
-                       order_id TEXT UNIQUE,
-                       data JSONB,
-                       status TEXT NOT NULL DEFAULT 'NEW',
-                       tracking_number TEXT,
-                       admin_comment TEXT,
-                       telegram_id BIGINT,
-                       total INTEGER NOT NULL DEFAULT 0,
-                       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                       id
+                       SERIAL
+                       PRIMARY
+                       KEY,
+                       order_id
+                       TEXT
+                       UNIQUE,
+                       data
+                       JSONB,
+                       status
+                       TEXT
+                       NOT
+                       NULL
+                       DEFAULT
+                       'NEW',
+                       tracking_number
+                       TEXT,
+                       admin_comment
+                       TEXT,
+                       telegram_id
+                       BIGINT,
+                       total
+                       INTEGER
+                       NOT
+                       NULL
+                       DEFAULT
+                       0,
+                       created_at
+                       TIMESTAMP
+                       DEFAULT
+                       CURRENT_TIMESTAMP,
+                       updated_at
+                       TIMESTAMP
+                       DEFAULT
+                       CURRENT_TIMESTAMP
                    )
                    """)
     cursor.execute("""
                    CREATE TABLE IF NOT EXISTS user_profiles
                    (
-                       telegram_id BIGINT PRIMARY KEY,
-                       first_name TEXT,
-                       last_name TEXT,
-                       phone TEXT,
-                       saved_deliveries JSONB NOT NULL DEFAULT '[]',
-                       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                       telegram_id
+                       BIGINT
+                       PRIMARY
+                       KEY,
+                       first_name
+                       TEXT,
+                       last_name
+                       TEXT,
+                       phone
+                       TEXT,
+                       saved_deliveries
+                       JSONB
+                       NOT
+                       NULL
+                       DEFAULT
+                       '[]',
+                       updated_at
+                       TIMESTAMP
+                       DEFAULT
+                       CURRENT_TIMESTAMP
                    )
                    """)
     cursor.execute("""
                    CREATE TABLE IF NOT EXISTS categories
                    (
-                       id TEXT PRIMARY KEY,
-                       name TEXT NOT NULL,
-                       image TEXT,
-                       position INTEGER NOT NULL DEFAULT 0,
-                       hidden BOOLEAN DEFAULT FALSE
+                       id
+                       TEXT
+                       PRIMARY
+                       KEY,
+                       name
+                       TEXT
+                       NOT
+                       NULL,
+                       image
+                       TEXT,
+                       position
+                       INTEGER
+                       NOT
+                       NULL
+                       DEFAULT
+                       0,
+                       hidden
+                       BOOLEAN
+                       DEFAULT
+                       FALSE
                    )
                    """)
     cursor.execute("""
                    CREATE TABLE IF NOT EXISTS brands
                    (
-                       id TEXT PRIMARY KEY,
-                       name TEXT NOT NULL,
-                       logo TEXT,
-                       position INTEGER NOT NULL DEFAULT 0,
-                       hidden BOOLEAN DEFAULT FALSE
+                       id
+                       TEXT
+                       PRIMARY
+                       KEY,
+                       name
+                       TEXT
+                       NOT
+                       NULL,
+                       logo
+                       TEXT,
+                       position
+                       INTEGER
+                       NOT
+                       NULL
+                       DEFAULT
+                       0,
+                       hidden
+                       BOOLEAN
+                       DEFAULT
+                       FALSE
                    )
                    """)
 
-    # Non-destructive migrations for anyone upgrading from the old schema.
     migrations = [
         ("products", "color_quantities", "TEXT"),
         ("products", "color_images", "TEXT"),
@@ -169,15 +265,16 @@ def init_db():
     ]
     for table, column, coltype in migrations:
         cursor.execute("""
-            SELECT 1 FROM information_schema.columns WHERE table_name=%s AND column_name=%s
-        """, (table, column))
+                       SELECT 1
+                       FROM information_schema.columns
+                       WHERE table_name = %s
+                         AND column_name = %s
+                       """, (table, column))
         if not cursor.fetchone():
             cursor.execute(f"ALTER TABLE {table} ADD COLUMN {column} {coltype}")
 
     conn.commit()
 
-    # Seed categories/brands from whatever already exists on products, so
-    # nothing that was working before silently disappears from the catalog.
     cursor.execute("SELECT DISTINCT category FROM products WHERE category IS NOT NULL AND category != ''")
     existing_categories = [r["category"] for r in cursor.fetchall()]
     cursor.execute("SELECT id FROM categories")
@@ -209,8 +306,6 @@ def init_db():
 
 def _slugify(text: str) -> str:
     text = (text or "").strip().lower()
-    # Keep it simple and dependency-free; transliteration isn't needed since
-    # ids are internal keys, not user-facing.
     slug = re.sub(r"[^a-z0-9а-яіїєґ]+", "-", text).strip("-")
     return slug or ("x-" + str(uuid.uuid4())[:6])
 
@@ -230,7 +325,6 @@ async def get_file_url(bot: Bot, file_id: str) -> str:
 
 
 def validate_init_data(init_data: str, bot_token: str):
-    """Validates Telegram WebApp initData signature and returns the user dict, or None if invalid."""
     try:
         if not init_data:
             return None
@@ -251,7 +345,6 @@ def validate_init_data(init_data: str, bot_token: str):
 
 
 def get_admin_user(request: Request):
-    """Reads X-Init-Data header, validates it, and returns the Telegram user if they're an admin."""
     init_data = request.headers.get("X-Init-Data", "")
     user = validate_init_data(init_data, TOKEN)
     if not user or user.get("id") not in ADMIN_IDS:
@@ -260,8 +353,6 @@ def get_admin_user(request: Request):
 
 
 def get_verified_user(request: Request):
-    """Like get_admin_user but for any signed-in Telegram user (not just admins).
-    Used so we can trust telegram_id server-side instead of accepting it from the body."""
     init_data = request.headers.get("X-Init-Data", "")
     return validate_init_data(init_data, TOKEN)
 
@@ -336,13 +427,13 @@ async def root():
 
 @api_router.get("/api/products")
 async def get_products(
-    category: str = None,
-    brand: str = None,
-    search: str = None,
-    min_price: int = None,
-    max_price: int = None,
-    in_stock: bool = None,
-    sort: str = None,
+        category: str = None,
+        brand: str = None,
+        search: str = None,
+        min_price: int = None,
+        max_price: int = None,
+        in_stock: bool = None,
+        sort: str = None,
 ):
     products = get_db_products()
 
@@ -355,9 +446,9 @@ async def get_products(
         products = [
             p for p in products
             if q in (p.get("title") or "").lower()
-            or q in (p.get("brand") or "").lower()
-            or q in (p.get("category") or "").lower()
-            or q in (p.get("sku") or "").lower()
+               or q in (p.get("brand") or "").lower()
+               or q in (p.get("category") or "").lower()
+               or q in (p.get("sku") or "").lower()
         ]
     if min_price is not None:
         products = [p for p in products if p.get("price", 0) >= min_price]
@@ -371,7 +462,7 @@ async def get_products(
     elif sort == "price_desc":
         products.sort(key=lambda p: p.get("price", 0), reverse=True)
     elif sort == "new":
-        pass  # already newest-first from the query
+        pass
     elif sort == "popular":
         products.sort(key=lambda p: bool(p.get("popular")), reverse=True)
 
@@ -410,8 +501,7 @@ async def get_brands():
 
 
 # ============================================================================
-# ORDER CREATION — server is the source of truth for price, stock and totals.
-# Never trust price/qty/total sent by the client.
+# ORDER CREATION
 # ============================================================================
 
 class OrderValidationError(Exception):
@@ -422,11 +512,6 @@ class OrderValidationError(Exception):
 
 
 def _validate_and_price_items(cursor, items: list):
-    """Runs inside an open transaction with the caller's cursor.
-    Locks each referenced product row (FOR UPDATE) so concurrent orders can't
-    both oversell the same unit of stock, checks availability, and returns
-    server-computed line items + total. Raises OrderValidationError on any
-    problem — caller is expected to roll back."""
     if not items:
         raise OrderValidationError("Кошик порожній")
 
@@ -452,7 +537,6 @@ def _validate_and_price_items(cursor, items: list):
             cq = {}
 
         if cq:
-            # Product has per-color stock — the requested color must exist and have stock.
             if color not in cq:
                 raise OrderValidationError(f"Колір «{color}» недоступний для цього товару", product_id)
             available = cq.get(color, 0)
@@ -464,7 +548,7 @@ def _validate_and_price_items(cursor, items: list):
             if (row.get("quantity") or 0) < qty:
                 raise OrderValidationError(f"Недостатньо товару «{row['title']}» на складі", product_id)
 
-        price = row["price"]  # authoritative price, never taken from the client
+        price = row["price"]
         line_total = price * qty
         total += line_total
         priced_items.append({
@@ -482,8 +566,6 @@ def _validate_and_price_items(cursor, items: list):
 
 
 def _reserve_stock(cursor, priced_items: list):
-    """Decrements stock for each line item. Must run in the same transaction
-    as _validate_and_price_items so the FOR UPDATE lock is still held."""
     for item in priced_items:
         cq = item["_cq"]
         if cq:
@@ -501,8 +583,6 @@ def _reserve_stock(cursor, priced_items: list):
 
 
 def _restock(cursor, order_data: dict):
-    """Reverses _reserve_stock for a cancelled order, using the priced items
-    that were stored on the order at creation time."""
     for item in order_data.get("items", []):
         product_id = item.get("id")
         color = item.get("color")
@@ -590,7 +670,8 @@ async def create_order(request: Request):
             raise HTTPException(status_code=400, detail="Невідома служба доставки")
         if not provider.configured:
             raise HTTPException(status_code=503, detail=f"{provider.label}: автоматичний пошук ще не налаштований")
-        if not delivery.get("cityRef") or not delivery.get("warehouseRef") or not delivery.get("city") or not delivery.get("department"):
+        if not delivery.get("cityRef") or not delivery.get("warehouseRef") or not delivery.get(
+                "city") or not delivery.get("department"):
             raise HTTPException(status_code=400, detail="Оберіть місто та відділення зі списку")
 
         try:
@@ -621,7 +702,6 @@ async def create_order(request: Request):
                VALUES (%s, %s, 'NEW', %s, %s)""",
             (order_id_str, json.dumps(order_data, ensure_ascii=False), telegram_id, total),
         )
-
 
         conn.commit()
     except HTTPException:
@@ -661,20 +741,17 @@ async def create_order(request: Request):
 
 @api_router.get("/api/orders/{order_id}")
 async def get_order_status(order_id: str, request: Request):
-    """Lets a customer check their own order (matched by Telegram id) without exposing
-    every order in the system."""
     verified_user = get_verified_user(request)
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT order_id, data, status, tracking_number, total, created_at FROM orders WHERE order_id = %s", (order_id,))
+    cursor.execute("SELECT order_id, data, status, tracking_number, total, created_at FROM orders WHERE order_id = %s",
+                   (order_id,))
     row = cursor.fetchone()
     cursor.close()
     conn.close()
     if not row:
         raise HTTPException(status_code=404, detail="Замовлення не знайдено")
     if not verified_user or (row.get("telegram_id") and row["telegram_id"] != verified_user.get("id")):
-        # telegram_id may be null for orders placed before this field existed —
-        # in that case we still require a valid signed session to view it.
         if not verified_user:
             raise HTTPException(status_code=403, detail="Доступ заборонено")
     return {
@@ -708,15 +785,10 @@ async def get_my_orders(request: Request):
 
 # ============================================================================
 # DELIVERY
-# Checkout never calls a carrier directly — only through delivery_service.
-# See delivery.py for the DeliveryService -> Provider -> API architecture.
 # ============================================================================
 
 @api_router.get("/api/delivery/providers")
 async def list_delivery_providers():
-    """All known carriers and whether each one is actually wired up yet, so
-    the frontend can hide/disable providers that have no API key configured
-    instead of pretending they work."""
     return delivery_service.list_providers()
 
 
@@ -759,7 +831,7 @@ async def delivery_search_warehouses(provider_id: str, city_ref: str = "", query
 
 
 # ============================================================================
-# USER PROFILE — saved contact info + saved delivery addresses
+# USER PROFILE
 # ============================================================================
 
 def _get_or_create_profile(cursor, telegram_id: int) -> dict:
@@ -799,8 +871,6 @@ async def get_my_profile(request: Request):
 
 @api_router.put("/api/users/me/profile")
 async def update_my_profile(request: Request):
-    """Saves the customer's own contact info (name/phone) so checkout can
-    prefill it next time — separate from saved delivery addresses."""
     verified_user = get_verified_user(request)
     if not verified_user:
         raise HTTPException(status_code=403, detail="Доступ заборонено")
@@ -821,7 +891,10 @@ async def update_my_profile(request: Request):
         _get_or_create_profile(cursor, verified_user["id"])
         cursor.execute(
             """UPDATE user_profiles
-               SET first_name = %s, last_name = %s, phone = COALESCE(%s, phone), updated_at = CURRENT_TIMESTAMP
+               SET first_name = %s,
+                   last_name  = %s,
+                   phone      = COALESCE(%s, phone),
+                   updated_at = CURRENT_TIMESTAMP
                WHERE telegram_id = %s""",
             (first_name, last_name, phone, verified_user["id"]),
         )
@@ -834,10 +907,6 @@ async def update_my_profile(request: Request):
 
 @api_router.post("/api/users/me/deliveries")
 async def add_saved_delivery(request: Request):
-    """Adds (or, with an existing id, replaces) one saved delivery address —
-    the 'use my saved warehouse' shortcut in checkout. Stores the carrier's
-    own ref ids, never just display text, so a saved address can't silently
-    drift from a real warehouse."""
     verified_user = get_verified_user(request)
     if not verified_user:
         raise HTTPException(status_code=403, detail="Доступ заборонено")
@@ -866,7 +935,7 @@ async def add_saved_delivery(request: Request):
         profile = _get_or_create_profile(cursor, verified_user["id"])
         deliveries = [d for d in profile["saved_deliveries"] if d.get("id") != entry["id"]]
         deliveries.insert(0, entry)
-        deliveries = deliveries[:5]  # an address book, not an archive
+        deliveries = deliveries[:5]
         cursor.execute(
             "UPDATE user_profiles SET saved_deliveries = %s, updated_at = CURRENT_TIMESTAMP WHERE telegram_id = %s",
             (json.dumps(deliveries, ensure_ascii=False), verified_user["id"]),
@@ -904,7 +973,6 @@ async def delete_saved_delivery(delivery_id: str, request: Request):
 # ============================================================================
 
 def _product_row_to_admin_json(product: dict) -> dict:
-    """Reshapes a get_db_products() row into the flat colors[] shape the admin panel edits."""
     cq = product.get("colorQuantities", {}) or {}
     ci = product.get("colorImages", {}) or {}
     color_names = list(cq.keys()) or [c.strip() for c in (product.get("colors") or "").split(",") if c.strip()]
@@ -970,9 +1038,24 @@ def _save_admin_product(body: dict, product_id: str = None) -> str:
     if exists:
         cursor.execute("""
                        UPDATE products
-                       SET brand=%s, title=%s, price=%s, old_price=%s, tag=%s, sku=%s, category=%s, quantity=%s,
-                           colors=%s, description=%s, img=%s, gallery=%s, specs=%s, color_images=%s,
-                           color_quantities=%s, featured=%s, popular=%s, hidden=%s
+                       SET brand=%s,
+                           title=%s,
+                           price=%s,
+                           old_price=%s,
+                           tag=%s,
+                           sku=%s,
+                           category=%s,
+                           quantity=%s,
+                           colors=%s,
+                           description=%s,
+                           img=%s,
+                           gallery=%s,
+                           specs=%s,
+                           color_images=%s,
+                           color_quantities=%s,
+                           featured=%s,
+                           popular=%s,
+                           hidden=%s
                        WHERE id = %s
                        """, (brand, title, price, old_price, tag, sku, category, total_qty, colors_str, description,
                              img, json.dumps(gallery, ensure_ascii=False), json.dumps(specs, ensure_ascii=False),
@@ -989,8 +1072,6 @@ def _save_admin_product(body: dict, product_id: str = None) -> str:
                              json.dumps(specs, ensure_ascii=False), json.dumps(ci_dict, ensure_ascii=False),
                              json.dumps(cq_dict, ensure_ascii=False), featured, popular, hidden))
 
-    # Make sure the category/brand this product references actually exist as
-    # first-class rows too, so they show up in the admin's category/brand lists.
     cat_id = _slugify(category)
     cursor.execute(
         "INSERT INTO categories (id, name, position) VALUES (%s, %s, (SELECT COALESCE(MAX(position), -1) + 1 FROM categories)) ON CONFLICT (id) DO NOTHING",
@@ -1050,7 +1131,6 @@ async def admin_delete_product(product_id: str, request: Request):
 
 @api_router.patch("/api/admin/products/{product_id}/stock")
 async def admin_quick_update_stock(product_id: str, request: Request):
-    """Fast stock-only edit for the warehouse table, without touching anything else."""
     require_admin(request)
     body = await request.json()
     color = body.get("color")
@@ -1107,7 +1187,7 @@ async def admin_upload_image(request: Request, file: UploadFile = File(...)):
     except Exception as e:
         logging.error(f"Upload error: {e}")
         raise HTTPException(status_code=500,
-                             detail="Не вдалося завантажити фото. Переконайтесь, що ви писали боту /start.")
+                            detail="Не вдалося завантажити фото. Переконайтесь, що ви писали боту /start.")
     finally:
         await bot_upload.session.close()
 
@@ -1140,8 +1220,8 @@ async def admin_create_category(request: Request):
     cursor = conn.cursor()
     cursor.execute(
         """INSERT INTO categories (id, name, image, position)
-           VALUES (%s, %s, %s, (SELECT COALESCE(MAX(position), -1) + 1 FROM categories))
-           ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, image = EXCLUDED.image""",
+           VALUES (%s, %s, %s, (SELECT COALESCE(MAX(position), -1) + 1 FROM categories)) ON CONFLICT (id) DO
+        UPDATE SET name = EXCLUDED.name, image = EXCLUDED.image""",
         (cat_id, name, body.get("image", "")),
     )
     conn.commit()
@@ -1206,8 +1286,8 @@ async def admin_create_brand(request: Request):
     cursor = conn.cursor()
     cursor.execute(
         """INSERT INTO brands (id, name, logo, position)
-           VALUES (%s, %s, %s, (SELECT COALESCE(MAX(position), -1) + 1 FROM brands))
-           ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, logo = EXCLUDED.logo""",
+           VALUES (%s, %s, %s, (SELECT COALESCE(MAX(position), -1) + 1 FROM brands)) ON CONFLICT (id) DO
+        UPDATE SET name = EXCLUDED.name, logo = EXCLUDED.logo""",
         (brand_id, name, body.get("logo", "")),
     )
     conn.commit()
@@ -1268,7 +1348,8 @@ def _order_row_to_json(row: dict) -> dict:
 
 
 @api_router.get("/api/admin/orders")
-async def admin_list_orders(request: Request, status: str = None, search: str = None, limit: int = 100, offset: int = 0):
+async def admin_list_orders(request: Request, status: str = None, search: str = None, limit: int = 100,
+                            offset: int = 0):
     require_admin(request)
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -1337,8 +1418,6 @@ async def admin_update_order(order_id: str, request: Request):
     old_status = row["status"]
     order_data = row["data"] if isinstance(row["data"], dict) else json.loads(row["data"])
 
-    # Restock automatically when an order that was holding stock gets cancelled;
-    # re-reserve if an admin un-cancels it back into a stock-holding status.
     if new_status is not None and new_status != old_status:
         if old_status in STOCK_HELD_STATUSES and new_status == "CANCELLED":
             _restock(cursor, order_data)
@@ -1376,12 +1455,12 @@ async def admin_update_order(order_id: str, request: Request):
     cursor.close()
     conn.close()
 
-    # Notify the customer about status changes that matter to them.
     if new_status is not None and new_status != old_status and row.get("telegram_id"):
         status_messages = {
             "PAID": f"✅ Оплата замовлення #{order_id} підтверджена.",
             "PROCESSING": f"⚙️ Замовлення #{order_id} готується до відправки.",
-            "SHIPPED": f"🚚 Замовлення #{order_id} відправлено." + (f" ТТН: {tracking_number}" if tracking_number else ""),
+            "SHIPPED": f"🚚 Замовлення #{order_id} відправлено." + (
+                f" ТТН: {tracking_number}" if tracking_number else ""),
             "DELIVERED": f"📦 Замовлення #{order_id} доставлено. Дякуємо за покупку!",
             "CANCELLED": f"❌ Замовлення #{order_id} скасовано.",
         }
@@ -1406,13 +1485,15 @@ async def admin_dashboard(request: Request):
     cursor.execute("SELECT status, COUNT(*) AS c, COALESCE(SUM(total), 0) AS s FROM orders GROUP BY status")
     status_counts = {r["status"]: {"count": r["c"], "total": r["s"]} for r in cursor.fetchall()}
 
-    cursor.execute("SELECT COALESCE(SUM(total), 0) AS revenue FROM orders WHERE status IN ('PAID', 'PROCESSING', 'SHIPPED', 'DELIVERED')")
+    cursor.execute(
+        "SELECT COALESCE(SUM(total), 0) AS revenue FROM orders WHERE status IN ('PAID', 'PROCESSING', 'SHIPPED', 'DELIVERED')")
     revenue = cursor.fetchone()["revenue"]
 
     cursor.execute("SELECT COUNT(*) AS c FROM products WHERE hidden IS NOT TRUE")
     product_count = cursor.fetchone()["c"]
 
-    cursor.execute("SELECT id, title, brand, quantity FROM products WHERE quantity <= 3 AND hidden IS NOT TRUE ORDER BY quantity ASC LIMIT 10")
+    cursor.execute(
+        "SELECT id, title, brand, quantity FROM products WHERE quantity <= 3 AND hidden IS NOT TRUE ORDER BY quantity ASC LIMIT 10")
     low_stock = [dict(r) for r in cursor.fetchall()]
 
     cursor.execute("SELECT order_id, status, total, created_at FROM orders ORDER BY id DESC LIMIT 10")
@@ -1634,8 +1715,6 @@ async def process_show_order_details(callback: CallbackQuery):
 @router.callback_query(F.data.startswith("setstatus_"))
 async def process_set_order_status(callback: CallbackQuery):
     if callback.from_user.id not in ADMIN_IDS: return
-    # order_id itself has no underscores (MLP-XXXXXX), so splitting off the
-    # last underscore-separated piece reliably isolates the status.
     parts = callback.data.replace("setstatus_", "").rsplit("_", 1)
     o_id, new_status = parts[0], parts[1]
 
@@ -1881,13 +1960,48 @@ async def save_edited_color_qty_proxy(message: Message, state: FSMContext):
         await message.answer("❌ Будь ласка, введіть ціле число (0 або більше):")
 
 
+# ============================================================================
+# ДОДАВАННЯ ТОВАРУ ЗІ ШВИДКИМ ВИБОРОМ БРЕНДІВ КНОПКАМИ
+# ============================================================================
+
 @router.callback_query(F.data == "add_new_product")
 async def process_add_new(callback: CallbackQuery, state: FSMContext):
     if callback.from_user.id not in ADMIN_IDS: return
     await state.set_state(AddProductStates.waiting_for_brand)
+
+    brand_markup = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="🦈 Attack Shark", callback_data="brand_Attack Shark"),
+         InlineKeyboardButton(text="⚡ AJAZZ", callback_data="brand_AJAZZ")],
+        [InlineKeyboardButton(text="🎹 AULA", callback_data="brand_AULA"),
+         InlineKeyboardButton(text="🚀 MCHOSE", callback_data="brand_MCHOSE")],
+        [InlineKeyboardButton(text="🎮 VGN", callback_data="brand_VGN")],
+        [InlineKeyboardButton(text="✍️ Ввести інший бренд вручну", callback_data="brand_custom")]
+    ])
     await callback.message.answer(
-        "🏷 Введіть **бренд** товару\n\n*(Наприклад: `Logitech`, `Razer`, `AULA`, `AJAZZ`, `Hator`)*:",
-        parse_mode="Markdown")
+        "🏷 Оберіть **бренд** товару за допомогою кнопок або введіть вручну:",
+        reply_markup=brand_markup,
+        parse_mode="Markdown"
+    )
+    await callback.answer()
+
+
+@router.callback_query(F.data.startswith("brand_"), AddProductStates.waiting_for_brand)
+async def select_brand_cb(callback: CallbackQuery, state: FSMContext):
+    brand = callback.data.replace("brand_", "")
+    if brand == "custom":
+        await callback.message.answer("🏷 Введіть **назву бренду** текстом:")
+        await callback.answer()
+        return
+    await state.update_data(brand=brand)
+    await state.set_state(AddProductStates.waiting_for_title)
+    try:
+        await callback.message.delete()
+    except Exception:
+        pass
+    await callback.message.answer(
+        f"✅ Обрано бренд: **{brand}**\n\n✏️ Введіть **модель / назву** товару:",
+        parse_mode="Markdown"
+    )
     await callback.answer()
 
 
@@ -2191,7 +2305,7 @@ async def skip_general_gallery_cb(callback: CallbackQuery, state: FSMContext):
 @router.message(AddProductStates.waiting_for_gallery, F.photo)
 async def add_general_gallery_photo(message: Message, state: FSMContext):
     if message.from_user.id not in ADMIN_IDS: return
-    photo_url = await get_file_url(message.bot, message.photo[-1].file_id)
+    photo_url = await get_file_url(message.bot, photo_file_id=message.photo[-1].file_id)
     data = await state.get_data()
     gallery_list = data.get("gallery_list", [])
     if photo_url not in gallery_list: gallery_list.append(photo_url)
@@ -2270,11 +2384,6 @@ async def run_bot():
     dp = Dispatcher()
     dp.include_router(router)
     try:
-        # Clear any stale updates / webhook before polling starts. Do NOT also
-        # call bot.get_updates() separately — Telegram allows only ONE
-        # concurrent getUpdates connection per bot, and dp.start_polling()
-        # already owns that loop. Calling both at once causes a 409 Conflict
-        # that used to crash the entire process (site included).
         await bot.delete_webhook(drop_pending_updates=True)
         await dp.start_polling(bot)
     except Exception:
@@ -2282,8 +2391,6 @@ async def run_bot():
 
 
 async def main():
-    # The web server and the Telegram bot are independent. If the bot crashes
-    # (bad token, Telegram outage, etc.) the site must stay up.
     await asyncio.gather(run_server(), run_bot(), return_exceptions=True)
 
 
