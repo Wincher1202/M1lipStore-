@@ -148,11 +148,22 @@ def get_db_products():
             try:
                 val = p.get(key)
                 if isinstance(val, str):
-                    p[mapKey] = json.loads(val) if val.strip() else default
+                    parsed = json.loads(val) if val.strip() else default
                 elif isinstance(val, (dict, list)):
-                    p[mapKey] = val
+                    parsed = val
                 else:
-                    p[mapKey] = default
+                    parsed = default
+
+                if key == "color_images" and isinstance(parsed, dict):
+                    flat_ci = {}
+                    for col_name, col_data in parsed.items():
+                        if isinstance(col_data, dict):
+                            flat_ci[col_name] = col_data.get("main", "")
+                        else:
+                            flat_ci[col_name] = col_data
+                    p[mapKey] = flat_ci
+                else:
+                    p[mapKey] = parsed
             except Exception:
                 p[mapKey] = default
         result.append(p)
@@ -197,8 +208,8 @@ async def create_order(request: Request):
         payment = data.get("payment", {})
 
         items_str = "\n".join([
-                                  f"• {i.get('brand', '')} {i.get('title', '')} ({i.get('color', '')}) x {i['qty']} — {i['price'] * i['qty']} ₴"
-                                  for i in items])
+            f"• {i.get('brand', '')} {i.get('title', '')} ({i.get('color', '')}) x {i['qty']} — {i['price'] * i['qty']} ₴"
+            for i in items])
         msg_text = (
             f"🚨 *Нове замовлення #{order_id_str}*!\n\n"
             f"👤 *Клієнт:* {customer.get('firstName')} {customer.get('lastName')} ({customer.get('phone')})\n"
@@ -311,16 +322,22 @@ async def process_manage_product(callback: CallbackQuery):
     cq = product.get('colorQuantities', {})
     colors_info = ", ".join([f"{c}: {q} шт." for c, q in cq.items()]) if cq else product.get('colors', 'не вказано')
 
+    brand_esc = product.get('brand', 'не вказано').replace('*', '\\*').replace('_', '\\_')
+    title_esc = product['title'].replace('*', '\\*').replace('_', '\\_')
+    cat_esc = product['category'].replace('*', '\\*').replace('_', '\\_')
+    desc_snippet = (product.get('description') or 'немає')[:50].replace('*', '\\*').replace('_', '\\_')
+    colors_esc = colors_info.replace('*', '\\*').replace('_', '\\_')
+
     caption = (
-        f"🛠 **Редагування товару: {product.get('brand', '')} {product['title']}**\n\n"
-        f"• Бренд: {product.get('brand', 'не вказано')}\n"
-        f"• Назва: {product['title']}\n"
-        f"• Категорія: {product['category']}\n"
+        f"🛠 *Редагування товару: {brand_esc} {title_esc}*\n\n"
+        f"• Бренд: {brand_esc}\n"
+        f"• Назва: {title_esc}\n"
+        f"• Категорія: {cat_esc}\n"
         f"• Ціна: {product['price']} ₴\n"
         f"• Тег: `{product.get('tag') or 'немає'}`\n"
-        f"• Опис: _{product.get('description', 'немає')[:50]}...\n"
-        f"• Загалом на складі: **{product['quantity']} шт.**\n"
-        f"• Кольори та залишки: _{colors_info}_"
+        f"• Опис: {desc_snippet}...\n"
+        f"• Загалом на складі: *{product['quantity']} шт.*\n"
+        f"• Кольори та залишки: {colors_esc}"
     )
 
     action_markup = InlineKeyboardMarkup(inline_keyboard=[
@@ -381,6 +398,9 @@ async def process_edit_field_save(message: Message, state: FSMContext):
     if message.from_user.id not in ADMIN_IDS:
         return
     data = await state.get_data()
+    if data.get("edit_field_name") == "color_qty":
+        return
+
     prod_id = data.get("edit_product_id")
     field = data.get("edit_field_name")
 
@@ -437,22 +457,19 @@ async def process_change_color_qty(callback: CallbackQuery, state: FSMContext):
     if callback.from_user.id not in ADMIN_IDS:
         return
     parts = callback.data.replace("ch_cqty_", "").split("_", 1)
-    await state.update_data(editing_product_id=parts[0], editing_color_name=parts[1])
+    await state.update_data(editing_product_id=parts[0], editing_color_name=parts[1], edit_field_name="color_qty")
     await state.set_state(AdminEditStates.waiting_for_new_value)
-    # Зберігаємо також тип редагування
-    await state.update_data(edit_field_name="color_qty")
     await callback.message.answer(f"📦 Введіть нову кількість для кольору **{parts[1]}**:", parse_mode="Markdown")
     await callback.answer()
 
 
-# Перехоплювач для кількості кольору в адмінці
 @router.message(AdminEditStates.waiting_for_new_value, F.text)
 async def save_edited_color_qty_proxy(message: Message, state: FSMContext):
     if message.from_user.id not in ADMIN_IDS:
         return
     data = await state.get_data()
     if data.get("edit_field_name") != "color_qty":
-        return  # Пропускаємо, якщо це не зміна залишку кольору (працює попередній обробник полів)
+        return
 
     try:
         new_q = int(message.text.strip())
