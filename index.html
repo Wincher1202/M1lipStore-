@@ -1451,11 +1451,21 @@
                                 stockVal = Number(item.stock);
                             }
                             
+                            let colorData = rawColors[colorName];
+                            let colorImg = '';
+                            let colorGallery = [];
+                            if (colorData && typeof colorData === 'object') {
+                                colorImg = colorData.main || '';
+                                colorGallery = Array.isArray(colorData.gallery) ? colorData.gallery : [];
+                            } else if (typeof colorData === 'string') {
+                                colorImg = colorData;
+                            }
                             return {
                                 name: colorName,
                                 isOut: stockVal <= 0,
                                 stock: stockVal,
-                                image: rawColors[colorName]
+                                image: colorImg,
+                                gallery: colorGallery
                             };
                         });
                     }
@@ -1499,6 +1509,7 @@
                     parsedGallery.forEach(img => allImagesSet.add(img));
                     parsedColors.forEach(c => {
                         if (c.image) allImagesSet.add(c.image);
+                        if (Array.isArray(c.gallery)) c.gallery.forEach(g => allImagesSet.add(g));
                     });
 
                     let parsedSpecs = [];
@@ -1760,7 +1771,7 @@
 
                 if (activeColor.image) {
                     activeImg = activeColor.image;
-                    currentGalleryImages = [activeColor.image];
+                    currentGalleryImages = [activeColor.image, ...(activeColor.gallery || [])];
                 } else {
                     currentGalleryImages = currentModalProduct.gallery || [currentModalProduct.img];
                 }
