@@ -1891,7 +1891,13 @@
             try {
                 let response = await fetch(API_URL);
                 let backendData = await response.json();
-                
+                if (!response.ok || !Array.isArray(backendData)) {
+                    console.warn("Каталог тимчасово недоступний:", backendData);
+                    products = [];
+                    renderCatalog();
+                    return;
+                }
+
                 products = backendData.map(item => {
                     let parsedColors = [];
                     let rawColors = item.color_images || item.colorImages;
@@ -2013,7 +2019,11 @@
         async function fetchCategories() {
             try {
                 const response = await fetch(CATEGORIES_API_URL);
-                categories = await response.json();
+                const data = await response.json();
+                // A down/erroring backend returns a JSON object like {"detail": "..."} ,
+                // not an array — guard against that so the page doesn't crash trying
+                // to iterate it.
+                categories = (response.ok && Array.isArray(data)) ? data : [];
             } catch (e) {
                 console.warn("Не вдалося завантажити категорії:", e);
                 categories = [];
@@ -2024,7 +2034,8 @@
         async function fetchBrands() {
             try {
                 const response = await fetch(BRANDS_API_URL);
-                brands = await response.json();
+                const data = await response.json();
+                brands = (response.ok && Array.isArray(data)) ? data : [];
             } catch (e) {
                 console.warn("Не вдалося завантажити бренди:", e);
                 brands = [];
