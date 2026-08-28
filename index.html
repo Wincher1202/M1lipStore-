@@ -249,25 +249,29 @@
         }
 
         .hero {
-            min-height: 90vh;
-            padding: 140px 20px 60px;
-            max-width: 1440px;
+            padding: 110px 20px 30px;
+            max-width: 1360px;
             margin: 0 auto;
             display: grid;
             grid-template-columns: 1fr;
             align-items: center;
-            gap: 40px;
+            gap: 32px;
             width: 100%;
             text-align: center;
+            box-sizing: border-box;
+            overflow: hidden;
         }
 
         @media(min-width: 900px) {
             .hero {
-                grid-template-columns: 1fr 1fr;
+                grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
                 text-align: left;
-                padding-top: 160px;
+                padding-top: 125px;
+                padding-bottom: 40px;
+                gap: 36px;
             }
         }
+
         .brands-strip {
             display: flex;
             gap: 12px;
@@ -277,16 +281,7 @@
             -webkit-overflow-scrolling: touch;
         }
 
-        .hero-content {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            align-items: center;
-        }
-
-        @media(min-width: 900px) {
-            .hero-content { align-items: flex-start; }
-           .brand-logo-wrap 
+        .brand-logo-wrap {
             width: 40px;
             height: 40px;
             border-radius: 50%;
@@ -298,14 +293,41 @@
             font-weight: 800;
             font-size: 0.85rem;
             color: var(--text-secondary);
-            flex-shrink: 0; /* Это важно, чтобы логотип не сжимался */
+            flex-shrink: 0;
         }
 
         .brand-logo-wrap img { 
             width: 100%; 
             height: 100%; 
-            object-fit: contain; /* Это сделает логотип одного размера внутри круга */
-            padding: 5px; /* Немного отступа, чтобы не прилипал к краям */
+            object-fit: contain; 
+            padding: 5px; 
+        }
+
+        .hero-content {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            align-items: center;
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            min-width: 0;
+            box-sizing: border-box;
+        }
+
+        @media(min-width: 900px) {
+            .hero-content { 
+                align-items: flex-start; 
+                margin: 0;
+            }
+        }
+
+        .hero-badge-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
         }
 
         @media(min-width: 900px) {
@@ -347,14 +369,17 @@
         }
 
         .hero h1 {
-            font-size: clamp(2.2rem, 6vw, 3.5rem);
+            font-size: clamp(1.85rem, 4.2vw, 3.2rem);
             font-weight: 800;
-            line-height: 1.1;
-            letter-spacing: -0.03em;
+            line-height: 1.15;
+            letter-spacing: -0.025em;
+            word-break: normal;
+            overflow-wrap: break-word;
+            max-width: 100%;
         }
 
         .hero p {
-            font-size: 1rem;
+            font-size: 0.95rem;
             color: var(--text-secondary);
             max-width: 480px;
             line-height: 1.5;
@@ -364,7 +389,7 @@
             display: flex;
             align-items: center;
             gap: 15px;
-            margin-top: 10px;
+            margin-top: 8px;
         }
 
         .btn-primary {
@@ -403,44 +428,63 @@
             justify-content: center;
             align-items: center;
             width: 100%;
+            max-width: 100%;
+            min-width: 0;
+            box-sizing: border-box;
         }
 
         .hero-card-3d {
             background: var(--bg-secondary);
-            border: 1px solid var(--border-light);
+            border: 2px solid var(--border-light);
             border-radius: var(--radius-lg);
-            padding: 16px;
+            padding: 14px;
             box-shadow: var(--shadow-card);
             width: 100%;
-            max-width: 520px;
+            max-width: 480px;
             position: relative;
             cursor: pointer;
-            transition: var(--transition-smooth);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
             overflow: hidden;
-            will-change: transform;
+            will-change: transform, box-shadow;
+            box-sizing: border-box;
         }
 
         .hero-card-3d:hover {
             border-color: var(--accent);
-            box-shadow: var(--shadow-hover);
-            transform: translateY(-6px) scale(1.01);
+            box-shadow: 0 18px 40px rgba(87, 100, 226, 0.22);
+            transform: translateY(-5px) scale(1.01);
+        }
+
+        .hero-card-3d.brand-focus {
+            animation: heroTabletPulse 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            border-color: var(--accent);
+        }
+
+        @keyframes heroTabletPulse {
+            0% { transform: scale(0.96); box-shadow: 0 0 0 0 rgba(87, 100, 226, 0.8); }
+            50% { transform: scale(1.03); box-shadow: 0 0 35px 8px rgba(87, 100, 226, 0.4); }
+            100% { transform: scale(1); box-shadow: 0 14px 34px rgba(87, 100, 226, 0.25); }
         }
 
         .hero-card-3d .product-tag {
             position: absolute;
-            top: 28px;
-            left: 28px;
+            top: 22px;
+            left: 22px;
             z-index: 5;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
         }
 
         .hero-card-img-wrap {
             width: 100%;
-            aspect-ratio: 1 / 1;
+            aspect-ratio: 16 / 11;
             border-radius: var(--radius-md);
             overflow: hidden;
             display: flex;
             align-items: center;
             justify-content: center;
+            background: radial-gradient(circle at center, var(--bg-tertiary) 0%, var(--bg-secondary) 100%);
+            position: relative;
         }
 
         .hero-card-3d img {
@@ -449,11 +493,11 @@
             object-fit: cover;
             display: block;
             border-radius: var(--radius-md);
-            transition: opacity 0.3s ease-in-out, transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: opacity 0.35s ease-in-out, transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .hero-card-3d:hover img {
-            transform: scale(1.05);
+            transform: scale(1.04);
         }
 
         .section-padding {
@@ -535,17 +579,20 @@
 
         /* Popular brands — slow, seamless auto-scrolling marquee */
         .partner-brands-section {
-            padding: 4px 0 8px 0;
-            margin: 4px 0 8px 0;
+            padding: 10px 0 16px 0;
+            margin: 6px 0 12px 0;
+            position: relative;
         }
 
         .partner-brands-section .section-header {
-            padding: 0 20px 6px 20px;
+            padding: 0 20px 10px 20px;
         }
 
         .partner-brands-marquee {
             overflow: hidden;
             width: 100%;
+            padding: 18px 0 22px 0;
+            margin: -10px 0;
             -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 40px, #000 calc(100% - 40px), transparent 100%);
             mask-image: linear-gradient(90deg, transparent 0, #000 40px, #000 calc(100% - 40px), transparent 100%);
         }
@@ -554,6 +601,7 @@
             display: flex;
             align-items: center;
             width: max-content;
+            padding: 4px 10px;
             animation: partnerBrandsScroll 34s linear infinite;
         }
 
@@ -568,33 +616,108 @@
 
         .partner-brand-tile {
             flex-shrink: 0;
-            width: 132px;
-            height: 72px;
-            margin: 0 10px;
+            width: 140px;
+            height: 74px;
+            margin: 0 12px;
             background: #FFFFFF;
-            border: 1px solid var(--border-light);
+            border: 2px solid var(--border-light);
             border-radius: var(--radius-md);
             box-shadow: var(--shadow-subtle);
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 10px 14px;
+            padding: 10px 16px;
             cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+            overflow: visible;
+            transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
             user-select: none;
+        }
+
+        .partner-brand-tile::after {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            border-radius: var(--radius-md);
+            background: radial-gradient(circle at center, rgba(87, 100, 226, 0.15) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
         }
 
         .partner-brand-tile:hover {
             border-color: var(--accent);
-            transform: translateY(-3px) scale(1.03);
-            box-shadow: 0 8px 20px rgba(87, 100, 226, 0.18);
+            transform: translateY(-4px) scale(1.04);
+            box-shadow: 0 10px 24px rgba(87, 100, 226, 0.22);
+        }
+
+        .partner-brand-tile:hover::after {
+            opacity: 1;
+        }
+
+        .partner-brand-tile:active {
+            transform: scale(0.95);
+        }
+
+        .partner-brand-tile.just-clicked {
+            animation: brandTilePop 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            border-color: var(--accent);
+        }
+
+        @keyframes brandTilePop {
+            0% { transform: scale(0.90); }
+            45% { transform: scale(1.12) translateY(-5px); box-shadow: 0 12px 28px rgba(87, 100, 226, 0.45); }
+            100% { transform: scale(1.03); }
         }
 
         .partner-brand-tile.active {
             border-color: var(--accent);
             background: var(--accent-light);
-            box-shadow: 0 0 0 3px var(--accent);
-            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 0 0 3px var(--accent), 0 8px 24px rgba(87, 100, 226, 0.35);
+            transform: translateY(-3px) scale(1.03);
+            animation: brandGlowPulse 2.4s infinite ease-in-out;
+        }
+
+        .brand-logo-svg {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+        }
+
+        .brand-logo-svg svg {
+            max-width: 100%;
+            max-height: 42px;
+            object-fit: contain;
+        }
+
+        @keyframes brandGlowPulse {
+            0%, 100% {
+                box-shadow: 0 0 0 3px var(--accent), 0 8px 22px rgba(87, 100, 226, 0.3);
+            }
+            50% {
+                box-shadow: 0 0 0 4.5px var(--accent), 0 12px 30px rgba(87, 100, 226, 0.55);
+            }
+        }
+
+        #active-brand-indicator {
+            animation: indicatorPop 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+
+        @keyframes indicatorPop {
+            0% { transform: scale(0.85) translateY(-3px); opacity: 0; }
+            100% { transform: scale(1) translateY(0); opacity: 1; }
+        }
+
+        .catalog-card {
+            animation: catalogCardEntrance 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+
+        @keyframes catalogCardEntrance {
+            0% { opacity: 0; transform: translateY(12px) scale(0.98); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
         }
 
         .partner-brand-tile img {
@@ -602,10 +725,15 @@
             max-height: 100%;
             object-fit: contain;
             pointer-events: none;
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .partner-brand-tile:hover img {
+            transform: scale(1.08);
         }
 
         @media(min-width: 768px) {
-            .partner-brand-tile { width: 156px; height: 84px; }
+            .partner-brand-tile { width: 156px; height: 84px; margin: 0 12px; }
         }
 
         .brands-strip {
@@ -740,6 +868,7 @@
             min-height: 450px;
             will-change: transform;
             transition: var(--transition-smooth);
+            animation: catalogCardEntrance 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
         }
 
         .product-card:hover {
@@ -1499,17 +1628,95 @@
         </div>
         <div class="partner-brands-marquee">
             <div class="partner-brands-track">
-                <div class="partner-brand-tile" onclick="filterByBrand('Attack Shark', this)"><img src="attack-shark.jpg" alt="Attack Shark" loading="lazy"></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('Ajazz', this)"><img src="ajazz.webp" alt="Ajazz" loading="lazy"></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('Aula', this)"><img src="aula.png" alt="Aula" loading="lazy"></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('Mchose', this)"><img src="mchose.png" alt="Mchose" loading="lazy"></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('VGN', this)"><img src="vgn.jpg" alt="VGN" loading="lazy"></div>
-                <!-- duplicated so the strip loops seamlessly -->
-                <div class="partner-brand-tile" onclick="filterByBrand('Attack Shark', this)"><img src="attack-shark.jpg" alt="Attack Shark" loading="lazy"></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('Ajazz', this)"><img src="ajazz.webp" alt="Ajazz" loading="lazy"></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('Aula', this)"><img src="aula.png" alt="Aula" loading="lazy"></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('Mchose', this)"><img src="mchose.png" alt="Mchose" loading="lazy"></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('VGN', this)"><img src="vgn.jpg" alt="VGN" loading="lazy"></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Attack Shark', this)">
+                    <div class="brand-logo-svg">
+                        <svg viewBox="0 0 145 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 6L26 18L12 30L17 18L12 6Z" fill="#18181b"/>
+                            <path d="M5 11L14 18L5 25L8 18L5 11Z" fill="#5764e2"/>
+                            <text x="32" y="24" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="12.5" letter-spacing="0.5" fill="#18181b">ATTACK SHARK</text>
+                        </svg>
+                    </div>
+                </div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Ajazz', this)">
+                    <div class="brand-logo-svg">
+                        <svg viewBox="0 0 115 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M16 5L28 29H21L16 19L11 29H4L16 5Z" fill="#e53935"/>
+                            <path d="M16 11L21 22H11L16 11Z" fill="#ffffff"/>
+                            <text x="35" y="24" font-family="system-ui, -apple-system, sans-serif" font-weight="800" font-size="15" letter-spacing="1" fill="#18181b">AJAZZ</text>
+                        </svg>
+                    </div>
+                </div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Aula', this)">
+                    <div class="brand-logo-svg">
+                        <svg viewBox="0 0 110 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M16 4L28 14L16 32L4 14L16 4Z" stroke="#0284c7" stroke-width="2.2" fill="none"/>
+                            <path d="M16 10L22 15L16 23L10 15L16 10Z" fill="#0284c7"/>
+                            <text x="35" y="24" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="15.5" letter-spacing="1.2" fill="#0284c7">AULA</text>
+                        </svg>
+                    </div>
+                </div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Mchose', this)">
+                    <div class="brand-logo-svg">
+                        <svg viewBox="0 0 120 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="4" y="6" width="24" height="24" rx="5" fill="#18181b"/>
+                            <text x="9" y="23" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="13" fill="#ffffff">M</text>
+                            <text x="35" y="24" font-family="system-ui, -apple-system, sans-serif" font-weight="800" font-size="14" letter-spacing="0.8" fill="#18181b">MCHOSE</text>
+                        </svg>
+                    </div>
+                </div>
+                <div class="partner-brand-tile" onclick="filterByBrand('VGN', this)">
+                    <div class="brand-logo-svg">
+                        <svg viewBox="0 0 100 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <text x="6" y="26" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="20" letter-spacing="1.5" fill="#18181b">VGN</text>
+                            <circle cx="76" cy="18" r="5" fill="#5764e2"/>
+                        </svg>
+                    </div>
+                </div>
+                <!-- duplicated for infinite smooth loop -->
+                <div class="partner-brand-tile" onclick="filterByBrand('Attack Shark', this)">
+                    <div class="brand-logo-svg">
+                        <svg viewBox="0 0 145 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 6L26 18L12 30L17 18L12 6Z" fill="#18181b"/>
+                            <path d="M5 11L14 18L5 25L8 18L5 11Z" fill="#5764e2"/>
+                            <text x="32" y="24" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="12.5" letter-spacing="0.5" fill="#18181b">ATTACK SHARK</text>
+                        </svg>
+                    </div>
+                </div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Ajazz', this)">
+                    <div class="brand-logo-svg">
+                        <svg viewBox="0 0 115 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M16 5L28 29H21L16 19L11 29H4L16 5Z" fill="#e53935"/>
+                            <path d="M16 11L21 22H11L16 11Z" fill="#ffffff"/>
+                            <text x="35" y="24" font-family="system-ui, -apple-system, sans-serif" font-weight="800" font-size="15" letter-spacing="1" fill="#18181b">AJAZZ</text>
+                        </svg>
+                    </div>
+                </div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Aula', this)">
+                    <div class="brand-logo-svg">
+                        <svg viewBox="0 0 110 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M16 4L28 14L16 32L4 14L16 4Z" stroke="#0284c7" stroke-width="2.2" fill="none"/>
+                            <path d="M16 10L22 15L16 23L10 15L16 10Z" fill="#0284c7"/>
+                            <text x="35" y="24" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="15.5" letter-spacing="1.2" fill="#0284c7">AULA</text>
+                        </svg>
+                    </div>
+                </div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Mchose', this)">
+                    <div class="brand-logo-svg">
+                        <svg viewBox="0 0 120 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="4" y="6" width="24" height="24" rx="5" fill="#18181b"/>
+                            <text x="9" y="23" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="13" fill="#ffffff">M</text>
+                            <text x="35" y="24" font-family="system-ui, -apple-system, sans-serif" font-weight="800" font-size="14" letter-spacing="0.8" fill="#18181b">MCHOSE</text>
+                        </svg>
+                    </div>
+                </div>
+                <div class="partner-brand-tile" onclick="filterByBrand('VGN', this)">
+                    <div class="brand-logo-svg">
+                        <svg viewBox="0 0 100 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <text x="6" y="26" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="20" letter-spacing="1.5" fill="#18181b">VGN</text>
+                            <circle cx="76" cy="18" r="5" fill="#5764e2"/>
+                        </svg>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
@@ -1837,9 +2044,127 @@
             }
         }
 
-        let products = [];
-        let categories = [];
-        let brands = [];
+        const INITIAL_FALLBACK_PRODUCTS = [
+            {
+                id: 'prod-as-r5-ultra',
+                brand: 'Attack Shark',
+                title: 'Attack Shark R5 Ultra Magnesium Wireless',
+                price: 3299,
+                oldPrice: 3899,
+                tag: 'ТОП ПРОДАЖІВ',
+                category: 'Мишки',
+                sku: 'AS-R5-MAG',
+                popular: true,
+                desc: 'Ультралегка бездротова мишка з магнієвого сплаву з підтримкою 8000Hz опитування, сенсором PAW3395 та вагою лише 39 грамів.',
+                img: 'attack-shark-r5-ultra-top-angle.jpg',
+                gallery: [
+                    'attack-shark-r5-ultra-top-angle.jpg',
+                    'attack-shark-r5-ultra-back-grip.jpg',
+                    'attack-shark-r5-ultra-colors-price.jpg',
+                    'attack-shark-r5-ultra-in-hand-setup.jpg',
+                    'attack-shark-r5-ultra-box-bundle-contents.jpg'
+                ],
+                specs: [
+                    { key: 'Сенсор', value: 'PixArt PAW3395 (до 26 000 DPI)' },
+                    { key: 'Вага', value: '39 грам' },
+                    { key: 'Частота опитування', value: 'До 8000 Hz' },
+                    { key: 'Перемикачі', value: 'TTC Dustproof Gold (80M натискань)' },
+                    { key: 'Підключення', value: '2.4GHz Wireless / Bluetooth / Type-C' },
+                    { key: 'Автономність', value: 'До 60 годин роботи' }
+                ],
+                colors: [
+                    { name: 'Black', isOut: false, stock: 8, image: 'attack-shark-r5-ultra-top-angle.jpg', gallery: ['attack-shark-r5-ultra-top-angle.jpg'] },
+                    { name: 'White', isOut: false, stock: 6, image: 'attack-shark-r5-ultra-back-grip.jpg', gallery: ['attack-shark-r5-ultra-back-grip.jpg'] },
+                    { name: 'Red', isOut: false, stock: 4, image: 'attack-shark-r5-ultra-colors-price.jpg', gallery: ['attack-shark-r5-ultra-colors-price.jpg'] }
+                ],
+                colorImagesMap: {
+                    Black: { main: 'attack-shark-r5-ultra-top-angle.jpg', gallery: ['attack-shark-r5-ultra-top-angle.jpg'] },
+                    White: { main: 'attack-shark-r5-ultra-back-grip.jpg', gallery: ['attack-shark-r5-ultra-back-grip.jpg'] },
+                    Red: { main: 'attack-shark-r5-ultra-colors-price.jpg', gallery: ['attack-shark-r5-ultra-colors-price.jpg'] }
+                }
+            },
+            {
+                id: 'prod-as-x3-pro',
+                brand: 'Attack Shark',
+                title: 'Attack Shark X3 Wireless Gaming Mouse',
+                price: 1599,
+                oldPrice: 1999,
+                tag: 'ХІТ',
+                category: 'Мишки',
+                sku: 'AS-X3-BLK',
+                popular: true,
+                desc: 'Надзвичайно популярна бюджетна бездротова мишка на флагманському сенсорі PAW3395 вагою 49 грамів.',
+                img: 'attack-shark-x3-black.jpg',
+                gallery: [
+                    'attack-shark-x3-black.jpg',
+                    'attack-shark-x3-white.jpg',
+                    'attack-shark-x3-box.jpg'
+                ],
+                specs: [
+                    { key: 'Сенсор', value: 'PixArt PAW3395 (26 000 DPI)' },
+                    { key: 'Вага', value: '49 грам' },
+                    { key: 'Підключення', value: 'Tri-Mode: 2.4G, BT5.2, Type-C' },
+                    { key: 'Свічі', value: 'Kailh GM8.0 Black Mamba' },
+                    { key: 'Акумулятор', value: '300 mAh (до 200 годин BT)' }
+                ],
+                colors: [
+                    { name: 'Black', isOut: false, stock: 15, image: 'attack-shark-x3-black.jpg', gallery: ['attack-shark-x3-box.jpg'] },
+                    { name: 'White', isOut: false, stock: 10, image: 'attack-shark-x3-white.jpg', gallery: ['attack-shark-x3-white.jpg'] }
+                ],
+                colorImagesMap: {
+                    Black: { main: 'attack-shark-x3-black.jpg', gallery: ['attack-shark-x3-box.jpg'] },
+                    White: { main: 'attack-shark-x3-white.jpg', gallery: ['attack-shark-x3-white.jpg'] }
+                }
+            },
+            {
+                id: 'prod-aula-f75',
+                brand: 'AULA',
+                title: 'AULA F75 Wireless Mechanical Keyboard',
+                price: 2899,
+                oldPrice: 3299,
+                tag: 'НОВИНКА',
+                category: 'Клавіатури',
+                sku: 'AULA-F75-ICE',
+                popular: true,
+                desc: '75% механічна клавіатура з Gasket Mount, попередньо змащеними свічами LEOBOG Reaper та гарячою заміною Hot-swap.',
+                img: 'aula копия.png',
+                gallery: [
+                    'aula копия.png',
+                    'photo_2026-08-25_15-31-22.jpg',
+                    'photo_2026-08-25_15-31-28.jpg'
+                ],
+                specs: [
+                    { key: 'Формат', value: '75% (80 клавіш + регулятор гучності)' },
+                    { key: 'Конструкція', value: 'Gasket Mount з 5-шаровою шумоізоляцією' },
+                    { key: 'Свічі', value: 'LEOBOG Reaper Linear (змащені)' },
+                    { key: 'Підключення', value: 'Bluetooth 5.0 / 2.4GHz / Type-C' },
+                    { key: 'Акумулятор', value: '4000 mAh' }
+                ],
+                colors: [
+                    { name: 'White', isOut: false, stock: 8, image: 'aula копия.png', gallery: ['photo_2026-08-25_15-31-22.jpg'] },
+                    { name: 'Black', isOut: false, stock: 4, image: 'photo_2026-08-25_15-31-28.jpg', gallery: [] }
+                ],
+                colorImagesMap: {
+                    White: { main: 'aula копия.png', gallery: ['photo_2026-08-25_15-31-22.jpg'] },
+                    Black: { main: 'photo_2026-08-25_15-31-28.jpg', gallery: [] }
+                }
+            }
+        ];
+
+        let products = [...INITIAL_FALLBACK_PRODUCTS];
+        let categories = [
+            { id: 'mice', name: 'Мишки' },
+            { id: 'keyboards', name: 'Клавіатури' },
+            { id: 'accessories', name: 'Аксесуари' },
+            { id: 'audio', name: 'Аудіо' }
+        ];
+        let brands = [
+            { id: 'attack-shark', name: 'Attack Shark' },
+            { id: 'ajazz', name: 'Ajazz' },
+            { id: 'aula', name: 'AULA' },
+            { id: 'mchose', name: 'Mchose' },
+            { id: 'vgn', name: 'VGN' }
+        ];
         let cart = JSON.parse(localStorage.getItem('m1lip_cart')) || [];
         let wishlist = JSON.parse(localStorage.getItem('m1lip_wishlist')) || [];
         let currentModalProduct = null;
@@ -1850,7 +2175,9 @@
         let searchDebounceTimer = null;
         let heroIndex = 0;
 
-        const API_BASE = window.location.origin + "/api";
+        const API_BASE = (window.location.hostname === "localhost" && window.location.port === "3000")
+            ? (window.location.origin + "/api")
+            : "https://m1lipstore.onrender.com/api";
         const API_URL = API_BASE + "/products";
         const CATEGORIES_API_URL = API_BASE + "/categories";
         const BRANDS_API_URL = API_BASE + "/brands";
@@ -1904,10 +2231,17 @@
         async function fetchProducts() {
             try {
                 let response = await fetch(API_URL);
+                if (!response.ok) {
+                    renderCatalog();
+                    return;
+                }
+                let contentType = response.headers.get("content-type");
+                if (!contentType || !contentType.includes("application/json")) {
+                    renderCatalog();
+                    return;
+                }
                 let backendData = await response.json();
-                if (!response.ok || !Array.isArray(backendData)) {
-                    console.warn("Каталог тимчасово недоступний:", backendData);
-                    products = [];
+                if (!Array.isArray(backendData) || backendData.length === 0) {
                     renderCatalog();
                     return;
                 }
@@ -2022,8 +2356,7 @@
                     };
                 });
             } catch (e) {
-                console.warn("Не вдалося завантажити товари з API:", e);
-                products = [];
+                // keep INITIAL_FALLBACK_PRODUCTS
             }
 
             renderCatalog();
@@ -2033,11 +2366,15 @@
         async function fetchCategories() {
             try {
                 const response = await fetch(CATEGORIES_API_URL);
+                if (!response.ok) return;
+                const contentType = response.headers.get("content-type");
+                if (!contentType || !contentType.includes("application/json")) return;
                 const data = await response.json();
-                categories = (response.ok && Array.isArray(data)) ? data : [];
+                if (Array.isArray(data) && data.length > 0) {
+                    categories = data;
+                }
             } catch (e) {
-                console.warn("Не вдалося завантажити категорії:", e);
-                categories = [];
+                // keep fallback categories
             }
             renderCategoryFilters();
         }
@@ -2045,11 +2382,15 @@
         async function fetchBrands() {
             try {
                 const response = await fetch(BRANDS_API_URL);
+                if (!response.ok) return;
+                const contentType = response.headers.get("content-type");
+                if (!contentType || !contentType.includes("application/json")) return;
                 const data = await response.json();
-                brands = (response.ok && Array.isArray(data)) ? data : [];
+                if (Array.isArray(data) && data.length > 0) {
+                    brands = data;
+                }
             } catch (e) {
-                console.warn("Не вдалося завантажити бренди:", e);
-                brands = [];
+                // keep fallback brands
             }
         }
 
@@ -2079,6 +2420,39 @@
                 const isActive = currentBrandFilter !== 'All' && alt.toLowerCase().includes(currentBrandFilter.toLowerCase());
                 tile.classList.toggle('active', isActive);
             });
+
+            if (el) {
+                el.classList.add('just-clicked');
+                setTimeout(() => el.classList.remove('just-clicked'), 600);
+            }
+
+            const heroCard = document.getElementById('hero-card');
+            const heroImg = document.getElementById('hero-img');
+            const heroTag = document.getElementById('hero-tag');
+
+            if (heroCard) {
+                heroCard.classList.remove('brand-focus');
+                void heroCard.offsetWidth;
+                heroCard.classList.add('brand-focus');
+                setTimeout(() => heroCard.classList.remove('brand-focus'), 800);
+            }
+
+            if (currentBrandFilter !== 'All') {
+                const brandProducts = products.filter(p => (p.brand || '').toLowerCase().includes(currentBrandFilter.toLowerCase()));
+                if (heroImg && heroTag) {
+                    heroImg.style.opacity = '0';
+                    setTimeout(() => {
+                        if (brandProducts.length > 0 && brandProducts[0].img) {
+                            heroImg.src = brandProducts[0].img;
+                        }
+                        heroTag.innerText = `🔥 ${currentBrandFilter.toUpperCase()}`;
+                        heroImg.style.opacity = '1';
+                    }, 200);
+                }
+            } else {
+                if (heroTag) heroTag.innerText = 'НОВИНКА';
+                updateHeroBanner();
+            }
 
             const indicator = document.getElementById('active-brand-indicator');
             const indicatorText = document.getElementById('active-brand-text');
