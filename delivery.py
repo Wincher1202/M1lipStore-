@@ -1,66 +1,26 @@
-"""
-Delivery provider architecture for M1lipStore.
+"""Delivery provider adapters for M1lipStore.
 
-Checkout code never talks to Nova Poshta / Ukrposhta / MIST directly — it
-goes through DeliveryService, which picks the right Provider by id. Every
-provider implements the same small interface (search_cities /
-search_warehouses), so adding, removing, or swapping a carrier never touches
-checkout code.
-
-    Checkout -> DeliveryService -> Provider -> real carrier API
-
-None of the three real carrier APIs are wired up yet — there are no API keys
-configured, so every provider below is a clean stub that raises
-DeliveryProviderNotConfigured instead of pretending to return real cities or
-warehouses. This is intentional: fabricated addresses would end up on real
-orders. Once you have credentials for a carrier:
-
-  1. Set the matching environment variable (see each provider's `configured`
-     property).
-  2. Implement the two TODO'd methods on that provider using the real API —
-     map its response into the small dict shapes documented on
-     DeliveryProvider below.
-  3. Nothing else needs to change: DeliveryService, the /api/delivery/*
-     endpoints in main.py, and the checkout UI already call through the same
-     interface and will start working with real data automatically.
+Only real carrier data is accepted by checkout. No manual/fake branches are
+allowed. Configure the carrier credentials in environment variables.
 """
 import os
+import httpx
 from abc import ABC, abstractmethod
 
 
 class DeliveryProviderNotConfigured(Exception):
-    """Raised when a provider's API key/credentials aren't set yet.
-    Endpoints turn this into a 503 with a clear, honest message instead of
-    ever returning fake cities/warehouses."""
-
     def __init__(self, provider_label: str):
         self.provider_label = provider_label
-        super().__init__(f"{provider_label} is not configured yet")
+        super().__init__(f"{provider_label} is not configured")
 
 
 class DeliveryProviderError(Exception):
-    """Raised when a real carrier API call fails (network error, bad
-    response, rate limit, etc). Endpoints turn this into a 502 so the
-    frontend can show a 'Повторити' retry button."""
     pass
 
 
 class DeliveryProvider(ABC):
-    """
-    id/label identify the provider to the frontend and to orders.
-
-    search_cities(query) -> list of {"ref": str, "name": str, "region": str}
-        `ref` is the carrier's own unique id for that city/settlement —
-        this is what gets stored on the order, never just the display name.
-
-    search_warehouses(city_ref, query) -> list of
-        {"ref": str, "name": str, "address": str, "type": "branch"|"postomat"|"pickup"}
-        `ref` is again the carrier's unique id for that specific warehouse —
-        required so an order can never point at a warehouse that doesn't
-        exist.
-    """
-    id: str = ""
-    label: str = ""
+    id = ""
+    label = ""
 
     @property
     @abstractmethod
@@ -79,30 +39,70 @@ class DeliveryProvider(ABC):
 class NovaPoshtaProvider(DeliveryProvider):
     id = "nova_poshta"
     label = "Нова Пошта"
+    url = "https://api.novaposhta.ua/v2.0/json/"
 
     def __init__(self):
-        self.api_key = os.environ.get("NOVA_POSHTA_API_KEY", "")
+        self.api_key = os.environ.get("NOVA_POSHTA_API_KEY", "").strip()
 
     @property
     def configured(self) -> bool:
         return bool(self.api_key)
 
-    async def search_cities(self, query: str) -> list:
+    async def _call(self, model: str, method: str, props: dict):
         if not self.configured:
             raise DeliveryProviderNotConfigured(self.label)
-        # TODO: POST to https://api.novaposhta.ua/v2.0/json/ with
-        # modelName=Address, calledMethod=getCities, methodProperties
-        # {"FindByString": query}. Map each row to
-        # {"ref": row["Ref"], "name": row["Description"], "region": row["AreaDescription"]}.
-        raise DeliveryProviderNotConfigured(self.label)
+        payload = {
+            "apiKey": self.api_key,
+            "modelName": model,
+            "calledMethod": method,
+            "methodProperties": props,
+        }
+        try:
+            async with httpx.AsyncClient(timeout=15) as client:
+                r = await client.post(self.url, json=payload)
+                r.raise_for_status()
+                data = r.json()
+        except Exception as exc:
+            raise DeliveryProviderError(str(exc)) from exc
+        if not data.get("success"):
+            errors = data.get("errors") or data.get("warnings") or ["Nova Poshta API error"]
+            raise DeliveryProviderError("; ".join(map(str, errors)))
+        return data.get("data") or []
+
+    async def search_cities(self, query: str) -> list:
+        rows = await self._call("Address", "getCities", {"FindByString": query, "Page": 1})
+        result = []
+        for row in rows[:30]:
+            result.append({
+                "ref": str(row.get("Ref", "")),
+                "name": row.get("Description", ""),
+                "region": row.get("AreaDescription", ""),
+            })
+        return [x for x in result if x["ref"] and x["name"]]
 
     async def search_warehouses(self, city_ref: str, query: str = "") -> list:
-        if not self.configured:
-            raise DeliveryProviderNotConfigured(self.label)
-        # TODO: modelName=Address, calledMethod=getWarehouses, methodProperties
-        # {"CityRef": city_ref, "FindByString": query}. Map TypeOfWarehouse
-        # containing "Поштомат" to type "postomat", everything else to "branch".
-        raise DeliveryProviderNotConfigured(self.label)
+        rows = await self._call("Address", "getWarehouses", {
+            "CityRef": city_ref,
+            "FindByString": query,
+            "Limit": 100,
+            "Page": 1,
+        })
+        result = []
+        q = query.strip().lower()
+        for row in rows:
+            name = row.get("Description", "")
+            address = row.get("ShortAddress", "") or row.get("Description", "")
+            typ = row.get("TypeOfWarehouse", "") or ""
+            item_type = "postomat" if "поштомат" in typ.lower() or "postomat" in typ.lower() else "branch"
+            if q and q not in name.lower() and q not in str(row.get("Number", "")).lower():
+                continue
+            result.append({
+                "ref": str(row.get("Ref", "")),
+                "name": name,
+                "address": address,
+                "type": item_type,
+            })
+        return [x for x in result if x["ref"] and x["name"]][:100]
 
 
 class UkrposhtaProvider(DeliveryProvider):
@@ -110,24 +110,21 @@ class UkrposhtaProvider(DeliveryProvider):
     label = "Укрпошта"
 
     def __init__(self):
-        self.api_key = os.environ.get("UKRPOSHTA_API_KEY", "")
+        # Ukrposhta's current API requires account credentials/token.
+        self.token = os.environ.get("UKRPOSHTA_TOKEN", "").strip()
+        self.base_url = os.environ.get("UKRPOSHTA_API_URL", "https://www.ukrposhta.ua")
 
     @property
     def configured(self) -> bool:
-        return bool(self.api_key)
+        return bool(self.token)
 
     async def search_cities(self, query: str) -> list:
-        if not self.configured:
-            raise DeliveryProviderNotConfigured(self.label)
-        # TODO: call Ukrposhta's settlement/city-search endpoint with this
-        # api_key, map to {"ref", "name", "region"}.
+        # The Address Classifier is an authenticated Ukrposhta API. Keep this
+        # adapter explicit rather than fabricating a branch list if credentials
+        # are missing or the account has not enabled the classifier.
         raise DeliveryProviderNotConfigured(self.label)
 
     async def search_warehouses(self, city_ref: str, query: str = "") -> list:
-        if not self.configured:
-            raise DeliveryProviderNotConfigured(self.label)
-        # TODO: call Ukrposhta's post-office search endpoint scoped to
-        # city_ref, map to {"ref", "name", "address", "type": "branch"}.
         raise DeliveryProviderNotConfigured(self.label)
 
 
@@ -136,60 +133,25 @@ class MistProvider(DeliveryProvider):
     label = "MIST"
 
     def __init__(self):
-        self.api_key = os.environ.get("MIST_API_KEY", "")
+        self.api_key = os.environ.get("MIST_API_KEY", "").strip()
 
     @property
     def configured(self) -> bool:
+        # Meest states that its API integration is available to clients with
+        # a contract; credentials/endpoints are supplied by the account manager.
         return bool(self.api_key)
 
     async def search_cities(self, query: str) -> list:
-        if not self.configured:
-            raise DeliveryProviderNotConfigured(self.label)
-        # TODO: wire up once MIST API credentials exist.
         raise DeliveryProviderNotConfigured(self.label)
 
     async def search_warehouses(self, city_ref: str, query: str = "") -> list:
-        if not self.configured:
-            raise DeliveryProviderNotConfigured(self.label)
         raise DeliveryProviderNotConfigured(self.label)
-
-
-class PickupProvider(DeliveryProvider):
-    """Self-pickup from the shop's own point/warehouse — no external API.
-    Set PICKUP_ADDRESS once you have a physical point; until then it stays
-    unconfigured like the others, so it simply won't be offered at checkout."""
-    id = "pickup"
-    label = "Самовивіз"
-
-    def __init__(self):
-        self.address = os.environ.get("PICKUP_ADDRESS", "")
-
-    @property
-    def configured(self) -> bool:
-        return bool(self.address)
-
-    async def search_cities(self, query: str) -> list:
-        return []
-
-    async def search_warehouses(self, city_ref: str, query: str = "") -> list:
-        if not self.configured:
-            raise DeliveryProviderNotConfigured(self.label)
-        return [{"ref": "pickup", "name": self.address, "address": self.address, "type": "pickup"}]
 
 
 class DeliveryService:
-    """Single entry point checkout code talks to. Looks up the right
-    provider by id so callers never import a concrete provider class
-    directly — this is the seam that keeps checkout carrier-agnostic."""
-
     def __init__(self):
         self._providers = {
-            p.id: p for p in [
-                NovaPoshtaProvider(),
-                UkrposhtaProvider(),
-                MistProvider(),
-                PickupProvider(),
-            ]
+            p.id: p for p in [NovaPoshtaProvider(), UkrposhtaProvider(), MistProvider()]
         }
 
     def list_providers(self) -> list:
@@ -205,6 +167,4 @@ class DeliveryService:
         return provider
 
 
-# One shared instance — providers are stateless aside from reading their API
-# key once at startup, so a single service can be imported wherever needed.
 delivery_service = DeliveryService()

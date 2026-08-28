@@ -6,6 +6,10 @@ import random
 import uuid
 import re
 import hashlib
+import secrets
+import time
+import smtplib
+from email.message import EmailMessage
 import hmac
 from urllib.parse import parse_qsl
 from fastapi import FastAPI, Request, APIRouter, UploadFile, File, HTTPException
@@ -42,20 +46,26 @@ from delivery import delivery_service, DeliveryProviderNotConfigured, DeliveryPr
 # ONLY in the platform's environment variables, and delete the fallback
 # strings below once you've confirmed the env vars are set.
 # ============================================================================
-TOKEN = os.environ.get("BOT_TOKEN", "8993086388:AAETWcnRI-uxvm-lI2r6mQCKIXtuXq0nwpo")
+TOKEN = os.environ.get("BOT_TOKEN", "")
 ADMIN_IDS = [int(x) for x in os.environ.get("ADMIN_IDS", "1929165295,1248134309").split(",") if x.strip()]
 ADMIN_PANEL_URL = os.environ.get("ADMIN_PANEL_URL", "https://wincher1202.github.io/M1lipStore-/admin.html")
 SHOP_URL = os.environ.get("SHOP_URL", "https://wincher1202.github.io/M1lipStore-/")
 
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
-if TOKEN.startswith("8993086388"):
-    logging.warning(
-        "SECURITY: bot token is using the hardcoded fallback. Set BOT_TOKEN as an "
-        "environment variable and rotate the token via @BotFather as soon as possible."
-    )
+if not TOKEN:
+    logging.warning("BOT_TOKEN is not set. Telegram bot features will not work until it is configured.")
 
 logging.basicConfig(level=logging.INFO)
+
+# Email verification state. Codes are short-lived and never returned by the API.
+EMAIL_VERIFY_TTL = 10 * 60
+EMAIL_VERIFY_RATE = 60
+_email_verification = {}
+_email_send_last = {}
+
+NAME_RE = re.compile(r"^[A-Za-zА-Яа-яІіЇїЄєҐґ'’\-]{2,40}$", re.UNICODE)
+EMAIL_RE = re.compile(r"^[^\s@]+@[^\s@]+\.[^\s@]{2,}$")
 
 ORDER_STATUSES = [
     "NEW",
@@ -543,6 +553,85 @@ def normalize_ua_phone(raw: str) -> str:
     return normalized
 
 
+def normalize_email(raw: str) -> str:
+    email = (raw or "").strip().lower()
+    if not EMAIL_RE.fullmatch(email) or len(email) > 120:
+        raise HTTPException(status_code=400, detail="Введіть коректний e-mail")
+    return email
+
+
+def _send_verification_email(email: str, code: str):
+    host = os.environ.get("SMTP_HOST", "")
+    port = int(os.environ.get("SMTP_PORT", "587"))
+    user = os.environ.get("SMTP_USER", "")
+    password = os.environ.get("SMTP_PASSWORD", "")
+    sender = os.environ.get("SMTP_FROM", user)
+    if not host or not user or not password or not sender:
+        raise RuntimeError("SMTP is not configured")
+
+    msg = EmailMessage()
+    msg["Subject"] = "Підтвердження e-mail — M1lipStore"
+    msg["From"] = sender
+    msg["To"] = email
+    msg.set_content(
+        "Ваш код підтвердження M1lipStore: " + code + "\n\n"
+        "Код дійсний 10 хвилин. Якщо ви не оформлювали замовлення, просто проігноруйте цей лист."
+    )
+
+    with smtplib.SMTP(host, port, timeout=15) as smtp:
+        smtp.starttls()
+        smtp.login(user, password)
+        smtp.send_message(msg)
+
+
+@api_router.post("/api/verify-email/send")
+async def send_email_verification(request: Request):
+    body = await request.json()
+    email = normalize_email(body.get("email"))
+    now = time.time()
+    if now - _email_send_last.get(email, 0) < EMAIL_VERIFY_RATE:
+        raise HTTPException(status_code=429, detail="Зачекайте хвилину перед повторним надсиланням коду")
+
+    code = f"{secrets.randbelow(1_000_000):06d}"
+    token = secrets.token_urlsafe(32)
+    _email_verification[email] = {
+        "code_hash": hashlib.sha256(code.encode()).hexdigest(),
+        "token": token,
+        "expires": now + EMAIL_VERIFY_TTL,
+        "attempts": 0,
+    }
+    _email_send_last[email] = now
+
+    try:
+        await asyncio.to_thread(_send_verification_email, email, code)
+    except Exception as exc:
+        _email_verification.pop(email, None)
+        logging.error("Email verification send failed: %s", exc)
+        raise HTTPException(status_code=503, detail="Не вдалося надіслати код на e-mail. Перевірте налаштування пошти магазину.")
+
+    return {"status": "sent", "message": "Код надіслано на e-mail"}
+
+
+@api_router.post("/api/verify-email/confirm")
+async def confirm_email_verification(request: Request):
+    body = await request.json()
+    email = normalize_email(body.get("email"))
+    code = str(body.get("code") or "").strip()
+    item = _email_verification.get(email)
+    if not item or time.time() > item["expires"]:
+        _email_verification.pop(email, None)
+        raise HTTPException(status_code=400, detail="Код недійсний або строк його дії минув")
+    if not re.fullmatch(r"\d{6}", code):
+        raise HTTPException(status_code=400, detail="Введіть 6-значний код")
+    item["attempts"] += 1
+    if item["attempts"] > 5:
+        _email_verification.pop(email, None)
+        raise HTTPException(status_code=429, detail="Забагато невдалих спроб. Надішліть новий код")
+    if not hmac.compare_digest(item["code_hash"], hashlib.sha256(code.encode()).hexdigest()):
+        raise HTTPException(status_code=400, detail="Невірний код")
+    return {"status": "verified", "verificationToken": item["token"]}
+
+
 @api_router.post("/api/orders")
 async def create_order(request: Request):
     body = await request.json()
@@ -555,8 +644,20 @@ async def create_order(request: Request):
     verified_user = get_verified_user(request)
     telegram_id = verified_user.get("id") if verified_user else None
 
-    if not customer.get("firstName") or not customer.get("phone"):
-        raise HTTPException(status_code=400, detail="Вкажіть ім'я та телефон")
+    first_name = (customer.get("firstName") or "").strip()
+    last_name = (customer.get("lastName") or "").strip()
+    email = normalize_email(customer.get("email"))
+    if not NAME_RE.fullmatch(first_name):
+        raise HTTPException(status_code=400, detail="Введіть коректне ім'я: тільки літери")
+    if not NAME_RE.fullmatch(last_name):
+        raise HTTPException(status_code=400, detail="Введіть коректне прізвище: тільки літери")
+    if not customer.get("phone"):
+        raise HTTPException(status_code=400, detail="Вкажіть номер телефону")
+
+    verification = _email_verification.get(email)
+    verification_token = str(customer.get("emailVerificationToken") or "")
+    if not verification or not verification_token or verification.get("token") != verification_token or time.time() > verification.get("expires", 0):
+        raise HTTPException(status_code=400, detail="Спочатку підтвердіть e-mail кодом")
 
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -567,24 +668,16 @@ async def create_order(request: Request):
             raise HTTPException(status_code=400, detail=e.message)
 
         provider_id = delivery.get("provider")
-        if provider_id in ("nova_poshta", "ukrposhta", "mist", "pickup"):
-            try:
-                provider = delivery_service.get(provider_id)
-            except KeyError:
-                provider = None
-            if provider and provider.configured:
-                # Real carrier search is live for this provider — a warehouse
-                # must have come from that search (it has a ref), never
-                # free-typed, so we can't end up with a fake department.
-                if not delivery.get("warehouseRef") or not delivery.get("department"):
-                    raise HTTPException(
-                        status_code=400,
-                        detail="Такого відділення не знайдено. Оберіть відділення зі списку",
-                    )
-            elif not delivery.get("department"):
-                # Carrier search isn't wired up yet — fall back to the manual
-                # city/department fields so checkout keeps working.
-                raise HTTPException(status_code=400, detail="Вкажіть відділення служби доставки")
+        if provider_id not in ("nova_poshta", "ukrposhta", "mist"):
+            raise HTTPException(status_code=400, detail="Оберіть службу доставки")
+        try:
+            provider = delivery_service.get(provider_id)
+        except KeyError:
+            raise HTTPException(status_code=400, detail="Невідома служба доставки")
+        if not provider.configured:
+            raise HTTPException(status_code=503, detail=f"{provider.label}: автоматичний пошук ще не налаштований")
+        if not delivery.get("cityRef") or not delivery.get("warehouseRef") or not delivery.get("city") or not delivery.get("department"):
+            raise HTTPException(status_code=400, detail="Оберіть місто та відділення зі списку")
 
         try:
             priced_items, total = _validate_and_price_items(cursor, raw_items)
@@ -594,7 +687,11 @@ async def create_order(request: Request):
 
         _reserve_stock(cursor, priced_items)
 
+        customer["firstName"] = first_name
+        customer["lastName"] = last_name
+        customer["email"] = email
         customer["phone"] = phone
+        customer["emailVerified"] = True
         clean_items = [{k: v for k, v in it.items() if k != "_cq"} for it in priced_items]
         order_id_str = f"MLP-{random.randint(100000, 999999)}"
         order_data = {
@@ -612,28 +709,6 @@ async def create_order(request: Request):
             (order_id_str, json.dumps(order_data, ensure_ascii=False), telegram_id, total),
         )
 
-        # Optional: "remember this delivery for next time" checkbox from checkout.
-        if telegram_id and body.get("saveDelivery") and delivery.get("city") and delivery.get("department"):
-            profile = _get_or_create_profile(cursor, telegram_id)
-            new_entry = {
-                "id": str(uuid.uuid4())[:8],
-                "provider": delivery.get("provider", ""),
-                "city": delivery.get("city", ""),
-                "cityRef": delivery.get("cityRef", ""),
-                "warehouse": delivery.get("department", ""),
-                "warehouseRef": delivery.get("warehouseRef", ""),
-                "label": "",
-            }
-            deliveries = [d for d in profile["saved_deliveries"]
-                          if not (d.get("provider") == new_entry["provider"] and d.get("warehouseRef") == new_entry["warehouseRef"])]
-            deliveries.insert(0, new_entry)
-            deliveries = deliveries[:5]
-            cursor.execute(
-                "UPDATE user_profiles SET saved_deliveries = %s, first_name = COALESCE(%s, first_name), "
-                "last_name = COALESCE(%s, last_name), phone = %s, updated_at = CURRENT_TIMESTAMP WHERE telegram_id = %s",
-                (json.dumps(deliveries, ensure_ascii=False), customer.get("firstName"), customer.get("lastName"),
-                 phone, telegram_id),
-            )
 
         conn.commit()
     except HTTPException:
