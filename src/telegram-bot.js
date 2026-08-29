@@ -26,16 +26,6 @@ export class TelegramBotService {
   async cleanupChat(chatId, currentMsgId = null) {
     if (!chatId) return;
     const toDelete = new Set(this.chatHistory[chatId] || []);
-    
-    // Also clean up recent preceding message IDs (up to 30) around the current message to wipe all clutter
-    if (currentMsgId && typeof currentMsgId === 'number') {
-      toDelete.add(currentMsgId);
-      for (let i = 1; i <= 30; i++) {
-        if (currentMsgId - i > 0) {
-          toDelete.add(currentMsgId - i);
-        }
-      }
-    }
 
     const deletePromises = Array.from(toDelete).map(msgId => this.safeDeleteMessage(chatId, msgId));
     await Promise.allSettled(deletePromises);
@@ -69,6 +59,33 @@ export class TelegramBotService {
     } catch (err) {
       return false;
     }
+  }
+
+  // Send photo with caption or fallback to text message
+  async sendPhotoOrMessage(chatId, photoUrl, text, extra = {}) {
+    if (photoUrl && typeof photoUrl === 'string') {
+      try {
+        const baseUrl = (process.env.APP_URL || process.env.PUBLIC_APP_URL || 'https://m1lipstore.onrender.com').replace(/\/$/, '');
+        const fullPhoto = photoUrl.startsWith('http') ? photoUrl : `${baseUrl}${photoUrl.startsWith('/') ? '' : '/'}${encodeURI(photoUrl)}`;
+        
+        const photoRes = await this.callApi('sendPhoto', {
+          chat_id: chatId,
+          photo: fullPhoto,
+          caption: text,
+          parse_mode: extra.parse_mode || 'HTML',
+          reply_markup: extra.reply_markup
+        });
+
+        if (photoRes.ok && photoRes.result?.message_id) {
+          this.trackMessage(chatId, photoRes.result.message_id);
+          return photoRes.result;
+        }
+      } catch (err) {
+        console.warn('[TelegramBot] sendPhoto failed, fallback to text:', err.message);
+      }
+    }
+
+    return await this.safeEditOrSend(chatId, null, text, extra);
   }
 
   // Edit message in-place if messageId is provided, or send new message and delete old
@@ -1091,46 +1108,61 @@ export class TelegramBotService {
     if (order.status === 'PENDING_PAYMENT') statusEmoji = '⏳';
     if (order.status === 'NEW') statusEmoji = '🆕';
     if (order.status === 'CONFIRMED') statusEmoji = '✅';
+    if (order.status === 'PACKING_PREP' || order.status === 'PACKED') statusEmoji = '📦';
+    if (order.status === 'DISPATCH_PREP') statusEmoji = '🚚';
     if (order.status === 'SHIPPED') statusEmoji = '🚚';
     if (order.status === 'DELIVERED') statusEmoji = '🏢';
     if (order.status === 'COMPLETED') statusEmoji = '🎉';
     if (order.status === 'CANCELLED') statusEmoji = '❌';
 
-    const itemsSummary = (order.items || []).map(i => {
-      const color = i.color ? `\nКолір: ${i.color}` : '';
-      return `🕹 <b>${i.title}</b>${color}\nКількість: ${i.qty} шт.\nЦіна: <b>${i.price * i.qty} ₴</b>`;
+    const itemsSummary = (order.items || []).map((i, idx) => {
+      const color = i.color ? `\n   • Колір: <b>${i.color}</b>` : '';
+      return `${idx + 1}. 🕹 <b>${i.title}</b>${color}\n   • Кількість: ${i.qty} шт. × ${i.price} ₴ = <b>${i.price * i.qty} ₴</b>`;
     }).join('\n\n');
 
     const fullName = this.formatCustomerFullName(customer);
-    const provName = delivery.provider === 'ukrposhta' ? 'Укрпошта' : 'Нова пошта';
+    const provName = delivery.provider === 'ukrposhta' ? 'Укрпошта' : 'Нова Пошта';
     const methodType = (delivery.type === 'postomat' || delivery.method === 'postomat') ? 'поштомат' : 'відділення';
 
-    let text = `🛍 <b>ОПЛАТА ЗАМОВЛЕННЯ</b>\n\n`;
-    text += `<b>Замовлення:</b> <code>#${order.order_id}</code>\n\n`;
-    text += `🛒 <b>Товари:</b>\n\n${itemsSummary}\n\n`;
-    text += `💰 <b>Разом за товари:</b> <b>${order.subtotal || order.total} ₴</b>\n\n`;
-
-    text += `👤 <b>Покупець:</b>\n`;
-    text += `<b>ПІБ:</b> ${fullName}\n`;
-    if (customer.middle_name || customer.patronymic) {
-      text += `<b>По батькові:</b> ${customer.middle_name || customer.patronymic}\n`;
+    // Find photo of the 1st ordered item and exact color
+    const firstItem = (order.items && order.items[0]) || {};
+    const prod = db.getProductById(firstItem.product_id || firstItem.id);
+    let colorPhoto = null;
+    if (firstItem.color && prod?.color_images?.[firstItem.color]?.main) {
+      colorPhoto = prod.color_images[firstItem.color].main;
+    } else if (firstItem.color && firstItem.color_images?.[firstItem.color]?.main) {
+      colorPhoto = firstItem.color_images[firstItem.color].main;
+    } else if (firstItem.img) {
+      colorPhoto = firstItem.img;
+    } else if (prod?.img) {
+      colorPhoto = prod.img;
     }
-    text += `📞 <b>Телефон:</b> <code>${customer.phone || 'не вказано'}</code>\n`;
-    if (customer.email) text += `📧 <b>Email:</b> ${customer.email}\n`;
+
+    let text = `🛍 <b>ДЕТАЛІ ЗАМОВЛЕННЯ #${order.order_id}</b>\n\n`;
+    text += `📊 <b>Статус:</b> ${statusEmoji} <b>${statusName}</b>\n`;
+    text += `📅 <b>Дата:</b> ${new Date(order.created_at || Date.now()).toLocaleString('uk-UA')}\n`;
+    if (order.tracking_number) {
+      text += `🚚 <b>Номер ТТН:</b> <code>${order.tracking_number}</code>\n`;
+    }
+    text += `\n🛒 <b>Товари в замовленні:</b>\n${itemsSummary}\n\n`;
+    text += `💰 <b>Сума до сплати:</b> <b>${order.total} ₴</b>\n\n`;
+
+    text += `👤 <b>Отримувач:</b>\n`;
+    text += `• ПІБ: <b>${fullName}</b>\n`;
+    text += `• Телефон: <code>${customer.phone || 'не вказано'}</code>\n`;
+    if (customer.email) text += `• Email: ${customer.email}\n`;
     text += `\n`;
 
     text += `📦 <b>Доставка:</b>\n`;
-    text += `${provName} — ${methodType}\n`;
-    text += `📍 <b>Місто:</b> ${delivery.city || 'Україна'}\n`;
-    text += `🏤 <b>Пункт:</b> ${delivery.department || delivery.address || 'Відділення'}\n\n`;
+    text += `• Служба: <b>${provName}</b> (${methodType})\n`;
+    text += `• Населений пункт: <b>${delivery.city || 'Україна'}</b>\n`;
+    text += `• Відділення / адреса: ${delivery.department || delivery.address || 'Відділення'}\n\n`;
 
     text += `💳 <b>Оплата:</b>\n`;
-    text += `Спосіб: ${isOnline ? 'Онлайн-оплата (Smart Glocal Test)' : 'Оплата при отриманні'}\n`;
-    text += `Стан: ${isPaid ? '✅ <b>Оплачено</b>' : '⏳ <b>Очікує оплати</b>'}\n`;
-    text += `Сума: <b>${order.total} ₴</b>\n\n`;
-
-    if (isOnline && !isPaid) {
-      text += `🔒 <i>Перевірте дані замовлення перед оплатою.</i>`;
+    text += `• Спосіб: ${isOnline ? 'Онлайн-оплата' : 'Оплата при отриманні'}\n`;
+    text += `• Стан: ${isPaid ? '✅ <b>Оплачено</b>' : '⏳ <b>Очікує оплати</b>'}\n`;
+    if (payment.transaction_id) {
+      text += `• ID транзакції: <code>${payment.transaction_id}</code>\n`;
     }
 
     const buttons = [];
@@ -1146,11 +1178,11 @@ export class TelegramBotService {
     }
 
     buttons.push([
-      { text: '🔄 Оновити статус', callback_data: `view_order:${order.order_id}` },
-      { text: '📦 Мої замовлення', callback_data: `orders_list:${chatId}` }
+      { text: '🔄 Оновити інформацію', callback_data: `view_order:${order.order_id}` },
+      { text: '🛍 Мої замовлення', callback_data: `orders_list:${chatId}` }
     ]);
 
-    await this.safeEditOrSend(chatId, messageId, text, {
+    await this.sendPhotoOrMessage(chatId, colorPhoto, text, {
       reply_markup: { inline_keyboard: buttons }
     });
   }
@@ -1158,23 +1190,26 @@ export class TelegramBotService {
   async sendCustomerPaymentSuccess(order, messageId = null) {
     const cust = order.customer || {};
     const fullName = this.formatCustomerFullName(cust);
-    const text = `🎉 <b>ОПЛАТУ УСПІШНО ЗАРАХОВАНО!</b> 🎉\n\n` +
-      `Замовлення: <b>#${order.order_id}</b>\n` +
-      `👤 Отримувач: <b>${fullName}</b>\n` +
-      `💰 Сума: <b>${order.total} ₴</b>\n` +
-      `💳 Спосіб: ${order.payment?.provider || 'Smart Glocal Test'}\n` +
-      `🆔 ID транзакції: <code>${order.payment?.transaction_id || 'SG_OFFLINE_AUTO'}</code>\n\n` +
-      `✅ Ми вже отримали ваш платіж і передали девайси на комплектацію та пакування.\n` +
-      `Очікуйте сповіщення з номером ТТН!`;
+    const text = `✅ <b>ОПЛАТУ УСПІШНО ЗАРАХОВАНО!</b>\n\n` +
+      `Дякуємо за покупку в <b>MILIPSTORE</b>! 🎉\n\n` +
+      `Ваше замовлення <b>#${order.order_id}</b> успішно оплачено та передано на склад.\n\n` +
+      `💰 <b>Сума:</b> <b>${order.total} ₴</b>\n` +
+      `💳 <b>Спосіб:</b> ${order.payment?.provider || 'Smart Glocal Test'}\n` +
+      `🆔 <b>ID транзакції:</b> <code>${order.payment?.transaction_id || 'SG_OFFLINE_AUTO'}</code>\n` +
+      `📦 <b>Статус:</b> 🟡 <b>Очікує комплектації</b>\n\n` +
+      `Ми вже формуємо ваше замовлення! Очікуйте на сповіщення про відправку та номер ТТН у цьому чаті.`;
 
     const buttons = [
-      [{ text: '🔍 Переглянути статус замовлення', callback_data: `view_order:${order.order_id}` }],
-      [{ text: '🛍 Мої замовлення', callback_data: `orders_list:${order.customer?.telegram_id || ''}` }]
+      [{ text: '🛍 Мої замовлення', callback_data: `orders_list:${order.customer?.telegram_id || cust.telegram_id || ''}` }],
+      [{ text: '🔍 Деталі замовлення', callback_data: `view_order:${order.order_id}` }]
     ];
 
-    await this.safeEditOrSend(order.customer?.telegram_id || cust.telegram_id, messageId, text, {
-      reply_markup: { inline_keyboard: buttons }
-    });
+    const targetChatId = order.customer?.telegram_id || cust.telegram_id;
+    if (targetChatId) {
+      await this.safeEditOrSend(targetChatId, messageId, text, {
+        reply_markup: { inline_keyboard: buttons }
+      });
+    }
   }
 
   async sendNativeTelegramInvoice(chatId, order) {
@@ -1233,53 +1268,82 @@ export class TelegramBotService {
     const orders = db.getOrdersByTelegramId(telegramUserId || chatId);
 
     if (!orders || orders.length === 0) {
-      await this.safeEditOrSend(chatId, messageId, `🛍 <b>Мої замовлення</b>\n\nУ вас поки немає оформлених замовлень.\nОберіть девайси в нашому магазині та оформлюйте замовлення!`);
+      const appUrl = (process.env.APP_URL || process.env.PUBLIC_APP_URL || 'https://m1lipstore.onrender.com').replace(/\/$/, '');
+      await this.safeEditOrSend(chatId, messageId, `🛍 <b>Мої замовлення</b>\n\nУ вас поки немає оформлених замовлень.\nОберіть девайси в нашому магазині та оформлюйте замовлення!`, {
+        reply_markup: {
+          inline_keyboard: [
+            [{ text: '🚀 Відкрити каталог', web_app: { url: appUrl } }]
+          ]
+        }
+      });
       return;
     }
 
-    let text = `🛍 <b>Ваші замовлення (${orders.length}):</b>\n\n`;
-    const buttons = [];
+    const recentOrders = orders.slice(0, 5);
 
-    orders.slice(0, 8).forEach(o => {
-      let emoji = '📦';
-      if (o.status === 'PENDING_PAYMENT') emoji = '⏳';
-      if (o.status === 'NEW') emoji = '🆕';
-      if (o.status === 'CONFIRMED') emoji = '✅';
-      if (o.status === 'PACKING_PREP' || o.status === 'PACKED') emoji = '📦';
-      if (o.status === 'DISPATCH_PREP' || o.status === 'SHIPPED') emoji = '🚚';
-      if (o.status === 'DELIVERED') emoji = '🏢';
-      if (o.status === 'COMPLETED') emoji = '🎉';
-      if (o.status === 'CANCELLED') emoji = '❌';
-
+    for (const o of recentOrders) {
       const isPaid = o.payment?.status === 'PAID';
+      const isCod = o.payment?.is_cod || o.payment?.method === 'cod';
       const isUnpaid = o.payment?.method === 'online' && !isPaid;
-      const itemsBrief = o.items.map(i => `${i.title} × ${i.qty}`).join(', ');
-      const provName = o.delivery?.provider === 'ukrposhta' ? 'Укрпошта' : 'Нова пошта';
+      const statusLabel = ORDER_STATUSES[o.status]?.name || o.status;
+      const provName = o.delivery?.provider === 'ukrposhta' ? 'Укрпошта' : (o.delivery?.provider_name || 'Нова Пошта');
+      const delivPoint = o.delivery?.department || o.delivery?.address || o.delivery?.city || '';
 
-      text += `<b>#${o.order_id}</b>\n`;
-      text += `• ${itemsBrief}\n`;
-      text += `💰 <b>${o.total} ₴</b>\n`;
-      text += `💳 ${isPaid ? 'Оплачено ✅' : (isUnpaid ? 'Очікує оплати ⏳' : 'Оплата при отриманні 📦')}\n`;
-      text += `📦 ${provName} — ${o.delivery?.department || o.delivery?.city || ''}\n`;
-      text += `Статус: ${emoji} <b>${ORDER_STATUSES[o.status]?.name || o.status}</b>\n`;
-      if (o.tracking_number) text += `ТТН: <code>${o.tracking_number}</code>\n`;
-      text += `\n`;
+      let statusEmoji = '📦';
+      if (o.status === 'NEW') statusEmoji = '🆕';
+      else if (o.status === 'PENDING_PAYMENT') statusEmoji = '⏳';
+      else if (o.status === 'CONFIRMED') statusEmoji = '✅';
+      else if (o.status === 'PACKING_PREP' || o.status === 'PACKED') statusEmoji = '📦';
+      else if (o.status === 'DISPATCH_PREP' || o.status === 'SHIPPED') statusEmoji = '🚚';
+      else if (o.status === 'DELIVERED') statusEmoji = '🏢';
+      else if (o.status === 'COMPLETED') statusEmoji = '🎉';
+      else if (o.status === 'CANCELLED') statusEmoji = '❌';
 
+      const firstItem = (o.items && o.items[0]) || {};
+      const itemColor = firstItem.color || '';
+      const prod = db.getProductById(firstItem.product_id || firstItem.id);
+
+      // Find exact color photo
+      let colorPhoto = null;
+      if (itemColor && prod?.color_images?.[itemColor]?.main) {
+        colorPhoto = prod.color_images[itemColor].main;
+      } else if (itemColor && firstItem.color_images?.[itemColor]?.main) {
+        colorPhoto = firstItem.color_images[itemColor].main;
+      } else if (firstItem.img) {
+        colorPhoto = firstItem.img;
+      } else if (prod?.img) {
+        colorPhoto = prod.img;
+      }
+
+      let cardText = `🛍 <b>Замовлення #${o.order_id}</b>\n\n`;
+      cardText += `🕹 <b>${firstItem.title || 'Товар'}</b>\n`;
+      cardText += `🎨 Колір: <b>${itemColor || 'Стандартний'}</b>${firstItem.qty > 1 ? ` (×${firstItem.qty} шт.)` : ''}\n`;
+      if (o.items && o.items.length > 1) {
+        cardText += `<i>+ ще ${o.items.length - 1} поз. у замовленні</i>\n`;
+      }
+      cardText += `💰 <b>Сума: ${o.total} ₴</b>\n`;
+      cardText += `📊 Статус: ${statusEmoji} <b>${statusLabel}</b>\n`;
+      cardText += `🏢 Доставка: <b>${provName}</b> (${delivPoint})\n`;
+      cardText += `💳 Оплата: <b>${isPaid ? 'Оплачено ✅' : (isUnpaid ? 'Очікує оплати ⏳' : 'Накладений платіж 📦')}</b>\n`;
+      if (o.tracking_number) {
+        cardText += `🚚 Номер ТТН: <code>${o.tracking_number}</code>\n`;
+      }
+
+      const buttons = [];
       if (isUnpaid) {
         buttons.push([
           { text: `💳 Оплатити #${o.order_id} (${o.total} ₴)`, callback_data: `send_invoice:${o.order_id}` },
-          { text: `🔍 Деталі`, callback_data: `view_order:${o.order_id}` }
-        ]);
-      } else {
-        buttons.push([
-          { text: `🔍 Переглянути #${o.order_id}`, callback_data: `view_order:${o.order_id}` }
+          { text: `⚡ Сплатити (Test)`, callback_data: `pay_test:${o.order_id}` }
         ]);
       }
-    });
+      buttons.push([
+        { text: '🔍 Повні деталі замовлення', callback_data: `view_order:${o.order_id}` }
+      ]);
 
-    await this.safeEditOrSend(chatId, messageId, text, {
-      reply_markup: { inline_keyboard: buttons }
-    });
+      await this.sendPhotoOrMessage(chatId, colorPhoto, cardText, {
+        reply_markup: { inline_keyboard: buttons }
+      });
+    }
   }
 
   // ----------------------------------------------------
@@ -1796,7 +1860,7 @@ export class TelegramBotService {
     }
   }
 
-  async sendCustomerPaymentSuccess(order) {
+  async sendCustomerPaymentSuccess(order, messageId = null) {
     db.addNotification({
       type: 'PAYMENT_SUCCESS',
       order_id: order.order_id,
@@ -1804,24 +1868,27 @@ export class TelegramBotService {
       transaction_id: order.payment?.transaction_id
     });
 
-    if (order.customer?.telegram_id) {
-      const text = `🎉 <b>ОПЛАТА УСПІШНА!</b>\n\n` +
-        `Ваше замовлення <b>#${order.order_id}</b> успішно оплачено.\n\n` +
-        `💰 <b>Сума:</b> <b>${order.total} ₴</b>\n\n` +
-        `📦 <b>Статус:</b>\n🟡 <b>Очікує підтвердження</b>\n\n` +
-        `Ми отримали оплату та передали замовлення менеджеру.\n` +
-        `Очікуйте подальших повідомлень щодо вашого замовлення.`;
+    const cust = order.customer || {};
+    const fullName = this.formatCustomerFullName(cust);
+    const targetChatId = order.customer?.telegram_id || cust.telegram_id;
 
-      await this.callApi('sendMessage', {
-        chat_id: order.customer.telegram_id,
-        text,
-        parse_mode: 'HTML',
-        reply_markup: {
-          inline_keyboard: [
-            [{ text: '📦 Мої замовлення', callback_data: `orders_list:${order.customer.telegram_id}` }],
-            [{ text: '🔍 Деталі замовлення', callback_data: `view_order:${order.order_id}` }]
-          ]
-        }
+    if (targetChatId) {
+      const text = `✅ <b>ОПЛАТУ УСПІШНО ЗАРАХОВАНО!</b>\n\n` +
+        `Дякуємо за покупку в <b>MILIPSTORE</b>! 🎉\n\n` +
+        `Ваше замовлення <b>#${order.order_id}</b> успішно оплачено та передано на склад.\n\n` +
+        `💰 <b>Сума:</b> <b>${order.total} ₴</b>\n` +
+        `💳 <b>Спосіб:</b> ${order.payment?.provider || 'Smart Glocal Test'}\n` +
+        `🆔 <b>ID транзакції:</b> <code>${order.payment?.transaction_id || 'SG_OFFLINE_AUTO'}</code>\n` +
+        `📦 <b>Статус:</b> 🟡 <b>Очікує комплектації</b>\n\n` +
+        `Ми вже формуємо ваше замовлення! Очікуйте на сповіщення про відправку та номер ТТН у цьому чаті.`;
+
+      const buttons = [
+        [{ text: '🛍 Мої замовлення', callback_data: `orders_list:${targetChatId}` }],
+        [{ text: '🔍 Деталі замовлення', callback_data: `view_order:${order.order_id}` }]
+      ];
+
+      await this.safeEditOrSend(targetChatId, messageId, text, {
+        reply_markup: { inline_keyboard: buttons }
       });
     }
   }
@@ -1876,68 +1943,6 @@ export class TelegramBotService {
         reply_markup: { inline_keyboard: adminButtons }
       });
     }
-  }
-
-  async notifyCustomerStatusChange(order, newStatus, ttn = null) {
-    db.addNotification({
-      type: 'STATUS_CHANGED',
-      order_id: order.order_id,
-      status: newStatus,
-      status_name: ORDER_STATUSES[newStatus]?.name || newStatus,
-      ttn: ttn || order.tracking_number
-    });
-
-    if (!order.customer?.telegram_id) return;
-
-    const orderNum = `#${order.order_id}`;
-    let messageText = '';
-
-    switch (newStatus) {
-      case 'CONFIRMED':
-        messageText = `✅ <b>Ваше замовлення ${orderNum} підтверджено менеджером.</b>\n\nМи вже розпочали комплектацію та підготовку до пакування.`;
-        break;
-      case 'PACKING_PREP':
-        messageText = `📦 <b>Ваше замовлення ${orderNum} готується до пакування.</b>`;
-        break;
-      case 'PACKED':
-        messageText = `📦 <b>Ваше замовлення ${orderNum} упаковано.</b>`;
-        break;
-      case 'DISPATCH_PREP':
-        messageText = `🚚 <b>Ваше замовлення ${orderNum} готується до відправки.</b>`;
-        break;
-      case 'SHIPPED': {
-        const track = ttn || order.tracking_number;
-        const provName = order.delivery?.provider === 'ukrposhta' ? 'Укрпошта' : (order.delivery?.provider_name || 'Нова Пошта');
-        messageText = `🚚 <b>Ваше замовлення ${orderNum} відправлено!</b>`;
-        if (track) {
-          messageText += `\n\nНомер ТТН: <code>${track}</code>\nСлужба доставки: <b>${provName}</b>\n\nВи можете відстежувати рух посилки у застосунку перевізника або на сайті.`;
-        }
-        break;
-      }
-      case 'DELIVERED':
-        messageText = `📍 <b>Ваше замовлення ${orderNum} прибуло до відділення / поштомату.</b>\nБудь ласка, отримайте вашу посилку.`;
-        break;
-      case 'COMPLETED':
-        messageText = `🎉 <b>Ваше замовлення ${orderNum} успішно виконано!</b>\nДякуємо за покупку в MILIPSTORE!`;
-        break;
-      case 'CANCELLED':
-        messageText = `❌ <b>Ваше замовлення ${orderNum} скасовано.</b>\nЯкщо у вас виникли запитання, зверніться до нашої служби підтримки @milipmanager.`;
-        break;
-      default:
-        messageText = `📦 <b>Оновлено статус замовлення ${orderNum}:</b> <b>${ORDER_STATUSES[newStatus]?.name || newStatus}</b>`;
-        break;
-    }
-
-    await this.callApi('sendMessage', {
-      chat_id: order.customer.telegram_id,
-      text: messageText,
-      parse_mode: 'HTML',
-      reply_markup: {
-        inline_keyboard: [
-          [{ text: '🔍 Переглянути замовлення', callback_data: `view_order:${order.order_id}` }]
-        ]
-      }
-    });
   }
 
   // ----------------------------------------------------
@@ -2069,11 +2074,19 @@ export class TelegramBotService {
 
       session.data.category = catVal;
       db.addCategory(catVal);
+      await this.promptWizardTag(chatId);
+      return;
+    }
+
+    // STEP 7: TAG / BADGE
+    if (data.startsWith('wiz_tag:')) {
+      const tagVal = data.replace('wiz_tag:', '').trim();
+      session.data.tag = (tagVal === 'SKIP' || tagVal === 'CLEAR') ? '' : tagVal;
       await this.promptWizardColors(chatId);
       return;
     }
 
-    // STEP 7: COLOR TOGGLES (Single Plate Multi-selection without spamming)
+    // STEP 8: COLOR TOGGLES (Single Plate Multi-selection without spamming)
     if (data.startsWith('wiz_color_toggle:')) {
       const colName = data.replace('wiz_color_toggle:', '').trim();
       if (!session.data.colors) session.data.colors = [];
@@ -2331,11 +2344,18 @@ export class TelegramBotService {
       }
       session.data.category = text;
       db.addCategory(text);
+      await this.promptWizardTag(chatId);
+      return;
+    }
+
+    // 7. Tag / Badge Input
+    if (session.step === 'tag') {
+      session.data.tag = text ? text.trim() : '';
       await this.promptWizardColors(chatId);
       return;
     }
 
-    // 7. Custom Color Input
+    // 8. Custom Color Input
     if (session.step === 'custom_color') {
       if (!text) {
         await this.safeEditOrSend(chatId, session.cardMsgId, '⚠️ Будь ласка, введіть назву кольору:');
@@ -2548,9 +2568,30 @@ export class TelegramBotService {
     ];
 
     await this.safeEditOrSend(chatId, session.cardMsgId, `💰 <b>Ціна:</b> ${session.data.price} ₴\n\n` +
-      `<b>Крок 6/8: Оберіть категорію товару:</b>\n` +
+      `<b>Крок 6/9: Оберіть категорію товару:</b>\n` +
       `<i>Категорія одразу відобразиться у фільтрах вітрини магазину:</i>`, {
       reply_markup: { inline_keyboard: catButtons }
+    });
+  }
+
+  async promptWizardTag(chatId) {
+    const session = this.adminSessions[chatId];
+    if (!session) return;
+    session.step = 'tag';
+
+    const fullTitle = `${session.data.brand} ${session.data.title}`.trim();
+    const tagButtons = [
+      [{ text: '🔥 Топ продажів', callback_data: 'wiz_tag:🔥 ТОП ПРОДАЖІВ' }, { text: '✨ Новинка', callback_data: 'wiz_tag:✨ НОВИНКА' }],
+      [{ text: '⚡ Хіт', callback_data: 'wiz_tag:⚡ ХІТ' }, { text: '🏷 Знижка', callback_data: 'wiz_tag:🏷 ЗНИЖКА' }],
+      [{ text: '👑 Флагман', callback_data: 'wiz_tag:👑 ФЛАГМАН' }, { text: '🎯 Рекомендуємо', callback_data: 'wiz_tag:🎯 РЕКОМЕНДУЄМО' }],
+      [{ text: '⏩ Пропустити (Без бейджа)', callback_data: 'wiz_tag:SKIP' }],
+      [{ text: '❌ Скасувати', callback_data: 'wiz_cancel' }]
+    ];
+
+    await this.safeEditOrSend(chatId, session.cardMsgId, `🏷 <b>Товар:</b> ${fullTitle}\n\n` +
+      `<b>Крок 7/9: Оберіть або введіть позначку / бейдж товару:</b>\n\n` +
+      `<i>Оберіть популярний бейдж кнопкою або надішліть свій текст повідомленням у чат (або натисніть «⏩ Пропустити»):</i>`, {
+      reply_markup: { inline_keyboard: tagButtons }
     });
   }
 
@@ -2720,6 +2761,7 @@ export class TelegramBotService {
       `🎮 <b>Назва:</b> <b>${d.title}</b>\n` +
       `💰 <b>Ціна:</b> <b>${d.price} ₴</b> (стара ціна: ${Math.round(d.price * 1.15)} ₴)\n` +
       `🗂 <b>Категорія:</b> ${d.category}\n` +
+      `🏷 <b>Позначка / Бейдж:</b> <b>${d.tag || 'Без бейджа'}</b>\n` +
       `📝 <b>Опис:</b> <i>${(d.description || '').slice(0, 100)}${(d.description || '').length > 100 ? '...' : ''}</i>\n` +
       `${specsSummary}` +
       `🎨 <b>Варіанти кольорів, фото та склад:</b>\n${colorSummary}\n` +
@@ -2802,7 +2844,7 @@ export class TelegramBotService {
       title: fullTitle,
       price,
       old_price: Math.round(price * 1.15),
-      tag: 'НОВИНКА',
+      tag: d.tag !== undefined ? d.tag : 'НОВИНКА',
       category,
       quantity: totalQuantity,
       colors: colors.join(', '),
@@ -2973,7 +3015,8 @@ export class TelegramBotService {
     text += `🎮 <b>2. Назва / модель:</b> <b>${prod.title || '—'}</b>\n`;
     text += `📝 <b>3. Опис:</b> <i>${(prod.description || '').slice(0, 120)}${(prod.description || '').length > 120 ? '...' : ''}</i>\n`;
     text += `💰 <b>4. Ціна:</b> <b>${prod.price} ₴</b> (стара: ${prod.old_price || Math.round(prod.price * 1.15)} ₴)\n`;
-    text += `🗂 <b>Категорія:</b> <b>${prod.category || '—'}</b> | Артикул: <code>${prod.sku || '—'}</code>\n\n`;
+    text += `🗂 <b>Категорія:</b> <b>${prod.category || '—'}</b> | Артикул: <code>${prod.sku || '—'}</code>\n`;
+    text += `🏷 <b>Позначка / Бейдж:</b> <b>${prod.tag || 'Без бейджа'}</b>\n\n`;
     text += `🎨 <b>5. Кольори та склад (${colorsList.length}):</b>\n${colorsFormatted || '  • Black'}\n`;
     text += `📦 <b>Загальний залишок:</b> <b>${prod.quantity} шт.</b>\n\n`;
     text += `📋 <b>6. Характеристики (${specsList.length}/10):</b>\n${specsFormatted}\n\n`;
@@ -2997,6 +3040,9 @@ export class TelegramBotService {
       [
         { text: '📸 7. Головне фото', callback_data: `edit_prod_field:${prod.id}:main_photo` },
         { text: '🖼 8. Фото кольорів', callback_data: `edit_prod_field:${prod.id}:color_photos` }
+      ],
+      [
+        { text: '🏷 9. Позначка / Бейдж', callback_data: `edit_prod_field:${prod.id}:tag` }
       ],
       [
         { text: '🗑 Видалити товар з каталогу', callback_data: `admin_delete_prod_prompt:${prod.id}` }
@@ -3119,6 +3165,24 @@ export class TelegramBotService {
     // 8. COLOR PHOTOS
     if (field === 'color_photos') {
       await this.renderEditColorPhotosMenu(chatId, prodId, cardId);
+      return;
+    }
+
+    // 9. TAG / BADGE
+    if (field === 'tag') {
+      const tagButtons = [
+        [{ text: '🔥 Топ продажів', callback_data: `edit_prod_cb:${prodId}:tag:🔥 ТОП ПРОДАЖІВ` }, { text: '✨ Новинка', callback_data: `edit_prod_cb:${prodId}:tag:✨ НОВИНКА` }],
+        [{ text: '⚡ Хіт', callback_data: `edit_prod_cb:${prodId}:tag:⚡ ХІТ` }, { text: '🏷 Знижка', callback_data: `edit_prod_cb:${prodId}:tag:🏷 ЗНИЖКА` }],
+        [{ text: '👑 Флагман', callback_data: `edit_prod_cb:${prodId}:tag:👑 ФЛАГМАН` }, { text: '🎯 Рекомендуємо', callback_data: `edit_prod_cb:${prodId}:tag:🎯 РЕКОМЕНДУЄМО` }],
+        [{ text: '❌ Прибрати позначку (без бейджа)', callback_data: `edit_prod_cb:${prodId}:tag:CLEAR` }],
+        [{ text: '🔙 Скасувати та повернутися', callback_data: `admin_prod_view:${prodId}` }]
+      ];
+
+      await this.safeEditOrSend(chatId, cardId, `🏷 <b>Редагування позначки / бейджа товару:</b>\n` +
+        `Поточний бейдж: <b>${prod.tag || 'Не встановлено'}</b>\n\n` +
+        `<i>Оберіть позначку кнопкою або надішліть свій текст повідомленням у чат:</i>`, {
+        reply_markup: { inline_keyboard: tagButtons }
+      });
       return;
     }
   }
@@ -3289,8 +3353,15 @@ export class TelegramBotService {
       const newColors = (session.data.tempColors && session.data.tempColors.length > 0) ? session.data.tempColors : ['Black'];
       prod.colors = newColors.join(', ');
       
-      // Ensure missing color images exist
+      // Clean up removed colors from color_images
       if (!prod.color_images) prod.color_images = {};
+      Object.keys(prod.color_images).forEach(c => {
+        if (!newColors.includes(c)) {
+          delete prod.color_images[c];
+        }
+      });
+
+      // Ensure missing color images exist
       newColors.forEach(c => {
         if (!prod.color_images[c]) {
           const autoImg = this.getDefaultColorImage(c, prod.brand, prod.category);
@@ -3298,15 +3369,34 @@ export class TelegramBotService {
         }
       });
 
-      // Ensure missing color quantities exist
+      // Clean up removed colors from color_quantities
       if (!prod.color_quantities) prod.color_quantities = {};
-      const perColorQty = Math.max(1, Math.round(prod.quantity / newColors.length));
+      Object.keys(prod.color_quantities).forEach(c => {
+        if (!newColors.includes(c)) {
+          delete prod.color_quantities[c];
+        }
+      });
+
+      // Ensure missing color quantities exist
+      const perColorQty = Math.max(1, Math.round((prod.quantity || 10) / newColors.length));
       newColors.forEach(c => {
         if (prod.color_quantities[c] === undefined) {
           prod.color_quantities[c] = perColorQty;
         }
       });
 
+      // Recalculate total quantity from remaining colors
+      prod.quantity = Object.values(prod.color_quantities).reduce((sum, q) => sum + Number(q || 0), 0);
+
+      db.save();
+      delete this.adminSessions[chatId];
+      await this.sendAdminProductView(chatId, prodId, messageId);
+      return;
+    }
+
+    // 9. Tag preset chosen
+    if (action === 'tag') {
+      prod.tag = (param === 'CLEAR' || param === 'SKIP') ? '' : param;
       db.save();
       delete this.adminSessions[chatId];
       await this.sendAdminProductView(chatId, prodId, messageId);
@@ -3552,6 +3642,17 @@ export class TelegramBotService {
         }
         db.save();
         await this.handleEditProductFieldCallback(chatId, from, `edit_prod_cb:${prodId}:color_photo_select:${colorName}`, cardId);
+      }
+      return;
+    }
+
+    // 9. TAG / BADGE
+    if (field === 'tag') {
+      if (text) {
+        prod.tag = text.trim();
+        db.save();
+        delete this.adminSessions[chatId];
+        await this.sendAdminProductView(chatId, prodId, cardId);
       }
       return;
     }
