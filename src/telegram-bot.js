@@ -1289,21 +1289,22 @@ export class TelegramBotService {
     const stats = db.getStats();
     const orders = db.getOrders();
 
-    const activeOrders = orders.filter(o => !['DELIVERED', 'COMPLETED', 'CANCELLED'].includes(o.status));
+    // Only orders that are paid or cash on delivery appear for admin processing
+    const isReadyForAdmin = o => (o.payment?.status === 'PAID' || o.payment?.is_cod || o.payment?.method === 'cod') && o.status !== 'PENDING_PAYMENT';
+    const activeOrders = orders.filter(o => !['DELIVERED', 'COMPLETED', 'CANCELLED'].includes(o.status) && isReadyForAdmin(o));
     const archiveOrders = orders.filter(o => ['DELIVERED', 'COMPLETED', 'CANCELLED'].includes(o.status));
 
-    const newCount = orders.filter(o => o.status === 'NEW').length;
-    const pendingPaymentCount = orders.filter(o => o.status === 'PENDING_PAYMENT').length;
-    const confirmedCount = orders.filter(o => o.status === 'CONFIRMED').length;
-    const packingCount = orders.filter(o => o.status === 'PACKING_PREP' || o.status === 'PACKED' || o.status === 'DISPATCH_PREP').length;
-    const shippedCount = orders.filter(o => o.status === 'SHIPPED').length;
+    const newCount = activeOrders.filter(o => o.status === 'NEW').length;
+    const confirmedCount = activeOrders.filter(o => o.status === 'CONFIRMED').length;
+    const packingCount = activeOrders.filter(o => o.status === 'PACKING_PREP' || o.status === 'PACKED' || o.status === 'DISPATCH_PREP').length;
+    const shippedCount = activeOrders.filter(o => o.status === 'SHIPPED').length;
 
     let text = `👑 <b>Адмін-панель MILIPSTORE</b>\n\n`;
     text += `Адміністратор: <b>${from.first_name || ''}</b> ${from.username ? '(@' + from.username + ')' : ''}\n\n`;
     text += `📊 <b>Стан замовлень:</b>\n`;
     text += `• ⚡ <b>Активні (в роботі): ${activeOrders.length}</b>\n`;
     if (activeOrders.length > 0) {
-      text += `  └ 🆕 Нові: ${newCount} | ⏳ Очікують: ${pendingPaymentCount} | ✅ Підтверджені: ${confirmedCount} | 📦 Пакування: ${packingCount} | 🚚 Відправлені: ${shippedCount}\n`;
+      text += `  └ 🆕 Нові (оплачені): ${newCount} | ✅ Підтверджені: ${confirmedCount} | 📦 Пакування: ${packingCount} | 🚚 Відправлені: ${shippedCount}\n`;
     }
     text += `• 🗄 <b>Архів (доставлені / завершені): ${archiveOrders.length}</b>\n`;
     text += `• 💰 <b>Виторг: ${stats.total_sales.toLocaleString('uk-UA')} ₴</b>\n\n`;
@@ -1333,21 +1334,22 @@ export class TelegramBotService {
     let orders = [];
     let filterTitle = 'Активні замовлення';
 
-    const activeCount = allOrders.filter(o => !['DELIVERED', 'COMPLETED', 'CANCELLED'].includes(o.status)).length;
+    const isReadyForAdmin = o => (o.payment?.status === 'PAID' || o.payment?.is_cod || o.payment?.method === 'cod') && o.status !== 'PENDING_PAYMENT';
+    const activeCount = allOrders.filter(o => !['DELIVERED', 'COMPLETED', 'CANCELLED'].includes(o.status) && isReadyForAdmin(o)).length;
     const archiveCount = allOrders.filter(o => ['DELIVERED', 'COMPLETED', 'CANCELLED'].includes(o.status)).length;
 
     if (filter === 'ARCHIVE') {
       orders = allOrders.filter(o => ['DELIVERED', 'COMPLETED', 'CANCELLED'].includes(o.status));
       filterTitle = '🗄 Архів замовлень (доставлені та завершені)';
     } else {
-      orders = allOrders.filter(o => !['DELIVERED', 'COMPLETED', 'CANCELLED'].includes(o.status));
+      orders = allOrders.filter(o => !['DELIVERED', 'COMPLETED', 'CANCELLED'].includes(o.status) && isReadyForAdmin(o));
       filterTitle = '⚡ Активні замовлення (в роботі)';
     }
 
     if (orders.length === 0) {
       const emptyMsg = filter === 'ARCHIVE'
         ? `🗄 <b>Архів замовлень порожній</b>\n\nСюди потрапляють замовлення зі статусом «Доставлено», «Виконано» або «Скасовано».`
-        : `⚡ <b>Активних замовлень немає</b>\n\nВсі поточні замовлення опрацьовані та переміщені до архіву.`;
+        : `⚡ <b>Активних замовлень немає</b>\n\nВсі поточні замовлення опрацьовані або очікують оплати клієнтом.`;
 
       await this.safeEditOrSend(chatId, messageId, emptyMsg, {
         reply_markup: {
@@ -2109,12 +2111,13 @@ export class TelegramBotService {
       return;
     }
 
-    // STEP 8: MAIN CATALOG PHOTO ACTIONS
+    // STEP 8: MAIN CATALOG PHOTO ACTIONS (Mandatory manual upload/link only)
     if (data === 'wiz_cat_photo_auto' || data === 'wiz_cat_photo_skip') {
-      const autoCatalogImg = this.getDefaultProductImage(session.data.brand, session.data.category);
-      session.data.img = autoCatalogImg;
-      session.data.currentColorIndex = 0;
-      await this.promptWizardColorPhotos(chatId);
+      await this.safeEditOrSend(chatId, session.cardMsgId, `⚠️ <b>Головне фото для каталогу є обов'язковим!</b>\n\nБудь ласка, надішліть файл зображення або пряме посилання на картинку в цей чат:`, {
+        reply_markup: {
+          inline_keyboard: [[{ text: '❌ Скасувати створення', callback_data: 'wiz_cancel' }]]
+        }
+      });
       return;
     }
 
@@ -2184,7 +2187,21 @@ export class TelegramBotService {
       return;
     }
 
-    // STEP 10: QUANTITIES
+    // STEP 10: QUANTITIES (Manual text input with Skip option)
+    if (data === 'wiz_qty_skip') {
+      const curColorQty = colors[session.data.currentQtyIndex] || 'Black';
+      if (!session.data.color_quantities) session.data.color_quantities = {};
+      session.data.color_quantities[curColorQty] = 10;
+
+      session.data.currentQtyIndex++;
+      if (session.data.currentQtyIndex < colors.length) {
+        await this.promptWizardColorQuantity(chatId);
+      } else {
+        await this.showWizardConfirm(chatId);
+      }
+      return;
+    }
+
     if (data.startsWith('wiz_qty:')) {
       const qtyVal = parseInt(data.replace('wiz_qty:', '').trim(), 10) || 10;
       const curColorQty = colors[session.data.currentQtyIndex] || 'Black';
@@ -2197,16 +2214,6 @@ export class TelegramBotService {
       } else {
         await this.showWizardConfirm(chatId);
       }
-      return;
-    }
-
-    if (data.startsWith('wiz_qty_all:')) {
-      const qtyVal = parseInt(data.replace('wiz_qty_all:', '').trim(), 10) || 10;
-      if (!session.data.color_quantities) session.data.color_quantities = {};
-      colors.forEach(c => {
-        session.data.color_quantities[c] = qtyVal;
-      });
-      await this.showWizardConfirm(chatId);
       return;
     }
 
@@ -2342,7 +2349,7 @@ export class TelegramBotService {
       return;
     }
 
-    // 8. Main Catalog Photo Input (Only 1 Photo)
+    // 8. Main Catalog Photo Input (Only 1 Photo - Mandatory)
     if (session.step === 'catalog_photo') {
       let photoUrl = '';
       if (msg.photo && msg.photo.length > 0) {
@@ -2362,11 +2369,10 @@ export class TelegramBotService {
         return;
       }
 
-      await this.safeEditOrSend(chatId, session.cardMsgId, `⚠️ Будь ласка, надішліть фото зображенням або посиланням на картинку:`, {
+      await this.safeEditOrSend(chatId, session.cardMsgId, `⚠️ <b>Головне фото є обов'язковим!</b>\n\nБудь ласка, надішліть файл зображення або пряме посилання на картинку:`, {
         reply_markup: {
           inline_keyboard: [
-            [{ text: '🖼 Використати авто-фото', callback_data: 'wiz_cat_photo_auto' }],
-            [{ text: '❌ Скасувати', callback_data: 'wiz_cancel' }]
+            [{ text: '❌ Скасувати створення', callback_data: 'wiz_cancel' }]
           ]
         }
       });
@@ -2611,14 +2617,13 @@ export class TelegramBotService {
     session.step = 'catalog_photo';
 
     const buttons = [
-      [{ text: '🖼 Використати авто-фото для каталогу', callback_data: 'wiz_cat_photo_auto' }],
-      [{ text: '⏩ Пропустити (встановити стандартне)', callback_data: 'wiz_cat_photo_skip' }],
-      [{ text: '❌ Скасувати', callback_data: 'wiz_cancel' }]
+      [{ text: '❌ Скасувати створення', callback_data: 'wiz_cancel' }]
     ];
 
     await this.safeEditOrSend(chatId, session.cardMsgId, `📸 <b>Крок 8/8: Головне фото для каталогу (лише 1 фото)</b>\n\n` +
-      `Надішліть <b>1 основне фото</b>, яке буде відображатися на вітрині (надішліть файл фото або посилання на зображення):\n\n` +
-      `<i>Це загальне фото товару. На наступному кроці ви зможете додати окремі фото для кожного обраного кольору.</i>`, {
+      `Надішліть <b>1 обов'язкове фото</b>, яке буде відображатися на вітрині товару:\n` +
+      `<i>Надішліть файл зображення або пряме посилання на картинку в чат.</i>\n\n` +
+      `⚠️ <i>Використання авто-фото або пропуск на цьому кроці вимкнено.</i>`, {
       reply_markup: { inline_keyboard: buttons }
     });
   }
@@ -2676,14 +2681,13 @@ export class TelegramBotService {
     const qtyIndexHuman = session.data.currentQtyIndex + 1;
 
     const buttons = [
-      [{ text: '5 шт.', callback_data: 'wiz_qty:5' }, { text: '10 шт.', callback_data: 'wiz_qty:10' }, { text: '15 шт.', callback_data: 'wiz_qty:15' }],
-      [{ text: '20 шт.', callback_data: 'wiz_qty:20' }, { text: '30 шт.', callback_data: 'wiz_qty:30' }, { text: '50 шт.', callback_data: 'wiz_qty:50' }],
-      [{ text: '⏩ Встановити 10 шт. для всіх кольорів', callback_data: 'wiz_qty_all:10' }],
+      [{ text: '⏩ Пропустити (встановити 10 шт.)', callback_data: 'wiz_qty_skip' }],
       [{ text: '❌ Скасувати', callback_data: 'wiz_cancel' }]
     ];
 
     await this.safeEditOrSend(chatId, session.cardMsgId, `📦 <b>Склад (${qtyIndexHuman}/${colors.length}): Кількість для кольору «${curColor}»</b>\n\n` +
-      `Оберіть кількість одиниць на складі для кольору <b>${curColor}</b> або надішліть число текстом:`, {
+      `Надішліть кількість одиниць на складі для кольору <b>${curColor}</b> числом текстом у чат (наприклад: <code>15</code>)\n` +
+      `або натисніть кнопку «⏩ Пропустити»:`, {
       reply_markup: { inline_keyboard: buttons }
     });
   }
@@ -3102,10 +3106,9 @@ export class TelegramBotService {
     if (field === 'main_photo') {
       await this.safeEditOrSend(chatId, cardId, `📸 <b>Головне фото для каталогу (1 фото):</b>\n\n` +
         `Поточне фото: <code>${prod.img || 'немає'}</code>\n\n` +
-        `<i>Надішліть нове фото файлом зображення або посиланням на картинку:</i>`, {
+        `<i>Надішліть нове фото файлом зображення або прямим посиланням на картинку в цей чат:</i>`, {
         reply_markup: {
           inline_keyboard: [
-            [{ text: '🖼 Встановити авто-фото', callback_data: `edit_prod_cb:${prodId}:main_photo_auto` }],
             [{ text: '🔙 Скасувати та повернутися', callback_data: `admin_prod_view:${prodId}` }]
           ]
         }

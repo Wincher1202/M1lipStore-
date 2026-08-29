@@ -296,6 +296,7 @@ app.post('/api/orders/:order_id/confirm-payment', async (req, res) => {
 
   // Notify customer and admins
   await botService.sendCustomerPaymentSuccess(updatedOrder);
+  await botService.sendAdminPaymentSuccess(updatedOrder);
 
   res.json({
     status: 'success',
