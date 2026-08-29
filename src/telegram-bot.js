@@ -10,6 +10,48 @@ class TelegramBotService {
     this.username = process.env.BOT_USERNAME || 'm1lipstore_bot';
     // Store wizard sessions in memory or db
     this.wizardSessions = {};
+    this.processedUpdates = new Set();
+
+    if (this.token) {
+      this.startPolling();
+    } else {
+      console.warn('[TelegramBot] WARNING: BOT_TOKEN is not set in environment variables (.env). Telegram bot commands like /start will not respond until BOT_TOKEN is configured.');
+    }
+  }
+
+  startPolling() {
+    console.log('[TelegramBot] Starting Telegram bot long polling...');
+    let offset = 0;
+
+    // Delete webhook to ensure getUpdates works
+    this.callApi('deleteWebhook', { drop_pending_updates: false }).catch(() => {});
+
+    const poll = async () => {
+      try {
+        const res = await fetch(`https://api.telegram.org/bot${this.token}/getUpdates?offset=${offset}&timeout=25`, {
+          method: 'GET'
+        });
+        const data = await res.json();
+        if (data.ok && Array.isArray(data.result)) {
+          for (const update of data.result) {
+            offset = update.update_id + 1;
+            if (!this.processedUpdates.has(update.update_id)) {
+              this.processedUpdates.add(update.update_id);
+              if (this.processedUpdates.size > 1000) {
+                const firstItem = this.processedUpdates.values().next().value;
+                this.processedUpdates.delete(firstItem);
+              }
+              await this.handleUpdate(update);
+            }
+          }
+        }
+      } catch (e) {
+        // silent or warning on network hiccup
+      }
+      setTimeout(poll, 1500);
+    };
+
+    poll();
   }
 
   getBotUsername() {
@@ -18,6 +60,11 @@ class TelegramBotService {
 
   async handleUpdate(body) {
     if (!body) return true;
+
+    if (body.update_id) {
+      if (this.processedUpdates.has(body.update_id)) return true;
+      this.processedUpdates.add(body.update_id);
+    }
 
     if (body.message) {
       await this.handleMessage(body.message);
