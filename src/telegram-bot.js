@@ -349,6 +349,14 @@ export class TelegramBotService {
       return;
     }
 
+    // Check if admin is currently in Brand Management session
+    if (this.adminSessions[chatId]?.action === 'brand_edit_photo' || 
+        this.adminSessions[chatId]?.action === 'brand_edit_name' ||
+        this.adminSessions[chatId]?.action === 'brand_add') {
+      await this.handleBrandMessage(chatId, from, msg);
+      return;
+    }
+
     // Check if admin is currently in Add Product Wizard session
     if (this.adminSessions[chatId]?.action === 'wizard_add_product') {
       await this.handleWizardMessage(chatId, from, msg);
@@ -1072,6 +1080,79 @@ export class TelegramBotService {
       return;
     }
 
+    // Admin Popular Brands Management
+    if (data === 'admin_brands') {
+      await this.sendAdminBrands(chatId, msgId);
+      return;
+    }
+
+    if (data.startsWith('admin_brand_view:')) {
+      const brandId = data.replace('admin_brand_view:', '').trim();
+      await this.sendAdminBrandView(chatId, brandId, msgId);
+      return;
+    }
+
+    if (data.startsWith('admin_brand_toggle:')) {
+      const brandId = data.replace('admin_brand_toggle:', '').trim();
+      const brand = db.getBrandById(brandId);
+      if (brand) {
+        db.updateBrand(brand.id, { hidden: !brand.hidden });
+      }
+      await this.sendAdminBrandView(chatId, brandId, msgId);
+      return;
+    }
+
+    if (data.startsWith('admin_brand_edit_photo:')) {
+      const brandId = data.replace('admin_brand_edit_photo:', '').trim();
+      await this.startBrandPhotoEdit(chatId, brandId, msgId);
+      return;
+    }
+
+    if (data.startsWith('admin_brand_edit_name:')) {
+      const brandId = data.replace('admin_brand_edit_name:', '').trim();
+      await this.startBrandNameEdit(chatId, brandId, msgId);
+      return;
+    }
+
+    if (data.startsWith('admin_brand_delete_prompt:')) {
+      const brandId = data.replace('admin_brand_delete_prompt:', '').trim();
+      const brand = db.getBrandById(brandId);
+      if (!brand) {
+        await this.safeEditOrSend(chatId, msgId, '❌ Бренд не знайдено.');
+        return;
+      }
+      await this.safeEditOrSend(chatId, msgId, `⚠️ <b>Підтвердження видалення бренду</b>\n\n` +
+        `🌟 Бренд: <b>${brand.name}</b>\n\n` +
+        `Ви дійсно бажаєте видалити цей бренд з панелі та вітрини магазину?`, {
+        reply_markup: {
+          inline_keyboard: [
+            [{ text: '🗑 Так, видалити бренд', callback_data: `admin_brand_delete_confirm:${brand.id}` }],
+            [{ text: '❌ Скасувати (Повернутися)', callback_data: `admin_brand_view:${brand.id}` }]
+          ]
+        }
+      });
+      return;
+    }
+
+    if (data.startsWith('admin_brand_delete_confirm:')) {
+      const brandId = data.replace('admin_brand_delete_confirm:', '').trim();
+      db.deleteBrand(brandId);
+      await this.safeEditOrSend(chatId, msgId, '🗑 <b>Бренд успішно видалено.</b>', {
+        reply_markup: {
+          inline_keyboard: [
+            [{ text: '🌟 До списку брендів', callback_data: 'admin_brands' }],
+            [{ text: '👑 До адмін-панелі', callback_data: 'admin_dashboard' }]
+          ]
+        }
+      });
+      return;
+    }
+
+    if (data === 'admin_brand_add') {
+      await this.startBrandAdd(chatId, msgId);
+      return;
+    }
+
     // Admin Product Wizard Callbacks
     if (data.startsWith('wiz_')) {
       await this.handleWizardCallback(chatId, from, data, msgId);
@@ -1401,6 +1482,7 @@ export class TelegramBotService {
         { text: '➕ Додати новий товар', callback_data: 'add_new_product' }
       ],
       [
+        { text: '🌟 Популярні бренди', callback_data: 'admin_brands' },
         { text: '📥 Вхідні повідомлення', callback_data: 'admin_inbox' }
       ]
     ];
@@ -3818,6 +3900,246 @@ export class TelegramBotService {
     await this.safeEditOrSend(chatId, messageId, text, {
       reply_markup: { inline_keyboard: buttons }
     });
+  }
+
+  // ----------------------------------------------------
+  // Popular Brands Admin Management
+  // ----------------------------------------------------
+  async sendAdminBrands(chatId, messageId = null) {
+    const brands = db.getBrands(true); // include hidden
+
+    let text = `🌟 <b>Керування популярними брендами</b>\n\n`;
+    text += `Ці бренди відображаються у рухомому рядку (каруселі) на головній сторінці сайту.\n`;
+    text += `Усього брендів: <b>${brands.length}</b>\n\n`;
+
+    if (brands.length === 0) {
+      text += `<i>Список брендів порожній. Натисніть «➕ Додати новий бренд», щоб додати перший бренд.</i>`;
+    } else {
+      brands.forEach((b, idx) => {
+        const status = b.hidden ? '🙈 Приховано' : '✅ Активний';
+        const hasLogo = b.logo ? '🖼 Є фото' : '❌ Без фото';
+        text += `${idx + 1}. <b>${b.name}</b> — ${status} (${hasLogo})\n`;
+      });
+    }
+
+    const buttons = [];
+    // Brand buttons
+    for (let i = 0; i < brands.length; i += 2) {
+      const row = [];
+      const b1 = brands[i];
+      row.push({ text: `🌟 ${b1.name}`, callback_data: `admin_brand_view:${b1.id}` });
+      if (i + 1 < brands.length) {
+        const b2 = brands[i + 1];
+        row.push({ text: `🌟 ${b2.name}`, callback_data: `admin_brand_view:${b2.id}` });
+      }
+      buttons.push(row);
+    }
+
+    buttons.push([
+      { text: '➕ Додати новий бренд', callback_data: 'admin_brand_add' }
+    ]);
+    buttons.push([
+      { text: '👑 До адмін-панелі', callback_data: 'admin_dashboard' }
+    ]);
+
+    await this.safeEditOrSend(chatId, messageId, text, {
+      reply_markup: { inline_keyboard: buttons }
+    });
+  }
+
+  async sendAdminBrandView(chatId, brandId, messageId = null) {
+    const brand = db.getBrandById(brandId);
+    if (!brand) {
+      await this.safeEditOrSend(chatId, messageId, '❌ Бренд не знайдено.', {
+        reply_markup: {
+          inline_keyboard: [[{ text: '🌟 До списку брендів', callback_data: 'admin_brands' }]]
+        }
+      });
+      return;
+    }
+
+    const status = brand.hidden ? '🙈 Прихований (не показується на сайті)' : '✅ Активний (відображається в рядку брендів)';
+    let text = `🌟 <b>Налаштування бренду</b>\n\n` +
+      `🏷 Назва: <b>${brand.name}</b>\n` +
+      `👁 Стан: <b>${status}</b>\n` +
+      `🖼 Фото / логотип: <code>${brand.logo || 'не вказано'}</code>\n\n` +
+      `<i>Оберіть дію нижче:</i>`;
+
+    const buttons = [
+      [
+        { text: '🖼 Змінити фото / логотип', callback_data: `admin_brand_edit_photo:${brand.id}` },
+        { text: '✏️ Змінити назву', callback_data: `admin_brand_edit_name:${brand.id}` }
+      ],
+      [
+        { text: brand.hidden ? '👁 Показати на сайті' : '🙈 Приховати на сайті', callback_data: `admin_brand_toggle:${brand.id}` },
+        { text: '🗑 Видалити бренд', callback_data: `admin_brand_delete_prompt:${brand.id}` }
+      ],
+      [
+        { text: '🔙 До списку брендів', callback_data: 'admin_brands' },
+        { text: '👑 До адмін-панелі', callback_data: 'admin_dashboard' }
+      ]
+    ];
+
+    await this.safeEditOrSend(chatId, messageId, text, {
+      reply_markup: { inline_keyboard: buttons }
+    });
+  }
+
+  async startBrandPhotoEdit(chatId, brandId, messageId = null) {
+    const brand = db.getBrandById(brandId);
+    if (!brand) return;
+
+    this.adminSessions[chatId] = {
+      action: 'brand_edit_photo',
+      brandId: brand.id,
+      msgId: messageId
+    };
+
+    const text = `🖼 <b>Оновлення фото для бренду «${brand.name}»</b>\n\n` +
+      `Поточне фото: <code>${brand.logo || 'відсутнє'}</code>\n\n` +
+      `📷 <b>Надішліть нове фото файлом/картинкою в чат</b> або надішліть посилання / імʼя файлу (наприклад: <code>/shark.jpg</code>, <code>/aula.png</code>):\n\n` +
+      `<i>Або натисніть «❌ Скасувати»:</i>`;
+
+    await this.safeEditOrSend(chatId, messageId, text, {
+      reply_markup: {
+        inline_keyboard: [[{ text: '❌ Скасувати', callback_data: `admin_brand_view:${brand.id}` }]]
+      }
+    });
+  }
+
+  async startBrandNameEdit(chatId, brandId, messageId = null) {
+    const brand = db.getBrandById(brandId);
+    if (!brand) return;
+
+    this.adminSessions[chatId] = {
+      action: 'brand_edit_name',
+      brandId: brand.id,
+      msgId: messageId
+    };
+
+    const text = `✏️ <b>Редагування назви бренду</b>\n\n` +
+      `Поточна назва: <b>${brand.name}</b>\n\n` +
+      `Надішліть нову назву бренду повідомленням у чат:`;
+
+    await this.safeEditOrSend(chatId, messageId, text, {
+      reply_markup: {
+        inline_keyboard: [[{ text: '❌ Скасувати', callback_data: `admin_brand_view:${brand.id}` }]]
+      }
+    });
+  }
+
+  async startBrandAdd(chatId, messageId = null) {
+    this.adminSessions[chatId] = {
+      action: 'brand_add',
+      step: 'brand_name',
+      msgId: messageId,
+      data: {}
+    };
+
+    const text = `➕ <b>Додавання нового бренду</b>\n\n` +
+      `Введіть назву бренду текстом у чат (наприклад: <i>Attack Shark, Darmoshark, Lamzu, Ninjutso</i>):`;
+
+    await this.safeEditOrSend(chatId, messageId, text, {
+      reply_markup: {
+        inline_keyboard: [[{ text: '❌ Скасувати', callback_data: 'admin_brands' }]]
+      }
+    });
+  }
+
+  async handleBrandMessage(chatId, from, msg) {
+    const session = this.adminSessions[chatId];
+    if (!session) return;
+
+    if (msg.message_id) {
+      await this.safeDeleteMessage(chatId, msg.message_id);
+    }
+
+    const text = (msg.text || '').trim();
+
+    // 1. Edit brand photo
+    if (session.action === 'brand_edit_photo') {
+      const brandId = session.brandId;
+      let photoUrl = '';
+      if (msg.photo && msg.photo.length > 0) {
+        const largest = msg.photo[msg.photo.length - 1];
+        const fileRes = await this.callApi('getFile', { file_id: largest.file_id });
+        if (fileRes.ok && fileRes.result?.file_path) {
+          photoUrl = `https://api.telegram.org/file/bot${BOT_TOKEN}/${fileRes.result.file_path}`;
+        }
+      } else if (text) {
+        photoUrl = text;
+      }
+
+      if (photoUrl) {
+        db.updateBrand(brandId, { logo: photoUrl });
+        delete this.adminSessions[chatId];
+        await this.sendAdminBrandView(chatId, brandId, session.msgId);
+        return;
+      }
+
+      await this.safeEditOrSend(chatId, session.msgId, '⚠️ Будь ласка, надішліть фото або посилання на зображення:');
+      return;
+    }
+
+    // 2. Edit brand name
+    if (session.action === 'brand_edit_name') {
+      const brandId = session.brandId;
+      if (!text) {
+        await this.safeEditOrSend(chatId, session.msgId, '⚠️ Введіть коректну назву бренду:');
+        return;
+      }
+
+      db.updateBrand(brandId, { name: text });
+      delete this.adminSessions[chatId];
+      await this.sendAdminBrandView(chatId, brandId, session.msgId);
+      return;
+    }
+
+    // 3. Add brand flow
+    if (session.action === 'brand_add') {
+      if (session.step === 'brand_name') {
+        if (!text) {
+          await this.safeEditOrSend(chatId, session.msgId, '⚠️ Введіть коректну назву бренду:');
+          return;
+        }
+
+        session.data.name = text;
+        session.step = 'brand_photo';
+
+        const promptText = `🖼 <b>Фото / логотип для бренду «${text}»</b>\n\n` +
+          `Надішліть фото файлом/картинкою у чат, або пряме посилання/імʼя файлу (наприклад: <code>/shark.jpg</code>):\n\n` +
+          `<i>Або надішліть «-» чи «пропустити», щоб створити без фото:</i>`;
+
+        await this.safeEditOrSend(chatId, session.msgId, promptText, {
+          reply_markup: {
+            inline_keyboard: [[{ text: '❌ Скасувати', callback_data: 'admin_brands' }]]
+          }
+        });
+        return;
+      }
+
+      if (session.step === 'brand_photo') {
+        let photoUrl = '';
+        if (msg.photo && msg.photo.length > 0) {
+          const largest = msg.photo[msg.photo.length - 1];
+          const fileRes = await this.callApi('getFile', { file_id: largest.file_id });
+          if (fileRes.ok && fileRes.result?.file_path) {
+            photoUrl = `https://api.telegram.org/file/bot${BOT_TOKEN}/${fileRes.result.file_path}`;
+          }
+        } else if (text && text !== '-' && text.toLowerCase() !== 'пропустити') {
+          photoUrl = text;
+        }
+
+        const newBrand = db.addBrand({
+          name: session.data.name,
+          logo: photoUrl || ''
+        });
+
+        delete this.adminSessions[chatId];
+        await this.sendAdminBrands(chatId, session.msgId);
+        return;
+      }
+    }
   }
 
   async createInvoiceLink(order) {

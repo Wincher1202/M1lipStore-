@@ -55,7 +55,27 @@ app.get('/api/categories', (req, res) => {
 });
 
 app.get('/api/brands', (req, res) => {
-  res.json(db.getBrands());
+  const includeHidden = req.query.include_hidden === 'true';
+  res.json(db.getBrands(includeHidden));
+});
+
+app.post('/api/brands', (req, res) => {
+  const { name, logo } = req.body;
+  if (!name) return res.status(400).json({ detail: 'Назва бренду обовʼязкова' });
+  const brand = db.addBrand({ name, logo });
+  res.status(201).json(brand);
+});
+
+app.put('/api/brands/:id', (req, res) => {
+  const updated = db.updateBrand(req.params.id, req.body);
+  if (!updated) return res.status(404).json({ detail: 'Бренд не знайдено' });
+  res.json(updated);
+});
+
+app.delete('/api/brands/:id', (req, res) => {
+  const deleted = db.deleteBrand(req.params.id);
+  if (!deleted) return res.status(404).json({ detail: 'Бренд не знайдено' });
+  res.json({ ok: true, deleted });
 });
 
 // ----------------------------------------------------

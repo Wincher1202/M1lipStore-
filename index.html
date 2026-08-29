@@ -488,12 +488,17 @@
             justify-content: center;
             background: radial-gradient(circle at center, var(--bg-tertiary) 0%, var(--bg-secondary) 100%);
             position: relative;
+            padding: 10px;
+            box-sizing: border-box;
         }
 
         .hero-card-3d img {
             width: 100%;
             height: 100%;
-            object-fit: cover;
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            object-position: center;
             display: block;
             border-radius: var(--radius-md);
             transition: opacity 0.35s ease-in-out, transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
@@ -875,33 +880,45 @@
 
         .catalog-grid {
             display: grid;
-            grid-template-columns: 1fr;
-            gap: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 18px;
         }
 
         @media(min-width: 768px) {
-            .catalog-grid { grid-template-columns: repeat(2, 1fr); }
+            .catalog-grid { grid-template-columns: repeat(2, 1fr); gap: 20px; }
         }
 
         @media(min-width: 1100px) {
-            .catalog-grid { grid-template-columns: repeat(3, 1fr); }
+            .catalog-grid { grid-template-columns: repeat(3, 1fr); gap: 24px; }
         }
 
         .product-card {
             background: var(--bg-secondary);
             border: 1px solid var(--border-light);
             border-radius: var(--radius-lg);
-            padding: 20px;
+            padding: 16px;
             display: flex;
             flex-direction: column;
             position: relative;
             box-shadow: var(--shadow-subtle);
             cursor: pointer;
             height: 100%;
-            min-height: 450px;
+            min-height: 420px;
             will-change: transform;
             transition: var(--transition-smooth);
             animation: catalogCardEntrance 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+            box-sizing: border-box;
+        }
+
+        @media(max-width: 480px) {
+            .catalog-grid {
+                grid-template-columns: 1fr;
+                gap: 14px;
+            }
+            .product-card {
+                padding: 14px;
+                min-height: 380px;
+            }
         }
 
         .product-card:hover {
@@ -1275,12 +1292,18 @@
             align-items: center;
             justify-content: center;
             overflow: hidden;
+            background: var(--bg-tertiary);
+            padding: 10px;
+            box-sizing: border-box;
         }
         .modal-main-img { 
             width: 100%; 
             height: 100%; 
-            object-fit: cover; 
-            border-radius: var(--radius-md); 
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain; 
+            object-position: center;
+            border-radius: var(--radius-sm); 
             transition: opacity 0.3s ease-in-out, transform 0.4s ease; 
         }
         .modal-main-img:hover { transform: scale(1.03); }
@@ -2424,32 +2447,32 @@
         <div class="partner-brands-marquee">
             <div class="partner-brands-track">
                 <!-- Set 1 -->
-                <div class="partner-brand-tile" onclick="filterByBrand('Attack Shark', this)"><img src="brand-attack-shark.svg" alt="Attack Shark" loading="lazy" onerror="this.src='attack-shark.jpg'"><span class="brand-text-fallback">Attack Shark</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('Ajazz', this)"><img src="brand-ajazz.svg" alt="Ajazz" loading="lazy" onerror="this.src='brand-ajazz.svg'"><span class="brand-text-fallback">Ajazz</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('AULA', this)"><img src="brand-aula.svg" alt="AULA" loading="lazy" onerror="this.src='brand-aula.svg'"><span class="brand-text-fallback">AULA</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('Mchose', this)"><img src="brand-mchose.svg" alt="Mchose" loading="lazy" onerror="this.src='brand-mchose.svg'"><span class="brand-text-fallback">Mchose</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('VGN', this)"><img src="brand-vgn.svg" alt="VGN" loading="lazy" onerror="this.src='brand-vgn.svg'"><span class="brand-text-fallback">VGN</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Attack Shark', this)"><img src="shark.jpg" alt="Attack Shark" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Attack Shark</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Ajazz', this)"><img src="adjaras.webp" alt="Ajazz" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Ajazz</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('AULA', this)"><img src="aula.png" alt="AULA" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">AULA</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Mchose', this)"><img src="mchous.png" alt="Mchose" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Mchose</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('VGN', this)"><img src="vgn.jpg" alt="VGN" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">VGN</span></div>
 
                 <!-- Set 2 -->
-                <div class="partner-brand-tile" onclick="filterByBrand('Attack Shark', this)"><img src="brand-attack-shark.svg" alt="Attack Shark" loading="lazy" onerror="this.src='attack-shark.jpg'"><span class="brand-text-fallback">Attack Shark</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('Ajazz', this)"><img src="brand-ajazz.svg" alt="Ajazz" loading="lazy" onerror="this.src='brand-ajazz.svg'"><span class="brand-text-fallback">Ajazz</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('AULA', this)"><img src="brand-aula.svg" alt="AULA" loading="lazy" onerror="this.src='brand-aula.svg'"><span class="brand-text-fallback">AULA</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('Mchose', this)"><img src="brand-mchose.svg" alt="Mchose" loading="lazy" onerror="this.src='brand-mchose.svg'"><span class="brand-text-fallback">Mchose</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('VGN', this)"><img src="brand-vgn.svg" alt="VGN" loading="lazy" onerror="this.src='brand-vgn.svg'"><span class="brand-text-fallback">VGN</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Attack Shark', this)"><img src="shark.jpg" alt="Attack Shark" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Attack Shark</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Ajazz', this)"><img src="adjaras.webp" alt="Ajazz" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Ajazz</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('AULA', this)"><img src="aula.png" alt="AULA" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">AULA</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Mchose', this)"><img src="mchous.png" alt="Mchose" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Mchose</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('VGN', this)"><img src="vgn.jpg" alt="VGN" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">VGN</span></div>
 
                 <!-- Set 3 -->
-                <div class="partner-brand-tile" onclick="filterByBrand('Attack Shark', this)"><img src="brand-attack-shark.svg" alt="Attack Shark" loading="lazy" onerror="this.src='attack-shark.jpg'"><span class="brand-text-fallback">Attack Shark</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('Ajazz', this)"><img src="brand-ajazz.svg" alt="Ajazz" loading="lazy" onerror="this.src='brand-ajazz.svg'"><span class="brand-text-fallback">Ajazz</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('AULA', this)"><img src="brand-aula.svg" alt="AULA" loading="lazy" onerror="this.src='brand-aula.svg'"><span class="brand-text-fallback">AULA</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('Mchose', this)"><img src="brand-mchose.svg" alt="Mchose" loading="lazy" onerror="this.src='brand-mchose.svg'"><span class="brand-text-fallback">Mchose</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('VGN', this)"><img src="brand-vgn.svg" alt="VGN" loading="lazy" onerror="this.src='brand-vgn.svg'"><span class="brand-text-fallback">VGN</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Attack Shark', this)"><img src="shark.jpg" alt="Attack Shark" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Attack Shark</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Ajazz', this)"><img src="adjaras.webp" alt="Ajazz" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Ajazz</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('AULA', this)"><img src="aula.png" alt="AULA" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">AULA</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Mchose', this)"><img src="mchous.png" alt="Mchose" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Mchose</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('VGN', this)"><img src="vgn.jpg" alt="VGN" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">VGN</span></div>
 
                 <!-- Set 4 -->
-                <div class="partner-brand-tile" onclick="filterByBrand('Attack Shark', this)"><img src="brand-attack-shark.svg" alt="Attack Shark" loading="lazy" onerror="this.src='attack-shark.jpg'"><span class="brand-text-fallback">Attack Shark</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('Ajazz', this)"><img src="brand-ajazz.svg" alt="Ajazz" loading="lazy" onerror="this.src='brand-ajazz.svg'"><span class="brand-text-fallback">Ajazz</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('AULA', this)"><img src="brand-aula.svg" alt="AULA" loading="lazy" onerror="this.src='brand-aula.svg'"><span class="brand-text-fallback">AULA</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('Mchose', this)"><img src="brand-mchose.svg" alt="Mchose" loading="lazy" onerror="this.src='brand-mchose.svg'"><span class="brand-text-fallback">Mchose</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('VGN', this)"><img src="brand-vgn.svg" alt="VGN" loading="lazy" onerror="this.src='brand-vgn.svg'"><span class="brand-text-fallback">VGN</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Attack Shark', this)"><img src="shark.jpg" alt="Attack Shark" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Attack Shark</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Ajazz', this)"><img src="adjaras.webp" alt="Ajazz" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Ajazz</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('AULA', this)"><img src="aula.png" alt="AULA" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">AULA</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Mchose', this)"><img src="mchous.png" alt="Mchose" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Mchose</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('VGN', this)"><img src="vgn.jpg" alt="VGN" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">VGN</span></div>
             </div>
         </div>
     </section>
@@ -3086,213 +3109,9 @@
             }
         }
 
-        const INITIAL_FALLBACK_PRODUCTS = [
-            {
-                id: 'prod-as-r5-ultra',
-                brand: 'Attack Shark',
-                title: 'Attack Shark R5 Ultra Magnesium Wireless',
-                price: 3299,
-                oldPrice: 3899,
-                tag: 'ТОП ПРОДАЖІВ',
-                category: 'Мишки',
-                sku: 'AS-R5-MAG',
-                popular: true,
-                desc: 'Ультралегка бездротова мишка з магнієвого сплаву з підтримкою 8000Hz опитування, сенсором PAW3395 та вагою лише 39 грамів.',
-                img: 'attack-shark-r5-ultra-top-angle.jpg',
-                gallery: [
-                    'attack-shark-r5-ultra-top-angle.jpg',
-                    'attack-shark-r5-ultra-back-grip.jpg',
-                    'attack-shark-r5-ultra-colors-price.jpg',
-                    'attack-shark-r5-ultra-in-hand-setup.jpg',
-                    'attack-shark-r5-ultra-box-bundle-contents.jpg'
-                ],
-                specs: [
-                    { key: 'Сенсор', value: 'PixArt PAW3395 (до 26 000 DPI)' },
-                    { key: 'Вага', value: '39 грам' },
-                    { key: 'Частота опитування', value: 'До 8000 Hz' },
-                    { key: 'Перемикачі', value: 'TTC Dustproof Gold (80M натискань)' },
-                    { key: 'Підключення', value: '2.4GHz Wireless / Bluetooth / Type-C' },
-                    { key: 'Автономність', value: 'До 60 годин роботи' }
-                ],
-                colors: [
-                    { name: 'Black', isOut: false, stock: 8, image: 'attack-shark-r5-ultra-top-angle.jpg', gallery: ['attack-shark-r5-ultra-top-angle.jpg'] },
-                    { name: 'White', isOut: false, stock: 6, image: 'attack-shark-r5-ultra-back-grip.jpg', gallery: ['attack-shark-r5-ultra-back-grip.jpg'] },
-                    { name: 'Red', isOut: false, stock: 4, image: 'attack-shark-r5-ultra-colors-price.jpg', gallery: ['attack-shark-r5-ultra-colors-price.jpg'] }
-                ],
-                colorImagesMap: {
-                    Black: { main: 'attack-shark-r5-ultra-top-angle.jpg', gallery: ['attack-shark-r5-ultra-top-angle.jpg'] },
-                    White: { main: 'attack-shark-r5-ultra-back-grip.jpg', gallery: ['attack-shark-r5-ultra-back-grip.jpg'] },
-                    Red: { main: 'attack-shark-r5-ultra-colors-price.jpg', gallery: ['attack-shark-r5-ultra-colors-price.jpg'] }
-                }
-            },
-            {
-                id: 'prod-as-x3-pro',
-                brand: 'Attack Shark',
-                title: 'Attack Shark X3 Wireless Gaming Mouse',
-                price: 1599,
-                oldPrice: 1999,
-                tag: 'ХІТ',
-                category: 'Мишки',
-                sku: 'AS-X3-BLK',
-                popular: true,
-                desc: 'Надзвичайно популярна бюджетна бездротова мишка на флагманському сенсорі PAW3395 вагою 49 грамів.',
-                img: 'attack-shark-x3-black.jpg',
-                gallery: [
-                    'attack-shark-x3-black.jpg',
-                    'attack-shark-x3-white.jpg',
-                    'attack-shark-x3-box.jpg'
-                ],
-                specs: [
-                    { key: 'Сенсор', value: 'PixArt PAW3395 (26 000 DPI)' },
-                    { key: 'Вага', value: '49 грам' },
-                    { key: 'Підключення', value: 'Tri-Mode: 2.4G, BT5.2, Type-C' },
-                    { key: 'Свічі', value: 'Kailh GM8.0 Black Mamba' },
-                    { key: 'Акумулятор', value: '300 mAh (до 200 годин BT)' }
-                ],
-                colors: [
-                    { name: 'Black', isOut: false, stock: 15, image: 'attack-shark-x3-black.jpg', gallery: ['attack-shark-x3-box.jpg'] },
-                    { name: 'White', isOut: false, stock: 10, image: 'attack-shark-x3-white.jpg', gallery: ['attack-shark-x3-white.jpg'] }
-                ],
-                colorImagesMap: {
-                    Black: { main: 'attack-shark-x3-black.jpg', gallery: ['attack-shark-x3-box.jpg'] },
-                    White: { main: 'attack-shark-x3-white.jpg', gallery: ['attack-shark-x3-white.jpg'] }
-                }
-            },
-            {
-                id: 'prod-aula-f75',
-                brand: 'AULA',
-                title: 'AULA F75 Wireless Mechanical Keyboard',
-                price: 2899,
-                oldPrice: 3299,
-                tag: 'НОВИНКА',
-                category: 'Клавіатури',
-                sku: 'AULA-F75-ICE',
-                popular: true,
-                desc: '75% механічна клавіатура з Gasket Mount, попередньо змащеними свічами LEOBOG Reaper та гарячою заміною Hot-swap.',
-                img: 'aula копия.png',
-                gallery: [
-                    'aula копия.png',
-                    'photo_2026-08-25_15-31-22.jpg',
-                    'photo_2026-08-25_15-31-28.jpg'
-                ],
-                specs: [
-                    { key: 'Формат', value: '75% (80 клавіш + регулятор гучності)' },
-                    { key: 'Конструкція', value: 'Gasket Mount з 5-шаровою шумоізоляцією' },
-                    { key: 'Свічі', value: 'LEOBOG Reaper Linear (змащені)' },
-                    { key: 'Підключення', value: 'Bluetooth 5.0 / 2.4GHz / Type-C' },
-                    { key: 'Акумулятор', value: '4000 mAh' }
-                ],
-                colors: [
-                    { name: 'White', isOut: false, stock: 8, image: 'aula копия.png', gallery: ['photo_2026-08-25_15-31-22.jpg'] },
-                    { name: 'Black', isOut: false, stock: 4, image: 'photo_2026-08-25_15-31-28.jpg', gallery: [] }
-                ],
-                colorImagesMap: {
-                    White: { main: 'aula копия.png', gallery: ['photo_2026-08-25_15-31-22.jpg'] },
-                    Black: { main: 'photo_2026-08-25_15-31-28.jpg', gallery: [] }
-                }
-            },
-            {
-                id: 'prod-ajazz-ak820-pro',
-                brand: 'Ajazz',
-                title: 'Ajazz AK820 Pro Wireless Gasket Keyboard (TFT Screen)',
-                price: 2799,
-                oldPrice: 3299,
-                tag: 'ТОП ПРОДАЖІВ',
-                category: 'Клавіатури',
-                sku: 'AJAZZ-AK820-PRO',
-                popular: true,
-                desc: '75% механічна клавіатура з повноколірним TFT-дисплеєм, металевим енкодером, структурою Gasket Mount та бездротовим підключенням 2.4G/BT5.1.',
-                img: 'photo_2026-08-25_15-31-22.jpg',
-                gallery: [
-                    'photo_2026-08-25_15-31-22.jpg',
-                    'photo_2026-08-25_15-31-28.jpg',
-                    'aula копия.png'
-                ],
-                specs: [
-                    { key: 'Формат', value: '75% (81 клавіша + 0.85" TFT екран)' },
-                    { key: 'Свічі', value: 'Ajazz Flying Fish Linear (Hot-swap 5-pin)' },
-                    { key: 'Шумоізоляція', value: '5 шарів (Poron, IXPE, PET, силікон)' },
-                    { key: 'Підключення', value: 'Tri-Mode: 2.4GHz / Bluetooth 5.1 / Type-C' },
-                    { key: 'Акумулятор', value: '4000 mAh' }
-                ],
-                colors: [
-                    { name: 'Grey', isOut: false, stock: 8, image: 'photo_2026-08-25_15-31-22.jpg', gallery: [] },
-                    { name: 'Purple', isOut: false, stock: 5, image: 'photo_2026-08-25_15-31-28.jpg', gallery: [] },
-                    { name: 'White', isOut: false, stock: 3, image: 'aula копия.png', gallery: [] }
-                ],
-                colorImagesMap: {
-                    Grey: { main: 'photo_2026-08-25_15-31-22.jpg', gallery: [] },
-                    Purple: { main: 'photo_2026-08-25_15-31-28.jpg', gallery: [] },
-                    White: { main: 'aula копия.png', gallery: [] }
-                }
-            },
-            {
-                id: 'prod-mchose-ax5',
-                brand: 'Mchose',
-                title: 'Mchose AX5 Magnesium 8K Wireless Mouse',
-                price: 3499,
-                oldPrice: 3999,
-                tag: 'ФЛАГМАН',
-                category: 'Мишки',
-                sku: 'MCHOSE-AX5-MAG',
-                popular: true,
-                desc: 'Флагманська мишка з алюмінієво-магнієвого сплаву з ЧПК-обробкою, 8KHz Dongle у комплекті та сенсором PAW3395.',
-                img: 'attack-shark-r5-ultra-top-angle.jpg',
-                gallery: [
-                    'attack-shark-r5-ultra-top-angle.jpg',
-                    'attack-shark-r5-ultra-back-grip.jpg',
-                    'attack-shark-r5-ultra-colors-price.jpg'
-                ],
-                specs: [
-                    { key: 'Сенсор', value: 'PixArt PAW3395 (26 000 DPI)' },
-                    { key: 'Корпус', value: 'Магнієвий сплав Exoskeleton' },
-                    { key: 'Вага', value: '49 грамів' },
-                    { key: 'Частота опитування', value: 'До 8000 Hz Wireless' }
-                ],
-                colors: [
-                    { name: 'Silver', isOut: false, stock: 8, image: 'attack-shark-r5-ultra-top-angle.jpg', gallery: [] },
-                    { name: 'Black', isOut: false, stock: 6, image: 'attack-shark-r5-ultra-back-grip.jpg', gallery: [] }
-                ],
-                colorImagesMap: {
-                    Silver: { main: 'attack-shark-r5-ultra-top-angle.jpg', gallery: [] },
-                    Black: { main: 'attack-shark-r5-ultra-back-grip.jpg', gallery: [] }
-                }
-            },
-            {
-                id: 'prod-vgn-f1-promax',
-                brand: 'VGN',
-                title: 'VGN Dragonfly F1 Pro Max Wireless Mouse',
-                price: 2199,
-                oldPrice: 2599,
-                tag: 'ТОП ПРОДАЖІВ',
-                category: 'Мишки',
-                sku: 'VGN-F1-PROMAX',
-                popular: true,
-                desc: 'Еталонна ультралегка кіберспортивна мишка вагою 55 грамів на чіпі Nordic 52840 та сенсорі PAW3395 з ресурсом батареї до 130 годин.',
-                img: 'attack-shark-x3-white.jpg',
-                gallery: [
-                    'attack-shark-x3-white.jpg',
-                    'attack-shark-x3-black.jpg',
-                    'attack-shark-x3-box.jpg'
-                ],
-                specs: [
-                    { key: 'Сенсор', value: 'PixArt PAW3395 (26 000 DPI)' },
-                    { key: 'Чіпсет', value: 'Nordic 52840 Flagship MCU' },
-                    { key: 'Вага', value: '55 грам' },
-                    { key: 'Акумулятор', value: '500 mAh (до 130 годин безперервної гри)' }
-                ],
-                colors: [
-                    { name: 'Black', isOut: false, stock: 12, image: 'attack-shark-x3-black.jpg', gallery: [] },
-                    { name: 'White', isOut: false, stock: 10, image: 'attack-shark-x3-white.jpg', gallery: [] }
-                ],
-                colorImagesMap: {
-                    Black: { main: 'attack-shark-x3-black.jpg', gallery: [] },
-                    White: { main: 'attack-shark-x3-white.jpg', gallery: [] }
-                }
-            }
-        ];
+        const INITIAL_FALLBACK_PRODUCTS = [];
 
-        let products = [...INITIAL_FALLBACK_PRODUCTS];
+        let products = [];
         let categories = [
             { id: 'mice', name: 'Мишки' },
             { id: 'keyboards', name: 'Клавіатури' },
@@ -3538,10 +3357,33 @@
                 const data = await response.json();
                 if (Array.isArray(data) && data.length > 0) {
                     brands = data;
+                    renderBrandsMarquee();
                 }
             } catch (e) {
                 // keep fallback brands
             }
+        }
+
+        function renderBrandsMarquee() {
+            const track = document.querySelector('.partner-brands-track');
+            if (!track) return;
+            const visibleBrands = (brands && brands.length > 0) ? brands.filter(b => !b.hidden) : [];
+            if (visibleBrands.length === 0) return;
+
+            let tilesHtml = '';
+            for (let r = 0; r < 4; r++) {
+                tilesHtml += visibleBrands.map(b => {
+                    const rawLogo = b.logo || '';
+                    const logoSrc = rawLogo.startsWith('/') ? rawLogo.substring(1) : rawLogo;
+                    const safeName = (b.name || '').replace(/'/g, "\\'");
+                    const logoHtml = logoSrc 
+                        ? `<img src="${logoSrc}" alt="${b.name}" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback" style="display:none;">${b.name}</span>`
+                        : `<span class="brand-text-fallback" style="display:inline-block;">${b.name}</span>`;
+                    const isActive = currentBrandFilter !== 'All' && (b.name || '').toLowerCase() === currentBrandFilter.toLowerCase();
+                    return `<div class="partner-brand-tile ${isActive ? 'active' : ''}" onclick="filterByBrand('${safeName}', this)">${logoHtml}</div>`;
+                }).join('');
+            }
+            track.innerHTML = tilesHtml;
         }
 
         function renderCategoryFilters() {
@@ -3677,6 +3519,12 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
+            if (window.Telegram && window.Telegram.WebApp) {
+                try {
+                    window.Telegram.WebApp.ready();
+                    window.Telegram.WebApp.expand();
+                } catch(e) {}
+            }
             setupPhoneInput();
             const savedTheme = localStorage.getItem('m1lip_theme');
             if (savedTheme) {
