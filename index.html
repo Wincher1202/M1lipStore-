@@ -3591,11 +3591,15 @@
             
             group.innerHTML = providers.map(p => {
                 const isActive = checkoutDelivery.provider === p.id;
-                const icon = p.id === 'nova_poshta' ? '📦' : (p.id === 'ukrposhta' ? '📬' : '🚚');
+                const iconImg = p.id === 'nova_poshta' 
+                    ? '<img src="brand-novaposhta.svg" alt="Нова Пошта" style="width: 28px; height: 28px; border-radius: 6px; object-fit: contain;">' 
+                    : (p.id === 'ukrposhta' 
+                        ? '<img src="brand-ukrposhta.svg" alt="Укрпошта" style="width: 28px; height: 28px; border-radius: 6px; object-fit: contain;">' 
+                        : '<span style="font-size:1.3rem;">🚚</span>');
                 const sub = p.note || (p.id === 'nova_poshta' ? 'Відділення та поштомати (1-2 дні)' : 'Відділення Експрес / Стандарт');
                 return `
                     <div class="delivery-provider-card ${isActive ? 'active' : ''}" onclick="selectDeliveryProvider('${p.id}')">
-                        <div class="delivery-provider-icon">${icon}</div>
+                        <div class="delivery-provider-icon">${iconImg}</div>
                         <div class="delivery-provider-info">
                             <div class="delivery-provider-title">
                                 <span>${p.name}</span>
@@ -3621,11 +3625,13 @@
             }
 
             // If a city is already selected, re-fetch warehouses for the new provider
-            if (checkoutDelivery.cityRef) {
+            if (checkoutDelivery.city || checkoutDelivery.cityRef) {
                 checkoutDelivery.warehouseRef = '';
                 checkoutDelivery.department = '';
-                document.getElementById('warehouse-selected-pill').innerHTML = '';
-                document.getElementById('warehouse-search-box-wrap').style.display = 'block';
+                const whPill = document.getElementById('warehouse-selected-pill');
+                if (whPill) whPill.innerHTML = '';
+                const whWrap = document.getElementById('warehouse-search-box-wrap');
+                if (whWrap) whWrap.style.display = 'block';
                 loadDeliveryWarehouses('');
             }
         }
@@ -3661,9 +3667,9 @@
                         return;
                     }
                     resultsBox.innerHTML = data.map(item => `
-                        <div class="delivery-search-result-item" onclick="selectCity('${item.ref || item.id}', '${item.name.replace(/'/g, "\\'")}')">
-                            <div class="item-title">${item.name}</div>
-                            ${item.region ? `<div class="item-sub">${item.region}</div>` : ''}
+                        <div class="delivery-search-result-item" onclick="selectCity('${item.ref || item.id}', '${(item.name || item.fullName).replace(/'/g, "\\'")}')">
+                            <div class="item-title">${item.fullName || item.name}</div>
+                            ${item.region && !item.fullName?.includes(item.region) ? `<div class="item-sub">${item.region}</div>` : ''}
                         </div>
                     `).join('');
                     resultsBox.style.display = 'flex';
@@ -3743,10 +3749,10 @@
             if (!checkoutDelivery.cityRef && !checkoutDelivery.city) return;
 
             resultsBox.style.display = 'flex';
-            resultsBox.innerHTML = '<div class="delivery-search-empty">Завантаження відділень...</div>';
+            resultsBox.innerHTML = '<div class="delivery-search-empty">🔍 Завантаження відділень...</div>';
 
             try {
-                const url = `${API_BASE}/delivery/warehouses?provider=${encodeURIComponent(checkoutDelivery.provider || 'nova_poshta')}&city_ref=${encodeURIComponent(checkoutDelivery.cityRef || checkoutDelivery.city)}&query=${encodeURIComponent(query || '')}`;
+                const url = `${API_BASE}/delivery/warehouses?provider=${encodeURIComponent(checkoutDelivery.provider || 'nova_poshta')}&city_ref=${encodeURIComponent(checkoutDelivery.cityRef || '')}&city_name=${encodeURIComponent(checkoutDelivery.city || '')}&query=${encodeURIComponent(query || '')}`;
                 const res = await fetch(url);
                 const data = res.ok ? await res.json() : [];
                 currentWarehousesList = Array.isArray(data) ? data : [];
@@ -3761,17 +3767,19 @@
             if (!resultsBox) return;
 
             if (!list || list.length === 0) {
-                resultsBox.innerHTML = '<div class="delivery-search-empty">Відділень за запитом не знайдено</div>';
+                resultsBox.innerHTML = '<div class="delivery-search-empty">Відділень за цим запитом не знайдено</div>';
                 resultsBox.style.display = 'flex';
                 return;
             }
 
             resultsBox.innerHTML = list.map(item => {
                 const isSelected = checkoutDelivery.warehouseRef === (item.ref || item.id);
+                const isPostomat = item.type === 'postomat' || (item.name && item.name.toLowerCase().includes('поштомат'));
+                const icon = isPostomat ? '📮' : '🏬';
                 return `
                     <div class="delivery-search-result-item ${isSelected ? 'selected' : ''}" onclick="selectWarehouse('${item.ref || item.id}', '${item.name.replace(/'/g, "\\'")}')">
-                        <div class="item-title">${item.name}</div>
-                        ${item.address ? `<div class="item-sub">${item.address}</div>` : ''}
+                        <div class="item-title">${icon} ${item.name}</div>
+                        ${item.address && item.address !== item.name ? `<div class="item-sub">${item.address}</div>` : ''}
                     </div>
                 `;
             }).join('');
@@ -3781,14 +3789,8 @@
         function searchDeliveryWarehouses(query) {
             clearTimeout(whSearchDebounce);
             whSearchDebounce = setTimeout(() => {
-                if (currentWarehousesList && currentWarehousesList.length > 0 && query && query.trim().length > 0) {
-                    const q = query.trim().toLowerCase();
-                    const filtered = currentWarehousesList.filter(w => (w.name && w.name.toLowerCase().includes(q)) || (w.address && w.address.toLowerCase().includes(q)));
-                    renderWarehousesResults(filtered);
-                } else {
-                    loadDeliveryWarehouses(query);
-                }
-            }, 200);
+                loadDeliveryWarehouses(query);
+            }, 250);
         }
 
         function selectWarehouse(ref, name) {

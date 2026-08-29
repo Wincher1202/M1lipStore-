@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
+  <defs>
+    <linearGradient id="up-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#003554" />
+      <stop offset="100%" stop-color="#002238" />
+    </linearGradient>
+    <linearGradient id="up-yellow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFDE00" />
+      <stop offset="100%" stop-color="#F5B700" />
+    </linearGradient>
+  </defs>
+  <rect width="120" height="120" rx="26" fill="url(#up-bg)" />
+  <g transform="translate(24, 24)" fill="url(#up-yellow)">
+    <!-- Ukrposhta postal horn pin icon -->
+    <path d="M36 4 C20 4 7 17 7 33 C7 49 20 62 36 62 C41 62 46 60.5 50 58 L54 62 L60 56 L55 51 C59.5 46.5 62 40 62 33 C62 17 49 4 36 4 Z M36 14 C46.5 14 55 22.5 55 33 C55 43.5 46.5 52 36 52 C25.5 52 17 43.5 17 33 C17 22.5 25.5 14 36 14 Z M36 21 C29.4 21 24 26.4 24 33 C24 39.6 29.4 45 36 45 C42.6 45 48 39.6 48 33 C48 26.4 42.6 21 36 21 Z" />
+    <circle cx="36" cy="33" r="5" fill="url(#up-yellow)" />
+  </g>
+</svg>

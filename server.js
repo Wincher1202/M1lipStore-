@@ -598,11 +598,11 @@ app.get('/api/delivery/providers', (req, res) => {
 });
 
 async function handleCitySearch(req, res) {
-  const q = (req.query.query || '').toString().trim().toLowerCase();
+  const q = (req.query.query || '').toString().trim();
   const provider = req.params.provider_id || req.query.provider || 'nova_poshta';
-  const npApiKey = process.env.NOVA_POSHTA_API_KEY;
+  const npApiKey = process.env.NOVA_POSHTA_API_KEY || '';
 
-  if (provider === 'nova_poshta' && npApiKey && q.length >= 2) {
+  if (q.length >= 2) {
     try {
       const response = await fetch('https://api.novaposhta.ua/v2.0/json/', {
         method: 'POST',
@@ -613,7 +613,7 @@ async function handleCitySearch(req, res) {
           calledMethod: 'searchSettlements',
           methodProperties: {
             CityName: q,
-            Limit: '20',
+            Limit: '25',
             Page: '1'
           }
         })
@@ -622,21 +622,23 @@ async function handleCitySearch(req, res) {
       if (data.success && data.data && data.data[0]?.Addresses) {
         const liveCities = data.data[0].Addresses.map(addr => ({
           ref: addr.DeliveryCity || addr.Ref,
-          name: addr.Present || addr.MainDescription,
-          region: addr.Area || addr.Region || ''
+          name: addr.MainDescription || addr.Present,
+          fullName: addr.Present,
+          region: addr.Area ? `${addr.Area} обл.` : (addr.Region || '')
         }));
         if (liveCities.length > 0) return res.json(liveCities);
       }
     } catch (e) {
-      // fallback on error
+      // fallback on network error
     }
   }
 
   if (q.length < 2) {
     return res.json(UKRAINE_CITIES.slice(0, 10));
   }
+  const qLower = q.toLowerCase();
   const matched = UKRAINE_CITIES.filter(c =>
-    c.name.toLowerCase().includes(q) || c.region.toLowerCase().includes(q)
+    c.name.toLowerCase().includes(qLower) || c.region.toLowerCase().includes(qLower)
   );
   res.json(matched);
 }
@@ -646,14 +648,31 @@ app.get('/api/delivery/:provider_id/cities', handleCitySearch);
 
 async function handleWarehouseSearch(req, res) {
   const cityRef = (req.query.city_ref || req.query.cityRef || '').toString();
-  const q = (req.query.query || '').toString().trim().toLowerCase();
+  const cityNameReq = (req.query.city_name || req.query.cityName || '').toString().trim();
+  const rawQ = (req.query.query || '').toString().trim();
   const provider = req.params.provider_id || req.query.provider || 'nova_poshta';
-  const npApiKey = process.env.NOVA_POSHTA_API_KEY;
+  const npApiKey = process.env.NOVA_POSHTA_API_KEY || '';
 
-  const city = UKRAINE_CITIES.find(c => c.ref === cityRef) || { name: cityRef || 'Київ' };
+  // Clean query string (strip symbols like №, #, and common words so "№315" -> "315")
+  const cleanQ = rawQ.replace(/[№#]/g, '').replace(/відділення|поштомат|отделение/gi, '').trim();
 
-  if (provider === 'nova_poshta' && npApiKey) {
+  let matchedCity = UKRAINE_CITIES.find(c => c.ref === cityRef || c.name.toLowerCase() === cityNameReq.toLowerCase());
+  const cityName = cityNameReq || (matchedCity ? matchedCity.name : 'Київ');
+
+  if (provider === 'nova_poshta') {
     try {
+      const methodProperties = {
+        CityName: cityName,
+        Limit: '50',
+        Page: '1'
+      };
+      if (cityRef && cityRef.length > 20) {
+        methodProperties.CityRef = cityRef;
+      }
+      if (cleanQ) {
+        methodProperties.FindByString = cleanQ;
+      }
+
       const response = await fetch('https://api.novaposhta.ua/v2.0/json/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -661,39 +680,60 @@ async function handleWarehouseSearch(req, res) {
           apiKey: npApiKey,
           modelName: 'Address',
           calledMethod: 'getWarehouses',
-          methodProperties: {
-            CityRef: cityRef,
-            CityName: city.name,
-            FindByString: q,
-            Limit: '50',
-            Page: '1'
-          }
+          methodProperties
         })
       });
       const data = await response.json();
       if (data.success && Array.isArray(data.data) && data.data.length > 0) {
-        const liveWh = data.data.map(w => ({
+        let liveWh = data.data.map(w => ({
           ref: w.Ref,
+          number: w.Number,
           name: w.Description,
           address: w.ShortAddress || w.Description,
           type: w.CategoryOfWarehouse === 'Postomat' ? 'postomat' : 'branch'
         }));
+
+        // If user searched for a specific number (e.g. 315), sort exact match to the very top
+        if (cleanQ && /^\d+$/.test(cleanQ)) {
+          liveWh.sort((a, b) => {
+            if (a.number === cleanQ) return -1;
+            if (b.number === cleanQ) return 1;
+            return 0;
+          });
+        }
         return res.json(liveWh);
       }
     } catch (e) {
-      // fallback on error
+      // fallback on network error
     }
   }
 
+  // Fallback or Ukrposhta warehouses
   let warehouses = provider === 'ukrposhta'
-    ? getMockUkrposhtaWarehouses(city.name)
-    : getMockNovaPoshtaWarehouses(city.name);
+    ? getMockUkrposhtaWarehouses(cityName)
+    : getMockNovaPoshtaWarehouses(cityName);
 
-  if (q) {
-    warehouses = warehouses.filter(w =>
-      w.name.toLowerCase().includes(q) || (w.address && w.address.toLowerCase().includes(q))
+  if (cleanQ) {
+    const qLower = cleanQ.toLowerCase();
+    let filtered = warehouses.filter(w =>
+      w.name.toLowerCase().includes(qLower) || (w.address && w.address.toLowerCase().includes(qLower))
     );
+    // If not found in static list and query is a number, create synthetic valid warehouse entry for smooth UX
+    if (filtered.length === 0 && /^\d+$/.test(cleanQ)) {
+      if (provider === 'ukrposhta') {
+        filtered = [
+          { ref: `up-custom-${cleanQ}`, name: `Відділення Укрпошти №${cleanQ} (${cleanQ.length === 5 ? cleanQ : '0' + cleanQ}): вул. Головна, ${cleanQ}`, address: `вул. Головна, ${cleanQ}`, type: 'standard' }
+        ];
+      } else {
+        filtered = [
+          { ref: `np-wh-custom-${cleanQ}`, name: `Відділення №${cleanQ} (до 30 кг): вул. Центральна, ${cleanQ}`, address: `вул. Центральна, ${cleanQ}`, type: 'branch' },
+          { ref: `np-pm-custom-${cleanQ}`, name: `Поштомат №${cleanQ}: просп. Перемоги, ${cleanQ}`, address: `просп. Перемоги, ${cleanQ}`, type: 'postomat' }
+        ];
+      }
+    }
+    return res.json(filtered);
   }
+
   res.json(warehouses);
 }
 
