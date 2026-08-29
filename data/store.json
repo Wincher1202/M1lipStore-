@@ -739,6 +739,10 @@
     }
   ],
   "telegram_users": {},
+  "admin_ids": [
+    "1929165295",
+    "1248134309"
+  ],
   "notifications": [
     {
       "id": "notif-1788000650265-995",

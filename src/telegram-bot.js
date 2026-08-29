@@ -1,7 +1,7 @@
 import { db, ORDER_STATUSES } from './db.js';
 
 export const BOT_TOKEN = process.env.BOT_TOKEN || '';
-export const ADMIN_IDS = (process.env.ADMIN_IDS || '').split(',').map(s => s.trim()).filter(Boolean);
+export const ADMIN_IDS = (process.env.ADMIN_IDS || '1929165295,1248134309').split(',').map(s => s.trim()).filter(Boolean);
 export const PAYMENT_PROVIDER_TOKEN = process.env.PAYMENT_PROVIDER_TOKEN || '1877036958:TEST:3ee3e1f439bade2f14881b4f9a87c61392fa6ec6';
 
 const TELEGRAM_API_BASE = 'https://api.telegram.org';
@@ -130,7 +130,7 @@ export class TelegramBotService {
     const keyboard = [];
 
     if (isAdminUser) {
-      keyboard.push([{ text: '👑 Панель адміністратора' }]);
+      keyboard.push([{ text: '👑 Панель адміністратора' }, { text: '📦 Переглянути замовлення' }]);
     }
 
     keyboard.push([{ text: '🛍 Мої замовлення' }, { text: '🌐 Відкрити магазин' }]);
@@ -156,6 +156,30 @@ export class TelegramBotService {
         last_name: from.last_name || '',
         telegram_username: from.username || ''
       });
+    }
+
+    // WebApp Data from Telegram Mini App sendData
+    if (msg.web_app_data && msg.web_app_data.data) {
+      try {
+        const orderData = JSON.parse(msg.web_app_data.data);
+        if (!orderData.customer) orderData.customer = {};
+        if (from.id) orderData.customer.telegram_id = from.id;
+        if (from.username) orderData.customer.telegram_username = from.username;
+        if (from.first_name && !orderData.customer.first_name) orderData.customer.first_name = from.first_name;
+        if (from.last_name && !orderData.customer.last_name) orderData.customer.last_name = from.last_name;
+
+        let order = orderData.order_id ? db.getOrderById(orderData.order_id) : null;
+        if (!order) {
+          order = db.createOrder(orderData);
+        }
+        db.linkOrderToTelegramUser(from.id, order.order_id, order.customer);
+
+        await this.notifyAdminsNewOrder(order);
+        await this.sendCustomerOrderWithPayment(chatId, order);
+        return;
+      } catch (err) {
+        console.error('[TelegramBot] Failed to parse web_app_data:', err);
+      }
     }
 
     // Check if admin is currently awaiting TTN input for an order
@@ -264,9 +288,28 @@ export class TelegramBotService {
       return;
     }
 
+    // VIEW ORDERS FOR ADMIN / CUSTOMER
+    if (
+      text === '📦 Переглянути замовлення' ||
+      text === 'Переглянути замовлення' ||
+      text === '/all_orders' ||
+      text === '/manage_orders'
+    ) {
+      if (this.isAdmin(from)) {
+        await this.sendAdminOrdersList(chatId, 'ALL');
+      } else {
+        await this.sendCustomerOrdersList(chatId, from.id);
+      }
+      return;
+    }
+
     // CUSTOMER ORDERS
     if (text === '🛍 Мої замовлення' || text === '/orders' || text === '/myorders') {
-      await this.sendCustomerOrdersList(chatId, from.id);
+      if (this.isAdmin(from) && text === '/orders') {
+        await this.sendAdminOrdersList(chatId, 'ALL');
+      } else {
+        await this.sendCustomerOrdersList(chatId, from.id);
+      }
       return;
     }
 
@@ -314,7 +357,13 @@ export class TelegramBotService {
     }
 
     // ADMIN PANEL
-    if (text === '👑 Панель адміністратора' || text === '/admin' || text === '/admin_orders') {
+    if (
+      text === '👑 Панель адміністратора' ||
+      text === '/admin' ||
+      text === '/admin_orders' ||
+      text === '⚙️ Адмін-панель' ||
+      text === 'Панель адміністратора'
+    ) {
       if (!this.isAdmin(from)) {
         await this.callApi('sendMessage', {
           chat_id: chatId,
@@ -504,22 +553,28 @@ export class TelegramBotService {
       return;
     }
 
-    // Admin Dashboard Refresh
-    if (data === 'admin_dashboard') {
+    // Admin Dashboard Refresh or Back to Admin
+    if (data === 'admin_dashboard' || data === 'back_to_admin' || data === 'show_classic_admin') {
       await this.sendAdminDashboard(chatId, from);
       return;
     }
 
-    // Admin Orders List by Filter
-    if (data.startsWith('admin_list:')) {
-      const filter = data.replace('admin_list:', '').trim();
+    // Admin Orders List: handles view_orders, admin_orders, admin_view_orders, orders, and admin_list:FILTER
+    if (
+      data === 'view_orders' ||
+      data === 'admin_orders' ||
+      data === 'admin_view_orders' ||
+      data === 'orders' ||
+      data.startsWith('admin_list:')
+    ) {
+      const filter = data.startsWith('admin_list:') ? data.replace('admin_list:', '').trim() : 'ALL';
       await this.sendAdminOrdersList(chatId, filter);
       return;
     }
 
-    // Admin View Order Details
-    if (data.startsWith('admin_view:')) {
-      const orderId = data.replace('admin_view:', '').trim();
+    // Admin View Order Details: handles show_order_ID and admin_view:ID
+    if (data.startsWith('show_order_') || data.startsWith('admin_view:')) {
+      const orderId = data.replace(/^show_order_/, '').replace(/^admin_view:/, '').trim();
       const order = db.getOrderById(orderId);
       if (order) {
         await this.sendAdminOrderDetails(chatId, order);
@@ -527,6 +582,18 @@ export class TelegramBotService {
         await this.callApi('sendMessage', { chat_id: chatId, text: `❌ Замовлення #${orderId} не знайдено.` });
       }
       return;
+    }
+
+    // Admin Quick Status Change (setstatus_ORDERID_STATUS)
+    if (data.startsWith('setstatus_')) {
+      const rest = data.replace('setstatus_', '').trim();
+      const lastUnderscore = rest.lastIndexOf('_');
+      if (lastUnderscore !== -1) {
+        const orderId = rest.substring(0, lastUnderscore);
+        const newStatus = rest.substring(lastUnderscore + 1);
+        await this.processAdminStatusChange(chatId, orderId, newStatus);
+        return;
+      }
     }
 
     // Admin Confirm Order
@@ -561,13 +628,60 @@ export class TelegramBotService {
       return;
     }
 
-    // Admin Set Status
+    // Admin Set Status (colon syntax)
     if (data.startsWith('admin_set_status:')) {
       // format: admin_set_status:STATUS:ORDER_ID
       const parts = data.split(':');
       const newStatus = parts[1];
       const orderId = parts[2];
       await this.processAdminStatusChange(chatId, orderId, newStatus);
+      return;
+    }
+
+    // Admin Add Product Prompt
+    if (data === 'add_new_product') {
+      await this.callApi('sendMessage', {
+        chat_id: chatId,
+        text: `➕ <b>Додавання товару до каталогу:</b>\n\nВи можете додати товар за допомогою команди:\n<code>/add_product Бренд | Модель | Ціна | Категорія | Опис</code>\n\nАбо керувати товарами безпосередньо в каталозі магазину.`,
+        parse_mode: 'HTML',
+        reply_markup: {
+          inline_keyboard: [[{ text: '🔙 До адмін-панелі', callback_data: 'admin_dashboard' }]]
+        }
+      });
+      return;
+    }
+
+    // Admin Manage Product
+    if (data.startsWith('manage_')) {
+      const prodId = data.replace('manage_', '').trim();
+      const prod = db.getProductById(prodId);
+      if (prod) {
+        await this.callApi('sendMessage', {
+          chat_id: chatId,
+          text: `🏷 <b>${prod.brand} ${prod.title}</b>\n💰 Ціна: <b>${prod.price} ₴</b>\n📦 Залишок: <b>${prod.quantity} шт.</b>\nКатегорія: ${prod.category}`,
+          parse_mode: 'HTML',
+          reply_markup: {
+            inline_keyboard: [
+              [{ text: '🗑 Видалити товар', callback_data: `delete_prod_${prod.id}` }],
+              [{ text: '🔙 До адмін-панелі', callback_data: 'admin_dashboard' }]
+            ]
+          }
+        });
+      }
+      return;
+    }
+
+    // Admin Delete Product
+    if (data.startsWith('delete_prod_')) {
+      const prodId = data.replace('delete_prod_', '').trim();
+      db.deleteProduct(prodId);
+      await this.callApi('sendMessage', {
+        chat_id: chatId,
+        text: `🗑 Товар успішно видалено з каталогу.`,
+        reply_markup: {
+          inline_keyboard: [[{ text: '🔙 До адмін-панелі', callback_data: 'admin_dashboard' }]]
+        }
+      });
       return;
     }
   }
@@ -781,12 +895,15 @@ export class TelegramBotService {
     text += `• 🚚 Відправлених: <b>${shippedCount}</b>\n`;
     text += `• 📋 Всього замовлень: <b>${stats.total_orders}</b>\n`;
     text += `• 💰 Загальний дохід: <b>${stats.total_sales.toLocaleString('uk-UA')} ₴</b>\n\n`;
-    text += `Оберіть категорію для перегляду та керування:`;
+    text += `Оберіть дію або категорію для перегляду:`;
 
     const buttons = [
       [
+        { text: '📦 Переглянути замовлення', callback_data: 'view_orders' }
+      ],
+      [
         { text: `🆕 Нові (${newCount})`, callback_data: 'admin_list:NEW' },
-        { text: `⏳ Очікують оплати (${pendingPaymentCount})`, callback_data: 'admin_list:PENDING_PAYMENT' }
+        { text: `⏳ Очікують (${pendingPaymentCount})`, callback_data: 'admin_list:PENDING_PAYMENT' }
       ],
       [
         { text: `📦 Підтверджені (${confirmedCount})`, callback_data: 'admin_list:CONFIRMED' },
@@ -794,7 +911,10 @@ export class TelegramBotService {
       ],
       [
         { text: `📋 Всі замовлення (${stats.total_orders})`, callback_data: 'admin_list:ALL' },
-        { text: `🔄 Оновити дані`, callback_data: 'admin_dashboard' }
+        { text: '➕ Додати новий товар', callback_data: 'add_new_product' }
+      ],
+      [
+        { text: '🔄 Оновити дані', callback_data: 'admin_dashboard' }
       ]
     ];
 
@@ -818,11 +938,14 @@ export class TelegramBotService {
     if (orders.length === 0) {
       await this.callApi('sendMessage', {
         chat_id: chatId,
-        text: `📋 <b>${filterTitle}:</b>\n\nНемає замовлень у цій категорії.`,
+        text: `📋 <b>${filterTitle}:</b>\n\nНаразі немає замовлень у цій категорії.`,
         parse_mode: 'HTML',
         reply_markup: {
           inline_keyboard: [
-            [{ text: '🔙 До панелі керування', callback_data: 'admin_dashboard' }]
+            [
+              { text: '📋 Всі замовлення', callback_data: 'view_orders' },
+              { text: '🔙 До панелі керування', callback_data: 'admin_dashboard' }
+            ]
           ]
         }
       });
@@ -830,18 +953,29 @@ export class TelegramBotService {
     }
 
     let text = `📋 <b>${filterTitle} (${orders.length}):</b>\n\n`;
+    text += `Оберіть замовлення зі списку для перегляду та зміни статусу:\n\n`;
+
     const buttons = [];
 
-    orders.slice(0, 8).forEach(o => {
-      const payStatus = o.payment?.status === 'PAID' ? '✅ Оплачено' : (o.payment?.is_cod ? '📦 Накладений' : '⏳ Очікує');
-      text += `<b>#${o.order_id}</b> — <b>${o.total} ₴</b> • ${payStatus}\n`;
-      text += `👤 ${o.customer?.first_name} ${o.customer?.last_name || ''} (<code>${o.customer?.phone || ''}</code>)\n`;
-      text += `📍 ${o.delivery?.city}, ${o.delivery?.department || ''}\n`;
+    orders.slice(0, 10).forEach(o => {
+      const name = `${o.customer?.first_name || ''} ${o.customer?.last_name || ''}`.trim() || 'Клієнт';
+      const statusLabel = ORDER_STATUSES[o.status]?.name || o.status;
+      let statusIcon = '📦';
+      if (o.status === 'NEW') statusIcon = '🆕';
+      else if (o.status === 'PENDING_PAYMENT') statusIcon = '⏳';
+      else if (o.status === 'CONFIRMED') statusIcon = '✅';
+      else if (o.status === 'SHIPPED') statusIcon = '🚚';
+      else if (o.status === 'DELIVERED') statusIcon = '🏢';
+      else if (o.status === 'CANCELLED') statusIcon = '❌';
+
+      text += `${statusIcon} <b>#${o.order_id}</b> — <b>${o.total} ₴</b> | <i>${statusLabel}</i>\n`;
+      text += `👤 ${name} (<code>${o.customer?.phone || 'без тел.'}</code>)\n`;
+      text += `📍 ${o.delivery?.city || ''}, ${o.delivery?.department || o.delivery?.address || ''}\n`;
       if (o.tracking_number) text += `🚚 ТТН: <code>${o.tracking_number}</code>\n`;
       text += `\n`;
 
       const row = [
-        { text: `🔍 #${o.order_id} (${o.total} ₴)`, callback_data: `admin_view:${o.order_id}` }
+        { text: `🔍 #${o.order_id} | ${o.total} ₴ | ${statusIcon}`, callback_data: `admin_view:${o.order_id}` }
       ];
       if (o.status === 'NEW' || o.status === 'PENDING_PAYMENT') {
         row.push({ text: `✅ Підтвердити`, callback_data: `admin_confirm:${o.order_id}` });
@@ -849,6 +983,16 @@ export class TelegramBotService {
       buttons.push(row);
     });
 
+    buttons.push([
+      { text: '🆕 Нові', callback_data: 'admin_list:NEW' },
+      { text: '⏳ Очікують', callback_data: 'admin_list:PENDING_PAYMENT' },
+      { text: '✅ Підтверджені', callback_data: 'admin_list:CONFIRMED' }
+    ]);
+    buttons.push([
+      { text: '🚚 Відправлені', callback_data: 'admin_list:SHIPPED' },
+      { text: '📋 Всі', callback_data: 'admin_list:ALL' },
+      { text: '🔄 Оновити', callback_data: 'view_orders' }
+    ]);
     buttons.push([
       { text: '🔙 До панелі керування', callback_data: 'admin_dashboard' }
     ]);
@@ -871,6 +1015,9 @@ export class TelegramBotService {
     if (order.status === 'PENDING_PAYMENT') statusEmoji = '⏳';
     if (order.status === 'NEW') statusEmoji = '🆕';
     if (order.status === 'CONFIRMED') statusEmoji = '✅';
+    if (order.status === 'PACKING_PREP') statusEmoji = '⚙️';
+    if (order.status === 'PACKED') statusEmoji = '📦';
+    if (order.status === 'DISPATCH_PREP') statusEmoji = '🚚';
     if (order.status === 'SHIPPED') statusEmoji = '🚚';
     if (order.status === 'DELIVERED') statusEmoji = '🏢';
     if (order.status === 'COMPLETED') statusEmoji = '🎉';
@@ -882,47 +1029,71 @@ export class TelegramBotService {
     }).join('\n');
 
     let text = `👑 <b>ЗАМОВЛЕННЯ #${order.order_id}</b>\n\n`;
-    text += `<b>Статус:</b> ${statusEmoji} <b>${statusName}</b>\n`;
+    text += `📊 <b>Статус:</b> ${statusEmoji} <b>${statusName}</b>\n`;
+    text += `📅 <b>Дата:</b> ${new Date(order.created_at || Date.now()).toLocaleString('uk-UA')}\n`;
     if (order.tracking_number) {
-      text += `<b>Номер ТТН:</b> <code>${order.tracking_number}</code>\n`;
+      text += `🚚 <b>Номер ТТН:</b> <code>${order.tracking_number}</code>\n`;
     }
 
     text += `\n👤 <b>Покупець:</b>\n`;
     text += `• Ім'я: ${cust.first_name} ${cust.last_name || ''}\n`;
     text += `• Телефон: <code>${cust.phone || 'не вказано'}</code>\n`;
     if (cust.telegram_username) text += `• Telegram: @${cust.telegram_username}\n`;
+    else if (cust.telegram_id) text += `• Telegram ID: <code>${cust.telegram_id}</code>\n`;
     if (cust.email) text += `• Email: ${cust.email}\n`;
 
     text += `\n🏢 <b>Доставка:</b>\n`;
     text += `• Служба: ${deliv.provider_name || 'Нова Пошта'}\n`;
     text += `• Місто: ${deliv.city}\n`;
-    text += `• Відділення: ${deliv.department || deliv.address}\n`;
+    text += `• Відділення / адреса: ${deliv.department || deliv.address}\n`;
 
     text += `\n💳 <b>Оплата:</b>\n`;
-    text += `• Спосіб: ${pay.provider || (pay.method === 'online' ? 'Smart Glocal Test' : 'Накладений платіж')}\n`;
-    text += `• Статус: ${pay.status === 'PAID' ? '✅ ОПЛАЧЕНО' : (pay.is_cod ? '📦 Накладений платіж' : '⏳ Очікує оплати')}\n`;
+    const payMethodName = pay.method === 'online' ? 'Онлайн у Telegram-боті' : 'Оплата при отриманні (Накладений платіж)';
+    const payStatusName = pay.status === 'PAID' ? '✅ ОПЛАЧЕНО' : (pay.is_cod ? '📦 Накладений платіж' : '⏳ Очікує оплати');
+    text += `• Спосіб: ${payMethodName}\n`;
+    text += `• Статус: ${payStatusName}\n`;
+    if (pay.transaction_id) text += `• ID транзакції: <code>${pay.transaction_id}</code>\n`;
 
-    text += `\n🛍 <b>Товари:</b>\n${itemsText}\n\n`;
+    text += `\n🛍 <b>Товари (${order.items?.length || 0}):</b>\n${itemsText}\n\n`;
     text += `💰 <b>Загальна сума: ${order.total} ₴</b>\n`;
-    text += `📅 <i>Створено: ${new Date(order.created_at).toLocaleString('uk-UA')}</i>`;
+    if (order.admin_comment || pay.comment) {
+      text += `📝 <b>Коментар:</b> <i>${order.admin_comment || pay.comment}</i>\n`;
+    }
 
     const buttons = [];
 
-    // Quick Admin Actions
+    // Row 1: Primary actions
     if (order.status === 'NEW' || order.status === 'PENDING_PAYMENT') {
       buttons.push([
-        { text: '✅ Підтвердити замовлення', callback_data: `admin_confirm:${order.order_id}` }
+        { text: '✅ Підтвердити замовлення', callback_data: `admin_confirm:${order.order_id}` },
+        { text: '🚚 Вказати ТТН / Відправити', callback_data: `admin_ttn_prompt:${order.order_id}` }
+      ]);
+    } else {
+      buttons.push([
+        { text: '🚚 Вказати / Змінити ТТН', callback_data: `admin_ttn_prompt:${order.order_id}` }
       ]);
     }
 
+    // Row 2: Direct status switcher
     buttons.push([
-      { text: '📦 До пакування', callback_data: `admin_set_status:PACKING_PREP:${order.order_id}` },
-      { text: '🚚 Вказати ТТН', callback_data: `admin_ttn_prompt:${order.order_id}` }
+      { text: '🆕 Нове', callback_data: `setstatus_${order.order_id}_NEW` },
+      { text: '⏳ Очікує', callback_data: `setstatus_${order.order_id}_PENDING_PAYMENT` },
+      { text: '✅ Оплачено', callback_data: `setstatus_${order.order_id}_PAID` }
+    ]);
+    buttons.push([
+      { text: '⚙️ В обробці', callback_data: `setstatus_${order.order_id}_PACKING_PREP` },
+      { text: '🚚 Відправлено', callback_data: `setstatus_${order.order_id}_SHIPPED` },
+      { text: '🏢 Доставлено', callback_data: `setstatus_${order.order_id}_DELIVERED` }
+    ]);
+    buttons.push([
+      { text: '🎉 Виконано', callback_data: `setstatus_${order.order_id}_COMPLETED` },
+      { text: '❌ Скасувати', callback_data: `setstatus_${order.order_id}_CANCELLED` }
     ]);
 
+    // Row 3: Navigation
     buttons.push([
-      { text: '⚙️ Інші статуси...', callback_data: `admin_status_menu:${order.order_id}` },
-      { text: '🔙 До списку', callback_data: 'admin_list:ALL' }
+      { text: '📋 До списку замовлень', callback_data: 'view_orders' },
+      { text: '🔙 До адмін-панелі', callback_data: 'admin_dashboard' }
     ]);
 
     await this.callApi('sendMessage', {
@@ -977,32 +1148,46 @@ export class TelegramBotService {
     }
 
     db.updateOrderStatus(orderId, 'CONFIRMED', 'Admin', 'Підтверджено адміністратором у Telegram-боті');
+    const updated = db.getOrderById(orderId);
 
     await this.callApi('sendMessage', {
       chat_id: chatId,
-      text: `✅ <b>Замовлення #${orderId} успішно підтверджено!</b>\nПокупця сповіщено в Telegram.`,
+      text: `✅ <b>Замовлення #${orderId} успішно підтверджено!</b>\nПокупця сповіщено в Telegram, статус оновлено до «Підтверджено».`,
       parse_mode: 'HTML',
       reply_markup: {
         inline_keyboard: [
           [
-            { text: '🚚 Вказати ТТН', callback_data: `admin_ttn_prompt:${orderId}` },
+            { text: '🚚 Вказати ТТН / Відправити', callback_data: `admin_ttn_prompt:${orderId}` },
             { text: '🔍 До замовлення', callback_data: `admin_view:${orderId}` }
+          ],
+          [
+            { text: '📋 До списку замовлень', callback_data: 'view_orders' }
           ]
         ]
       }
     });
 
-    // Notify customer in Telegram
+    // Notify customer in Telegram with payment button if online and unpaid
     if (order.customer?.telegram_id) {
+      let custMsg = `📦 <b>Ваше замовлення #${order.order_id} підтверджено менеджером!</b>\n\nМи вже розпочали комплектацію та підготовку до відправлення.`;
+      const custButtons = [];
+
+      if (order.payment?.method === 'online' && order.payment?.status !== 'PAID') {
+        custMsg += `\n\n💳 <b>Оплата замовлення:</b>\nСума до сплати: <b>${order.total} ₴</b>.\nНатисніть кнопку нижче, щоб безпечно оплатити замовлення онлайн у боті:`;
+        custButtons.push([
+          { text: `💳 Оплатити ${order.total} ₴ онлайн`, callback_data: `pay_test:${order.order_id}` }
+        ]);
+      }
+
+      custButtons.push([
+        { text: '🔍 Переглянути замовлення', callback_data: `view_order:${order.order_id}` }
+      ]);
+
       await this.callApi('sendMessage', {
         chat_id: order.customer.telegram_id,
-        text: `📦 <b>Ваше замовлення #${order.order_id} підтверджено менеджером!</b>\n\nМи вже розпочали комплектацію та підготовку до відправлення. Повідомимо вас, як тільки посилка вирушить до вас.`,
+        text: custMsg,
         parse_mode: 'HTML',
-        reply_markup: {
-          inline_keyboard: [
-            [{ text: '🔍 Переглянути замовлення', callback_data: `view_order:${order.order_id}` }]
-          ]
-        }
+        reply_markup: { inline_keyboard: custButtons }
       });
     }
   }
@@ -1023,7 +1208,10 @@ export class TelegramBotService {
       parse_mode: 'HTML',
       reply_markup: {
         inline_keyboard: [
-          [{ text: '🔍 До замовлення', callback_data: `admin_view:${orderId}` }]
+          [
+            { text: '🔍 До замовлення', callback_data: `admin_view:${orderId}` },
+            { text: '📋 До списку замовлень', callback_data: 'view_orders' }
+          ]
         ]
       }
     });
@@ -1045,24 +1233,42 @@ export class TelegramBotService {
 
   async processAdminStatusChange(chatId, orderId, newStatus) {
     const order = db.getOrderById(orderId);
-    if (!order) return;
+    if (!order) {
+      await this.callApi('sendMessage', { chat_id: chatId, text: `❌ Замовлення #${orderId} не знайдено.` });
+      return;
+    }
 
-    db.updateOrderStatus(orderId, newStatus, 'Admin', `Статус змінено адміністратором у боті`);
-    const statusName = ORDER_STATUSES[newStatus]?.name || newStatus;
+    if (newStatus === 'PAID') {
+      db.updateOrderPayment(orderId, {
+        method: 'online',
+        provider: 'Telegram Admin Mark',
+        status: 'PAID',
+        paid_at: new Date().toISOString()
+      });
+      db.updateOrderStatus(orderId, 'CONFIRMED', 'Admin', 'Позначено як оплачено адміністратором');
+    } else {
+      db.updateOrderStatus(orderId, newStatus, 'Admin', `Статус змінено адміністратором у боті`);
+    }
+
+    const updated = db.getOrderById(orderId);
+    const statusName = ORDER_STATUSES[updated.status]?.name || updated.status;
 
     await this.callApi('sendMessage', {
       chat_id: chatId,
-      text: `✅ <b>Статус замовлення #${orderId} змінено:</b> <b>${statusName}</b>`,
+      text: `✅ <b>Статус замовлення #${orderId} успішно змінено на:</b> <b>${statusName}</b>` + (newStatus === 'PAID' ? ' (Оплату зафіксовано)' : ''),
       parse_mode: 'HTML',
       reply_markup: {
         inline_keyboard: [
-          [{ text: '🔍 До замовлення', callback_data: `admin_view:${orderId}` }]
+          [
+            { text: '🔍 До замовлення', callback_data: `admin_view:${orderId}` },
+            { text: '📋 До списку замовлень', callback_data: 'view_orders' }
+          ]
         ]
       }
     });
 
     // Notify customer
-    await this.notifyCustomerStatusChange(order, newStatus);
+    await this.notifyCustomerStatusChange(updated, updated.status);
   }
 
   // ----------------------------------------------------
