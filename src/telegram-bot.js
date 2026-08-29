@@ -5,7 +5,7 @@ export const PAYMENT_PROVIDER_TOKEN = process.env.PAYMENT_PROVIDER_TOKEN || 'TES
 
 class TelegramBotService {
   constructor() {
-    this.token = process.env.BOT_TOKEN || '';
+    this.token = (process.env.BOT_TOKEN || '').trim();
     this.botInfo = { first_name: 'M1lipStore Bot' };
     this.username = process.env.BOT_USERNAME || 'm1lipstore_bot';
     // Store wizard sessions in memory or db
@@ -13,10 +13,25 @@ class TelegramBotService {
     this.processedUpdates = new Set();
 
     if (this.token) {
-      this.startPolling();
+      console.log(`[TelegramBot] BOT_TOKEN configured (${this.token.substring(0, 6)}...${this.token.substring(this.token.length - 4)})`);
+      this.initBot();
     } else {
-      console.warn('[TelegramBot] WARNING: BOT_TOKEN is not set in environment variables (.env). Telegram bot commands like /start will not respond until BOT_TOKEN is configured.');
+      console.warn('[TelegramBot] WARNING: BOT_TOKEN is not set in environment variables. Telegram bot commands like /start will not respond until BOT_TOKEN is configured.');
     }
+  }
+
+  async initBot() {
+    try {
+      const me = await this.callApi('getMe', {});
+      if (me && me.username) {
+        this.username = me.username;
+        this.botInfo = me;
+        console.log(`[TelegramBot] Successfully connected to Telegram as @${this.username} (${me.first_name})`);
+      }
+    } catch (e) {
+      console.warn('[TelegramBot] getMe error:', e.message);
+    }
+    this.startPolling();
   }
 
   startPolling() {
