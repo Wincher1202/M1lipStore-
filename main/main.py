@@ -2383,11 +2383,14 @@ async def run_bot():
     bot = Bot(token=TOKEN)
     dp = Dispatcher()
     dp.include_router(router)
-    try:
-        await bot.delete_webhook(drop_pending_updates=True)
-        await dp.start_polling(bot)
-    except Exception:
-        logging.exception("Bot polling stopped due to an error. The site/API keeps running.")
+    while True:
+        try:
+            await bot.delete_webhook(drop_pending_updates=True)
+            await dp.start_polling(bot, handle_signals=False)
+            break
+        except Exception as e:
+            logging.warning(f"Bot polling exception ({e}). Retrying in 5 seconds...")
+            await asyncio.sleep(5)
 
 
 async def main():
