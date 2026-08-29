@@ -12,6 +12,34 @@ export class TelegramBotService {
     this.lastUpdateId = 0;
     this.botInfo = null;
     this.adminSessions = {}; // chatId -> { action: 'awaiting_ttn', orderId: '...' }
+    this.chatHistory = {}; // chatId -> Set of message IDs for clean chat management
+  }
+
+  trackMessage(chatId, messageId) {
+    if (!chatId || !messageId) return;
+    if (!this.chatHistory[chatId]) {
+      this.chatHistory[chatId] = new Set();
+    }
+    this.chatHistory[chatId].add(messageId);
+  }
+
+  async cleanupChat(chatId, currentMsgId = null) {
+    if (!chatId) return;
+    const toDelete = new Set(this.chatHistory[chatId] || []);
+    
+    // Also clean up recent preceding message IDs (up to 30) around the current message to wipe all clutter
+    if (currentMsgId && typeof currentMsgId === 'number') {
+      toDelete.add(currentMsgId);
+      for (let i = 1; i <= 30; i++) {
+        if (currentMsgId - i > 0) {
+          toDelete.add(currentMsgId - i);
+        }
+      }
+    }
+
+    const deletePromises = Array.from(toDelete).map(msgId => this.safeDeleteMessage(chatId, msgId));
+    await Promise.allSettled(deletePromises);
+    this.chatHistory[chatId] = new Set();
   }
 
   async callApi(method, body = {}) {
@@ -55,7 +83,8 @@ export class TelegramBotService {
           reply_markup: extra.reply_markup,
           disable_web_page_preview: extra.disable_web_page_preview ?? true
         });
-        if (editRes.ok) {
+        if (editRes.ok && editRes.result?.message_id) {
+          this.trackMessage(chatId, editRes.result.message_id);
           return editRes.result;
         }
       } catch (err) {
@@ -70,6 +99,10 @@ export class TelegramBotService {
       reply_markup: extra.reply_markup,
       disable_web_page_preview: extra.disable_web_page_preview ?? true
     });
+
+    if (sendRes.ok && sendRes.result?.message_id) {
+      this.trackMessage(chatId, sendRes.result.message_id);
+    }
 
     if (sendRes.ok && messageId) {
       await this.safeDeleteMessage(chatId, messageId);
@@ -381,6 +414,11 @@ export class TelegramBotService {
         }
       }
 
+      // Clean up previous clutter in chat on /start so only one clean welcome message remains
+      if (msg.message_id) {
+        await this.cleanupChat(chatId, msg.message_id);
+      }
+
       const welcomeText = `👋 <b>Вітаємо в офіційному боті MILIPSTORE!</b>\n\n` +
         `🎮 <b>MILIPSTORE</b> — преміальні ігрові девайси та техніка для сетапу:\n` +
         `• Ультралегкі бездротові мишки\n` +
@@ -389,19 +427,18 @@ export class TelegramBotService {
         `У цьому боті ви можете:\n` +
         `💳 Оплачувати замовлення онлайн безпосередньо в чаті\n` +
         `📦 Відстежувати статус замовлення та номер ТТН\n` +
-        `🛍 Переглядати історію покупок`;
+        `🛍 Переглядати історію покупок\n\n` +
+        `👇 <i>Оберіть потрібну дію на панелі кнопок внизу екрана:</i>`;
 
-      const appUrl = (process.env.APP_URL || process.env.PUBLIC_APP_URL || 'https://wincher1202.github.io/M1lipStore-/').replace(/\/$/, '');
-      await this.callApi('sendMessage', {
+      const sendRes = await this.callApi('sendMessage', {
         chat_id: chatId,
         text: welcomeText,
         parse_mode: 'HTML',
-        reply_markup: {
-          inline_keyboard: [
-            [{ text: '🚀 Відкрити каталог MILIPSTORE', web_app: { url: appUrl } }]
-          ]
-        }
+        reply_markup: this.getReplyKeyboard(from)
       });
+      if (sendRes.ok && sendRes.result?.message_id) {
+        this.trackMessage(chatId, sendRes.result.message_id);
+      }
       return;
     }
 
