@@ -1,0 +1,6 @@
+{
+  "name": "M1lipStore",
+  "description": "Gaming hardware and electronics store with catalog, cart, and ordering",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
