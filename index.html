@@ -974,14 +974,16 @@
             position: relative;
             margin: 14px 0;
             border-radius: var(--radius-md);
+            background: var(--bg-tertiary);
+            padding: 8px;
         }
 
         .product-img-wrap img {
             width: 100%;
             height: 100%;
-            object-fit: cover;
+            object-fit: contain;
             display: block;
-            border-radius: var(--radius-md);
+            border-radius: var(--radius-sm);
             transition: opacity 0.3s ease-in-out, transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
@@ -2422,32 +2424,32 @@
         <div class="partner-brands-marquee">
             <div class="partner-brands-track">
                 <!-- Set 1 -->
-                <div class="partner-brand-tile" onclick="filterByBrand('Attack Shark', this)"><img src="attack-shark.jpg" alt="Attack Shark" loading="lazy" onerror="this.src='brand-attack-shark.svg'"><span class="brand-text-fallback">Attack Shark</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('Ajazz', this)"><img src="ajazz.webp" alt="Ajazz" loading="lazy" onerror="this.src='brand-ajazz.svg'"><span class="brand-text-fallback">Ajazz</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('AULA', this)"><img src="aula.png" alt="AULA" loading="lazy" onerror="this.src='brand-aula.svg'"><span class="brand-text-fallback">AULA</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('Mchose', this)"><img src="mchose.png" alt="Mchose" loading="lazy" onerror="this.src='brand-mchose.svg'"><span class="brand-text-fallback">Mchose</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('VGN', this)"><img src="vgn.jpg" alt="VGN" loading="lazy" onerror="this.src='brand-vgn.svg'"><span class="brand-text-fallback">VGN</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Attack Shark', this)"><img src="brand-attack-shark.svg" alt="Attack Shark" loading="lazy" onerror="this.src='attack-shark.jpg'"><span class="brand-text-fallback">Attack Shark</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Ajazz', this)"><img src="brand-ajazz.svg" alt="Ajazz" loading="lazy" onerror="this.src='brand-ajazz.svg'"><span class="brand-text-fallback">Ajazz</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('AULA', this)"><img src="brand-aula.svg" alt="AULA" loading="lazy" onerror="this.src='brand-aula.svg'"><span class="brand-text-fallback">AULA</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Mchose', this)"><img src="brand-mchose.svg" alt="Mchose" loading="lazy" onerror="this.src='brand-mchose.svg'"><span class="brand-text-fallback">Mchose</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('VGN', this)"><img src="brand-vgn.svg" alt="VGN" loading="lazy" onerror="this.src='brand-vgn.svg'"><span class="brand-text-fallback">VGN</span></div>
 
                 <!-- Set 2 -->
-                <div class="partner-brand-tile" onclick="filterByBrand('Attack Shark', this)"><img src="attack-shark.jpg" alt="Attack Shark" loading="lazy" onerror="this.src='brand-attack-shark.svg'"><span class="brand-text-fallback">Attack Shark</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('Ajazz', this)"><img src="ajazz.webp" alt="Ajazz" loading="lazy" onerror="this.src='brand-ajazz.svg'"><span class="brand-text-fallback">Ajazz</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('AULA', this)"><img src="aula.png" alt="AULA" loading="lazy" onerror="this.src='brand-aula.svg'"><span class="brand-text-fallback">AULA</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('Mchose', this)"><img src="mchose.png" alt="Mchose" loading="lazy" onerror="this.src='brand-mchose.svg'"><span class="brand-text-fallback">Mchose</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('VGN', this)"><img src="vgn.jpg" alt="VGN" loading="lazy" onerror="this.src='brand-vgn.svg'"><span class="brand-text-fallback">VGN</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Attack Shark', this)"><img src="brand-attack-shark.svg" alt="Attack Shark" loading="lazy" onerror="this.src='attack-shark.jpg'"><span class="brand-text-fallback">Attack Shark</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Ajazz', this)"><img src="brand-ajazz.svg" alt="Ajazz" loading="lazy" onerror="this.src='brand-ajazz.svg'"><span class="brand-text-fallback">Ajazz</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('AULA', this)"><img src="brand-aula.svg" alt="AULA" loading="lazy" onerror="this.src='brand-aula.svg'"><span class="brand-text-fallback">AULA</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Mchose', this)"><img src="brand-mchose.svg" alt="Mchose" loading="lazy" onerror="this.src='brand-mchose.svg'"><span class="brand-text-fallback">Mchose</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('VGN', this)"><img src="brand-vgn.svg" alt="VGN" loading="lazy" onerror="this.src='brand-vgn.svg'"><span class="brand-text-fallback">VGN</span></div>
 
                 <!-- Set 3 -->
-                <div class="partner-brand-tile" onclick="filterByBrand('Attack Shark', this)"><img src="attack-shark.jpg" alt="Attack Shark" loading="lazy" onerror="this.src='brand-attack-shark.svg'"><span class="brand-text-fallback">Attack Shark</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('Ajazz', this)"><img src="ajazz.webp" alt="Ajazz" loading="lazy" onerror="this.src='brand-ajazz.svg'"><span class="brand-text-fallback">Ajazz</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('AULA', this)"><img src="aula.png" alt="AULA" loading="lazy" onerror="this.src='brand-aula.svg'"><span class="brand-text-fallback">AULA</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('Mchose', this)"><img src="mchose.png" alt="Mchose" loading="lazy" onerror="this.src='brand-mchose.svg'"><span class="brand-text-fallback">Mchose</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('VGN', this)"><img src="vgn.jpg" alt="VGN" loading="lazy" onerror="this.src='brand-vgn.svg'"><span class="brand-text-fallback">VGN</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Attack Shark', this)"><img src="brand-attack-shark.svg" alt="Attack Shark" loading="lazy" onerror="this.src='attack-shark.jpg'"><span class="brand-text-fallback">Attack Shark</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Ajazz', this)"><img src="brand-ajazz.svg" alt="Ajazz" loading="lazy" onerror="this.src='brand-ajazz.svg'"><span class="brand-text-fallback">Ajazz</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('AULA', this)"><img src="brand-aula.svg" alt="AULA" loading="lazy" onerror="this.src='brand-aula.svg'"><span class="brand-text-fallback">AULA</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Mchose', this)"><img src="brand-mchose.svg" alt="Mchose" loading="lazy" onerror="this.src='brand-mchose.svg'"><span class="brand-text-fallback">Mchose</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('VGN', this)"><img src="brand-vgn.svg" alt="VGN" loading="lazy" onerror="this.src='brand-vgn.svg'"><span class="brand-text-fallback">VGN</span></div>
 
                 <!-- Set 4 -->
-                <div class="partner-brand-tile" onclick="filterByBrand('Attack Shark', this)"><img src="attack-shark.jpg" alt="Attack Shark" loading="lazy" onerror="this.src='brand-attack-shark.svg'"><span class="brand-text-fallback">Attack Shark</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('Ajazz', this)"><img src="ajazz.webp" alt="Ajazz" loading="lazy" onerror="this.src='brand-ajazz.svg'"><span class="brand-text-fallback">Ajazz</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('AULA', this)"><img src="aula.png" alt="AULA" loading="lazy" onerror="this.src='brand-aula.svg'"><span class="brand-text-fallback">AULA</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('Mchose', this)"><img src="mchose.png" alt="Mchose" loading="lazy" onerror="this.src='brand-mchose.svg'"><span class="brand-text-fallback">Mchose</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('VGN', this)"><img src="vgn.jpg" alt="VGN" loading="lazy" onerror="this.src='brand-vgn.svg'"><span class="brand-text-fallback">VGN</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Attack Shark', this)"><img src="brand-attack-shark.svg" alt="Attack Shark" loading="lazy" onerror="this.src='attack-shark.jpg'"><span class="brand-text-fallback">Attack Shark</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Ajazz', this)"><img src="brand-ajazz.svg" alt="Ajazz" loading="lazy" onerror="this.src='brand-ajazz.svg'"><span class="brand-text-fallback">Ajazz</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('AULA', this)"><img src="brand-aula.svg" alt="AULA" loading="lazy" onerror="this.src='brand-aula.svg'"><span class="brand-text-fallback">AULA</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Mchose', this)"><img src="brand-mchose.svg" alt="Mchose" loading="lazy" onerror="this.src='brand-mchose.svg'"><span class="brand-text-fallback">Mchose</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('VGN', this)"><img src="brand-vgn.svg" alt="VGN" loading="lazy" onerror="this.src='brand-vgn.svg'"><span class="brand-text-fallback">VGN</span></div>
             </div>
         </div>
     </section>
