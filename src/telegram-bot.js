@@ -930,6 +930,20 @@ export class TelegramBotService {
       }
     }
 
+    // Admin Cancel Order - Confirmation Prompt (Double confirmation)
+    if (data.startsWith('admin_cancel_prompt:')) {
+      const orderId = data.replace('admin_cancel_prompt:', '').trim();
+      await this.sendAdminCancelConfirmPrompt(chatId, orderId, msgId);
+      return;
+    }
+
+    // Admin Cancel Order - Execution
+    if (data.startsWith('admin_confirm_cancel:')) {
+      const orderId = data.replace('admin_confirm_cancel:', '').trim();
+      await this.processAdminStatusChange(chatId, orderId, 'CANCELLED', msgId);
+      return;
+    }
+
     // Admin Confirm Order
     if (data.startsWith('admin_confirm:')) {
       const orderId = data.replace('admin_confirm:', '').trim();
@@ -1138,9 +1152,12 @@ export class TelegramBotService {
       colorPhoto = prod.img;
     }
 
-    let text = `🛍 <b>ДЕТАЛІ ЗАМОВЛЕННЯ #${order.order_id}</b>\n\n`;
+    let text = `✅ <b>Замовлення #${order.order_id} успішно зареєстровано!</b>\n\n`;
+    if (isOnline && !isPaid) {
+      text += `💡 <i>Для продовження оформлення та переходу до оплати скористайтеся кнопками нижче або перейдіть до розділу «🛍 Мої замовлення».</i>\n\n`;
+    }
     text += `📊 <b>Статус:</b> ${statusEmoji} <b>${statusName}</b>\n`;
-    text += `📅 <b>Дата:</b> ${new Date(order.created_at || Date.now()).toLocaleString('uk-UA')}\n`;
+    text += `📅 <b>Дата створення:</b> ${new Date(order.created_at || Date.now()).toLocaleString('uk-UA')}\n`;
     if (order.tracking_number) {
       text += `🚚 <b>Номер ТТН:</b> <code>${order.tracking_number}</code>\n`;
     }
@@ -1533,28 +1550,86 @@ export class TelegramBotService {
     }
 
     const buttons = [];
-
-    // Row 1: Change status
-    buttons.push([
-      { text: '🔄 Змінити статус замовлення', callback_data: `admin_status_menu:${order.order_id}` }
-    ]);
-
-    // Row 2: TTN
-    buttons.push([
-      { text: order.tracking_number ? '🚚 Змінити номер ТТН' : '🚚 Вказати номер ТТН', callback_data: `admin_ttn_prompt:${order.order_id}` }
-    ]);
-
-    // Row 3: Delete
-    buttons.push([
-      { text: '🗑 Видалити замовлення', callback_data: `admin_delete_prompt:${order.order_id}` }
-    ]);
-
-    // Row 4: Navigation
     const isArchived = ['DELIVERED', 'COMPLETED', 'CANCELLED'].includes(order.status);
-    buttons.push([
-      { text: isArchived ? '🗄 До архіву' : '⚡ До активних', callback_data: isArchived ? 'admin_list:ARCHIVE' : 'admin_list:ACTIVE' },
-      { text: '👑 До адмін-панелі', callback_data: 'admin_dashboard' }
-    ]);
+
+    if (!isArchived) {
+      // Row 1: Quick Actions (Підтвердити / Скасувати)
+      const actionRow = [];
+      if (order.status !== 'CONFIRMED') {
+        actionRow.push({ text: '✅ Підтвердити замовлення', callback_data: `admin_confirm:${order.order_id}` });
+        actionRow.push({ text: '❌ Скасувати', callback_data: `admin_cancel_prompt:${order.order_id}` });
+      } else {
+        actionRow.push({ text: '❌ Скасувати замовлення', callback_data: `admin_cancel_prompt:${order.order_id}` });
+      }
+      buttons.push(actionRow);
+
+      // Row 2: Status Menu
+      buttons.push([
+        { text: '🔄 Змінити статус замовлення', callback_data: `admin_status_menu:${order.order_id}` }
+      ]);
+
+      // Row 3: TTN
+      buttons.push([
+        { text: order.tracking_number ? '🚚 Змінити номер ТТН' : '🚚 Вказати номер ТТН', callback_data: `admin_ttn_prompt:${order.order_id}` }
+      ]);
+
+      // Row 4: Delete
+      buttons.push([
+        { text: '🗑 Видалити замовлення', callback_data: `admin_delete_prompt:${order.order_id}` }
+      ]);
+
+      // Row 5: Navigation
+      buttons.push([
+        { text: '⚡ До активних', callback_data: 'admin_list:ACTIVE' },
+        { text: '👑 До адмін-панелі', callback_data: 'admin_dashboard' }
+      ]);
+    } else {
+      // For archived/cancelled orders
+      buttons.push([
+        { text: '🔄 Змінити статус замовлення', callback_data: `admin_status_menu:${order.order_id}` }
+      ]);
+      buttons.push([
+        { text: order.tracking_number ? '🚚 Змінити номер ТТН' : '🚚 Вказати номер ТТН', callback_data: `admin_ttn_prompt:${order.order_id}` }
+      ]);
+      buttons.push([
+        { text: '🗑 Видалити замовлення', callback_data: `admin_delete_prompt:${order.order_id}` }
+      ]);
+      buttons.push([
+        { text: '🗄 До архіву', callback_data: 'admin_list:ARCHIVE' },
+        { text: '👑 До адмін-панелі', callback_data: 'admin_dashboard' }
+      ]);
+    }
+
+    await this.safeEditOrSend(chatId, messageId, text, {
+      reply_markup: { inline_keyboard: buttons }
+    });
+  }
+
+  async sendAdminCancelConfirmPrompt(chatId, orderId, messageId = null) {
+    const order = db.getOrderById(orderId);
+    if (!order) {
+      await this.safeEditOrSend(chatId, messageId, `❌ Замовлення #${orderId} не знайдено.`);
+      return;
+    }
+    const custName = this.formatCustomerFullName(order.customer);
+    const text = `⚠️ <b>Підтвердження скасування замовлення #${orderId}</b>\n\n` +
+      `👤 Покупець: <b>${custName}</b>\n` +
+      `💰 Сума: <b>${order.total} ₴</b>\n` +
+      `📊 Поточний статус: <b>${ORDER_STATUSES[order.status]?.name || order.status}</b>\n\n` +
+      `Ви дійсно бажаєте скасувати це замовлення?\n\n` +
+      `• Статус буде змінено на <b>«Скасовано»</b>\n` +
+      `• Замовлення перейде в <b>Архів</b>\n` +
+      `• Покупцю надійде сповіщення про скасування\n\n` +
+      `<i>Підтвердіть скасування або поверніться назад:</i>`;
+
+    const buttons = [
+      [
+        { text: '❌ Так, точно скасувати', callback_data: `admin_confirm_cancel:${orderId}` }
+      ],
+      [
+        { text: '↩️ Ні, повернутися до замовлення', callback_data: `admin_view:${orderId}` }
+      ]
+    ];
 
     await this.safeEditOrSend(chatId, messageId, text, {
       reply_markup: { inline_keyboard: buttons }
@@ -1584,7 +1659,7 @@ export class TelegramBotService {
         { text: '🏢 Доставлено (В архів)', callback_data: `admin_set_status:DELIVERED:${orderId}` }
       ],
       [
-        { text: '❌ Скасувати замовлення (В архів)', callback_data: `admin_set_status:CANCELLED:${orderId}` }
+        { text: '❌ Скасувати замовлення (В архів)', callback_data: `admin_cancel_prompt:${orderId}` }
       ],
       [
         { text: '🔙 Назад до замовлення', callback_data: `admin_view:${orderId}` }
@@ -1838,14 +1913,7 @@ export class TelegramBotService {
 
     const adminButtons = [
       [
-        { text: '📋 Переглянути замовлення', callback_data: `admin_view:${order.order_id}` }
-      ],
-      [
-        { text: '✅ Підтвердити', callback_data: `admin_confirm:${order.order_id}` },
-        { text: '❌ Скасувати', callback_data: `setstatus_${order.order_id}_CANCELLED` }
-      ],
-      [
-        { text: '🚚 Вказати ТТН', callback_data: `admin_ttn_prompt:${order.order_id}` }
+        { text: '🔍 Переглянути замовлення', callback_data: `admin_view:${order.order_id}` }
       ]
     ];
 
@@ -1924,14 +1992,7 @@ export class TelegramBotService {
 
     const adminButtons = [
       [
-        { text: '📋 Переглянути замовлення', callback_data: `admin_view:${order.order_id}` }
-      ],
-      [
-        { text: '✅ Підтвердити', callback_data: `admin_confirm:${order.order_id}` },
-        { text: '❌ Скасувати', callback_data: `setstatus_${order.order_id}_CANCELLED` }
-      ],
-      [
-        { text: '🚚 Вказати ТТН', callback_data: `admin_ttn_prompt:${order.order_id}` }
+        { text: '🔍 Переглянути замовлення', callback_data: `admin_view:${order.order_id}` }
       ]
     ];
 

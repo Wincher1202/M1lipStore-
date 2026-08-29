@@ -376,9 +376,9 @@ class Database {
           this.data = {
             ...this.data,
             ...parsed,
-            products: Array.isArray(parsed.products) && parsed.products.length ? parsed.products : INITIAL_PRODUCTS,
-            categories: Array.isArray(parsed.categories) && parsed.categories.length ? parsed.categories : INITIAL_CATEGORIES,
-            brands: Array.isArray(parsed.brands) && parsed.brands.length ? parsed.brands : INITIAL_BRANDS,
+            products: Array.isArray(parsed.products) ? parsed.products : INITIAL_PRODUCTS,
+            categories: Array.isArray(parsed.categories) ? parsed.categories : INITIAL_CATEGORIES,
+            brands: Array.isArray(parsed.brands) ? parsed.brands : INITIAL_BRANDS,
             orders: Array.isArray(parsed.orders) ? parsed.orders : [],
             telegram_users: parsed.telegram_users || {},
             admin_ids: combinedAdmins,
