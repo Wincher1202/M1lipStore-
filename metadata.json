@@ -1,6 +1,6 @@
 {
   "name": "M1lipStore",
-  "description": "Gaming hardware and electronics store with catalog, cart, and ordering",
+  "description": "Gaming hardware and electronics store with catalog, cart, Telegram bot order management and payments",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

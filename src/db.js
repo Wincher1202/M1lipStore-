@@ -354,6 +354,7 @@ class Database {
       brands: INITIAL_BRANDS,
       orders: [],
       telegram_users: {},
+      admin_ids: [],
       notifications: []
     };
     this.init();
@@ -376,6 +377,7 @@ class Database {
             brands: Array.isArray(parsed.brands) && parsed.brands.length ? parsed.brands : INITIAL_BRANDS,
             orders: Array.isArray(parsed.orders) ? parsed.orders : [],
             telegram_users: parsed.telegram_users || {},
+            admin_ids: Array.isArray(parsed.admin_ids) ? parsed.admin_ids : [],
             notifications: parsed.notifications || []
           };
         }
@@ -780,6 +782,35 @@ class Database {
 
   getNotifications() {
     return this.data.notifications.slice(0, 50);
+  }
+
+  // Admin Management
+  addAdmin(idOrTag) {
+    if (!idOrTag) return false;
+    const clean = String(idOrTag).trim().toLowerCase().replace(/^@/, '');
+    if (!this.data.admin_ids) this.data.admin_ids = [];
+    if (!this.data.admin_ids.includes(clean)) {
+      this.data.admin_ids.push(clean);
+      this.save();
+      return true;
+    }
+    return false;
+  }
+
+  removeAdmin(idOrTag) {
+    if (!idOrTag || !this.data.admin_ids) return false;
+    const clean = String(idOrTag).trim().toLowerCase().replace(/^@/, '');
+    const idx = this.data.admin_ids.indexOf(clean);
+    if (idx !== -1) {
+      this.data.admin_ids.splice(idx, 1);
+      this.save();
+      return true;
+    }
+    return false;
+  }
+
+  getAdminIds() {
+    return this.data.admin_ids || [];
   }
 }
 

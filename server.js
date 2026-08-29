@@ -481,6 +481,24 @@ app.get('/api/admin/brands', (req, res) => {
   res.json(db.getBrands());
 });
 
+app.get('/api/bot-info', (req, res) => {
+  res.json({
+    username: botService.getBotUsername(),
+    name: botService.botInfo?.first_name || 'MILIPSTORE Bot'
+  });
+});
+
+app.post('/api/telegram/webhook', async (req, res) => {
+  if (req.body) {
+    try {
+      await botService.handleUpdate(req.body);
+    } catch (e) {
+      console.error('[Webhook] Error:', e);
+    }
+  }
+  res.json({ ok: true });
+});
+
 // ----------------------------------------------------
 // Static File Serving & Entry Point
 // ----------------------------------------------------
