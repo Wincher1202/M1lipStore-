@@ -1757,9 +1757,9 @@ export class TelegramBotService {
 
     await this.callApi('sendMessage', {
       chat_id: chatId,
-      text: `➕ <b>Майстер додавання товару MILIPSTORE</b>\n\n` +
-        `<b>Крок 1/6: Оберіть бренд товару:</b>\n` +
-        `<i>Натисніть на один із популярних брендів нижче або введіть свій бренд:</i>`,
+      text: `➕ <b>Створення нового товару MILIPSTORE</b>\n\n` +
+        `<b>Крок 1/7: Оберіть бренд товару:</b>\n` +
+        `<i>Натисніть на один із брендів нижче або введіть назву вручну:</i>`,
       parse_mode: 'HTML',
       reply_markup: { inline_keyboard: brands }
     });
@@ -1770,7 +1770,7 @@ export class TelegramBotService {
     if (!session || session.action !== 'wizard_add_product') {
       await this.callApi('sendMessage', {
         chat_id: chatId,
-        text: 'ℹ️ Сесію додавання товару завершено або скасовано. Щоб розпочати заново, натисніть /add_product або оберіть «➕ Додати новий товар» в адмін-панелі.',
+        text: 'ℹ️ Сесію створення товару завершено або скасовано. Щоб розпочати заново, натисніть /add_product або оберіть «➕ Додати новий товар» в адмін-панелі.',
         reply_markup: this.getReplyKeyboard(from)
       });
       return;
@@ -1780,7 +1780,7 @@ export class TelegramBotService {
       delete this.adminSessions[chatId];
       await this.callApi('sendMessage', {
         chat_id: chatId,
-        text: '❌ Додавання товару скасовано.',
+        text: '❌ Створення товару скасовано.',
         reply_markup: {
           inline_keyboard: [[{ text: '🔙 До адмін-панелі', callback_data: 'admin_dashboard' }]]
         }
@@ -1795,7 +1795,7 @@ export class TelegramBotService {
         session.step = 'custom_brand';
         await this.callApi('sendMessage', {
           chat_id: chatId,
-          text: `🏷 <b>Введіть назву бренду текстом</b>\n\n<i>Наприклад: Razer, Logitech, ATK, Keychron, Lamzu:</i>`,
+          text: `🏷 <b>Введіть назву бренду текстом:</b>\n\n<i>Наприклад: Razer, Logitech, ATK, Keychron, Lamzu:</i>`,
           parse_mode: 'HTML',
           reply_markup: {
             inline_keyboard: [[{ text: '❌ Скасувати', callback_data: 'wiz_cancel' }]]
@@ -1824,7 +1824,7 @@ export class TelegramBotService {
         session.step = 'custom_category';
         await this.callApi('sendMessage', {
           chat_id: chatId,
-          text: `🗂 <b>Введіть назву нової категорії текстом</b>\n\n<i>Наприклад: Світчі, Кейкапи, Мікрофони, Кронштейни:</i>`,
+          text: `🗂 <b>Введіть назву нової категорії текстом:</b>\n\n<i>Наприклад: Світчі, Кейкапи, Мікрофони, Кронштейни:</i>`,
           parse_mode: 'HTML',
           reply_markup: {
             inline_keyboard: [[{ text: '❌ Скасувати', callback_data: 'wiz_cancel' }]]
@@ -1839,7 +1839,7 @@ export class TelegramBotService {
       return;
     }
 
-    // STEP 5: COLOR TOGGLES
+    // STEP 5: COLOR TOGGLES (Multi-selection)
     if (data.startsWith('wiz_color_toggle:')) {
       const colName = data.replace('wiz_color_toggle:', '').trim();
       if (!session.data.colors) session.data.colors = [];
@@ -1857,7 +1857,7 @@ export class TelegramBotService {
       session.step = 'custom_color';
       await this.callApi('sendMessage', {
         chat_id: chatId,
-        text: `🎨 <b>Введіть назву кольору / варіації текстом</b>\n\n<i>Наприклад: Gradient Purple, Matt White, Retro Grey, Cyberpunk:</i>`,
+        text: `🎨 <b>Введіть назву кольору / варіації текстом:</b>\n\n<i>Наприклад: Gradient Purple, Matt White, Retro Grey, Cyberpunk:</i>`,
         parse_mode: 'HTML',
         reply_markup: {
           inline_keyboard: [[{ text: '❌ Скасувати', callback_data: 'wiz_cancel' }]]
@@ -1870,30 +1870,60 @@ export class TelegramBotService {
       if (!session.data.colors || session.data.colors.length === 0) {
         session.data.colors = ['Black'];
       }
-      session.data.currentColorIndex = 0;
-      await this.promptWizardColorPhoto(chatId);
+      await this.promptWizardCatalogPhoto(chatId);
       return;
     }
 
     if (data === 'wiz_colors_skip') {
       session.data.colors = ['Black'];
-      session.data.currentColorIndex = 0;
-      await this.promptWizardColorPhoto(chatId);
+      await this.promptWizardCatalogPhoto(chatId);
       return;
     }
 
-    // STEP 6: PHOTO ACTIONS
-    if (data === 'wiz_photo_auto') {
-      const colors = session.data.colors || ['Black'];
-      const curColor = colors[session.data.currentColorIndex] || 'Black';
+    // STEP 6: MAIN CATALOG PHOTO ACTIONS
+    if (data === 'wiz_cat_photo_auto' || data === 'wiz_cat_photo_skip') {
+      const autoCatalogImg = this.getDefaultProductImage(session.data.brand, session.data.category);
+      session.data.img = autoCatalogImg;
+      session.data.currentColorIndex = 0;
+      await this.callApi('sendMessage', {
+        chat_id: chatId,
+        text: `🖼 <b>Встановлено авто-фото для каталогу!</b>\nПереходимо до фотографій для кожного кольору.`,
+        parse_mode: 'HTML'
+      });
+      await this.promptWizardColorPhotos(chatId);
+      return;
+    }
+
+    // STEP 7: COLOR PHOTOS ACTIONS (Per Color)
+    const colors = session.data.colors || ['Black'];
+    const curColor = colors[session.data.currentColorIndex] || 'Black';
+
+    if (data === 'wiz_color_done_photos') {
+      // If no photos uploaded for this color, set default
+      if (!session.data.color_images?.[curColor]?.main) {
+        const autoImg = this.getDefaultColorImage(curColor, session.data.brand, session.data.category);
+        if (!session.data.color_images) session.data.color_images = {};
+        session.data.color_images[curColor] = { main: autoImg, gallery: [autoImg] };
+      }
+
+      session.data.currentColorIndex++;
+      if (session.data.currentColorIndex < colors.length) {
+        await this.promptWizardColorPhotos(chatId);
+      } else {
+        session.data.currentQtyIndex = 0;
+        await this.promptWizardColorQuantity(chatId);
+      }
+      return;
+    }
+
+    if (data === 'wiz_color_photo_auto') {
       const autoImg = this.getDefaultColorImage(curColor, session.data.brand, session.data.category);
       if (!session.data.color_images) session.data.color_images = {};
       session.data.color_images[curColor] = { main: autoImg, gallery: [autoImg] };
-      if (!session.data.img) session.data.img = autoImg;
 
       session.data.currentColorIndex++;
       if (session.data.currentColorIndex < colors.length) {
-        await this.promptWizardColorPhoto(chatId);
+        await this.promptWizardColorPhotos(chatId);
       } else {
         session.data.currentQtyIndex = 0;
         await this.promptWizardColorQuantity(chatId);
@@ -1901,11 +1931,16 @@ export class TelegramBotService {
       return;
     }
 
-    if (data === 'wiz_photo_skip_one') {
+    if (data === 'wiz_color_photo_skip') {
+      if (!session.data.color_images?.[curColor]?.main) {
+        const autoImg = this.getDefaultColorImage(curColor, session.data.brand, session.data.category);
+        if (!session.data.color_images) session.data.color_images = {};
+        session.data.color_images[curColor] = { main: autoImg, gallery: [autoImg] };
+      }
+
       session.data.currentColorIndex++;
-      const colors = session.data.colors || ['Black'];
       if (session.data.currentColorIndex < colors.length) {
-        await this.promptWizardColorPhoto(chatId);
+        await this.promptWizardColorPhotos(chatId);
       } else {
         session.data.currentQtyIndex = 0;
         await this.promptWizardColorQuantity(chatId);
@@ -1913,19 +1948,25 @@ export class TelegramBotService {
       return;
     }
 
-    if (data === 'wiz_photo_skip_all') {
+    if (data === 'wiz_color_photo_skip_all') {
+      colors.forEach(c => {
+        if (!session.data.color_images?.[c]?.main) {
+          const autoImg = this.getDefaultColorImage(c, session.data.brand, session.data.category);
+          if (!session.data.color_images) session.data.color_images = {};
+          session.data.color_images[c] = { main: autoImg, gallery: [autoImg] };
+        }
+      });
       session.data.currentQtyIndex = 0;
       await this.promptWizardColorQuantity(chatId);
       return;
     }
 
-    // STEP 7: QUANTITIES
+    // STEP 8: QUANTITIES
     if (data.startsWith('wiz_qty:')) {
       const qtyVal = parseInt(data.replace('wiz_qty:', '').trim(), 10) || 10;
-      const colors = session.data.colors || ['Black'];
-      const curColor = colors[session.data.currentQtyIndex] || 'Black';
+      const curColorQty = colors[session.data.currentQtyIndex] || 'Black';
       if (!session.data.color_quantities) session.data.color_quantities = {};
-      session.data.color_quantities[curColor] = qtyVal;
+      session.data.color_quantities[curColorQty] = qtyVal;
 
       session.data.currentQtyIndex++;
       if (session.data.currentQtyIndex < colors.length) {
@@ -1938,7 +1979,6 @@ export class TelegramBotService {
 
     if (data.startsWith('wiz_qty_all:')) {
       const qtyVal = parseInt(data.replace('wiz_qty_all:', '').trim(), 10) || 10;
-      const colors = session.data.colors || ['Black'];
       if (!session.data.color_quantities) session.data.color_quantities = {};
       colors.forEach(c => {
         session.data.color_quantities[c] = qtyVal;
@@ -1947,7 +1987,7 @@ export class TelegramBotService {
       return;
     }
 
-    // STEP 8: CONFIRM & PUBLISH
+    // STEP 9: CONFIRM & PUBLISH
     if (data === 'wiz_save_publish') {
       await this.saveWizardProduct(chatId);
       return;
@@ -2025,17 +2065,49 @@ export class TelegramBotService {
       return;
     }
 
-    // 6. Color Photo Input (Image upload or Image URL)
-    if (session.step === 'color_photos') {
+    // 6. Main Catalog Photo Input (Only 1 Photo)
+    if (session.step === 'catalog_photo') {
       let photoUrl = '';
-
       if (msg.photo && msg.photo.length > 0) {
         const largest = msg.photo[msg.photo.length - 1];
         const fileRes = await this.callApi('getFile', { file_id: largest.file_id });
         if (fileRes.ok && fileRes.result?.file_path) {
           photoUrl = `https://api.telegram.org/file/bot${BOT_TOKEN}/${fileRes.result.file_path}`;
         }
-      } else if (/^https?:\/\/.+\.(jpg|jpeg|png|webp|gif|svg)/i.test(text) || /^https?:\/\//i.test(text)) {
+      } else if (/^https?:\/\/.+/i.test(text)) {
+        photoUrl = text;
+      }
+
+      if (photoUrl) {
+        session.data.img = photoUrl;
+        await this.callApi('sendMessage', {
+          chat_id: chatId,
+          text: `✅ <b>Головне фото каталогу збережено!</b>\n\nТепер додамо фотографії для кожного обраного кольору.`,
+          parse_mode: 'HTML'
+        });
+
+        session.data.currentColorIndex = 0;
+        await this.promptWizardColorPhotos(chatId);
+        return;
+      }
+
+      await this.callApi('sendMessage', {
+        chat_id: chatId,
+        text: `⚠️ Будь ласка, надішліть фото файлом/зображенням або посиланням на картинку (або скористайтеся кнопкою «Використати авто-фото»).`
+      });
+      return;
+    }
+
+    // 7. Color Photos Input (Unlimited Photos per Color)
+    if (session.step === 'color_photos') {
+      let photoUrl = '';
+      if (msg.photo && msg.photo.length > 0) {
+        const largest = msg.photo[msg.photo.length - 1];
+        const fileRes = await this.callApi('getFile', { file_id: largest.file_id });
+        if (fileRes.ok && fileRes.result?.file_path) {
+          photoUrl = `https://api.telegram.org/file/bot${BOT_TOKEN}/${fileRes.result.file_path}`;
+        }
+      } else if (/^https?:\/\/.+/i.test(text)) {
         photoUrl = text;
       }
 
@@ -2043,33 +2115,49 @@ export class TelegramBotService {
         const colors = session.data.colors || ['Black'];
         const curColor = colors[session.data.currentColorIndex] || 'Black';
         if (!session.data.color_images) session.data.color_images = {};
-        session.data.color_images[curColor] = { main: photoUrl, gallery: [photoUrl] };
-        if (!session.data.img) session.data.img = photoUrl;
+        if (!session.data.color_images[curColor]) {
+          session.data.color_images[curColor] = { main: photoUrl, gallery: [photoUrl] };
+        } else {
+          if (!session.data.color_images[curColor].main) {
+            session.data.color_images[curColor].main = photoUrl;
+          }
+          if (!session.data.color_images[curColor].gallery) {
+            session.data.color_images[curColor].gallery = [];
+          }
+          if (!session.data.color_images[curColor].gallery.includes(photoUrl)) {
+            session.data.color_images[curColor].gallery.push(photoUrl);
+          }
+        }
+
+        const totalForColor = session.data.color_images[curColor].gallery.length;
+        const isFirst = totalForColor === 1;
+
+        const infoMsg = isFirst
+          ? `🌟 <b>Головне фото для кольору «${curColor}» збережено!</b>\n\nТепер ви можете надіслати <b>додаткові фото</b> для галереї цього кольору (можна додавати необмежено), або натиснути кнопку переходу до наступного кроку:`
+          : `📸 <b>Фото #${totalForColor} додано до галереї кольору «${curColor}»!</b>\n\nМожна надіслати ще фото або перейти далі:`;
 
         await this.callApi('sendMessage', {
           chat_id: chatId,
-          text: `✅ Фото для кольору <b>${curColor}</b> успішно збережено!`,
-          parse_mode: 'HTML'
+          text: infoMsg,
+          parse_mode: 'HTML',
+          reply_markup: {
+            inline_keyboard: [
+              [{ text: `➡️ Завершити фото для «${curColor}» (${totalForColor} фото) →`, callback_data: 'wiz_color_done_photos' }],
+              [{ text: '❌ Скасувати', callback_data: 'wiz_cancel' }]
+            ]
+          }
         });
-
-        session.data.currentColorIndex++;
-        if (session.data.currentColorIndex < colors.length) {
-          await this.promptWizardColorPhoto(chatId);
-        } else {
-          session.data.currentQtyIndex = 0;
-          await this.promptWizardColorQuantity(chatId);
-        }
         return;
       }
 
       await this.callApi('sendMessage', {
         chat_id: chatId,
-        text: `⚠️ Будь ласка, завантажте фото або надішліть посилання на картинку (або скористайтеся кнопками «Використати авто-фото» / «Пропустити»).`
+        text: `⚠️ Будь ласка, завантажте фото або надішліть посилання на зображення (або натисніть кнопку «Завершити» / «Авто-фото»).`
       });
       return;
     }
 
-    // 7. Quantity Input
+    // 8. Quantity Input
     if (session.step === 'color_quantities') {
       const num = parseInt(text.replace(/[^\d]/g, ''), 10);
       if (isNaN(num) || num < 0) {
@@ -2104,7 +2192,7 @@ export class TelegramBotService {
     await this.callApi('sendMessage', {
       chat_id: chatId,
       text: `🏷 <b>Бренд:</b> ${session.data.brand}\n\n` +
-        `<b>Крок 2/6: Введіть назву / модель товару:</b>\n\n` +
+        `<b>Крок 2/7: Введіть назву / модель товару:</b>\n\n` +
         `<i>Приклад: R1 Pro Max Wireless, F75 Tri-Mode Gasket, Mad Major 8K</i>\n\n` +
         `Надішліть назву наступним повідомленням у чат:`,
       parse_mode: 'HTML',
@@ -2129,7 +2217,7 @@ export class TelegramBotService {
     await this.callApi('sendMessage', {
       chat_id: chatId,
       text: `🏷 <b>Товар:</b> ${session.data.brand} ${session.data.title}\n\n` +
-        `<b>Крок 3/6: Вкажіть ціну товару (у гривнях):</b>\n\n` +
+        `<b>Крок 3/7: Вкажіть ціну товару (у гривнях):</b>\n\n` +
         `<i>Оберіть швидку кнопку або введіть число текстом (наприклад: <code>1750</code>):</i>`,
       parse_mode: 'HTML',
       reply_markup: { inline_keyboard: priceButtons }
@@ -2145,15 +2233,15 @@ export class TelegramBotService {
       [{ text: '🖱 Мишки', callback_data: 'wiz_cat:Мишки' }, { text: '⌨️ Клавіатури', callback_data: 'wiz_cat:Клавіатури' }],
       [{ text: '🎧 Навушники', callback_data: 'wiz_cat:Навушники' }, { text: '⬛ Килимки', callback_data: 'wiz_cat:Килимки' }],
       [{ text: '🎮 Геймпади', callback_data: 'wiz_cat:Геймпади' }, { text: '🔌 Аксесуари', callback_data: 'wiz_cat:Аксесуари' }],
-      [{ text: '➕ + Ввести нову категорію', callback_data: 'wiz_cat:CUSTOM' }],
+      [{ text: '➕ Ввести нову категорію', callback_data: 'wiz_cat:CUSTOM' }],
       [{ text: '❌ Скасувати', callback_data: 'wiz_cancel' }]
     ];
 
     await this.callApi('sendMessage', {
       chat_id: chatId,
       text: `💰 <b>Ціна:</b> ${session.data.price} ₴\n\n` +
-        `<b>Крок 4/6: Оберіть категорію для каталогу:</b>\n` +
-        `<i>Категорія одразу з'явиться на сайті та у фільтрах вітрини магазину:</i>`,
+        `<b>Крок 4/7: Оберіть категорію товару:</b>\n` +
+        `<i>Категорія одразу відобразиться у фільтрах вітрини магазину:</i>`,
       parse_mode: 'HTML',
       reply_markup: { inline_keyboard: catButtons }
     });
@@ -2166,14 +2254,14 @@ export class TelegramBotService {
 
     const selected = session.data.colors || [];
     const colorPresets = [
-      { id: 'White', name: '⚪ Білий (White)' },
-      { id: 'Black', name: '⚫ Чорний (Black)' },
-      { id: 'Red', name: '🔴 Червоний (Red)' },
-      { id: 'Blue', name: '🔵 Синій (Blue)' },
-      { id: 'Purple', name: '🟣 Фіолетовий (Purple)' },
+      { id: 'White', name: '⚪ Білий' },
+      { id: 'Black', name: '⚫ Чорний' },
+      { id: 'Red', name: '🔴 Червоний' },
+      { id: 'Blue', name: '🔵 Синій' },
+      { id: 'Purple', name: '🟣 Фіолетовий' },
       { id: 'Green', name: '🟢 Зелений / М\'ятний' },
-      { id: 'Pink', name: '💖 Рожевий (Pink)' },
-      { id: 'Grey', name: '🔘 Сірий (Grey)' }
+      { id: 'Pink', name: '💖 Рожевий' },
+      { id: 'Grey', name: '🔘 Сірий / Графіт' }
     ];
 
     const keyboard = [];
@@ -2200,26 +2288,47 @@ export class TelegramBotService {
     keyboard.push([{ text: '➕ Ввести свій колір вручну', callback_data: 'wiz_color:CUSTOM' }]);
 
     const doneText = selected.length > 0
-      ? `➡️ ✅ Завершити вибір кольорів (${selected.length}) →`
+      ? `➡️ Продовжити з обраними кольорами (${selected.length}) →`
       : `⏩ Пропустити (Один стандартний колір)`;
 
     keyboard.push([{ text: doneText, callback_data: selected.length > 0 ? 'wiz_colors_done' : 'wiz_colors_skip' }]);
     keyboard.push([{ text: '❌ Скасувати', callback_data: 'wiz_cancel' }]);
 
-    const selectedText = selected.length > 0 ? selected.join(', ') : 'Поки не обрано';
+    const selectedText = selected.length > 0 ? selected.join(', ') : 'Поки не обрано (натисніть на кнопки кольорів)';
 
     await this.callApi('sendMessage', {
       chat_id: chatId,
       text: `🗂 <b>Категорія:</b> ${session.data.category}\n\n` +
-        `<b>Крок 5/6: Оберіть доступні кольори товару:</b>\n` +
+        `<b>Крок 5/7: Оберіть кольори товару (можна вибрати одразу декілька в одній панелі):</b>\n\n` +
         `Обрані: <b>${selectedText}</b>\n\n` +
-        `<i>Натискайте на кнопки кольорів нижче (можна вибрати декілька):</i>`,
+        `<i>Натискайте на кнопки потрібних кольорів, щоб увімкнути/вимкнути галочку [✅]:</i>`,
       parse_mode: 'HTML',
       reply_markup: { inline_keyboard: keyboard }
     });
   }
 
-  async promptWizardColorPhoto(chatId) {
+  async promptWizardCatalogPhoto(chatId) {
+    const session = this.adminSessions[chatId];
+    if (!session) return;
+    session.step = 'catalog_photo';
+
+    const buttons = [
+      [{ text: '🖼 Використати авто-фото для каталогу', callback_data: 'wiz_cat_photo_auto' }],
+      [{ text: '⏩ Пропустити (встановити стандартне)', callback_data: 'wiz_cat_photo_skip' }],
+      [{ text: '❌ Скасувати', callback_data: 'wiz_cancel' }]
+    ];
+
+    await this.callApi('sendMessage', {
+      chat_id: chatId,
+      text: `📸 <b>Крок 6/7: Головне фото для каталогу (лише 1 фото)</b>\n\n` +
+        `Надішліть <b>1 основне фото</b>, яке буде відображатися на вітрині та в списку каталогу (надішліть файл фото або посилання на зображення):\n\n` +
+        `<i>Це загальне фото товару. На наступному кроці ви зможете завантажити окремі фото для кожного обраного кольору.</i>`,
+      parse_mode: 'HTML',
+      reply_markup: { inline_keyboard: buttons }
+    });
+  }
+
+  async promptWizardColorPhotos(chatId) {
     const session = this.adminSessions[chatId];
     if (!session) return;
     session.step = 'color_photos';
@@ -2233,19 +2342,28 @@ export class TelegramBotService {
 
     const curColor = colors[session.data.currentColorIndex];
     const colorIndexHuman = session.data.currentColorIndex + 1;
+    const uploadedCount = (session.data.color_images?.[curColor]?.gallery || []).length;
 
-    const buttons = [
-      [{ text: `🖼 Використати авто-фото для ${curColor}`, callback_data: 'wiz_photo_auto' }],
-      [{ text: `⏩ Пропустити фото для ${curColor}`, callback_data: 'wiz_photo_skip_one' }],
-      [{ text: `⏭ Пропустити всі фото кольорів →`, callback_data: 'wiz_photo_skip_all' }],
-      [{ text: '❌ Скасувати', callback_data: 'wiz_cancel' }]
-    ];
+    const buttons = [];
+    if (uploadedCount > 0) {
+      buttons.push([{ text: `➡️ Завершити фото для «${curColor}» (${uploadedCount} фото) →`, callback_data: 'wiz_color_done_photos' }]);
+    } else {
+      buttons.push([{ text: `🖼 Встановити авто-фото для «${curColor}»`, callback_data: 'wiz_color_photo_auto' }]);
+      buttons.push([{ text: `⏩ Пропустити фото для «${curColor}»`, callback_data: 'wiz_color_photo_skip' }]);
+    }
+    buttons.push([{ text: `⏭ Пропустити фото для всіх кольорів →`, callback_data: 'wiz_color_photo_skip_all' }]);
+    buttons.push([{ text: '❌ Скасувати', callback_data: 'wiz_cancel' }]);
+
+    let descText = `🎨 <b>Крок 7/7 (Колір ${colorIndexHuman}/${colors.length}): Фотографії для кольору «${curColor}»</b>\n\n` +
+      `Надішліть фотографії для кольору <b>${curColor}</b>:\n` +
+      `• <b>1-ше фото</b> автоматично стане <b>головним для кольору «${curColor}»</b> (показується при виборі цього кольору на сайті).\n` +
+      `• <b>Усі наступні фото</b> будуть додані до галереї цього кольору. Ви можете надіслати <b>необмежену кількість фото</b>!\n\n` +
+      `📷 <i>Завантажено для «${curColor}»: <b>${uploadedCount} фото</b>${uploadedCount > 0 ? ' (1 головне + ' + (uploadedCount - 1) + ' додаткових)' : ''}</i>\n\n` +
+      `<i>Надсилайте фото по одному або посиланнями. Після додавання потрібної кількості натисніть кнопку переходу:</i>`;
 
     await this.callApi('sendMessage', {
       chat_id: chatId,
-      text: `📸 <b>Крок 6/6 (Фото ${colorIndexHuman}/${colors.length}): Фото для кольору «${curColor}»</b>\n\n` +
-        `Надішліть фотографію товару у кольорі <b>${curColor}</b> (як фото або посилання на зображення):\n\n` +
-        `<i>Або оберіть дію нижче:</i>`,
+      text: descText,
       parse_mode: 'HTML',
       reply_markup: { inline_keyboard: buttons }
     });
@@ -2274,8 +2392,8 @@ export class TelegramBotService {
 
     await this.callApi('sendMessage', {
       chat_id: chatId,
-      text: `📦 <b>Залишок на складі (${qtyIndexHuman}/${colors.length}): «${curColor}»</b>\n\n` +
-        `Оберіть кількість на складі для кольору <b>${curColor}</b> або надішліть число у чат:`,
+      text: `📦 <b>Склад (${qtyIndexHuman}/${colors.length}): Кількість для кольору «${curColor}»</b>\n\n` +
+        `Оберіть кількість одиниць на складі для кольору <b>${curColor}</b> або надішліть число текстом:`,
       parse_mode: 'HTML',
       reply_markup: { inline_keyboard: buttons }
     });
@@ -2293,8 +2411,9 @@ export class TelegramBotService {
     let colorSummary = '';
     colorsList.forEach(c => {
       const q = d.color_quantities?.[c] ?? Math.round(totalQty / colorsList.length);
-      const hasPhoto = d.color_images?.[c]?.main ? '📷 Є фото' : '⚙️ Авто-фото';
-      colorSummary += `  • <b>${c}</b>: ${q} шт. (${hasPhoto})\n`;
+      const photoCount = (d.color_images?.[c]?.gallery || []).length || (d.color_images?.[c]?.main ? 1 : 0);
+      const photoInfo = photoCount > 0 ? `📷 ${photoCount} фото` : '⚙️ Авто-фото';
+      colorSummary += `  • <b>${c}</b>: ${q} шт. (${photoInfo})\n`;
     });
 
     const text = `✨ <b>ПЕРЕВІРКА НОВОГО ТОВАРУ</b> ✨\n\n` +
@@ -2302,7 +2421,7 @@ export class TelegramBotService {
       `🎮 <b>Назва:</b> <b>${d.title}</b>\n` +
       `💰 <b>Ціна:</b> <b>${d.price} ₴</b> (стара ціна: ${Math.round(d.price * 1.15)} ₴)\n` +
       `🗂 <b>Категорія:</b> ${d.category}\n` +
-      `🎨 <b>Варіанти кольорів та склад:</b>\n${colorSummary}\n` +
+      `🎨 <b>Варіанти кольорів, фото та склад:</b>\n${colorSummary}\n` +
       `📦 <b>Загальний залишок:</b> <b>${totalQty} шт.</b>\n\n` +
       `<i>Після підтвердження товар миттєво з'явиться на сайті MILIPSTORE та у Telegram-боті!</i>`;
 
@@ -2340,21 +2459,41 @@ export class TelegramBotService {
       totalQuantity += q;
     });
 
-    // Fill default images if empty
+    // Build deduplicated color images structure
     const color_images = {};
     const defaultImg = this.getDefaultProductImage(brand, category);
+
     colors.forEach(c => {
-      if (d.color_images?.[c]?.main) {
-        color_images[c] = d.color_images[c];
+      const cData = d.color_images?.[c];
+      if (cData && cData.main) {
+        const rawGallery = Array.isArray(cData.gallery) && cData.gallery.length > 0 ? cData.gallery : [cData.main];
+        // Ensure main photo is first and no duplicates in color gallery
+        const cleanGallery = Array.from(new Set([cData.main, ...rawGallery])).filter(Boolean);
+        color_images[c] = {
+          main: cData.main,
+          gallery: cleanGallery
+        };
       } else {
         const cImg = this.getDefaultColorImage(c, brand, category);
-        color_images[c] = { main: cImg, gallery: [cImg] };
+        color_images[c] = {
+          main: cImg,
+          gallery: [cImg]
+        };
       }
     });
 
-    const mainImg = d.img || color_images[colors[0]]?.main || defaultImg;
-    const gallery = Object.values(color_images).map(ci => ci.main).filter(Boolean);
-    if (!gallery.includes(mainImg)) gallery.unshift(mainImg);
+    // Main catalog photo
+    const mainCatalogImg = d.img || color_images[colors[0]]?.main || defaultImg;
+
+    // Overall product gallery (deduplicated across all colors & catalog photo)
+    const allGalleryPhotos = [mainCatalogImg];
+    colors.forEach(c => {
+      if (color_images[c]?.main) allGalleryPhotos.push(color_images[c].main);
+      if (Array.isArray(color_images[c]?.gallery)) {
+        allGalleryPhotos.push(...color_images[c].gallery);
+      }
+    });
+    const finalProductGallery = Array.from(new Set(allGalleryPhotos)).filter(Boolean);
 
     const fullTitle = `${brand} ${title}`;
     const slugId = `prod-${brand.toLowerCase().replace(/[^a-z0-9]/g, '')}-${title.toLowerCase().replace(/[^a-z0-9]/g, '')}-${Date.now().toString().slice(-4)}`;
@@ -2370,8 +2509,8 @@ export class TelegramBotService {
       quantity: totalQuantity,
       colors: colors.join(', '),
       description: `${fullTitle} — якісний ігровий девайс з офіційною гарантією від MILIPSTORE.`,
-      img: mainImg,
-      gallery: gallery.length ? gallery : [mainImg],
+      img: mainCatalogImg,
+      gallery: finalProductGallery.length ? finalProductGallery : [mainCatalogImg],
       specs: this.getDefaultSpecs(category),
       color_images,
       color_quantities,

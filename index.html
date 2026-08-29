@@ -3870,9 +3870,11 @@
 
                 if (activeColor.image) {
                     activeImg = activeColor.image;
-                    currentGalleryImages = [activeColor.image, ...(activeColor.gallery || [])];
+                    const colGallery = Array.isArray(activeColor.gallery) ? activeColor.gallery : [];
+                    // Ensure the main color image is not duplicated in the gallery
+                    currentGalleryImages = Array.from(new Set([activeColor.image, ...colGallery])).filter(Boolean);
                 } else {
-                    currentGalleryImages = currentModalProduct.gallery || [currentModalProduct.img];
+                    currentGalleryImages = Array.from(new Set(currentModalProduct.gallery || [currentModalProduct.img])).filter(Boolean);
                 }
 
                 if (stockStatusEl) {
@@ -3894,7 +3896,7 @@
                 }
             } else {
                 if (colorNameEl) colorNameEl.innerText = 'не вибрано';
-                currentGalleryImages = currentModalProduct.gallery || [currentModalProduct.img];
+                currentGalleryImages = Array.from(new Set(currentModalProduct.gallery || [currentModalProduct.img])).filter(Boolean);
                 activeImg = currentGalleryImages[0] || currentModalProduct.img;
 
                 if (stockStatusEl) {
@@ -3906,6 +3908,9 @@
                     addCartBtn.innerText = 'Оберіть колір';
                 }
             }
+
+            // Ensure currentGalleryImages has unique values
+            currentGalleryImages = Array.from(new Set(currentGalleryImages)).filter(Boolean);
 
             if (mainImg) {
                 mainImg.style.opacity = '0';
