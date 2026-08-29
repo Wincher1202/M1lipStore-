@@ -1,2885 +1,7148 @@
-import asyncio
-import json
-import logging
-import os
-import random
-import uuid
-import re
-import hashlib
-import time
-import hmac
-from urllib.parse import parse_qsl
-from fastapi import FastAPI, Request, APIRouter, UploadFile, File, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
-from aiogram import Bot, Dispatcher, F, Router
-from aiogram.filters import Command
-from aiogram.fsm.context import FSMContext
-from aiogram.fsm.state import State, StatesGroup
-from aiogram.types import (
-    KeyboardButton,
-    Message,
-    ReplyKeyboardMarkup,
-    WebAppInfo,
-    InlineKeyboardButton,
-    InlineKeyboardMarkup,
-    CallbackQuery,
-    BufferedInputFile,
-    LabeledPrice,
-    PreCheckoutQuery,
-)
-import uvicorn
-import psycopg2
-from psycopg2.extras import RealDictCursor
+< !DOCTYPE
+html >
+< html
+lang = "uk" >
+< head >
+< meta
+charset = "UTF-8" >
+< meta
+name = "viewport"
+content = "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" >
+< title > M1lipStore — Premium
+Gaming
+Hardware < / title >
+< !-- Inline
+favicon: prevents
+GitHub
+Pages
+from requesting a
 
-from delivery import delivery_service, DeliveryProviderNotConfigured, DeliveryProviderError
-
-# ============================================================================
-# SECRETS
-# ============================================================================
-TOKEN = os.environ.get("BOT_TOKEN", "")
-ADMIN_IDS = [int(x) for x in os.environ.get("ADMIN_IDS", "1929165295,1248134309").split(",") if x.strip()]
-ADMIN_PANEL_URL = os.environ.get("ADMIN_PANEL_URL", "https://wincher1202.github.io/M1lipStore-/admin.html")
-SHOP_URL = os.environ.get("SHOP_URL", "https://wincher1202.github.io/M1lipStore-/")
-
-# Telegram Payments (Smart Glocal Test) provider token. NEVER hardcode this or
-# expose it to the frontend — it lives only here, read from the environment,
-# and is used exclusively in server-side Bot API calls (createInvoiceLink /
-# answerPreCheckoutQuery happen on Telegram's side once this token is set on
-# the invoice). Set TELEGRAM_PAYMENT_TOKEN in your environment/host secrets.
-TELEGRAM_PAYMENT_TOKEN = os.environ.get("TELEGRAM_PAYMENT_TOKEN", "")
-PAYMENT_CURRENCY = os.environ.get("PAYMENT_CURRENCY", "UAH")
-PAYMENT_PROVIDER_LABEL = os.environ.get("PAYMENT_PROVIDER_LABEL", "Smart Glocal")
-
-DATABASE_URL = os.environ.get("DATABASE_URL")
-
-if not TOKEN:
-    logging.warning("BOT_TOKEN is not set. Telegram bot features will not work until it is configured.")
-if not TELEGRAM_PAYMENT_TOKEN:
-    logging.warning("TELEGRAM_PAYMENT_TOKEN is not set. Online payment (Telegram Payments) will not work until it is configured.")
-
-logging.basicConfig(level=logging.INFO)
-
-NAME_RE = re.compile(r"^[A-Za-zА-Яа-яІіЇїЄєҐґ'’\-]{2,40}$", re.UNICODE)
-EMAIL_RE = re.compile(r"^[^\s@]+@[^\s@]+\.[^\s@]{2,}$")
-
-# Fulfillment pipeline status. This is deliberately separate from
-# payment_status: an order only becomes actionable for the warehouse once
-# payment_status == PAID; before that it just waits in NEW/WAITING_PAYMENT.
-ORDER_STATUSES = [
-    "NEW",              # Нові
-    "CONFIRMED",        # Підтверджені
-    "PACKING",          # Готується до пакування
-    "PACKED",           # Упаковано
-    "READY_TO_SHIP",    # Готується до відправки
-    "SHIPPED",          # Відправлено
-    "DELIVERED",        # Доставлено
-    "COMPLETED",        # Виконано
-    "CANCELLED",        # Скасовано
-]
-STOCK_HELD_STATUSES = {
-    "NEW", "CONFIRMED", "PACKING", "PACKED", "READY_TO_SHIP", "SHIPPED", "DELIVERED", "COMPLETED",
+missing / favicon.ico(404). -->
+< link
+rel = "icon"
+type = "image/svg+xml"
+href = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%235764e2'/%3E%3Cpath fill='white' d='M13 43V21h7l7 11 7-11h7v22h-7V32l-7 10-7-10v11z'/%3E%3C/svg%3E" >
+< !-- Telegram
+Web
+App
+SDK -->
+< script
+src = "https://telegram.org/js/telegram-web-app.js" > < / script >
+< link
+rel = "preconnect"
+href = "https://fonts.googleapis.com" >
+< link
+rel = "preconnect"
+href = "https://fonts.gstatic.com"
+crossorigin >
+< link
+href = "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@700;800;900&display=swap"
+rel = "stylesheet" >
+< style >
+:root
+{
+    --bg - primary:  # F8F9FA;
+        --bg - secondary:  # FFFFFF;
+--bg - tertiary:  # F1F3F5;
+--text - primary:  # 111315;
+--text - secondary:  # 656D76;
+--text - muted:  # 8C959F;
+--accent:  # 5764e2;
+--accent - hover:  # 4551d0;
+--accent - light: rgba(87, 100, 226, 0.08);
+--border - light: rgba(0, 0, 0, 0.08);
+--border - hover: rgba(0, 0, 0, 0.16);
+--shadow - subtle: 0
+4
+px
+24
+px
+rgba(0, 0, 0, 0.04);
+--shadow - card: 0
+10
+px
+30
+px
+rgba(0, 0, 0, 0.06);
+--shadow - hover: 0
+20
+px
+40
+px
+rgba(87, 100, 226, 0.15);
+--radius - lg: 20
+px;
+--radius - md: 14
+px;
+--radius - sm: 8
+px;
+--transition - smooth: all
+0.4
+s
+cubic - bezier(0.16, 1, 0.3, 1);
 }
 
-# Payment status is independent of the fulfillment status above.
-PAYMENT_STATUSES = ["WAITING_PAYMENT", "PAID", "FAILED"]
-
-ORDER_STATUS_LABELS_UA = {
-    "NEW": "🆕 Нові",
-    "CONFIRMED": "✅ Підтверджені",
-    "PACKING": "📦 Готується до пакування",
-    "PACKED": "📦 Упаковано",
-    "READY_TO_SHIP": "🚚 Готується до відправки",
-    "SHIPPED": "🚚 Відправлено",
-    "DELIVERED": "📬 Доставлено",
-    "COMPLETED": "🎉 Виконано",
-    "CANCELLED": "❌ Скасовано",
+[data - theme = "dark"] {
+    --bg - primary:  # 0A0B0D;
+        --bg - secondary:  # 121418;
+--bg - tertiary:  # 1A1D23;
+--text - primary:  # F4F5F7;
+--text - secondary:  # 9DA3AF;
+--text - muted:  # 6B7280;
+--accent:  # 5764e2;
+--accent - hover:  # 6c78ff;
+--accent - light: rgba(87, 100, 226, 0.15);
+--border - light: rgba(255, 255, 255, 0.08);
+--border - hover: rgba(255, 255, 255, 0.16);
+--shadow - subtle: 0
+4
+px
+24
+px
+rgba(0, 0, 0, 0.2);
+--shadow - card: 0
+10
+px
+30
+px
+rgba(0, 0, 0, 0.3);
+--shadow - hover: 0
+20
+px
+40
+px
+rgba(87, 100, 226, 0.25);
 }
-PAYMENT_STATUS_LABELS_UA = {
-    "WAITING_PAYMENT": "⏳ Очікує оплати",
-    "PAID": "✅ Оплата підтверджена",
-    "FAILED": "⚠️ Помилка оплати",
+
+*, *::before, *::after
+{
+    box - sizing: border - box;
+margin: 0;
+padding: 0;
 }
 
-# Customer-facing Telegram message sent automatically whenever an admin moves
-# an order to a new fulfillment status (spec section 11).
-STATUS_CUSTOMER_MESSAGES = {
-    "CONFIRMED": "📦 Ваше замовлення #{order_id} підтверджено!\n\nМи вже почали його обробку.",
-    "PACKING": "📦 Ваше замовлення #{order_id} готується до пакування.",
-    "PACKED": "✅ Ваше замовлення #{order_id} упаковано.",
-    "READY_TO_SHIP": "🚚 Ваше замовлення #{order_id} готується до відправки.",
-    "SHIPPED": "🚚 Ваше замовлення #{order_id} вже відправлено!{ttn_line}",
-    "DELIVERED": "📦 Ваше замовлення #{order_id} вже прибуло до відділення.",
-    "COMPLETED": "🎉 Ваше замовлення #{order_id} успішно виконано. Дякуємо за покупку!",
-    "CANCELLED": "❌ Ваше замовлення #{order_id} було скасовано.",
+html
+{
+    scroll - behavior: smooth;
+font - size: 16
+px;
+height: 100 %;
 }
 
+body
+{
+    font - family: 'Inter', sans - serif;
+font - weight: 500;
+background - color: var(--bg - primary);
+color: var(--text - primary);
+line - height: 1.5;
+overflow - x: hidden;
+-webkit - font - smoothing: antialiased;
+min - height: 100 %;
+display: flex;
+flex - direction: column;
+transition: background - color
+0.4
+s
+ease, color
+0.4
+s
+ease;
+}
 
-def get_db_connection():
-    return psycopg2.connect(DATABASE_URL, cursor_factory=RealDictCursor)
+.product - price,.cart - total
+{
+    font - family: 'Inter', sans - serif;
+font - weight: 600;
+}
+
+.product - price
+span.currency
+{
+    font - weight: 400;
+color: var(--text - secondary);
+font - size: 0.9
+em;
+margin - left: 2
+px;
+}
+
+.badge - count,.spec - box
+strong,.quantity - controls
+span
+{
+    font - family: 'JetBrains Mono', monospace;
+}
+
+::-webkit - scrollbar
+{width: 6px;
+height: 6
+px;}
+::-webkit - scrollbar - track
+{background: var(--bg - primary);}
+::-webkit - scrollbar - thumb
+{background: var(--border - hover);
+border - radius: 3
+px;}
+
+@keyframes
 
 
-def init_db():
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute("""
-                   CREATE TABLE IF NOT EXISTS products
-                   (
-                       id
-                       TEXT
-                       PRIMARY
-                       KEY,
-                       brand
-                       TEXT,
-                       title
-                       TEXT
-                       NOT
-                       NULL,
-                       price
-                       INTEGER
-                       NOT
-                       NULL,
-                       old_price
-                       INTEGER,
-                       tag
-                       TEXT,
-                       category
-                       TEXT
-                       NOT
-                       NULL,
-                       quantity
-                       INTEGER
-                       NOT
-                       NULL,
-                       colors
-                       TEXT,
-                       description
-                       TEXT,
-                       img
-                       TEXT,
-                       gallery
-                       TEXT,
-                       specs
-                       TEXT,
-                       color_images
-                       TEXT,
-                       color_quantities
-                       TEXT,
-                       sku
-                       TEXT,
-                       featured
-                       BOOLEAN
-                       DEFAULT
-                       FALSE,
-                       popular
-                       BOOLEAN
-                       DEFAULT
-                       FALSE,
-                       hidden
-                       BOOLEAN
-                       DEFAULT
-                       FALSE,
-                       created_at
-                       TIMESTAMP
-                       DEFAULT
-                       CURRENT_TIMESTAMP
-                   )
-                   """)
-    cursor.execute("""
-                   CREATE TABLE IF NOT EXISTS orders
-                   (
-                       id
-                       SERIAL
-                       PRIMARY
-                       KEY,
-                       order_id
-                       TEXT
-                       UNIQUE,
-                       data
-                       JSONB,
-                       status
-                       TEXT
-                       NOT
-                       NULL
-                       DEFAULT
-                       'NEW',
-                       tracking_number
-                       TEXT,
-                       admin_comment
-                       TEXT,
-                       telegram_id
-                       BIGINT,
-                       total
-                       INTEGER
-                       NOT
-                       NULL
-                       DEFAULT
-                       0,
-                       created_at
-                       TIMESTAMP
-                       DEFAULT
-                       CURRENT_TIMESTAMP,
-                       updated_at
-                       TIMESTAMP
-                       DEFAULT
-                       CURRENT_TIMESTAMP
-                   )
-                   """)
-    cursor.execute("""
-                   CREATE TABLE IF NOT EXISTS order_status_history
-                   (
-                       id
-                       SERIAL
-                       PRIMARY
-                       KEY,
-                       order_id
-                       TEXT
-                       NOT
-                       NULL,
-                       status
-                       TEXT,
-                       payment_status
-                       TEXT,
-                       note
-                       TEXT,
-                       created_at
-                       TIMESTAMP
-                       DEFAULT
-                       CURRENT_TIMESTAMP
-                   )
-                   """)
-    cursor.execute("""
-                   CREATE TABLE IF NOT EXISTS user_profiles
-                   (
-                       telegram_id
-                       BIGINT
-                       PRIMARY
-                       KEY,
-                       first_name
-                       TEXT,
-                       last_name
-                       TEXT,
-                       phone
-                       TEXT,
-                       saved_deliveries
-                       JSONB
-                       NOT
-                       NULL
-                       DEFAULT
-                       '[]',
-                       updated_at
-                       TIMESTAMP
-                       DEFAULT
-                       CURRENT_TIMESTAMP
-                   )
-                   """)
-    cursor.execute("""
-                   CREATE TABLE IF NOT EXISTS categories
-                   (
-                       id
-                       TEXT
-                       PRIMARY
-                       KEY,
-                       name
-                       TEXT
-                       NOT
-                       NULL,
-                       image
-                       TEXT,
-                       position
-                       INTEGER
-                       NOT
-                       NULL
-                       DEFAULT
-                       0,
-                       hidden
-                       BOOLEAN
-                       DEFAULT
-                       FALSE
-                   )
-                   """)
-    cursor.execute("""
-                   CREATE TABLE IF NOT EXISTS brands
-                   (
-                       id
-                       TEXT
-                       PRIMARY
-                       KEY,
-                       name
-                       TEXT
-                       NOT
-                       NULL,
-                       logo
-                       TEXT,
-                       position
-                       INTEGER
-                       NOT
-                       NULL
-                       DEFAULT
-                       0,
-                       hidden
-                       BOOLEAN
-                       DEFAULT
-                       FALSE
-                   )
-                   """)
+floating
+{
+    0 % {transform: translateY(0px);}
+50 % {transform: translateY(-3px);}
+100 % {transform: translateY(0px);}
+}
 
-    migrations = [
-        ("products", "color_quantities", "TEXT"),
-        ("products", "color_images", "TEXT"),
-        ("products", "old_price", "INTEGER"),
-        ("products", "sku", "TEXT"),
-        ("products", "featured", "BOOLEAN DEFAULT FALSE"),
-        ("products", "popular", "BOOLEAN DEFAULT FALSE"),
-        ("products", "hidden", "BOOLEAN DEFAULT FALSE"),
-        ("products", "created_at", "TIMESTAMP DEFAULT CURRENT_TIMESTAMP"),
-        ("orders", "status", "TEXT NOT NULL DEFAULT 'NEW'"),
-        ("orders", "tracking_number", "TEXT"),
-        ("orders", "admin_comment", "TEXT"),
-        ("orders", "telegram_id", "BIGINT"),
-        ("orders", "total", "INTEGER NOT NULL DEFAULT 0"),
-        ("orders", "updated_at", "TIMESTAMP DEFAULT CURRENT_TIMESTAMP"),
-        ("orders", "payment_status", "TEXT NOT NULL DEFAULT 'WAITING_PAYMENT'"),
-        ("orders", "payment_charge_id", "TEXT"),
-        ("orders", "provider_charge_id", "TEXT"),
-        ("orders", "paid_at", "TIMESTAMP"),
-        ("orders", "invoice_payload", "TEXT"),
-    ]
-    for table, column, coltype in migrations:
-        cursor.execute("""
-                       SELECT 1
-                       FROM information_schema.columns
-                       WHERE table_name = %s
-                         AND column_name = %s
-                       """, (table, column))
-        if not cursor.fetchone():
-            cursor.execute(f"ALTER TABLE {table} ADD COLUMN {column} {coltype}")
+header
+{
+    position: fixed;
+top: 0;
+left: 0;
+width: 100 %;
+z - index: 1000;
+padding: 14
+px
+20
+px;
+display: flex;
+align - items: center;
+justify - content: space - between;
+background: rgba(248, 249, 250, 0.85);
+backdrop - filter: blur(16
+px);
+-webkit - backdrop - filter: blur(16
+px);
+border - bottom: 1
+px
+solid
+transparent;
+transition: var(--transition - smooth);
+}
 
-    # One-time data migration: map the old 7-value status scheme onto the new
-    # fulfillment/payment split. Safe to run every boot — it only rewrites
-    # rows still holding a legacy value.
-    legacy_status_map = {
-        "WAITING_PAYMENT": ("NEW", "WAITING_PAYMENT"),
-        "PAID": ("CONFIRMED", "PAID"),
-        "PROCESSING": ("PACKING", "PAID"),
-        "SHIPPED": ("SHIPPED", "PAID"),
-        "DELIVERED": ("DELIVERED", "PAID"),
+[data - theme = "dark"] header
+{
+    background: rgba(10, 11, 13, 0.85);
+}
+
+header.scrolled
+{
+    padding: 10px 20px;
+background: rgba(248, 249, 250, 0.92);
+border - bottom: 1
+px
+solid
+var(--border - light);
+box - shadow: var(--shadow - subtle);
+}
+
+[data - theme = "dark"] header.scrolled
+{
+    background: rgba(10, 11, 13, 0.92);
+}
+
+.logo
+{
+    font - family: 'Outfit', sans - serif;
+font - size: 1.55
+rem;
+font - weight: 900;
+letter - spacing: -0.03
+em;
+cursor: pointer;
+text - decoration: none;
+display: flex;
+align - items: center;
+gap: 2
+px;
+animation: floating
+3
+s
+ease - in -out
+infinite;
+transition: transform
+0.3
+s
+cubic - bezier(0.16, 1, 0.3, 1);
+}
+
+.logo: hover
+{
+    transform: scale(1.03);
+}
+
+.logo - text - wrap
+{
+    display: flex;
+align - items: center;
+}
+
+.logo - part - 1
+{
+    color: var(--text - primary);
+text - transform: uppercase;
+}
+
+.logo - part - 2
+{
+    background: linear - gradient(135deg,  # 5764e2 0%, #8c9eff 100%);
+-webkit - background - clip: text;
+-webkit - text - fill - color: transparent;
+text - transform: uppercase;
+margin - left: 1
+px;
+position: relative;
+}
+
+.nav - right
+{
+    display: flex;
+align - items: center;
+gap: 10
+px;
+margin - left: auto;
+}
+
+.icon - btn - wrapper
+{
+    position: relative;
+display: inline - flex;
+}
+
+.tooltip
+{
+    position: absolute;
+bottom: -36
+px;
+left: 50 %;
+transform: translateX(-50 %)
+translateY(4
+px);
+background: var(--text - primary);
+color: var(--bg - secondary);
+padding: 4
+px
+8
+px;
+border - radius: 6
+px;
+font - size: 0.7
+rem;
+font - weight: 600;
+white - space: nowrap;
+opacity: 0;
+visibility: hidden;
+pointer - events: none;
+transition: var(--transition - smooth);
+box - shadow: var(--shadow - subtle);
+z - index: 1010;
+}
+
+.icon - btn - wrapper: hover.tooltip
+{
+    opacity: 1;
+visibility: visible;
+transform: translateX(-50 %)
+translateY(0);
+}
+
+.icon - btn
+{
+    background: transparent;
+border: none;
+cursor: pointer;
+color: var(--text - primary);
+font - size: 1
+rem;
+position: relative;
+width: 38
+px;
+height: 38
+px;
+border - radius: 50 %;
+display: flex;
+align - items: center;
+justify - content: center;
+transition: var(--transition - smooth);
+border: 1
+px
+solid
+var(--border - light);
+}
+
+.icon - btn: hover
+{
+    background: var(--bg - tertiary);
+border - color: var(--border - hover);
+transform: translateY(-2
+px);
+}
+
+.badge - count
+{
+    position: absolute;
+top: 2
+px;
+right: 2
+px;
+background: var(--accent);
+color: white;
+font - size: 0.6
+rem;
+font - weight: 700;
+width: 16
+px;
+height: 16
+px;
+border - radius: 50 %;
+display: flex;
+align - items: center;
+justify - content: center;
+}
+
+.hero
+{
+    padding: 110px 20px 30px;
+max - width: 1360
+px;
+margin: 0
+auto;
+display: grid;
+grid - template - columns: 1
+fr;
+align - items: center;
+gap: 32
+px;
+width: 100 %;
+text - align: center;
+box - sizing: border - box;
+overflow: hidden;
+}
+
+@media(min - width
+
+: 900
+px) {
+.hero
+{
+    grid - template - columns: minmax(0, 1.15fr) minmax(0, 0.85
+fr);
+text - align: left;
+padding - top: 125
+px;
+padding - bottom: 40
+px;
+gap: 36
+px;
+}
+}
+
+.brands - strip
+{
+    display: flex;
+gap: 12
+px;
+overflow - x: auto;
+padding: 6
+px
+4
+px
+14
+px
+4
+px;
+scroll - behavior: smooth;
+-webkit - overflow - scrolling: touch;
+}
+
+.brand - logo - wrap
+{
+    width: 40px;
+height: 40
+px;
+border - radius: 50 %;
+background: var(--bg - tertiary);
+display: flex;
+align - items: center;
+justify - content: center;
+overflow: hidden;
+font - weight: 800;
+font - size: 0.85
+rem;
+color: var(--text - secondary);
+flex - shrink: 0;
+}
+
+.brand - logo - wrap
+img
+{
+    width: 100 %;
+height: 100 %;
+object - fit: contain;
+padding: 5
+px;
+}
+
+.hero - content
+{
+    display: flex;
+flex - direction: column;
+gap: 14
+px;
+align - items: center;
+width: 100 %;
+max - width: 600
+px;
+margin: 0
+auto;
+min - width: 0;
+box - sizing: border - box;
+}
+
+@media(min - width
+
+: 900
+px) {
+    .hero - content
+{
+    align - items: flex - start;
+margin: 0;
+}
+}
+
+.hero - badge - group
+{
+    display: flex;
+align - items: center;
+gap: 10
+px;
+flex - wrap: wrap;
+justify - content: center;
+}
+
+@media(min - width
+
+: 900
+px) {
+    .hero - badge - group
+{justify - content: flex - start;}
+}
+
+.hero - badge
+{
+    display: inline - flex;
+align - items: center;
+gap: 8
+px;
+background: var(--accent - light);
+color: var(--accent);
+padding: 6
+px
+12
+px;
+border - radius: 30
+px;
+font - size: 0.7
+rem;
+font - weight: 700;
+letter - spacing: 0.05
+em;
+text - transform: uppercase;
+}
+
+.store - status
+{
+    display: inline - flex;
+align - items: center;
+gap: 6
+px;
+font - size: 0.75
+rem;
+font - weight: 600;
+color: var(--text - secondary);
+background: var(--bg - secondary);
+border: 1
+px
+solid
+var(--border - light);
+padding: 5
+px
+10
+px;
+border - radius: 20
+px;
+}
+
+.status - dot
+{
+    width: 7px;
+height: 7
+px;
+background - color:  # 2E7D32;
+border - radius: 50 %;
+}
+
+.hero
+h1
+{
+    font - size: clamp(1.85rem, 4.2
+vw, 3.2
+rem);
+font - weight: 800;
+line - height: 1.15;
+letter - spacing: -0.025
+em;
+word -
+break: normal;
+overflow - wrap:
+break
+-word;
+max - width: 100 %;
+}
+
+.hero
+p
+{
+font - size: 0.95
+rem;
+color: var(--text - secondary);
+max - width: 480
+px;
+line - height: 1.5;
+}
+
+.hero - actions
+{
+display: flex;
+align - items: center;
+gap: 15
+px;
+margin - top: 8
+px;
+}
+
+.btn - primary
+{
+background: var(--text - primary);
+color: var(--bg - secondary);
+border: none;
+padding: 12
+px
+24
+px;
+border - radius: var(--radius - sm);
+font - weight: 700;
+font - size: 0.9
+rem;
+cursor: pointer;
+display: inline - flex;
+align - items: center;
+gap: 8
+px;
+text - decoration: none;
+transition: var(--transition - smooth);
+}
+
+.btn - primary: hover:not (:disabled)
+{
+background: var(--accent);
+transform: translateY(-2
+px) scale(1.02);
+box - shadow: var(--shadow - hover);
+}
+
+.btn - primary: disabled
+{
+background: var(--border - hover) !important;
+color: var(--text - muted) !important;
+cursor: not -allowed;
+transform: none !important;
+box - shadow: none !important;
+}
+
+.hero - visual
+{
+position: relative;
+display: flex;
+justify - content: center;
+align - items: center;
+width: 100 %;
+max - width: 100 %;
+min - width: 0;
+box - sizing: border - box;
+}
+
+.hero - card - 3
+d
+{
+background: var(--bg - secondary);
+border: 2
+px
+solid
+var(--border - light);
+border - radius: var(--radius - lg);
+padding: 14
+px;
+box - shadow: var(--shadow - card);
+width: 100 %;
+max - width: 480
+px;
+position: relative;
+cursor: pointer;
+transition: all
+0.4
+s
+cubic - bezier(0.16, 1, 0.3, 1);
+overflow: hidden;
+will - change: transform, box - shadow;
+box - sizing: border - box;
+}
+
+.hero - card - 3
+d: hover
+{
+border - color: var(--accent);
+box - shadow: 0
+18
+px
+40
+px
+rgba(87, 100, 226, 0.22);
+transform: translateY(-5
+px) scale(1.01);
+}
+
+.hero - card - 3
+d.brand - focus
+{
+animation: heroTabletPulse
+0.7
+s
+cubic - bezier(0.16, 1, 0.3, 1)
+forwards;
+border - color: var(--accent);
+}
+
+@keyframes
+
+
+heroTabletPulse
+{
+0 % {transform: scale(0.96);
+box - shadow: 0
+0
+0
+0
+rgba(87, 100, 226, 0.8);}
+50 % {transform: scale(1.03);
+box - shadow: 0
+0
+35
+px
+8
+px
+rgba(87, 100, 226, 0.4);}
+100 % {transform: scale(1);
+box - shadow: 0
+14
+px
+34
+px
+rgba(87, 100, 226, 0.25);}
+}
+
+.hero - card - 3
+d.product - tag
+{
+position: absolute;
+top: 22
+px;
+left: 22
+px;
+z - index: 5;
+box - shadow: 0
+4
+px
+12
+px
+rgba(0, 0, 0, 0.1);
+transition: all
+0.3
+s
+ease;
+}
+
+.hero - card - img - wrap
+{
+width: 100 %;
+aspect - ratio: 16 / 11;
+border - radius: var(--radius - md);
+overflow: hidden;
+display: flex;
+align - items: center;
+justify - content: center;
+background: radial - gradient(circle
+at
+center, var(--bg - tertiary)
+0 %, var(--bg - secondary)
+100 %);
+position: relative;
+}
+
+.hero - card - 3
+d
+img
+{
+width: 100 %;
+height: 100 %;
+object - fit: cover;
+display: block;
+border - radius: var(--radius - md);
+transition: opacity
+0.35
+s
+ease - in -out, transform
+0.5
+s
+cubic - bezier(0.16, 1, 0.3, 1);
+}
+
+.hero - card - 3
+d: hover
+img
+{
+transform: scale(1.04);
+}
+
+.section - padding
+{
+padding: 50
+px
+20
+px;
+max - width: 1440
+px;
+margin: 0
+auto;
+width: 100 %;
+}
+
+.section - header
+{
+display: flex;
+justify - content: space - between;
+align - items: flex - end;
+margin - bottom: 24
+px;
+}
+
+.section - title
+{
+font - size: clamp(1.5
+rem, 3.5
+vw, 2.2
+rem);
+font - weight: 800;
+letter - spacing: -0.02
+em;
+}
+
+.section - subtitle
+{
+color: var(--text - secondary);
+font - size: 0.9
+rem;
+}
+
+.catalog - filters
+{
+display: flex;
+gap: 10
+px;
+margin - bottom: 28
+px;
+overflow - x: auto;
+padding: 6
+px
+4
+px
+12
+px
+4
+px;
+scroll - behavior: smooth;
+-webkit - overflow - scrolling: touch;
+}
+
+.filter - btn
+{
+background: var(--bg - secondary);
+border: 1
+px
+solid
+var(--border - light);
+padding: 10
+px
+20
+px;
+border - radius: 30
+px;
+font - size: 0.85
+rem;
+font - weight: 600;
+color: var(--text - secondary);
+cursor: pointer;
+white - space: nowrap;
+flex - shrink: 0;
+box - shadow: var(--shadow - subtle);
+transition: all
+0.35
+s
+cubic - bezier(0.16, 1, 0.3, 1);
+position: relative;
+overflow: hidden;
+}
+
+.filter - btn
+span
+{
+position: relative;
+z - index: 1;
+}
+
+.filter - btn: hover
+{
+border - color: var(--accent);
+color: var(--accent);
+transform: translateY(-3
+px) scale(1.02);
+box - shadow: 0
+4
+px
+12
+px
+rgba(87, 100, 226, 0.1);
+}
+
+.filter - btn.active
+{
+background: var(--accent);
+color: white;
+border - color: var(--accent);
+transform: translateY(-3
+px) scale(1.03);
+box - shadow: 0
+4
+px
+14
+px
+rgba(87, 100, 226, 0.25);
+}
+
+.brands - section
+{
+padding: 0
+20
+px;
+margin - bottom: 8
+px;
+}
+
+/ *Popular
+brands — slow, seamless
+auto - scrolling
+marquee * /
+.partner - brands - section
+{
+padding: 10
+px
+0
+16
+px
+0;
+margin: 6
+px
+0
+12
+px
+0;
+position: relative;
+}
+
+.partner - brands - section.section - header
+{
+padding: 0
+20
+px
+10
+px
+20
+px;
+}
+
+.partner - brands - marquee
+{
+overflow: hidden;
+width: 100 %;
+padding: 16
+px
+0
+20
+px
+0;
+margin: -6
+px
+0;
+position: relative;
+-webkit - mask - image: linear - gradient(90
+deg, transparent
+0,  # 000 30px, #000 calc(100% - 30px), transparent 100%);
+mask - image: linear - gradient(90
+deg, transparent
+0,  # 000 30px, #000 calc(100% - 30px), transparent 100%);
+}
+
+.partner - brands - track
+{
+    display: flex;
+align - items: center;
+width: max - content;
+padding: 6
+px
+0;
+animation: partnerBrandsScroll
+55
+s
+linear
+infinite;
+will - change: transform;
+}
+
+.partner - brands - marquee: hover.partner - brands - track
+{
+    animation - play - state: paused;
+}
+
+@keyframes
+
+
+partnerBrandsScroll
+{
+    0 % {transform: translateX(0);}
+100 % {transform: translateX(-50 %);}
+}
+
+.partner - brand - tile
+{
+    flex - shrink: 0;
+width: 136
+px;
+height: 72
+px;
+margin: 0
+10
+px;
+background:  # FFFFFF;
+border: 2
+px
+solid
+var(--border - light);
+border - radius: var(--radius - md);
+box - shadow: var(--shadow - subtle);
+display: flex;
+align - items: center;
+justify - content: center;
+padding: 8
+px
+14
+px;
+cursor: pointer;
+position: relative;
+overflow: visible;
+transition: all
+0.28
+s
+cubic - bezier(0.16, 1, 0.3, 1);
+user - select: none;
+box - sizing: border - box;
+}
+
+.partner - brand - tile
+img
+{
+    max - width: 100 %;
+max - height: 44
+px;
+width: auto;
+height: auto;
+object - fit: contain;
+pointer - events: none;
+transition: transform
+0.3
+s
+cubic - bezier(0.16, 1, 0.3, 1);
+display: block;
+}
+
+.partner - brand - tile
+span.brand - text - fallback
+{
+    font - weight: 800;
+font - size: 0.95
+rem;
+color: var(--text - primary);
+letter - spacing: 0.5
+px;
+display: none;
+}
+
+.partner - brand - tile.fallback - styled
+img
+{
+    display: none;
+}
+
+.partner - brand - tile.fallback - styled
+span.brand - text - fallback
+{
+    display: inline - block;
+}
+
+.partner - brand - tile::after
+{
+    content: '';
+position: absolute;
+inset: -2
+px;
+border - radius: var(--radius - md);
+background: radial - gradient(circle
+at
+center, rgba(87, 100, 226, 0.15)
+0 %, transparent
+70 %);
+opacity: 0;
+transition: opacity
+0.3
+s
+ease;
+pointer - events: none;
+}
+
+.partner - brand - tile: hover
+{
+    border - color: var(--accent);
+transform: translateY(-4
+px) scale(1.04);
+box - shadow: 0
+10
+px
+24
+px
+rgba(87, 100, 226, 0.22);
+}
+
+.partner - brand - tile: hover::after
+{
+    opacity: 1;
+}
+
+.partner - brand - tile: active
+{
+    transform: scale(0.95);
+}
+
+.partner - brand - tile.just - clicked
+{
+    animation: brandTilePop 0.55s cubic - bezier(0.16, 1, 0.3, 1) forwards;
+border - color: var(--accent);
+}
+
+@keyframes
+
+
+brandTilePop
+{
+    0 % {transform: scale(0.90);}
+45 % {transform: scale(1.12) translateY(-5px); box - shadow: 0
+12
+px
+28
+px
+rgba(87, 100, 226, 0.45);}
+100 % {transform: scale(1.03);}
+}
+
+.partner - brand - tile.active
+{
+    border - color: var(--accent);
+background: var(--accent - light);
+box - shadow: 0
+0
+0
+3
+px
+var(--accent), 0
+8
+px
+24
+px
+rgba(87, 100, 226, 0.35);
+transform: translateY(-3
+px) scale(1.03);
+animation: brandGlowPulse
+2.4
+s
+infinite
+ease - in -out;
+}
+
+.brand - logo - svg
+{
+    width: 100 %;
+height: 100 %;
+display: flex;
+align - items: center;
+justify - content: center;
+pointer - events: none;
+}
+
+.brand - logo - svg
+svg
+{
+    max - width: 100 %;
+max - height: 42
+px;
+object - fit: contain;
+}
+
+@keyframes
+
+
+brandGlowPulse
+{
+    0 %, 100 % {
+    box - shadow: 0 0 0 3px var(--accent), 0 8px 22px rgba(87, 100, 226, 0.3);
+}
+50 % {
+    box - shadow: 0 0 0 4.5px var(--accent), 0
+12
+px
+30
+px
+rgba(87, 100, 226, 0.55);
+}
+}
+
+# active-brand-indicator {
+animation: indicatorPop
+0.3
+s
+cubic - bezier(0.16, 1, 0.3, 1)
+both;
+}
+
+@keyframes
+
+
+indicatorPop
+{
+    0 % {transform: scale(0.85) translateY(-3px); opacity: 0;}
+100 % {transform: scale(1) translateY(0);
+opacity: 1;}
+}
+
+.catalog - card
+{
+    animation: catalogCardEntrance 0.35s cubic - bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes
+
+
+catalogCardEntrance
+{
+    0 % {opacity: 0;
+transform: translateY(12
+px) scale(0.98);}
+100 % {opacity: 1;
+transform: translateY(0)
+scale(1);}
+}
+
+.partner - brand - tile
+img
+{
+    max - width: 100 %;
+max - height: 100 %;
+object - fit: contain;
+pointer - events: none;
+transition: transform
+0.3
+s
+cubic - bezier(0.16, 1, 0.3, 1);
+}
+
+.partner - brand - tile: hover
+img
+{
+    transform: scale(1.08);
+}
+
+@media(min - width
+
+: 768
+px) {
+    .partner - brand - tile
+{width: 156px;
+height: 84
+px;
+margin: 0
+12
+px;}
+}
+
+.brands - strip
+{
+    display: flex;
+gap: 12
+px;
+overflow - x: auto;
+padding: 6
+px
+4
+px
+14
+px
+4
+px;
+scroll - behavior: smooth;
+-webkit - overflow - scrolling: touch;
+}
+
+.brand - card
+{
+    flex - shrink: 0;
+width: 84
+px;
+display: flex;
+flex - direction: column;
+align - items: center;
+justify - content: center;
+gap: 8
+px;
+padding: 12
+px
+8
+px;
+background: var(--bg - secondary);
+border: 1
+px
+solid
+var(--border - light);
+border - radius: var(--radius - md);
+box - shadow: var(--shadow - subtle);
+cursor: pointer;
+transition: var(--transition - smooth);
+}
+
+.brand - card: active
+{transform: scale(0.96);}
+
+.brand - card: hover, .brand - card.active
+{
+    border - color: var(--accent);
+box - shadow: 0
+6
+px
+16
+px
+rgba(87, 100, 226, 0.15);
+transform: translateY(-3
+px);
+}
+
+.brand - card.active
+{background: var(--accent - light);}
+
+.brand - logo - wrap
+{
+    width: 40px;
+height: 40
+px;
+border - radius: 50 %;
+background: var(--bg - tertiary);
+display: flex;
+align - items: center;
+justify - content: center;
+overflow: hidden;
+font - weight: 800;
+font - size: 0.85
+rem;
+color: var(--text - secondary);
+}
+
+.brand - logo - wrap
+img
+{width: 100 %;
+height: 100 %;
+object - fit: cover;}
+
+.brand - card
+span
+{
+    font - size: 0.72rem;
+font - weight: 700;
+text - align: center;
+color: var(--text - secondary);
+white - space: nowrap;
+overflow: hidden;
+text - overflow: ellipsis;
+max - width: 100 %;
+}
+
+.brand - card.active
+span
+{color: var(--accent);}
+
+.catalog - toolbar
+{
+    display: flex;
+align - items: center;
+gap: 10
+px;
+margin - bottom: 14
+px;
+}
+
+.filter - block - title
+{font - size: 0.8rem;
+font - weight: 800;
+text - transform: uppercase;
+letter - spacing: 0.02
+em;
+color: var(--text - muted);
+margin - bottom: 10
+px;}
+
+.price - range - inputs
+{display: flex;
+align - items: center;
+gap: 10
+px;}
+.price - range - inputs
+input
+{
+    width: 100 %;
+padding: 10
+px
+12
+px;
+border - radius: var(--radius - sm);
+border: 1
+px
+solid
+var(--border - light);
+background: var(--bg - primary);
+color: var(--text - primary);
+font - weight: 600;
+outline: none;
+}
+.price - range - inputs
+input: focus
+{border - color: var(--accent);}
+
+.chip - group
+{display: flex;
+flex - wrap: wrap;
+gap: 8
+px;}
+.chip - option
+{
+    padding: 8px 14px;
+border - radius: 20
+px;
+border: 1
+px
+solid
+var(--border - light);
+background: var(--bg - primary);
+font - size: 0.8
+rem;
+font - weight: 600;
+color: var(--text - secondary);
+cursor: pointer;
+transition: var(--transition - smooth);
+}
+.chip - option.active
+{background: var(--accent);
+border - color: var(--accent);
+color: white;}
+
+.btn - secondary - outline
+{
+    flex: 1;
+text - align: center;
+padding: 12
+px;
+border - radius: var(--radius - sm);
+border: 1
+px
+solid
+var(--border - light);
+background: var(--bg - secondary);
+color: var(--text - primary);
+font - weight: 700;
+cursor: pointer;
+transition: var(--transition - smooth);
+}
+.btn - secondary - outline: hover
+{border - color: var(--accent);
+color: var(--accent);}
+
+.recent - searches
+{display: flex;
+flex - wrap: wrap;
+gap: 8
+px;
+margin - top: 10
+px;}
+.recent - search - chip
+{
+    padding: 6px 12px;
+border - radius: 20
+px;
+background: var(--bg - primary);
+border: 1
+px
+solid
+var(--border - light);
+font - size: 0.75
+rem;
+font - weight: 600;
+color: var(--text - secondary);
+cursor: pointer;
+transition: var(--transition - smooth);
+}
+.recent - search - chip: hover
+{border - color: var(--accent);
+color: var(--accent);}
+.search - empty - state
+{text - align: center;
+padding: 30
+px
+10
+px;
+color: var(--text - secondary);
+font - size: 0.85
+rem;}
+
+.catalog - grid
+{
+    display: grid;
+grid - template - columns: 1
+fr;
+gap: 20
+px;
+}
+
+@media(min - width
+
+: 768
+px) {
+    .catalog - grid
+{grid - template - columns: repeat(2, 1fr);}
+}
+
+@media(min - width
+
+: 1100
+px) {
+    .catalog - grid
+{grid - template - columns: repeat(3, 1fr);}
+}
+
+.product - card
+{
+    background: var(--bg - secondary);
+border: 1
+px
+solid
+var(--border - light);
+border - radius: var(--radius - lg);
+padding: 20
+px;
+display: flex;
+flex - direction: column;
+position: relative;
+box - shadow: var(--shadow - subtle);
+cursor: pointer;
+height: 100 %;
+min - height: 450
+px;
+will - change: transform;
+transition: var(--transition - smooth);
+animation: catalogCardEntrance
+0.35
+s
+cubic - bezier(0.16, 1, 0.3, 1)
+both;
+}
+
+.product - card: hover
+{
+    transform: translateY(-6px) scale(1.01);
+border - color: var(--accent);
+box - shadow: var(--shadow - hover);
+}
+
+.product - tag
+{
+    background: var(--bg - tertiary);
+color: var(--text - primary);
+font - size: 0.65
+rem;
+font - weight: 700;
+padding: 4
+px
+10
+px;
+border - radius: 20
+px;
+width: fit - content;
+letter - spacing: 0.05
+em;
+text - transform: uppercase;
+}
+
+.product - tag.new
+{background: var(--accent - light);
+color: var(--accent);}
+
+@keyframes
+
+
+heartBeatAnim
+{
+    0 % {transform: scale(1);}
+15 % {transform: scale(1.35);}
+30 % {transform: scale(0.95);}
+45 % {transform: scale(1.2);}
+60 % {transform: scale(1);}
+}
+
+.wishlist - btn
+{
+    position: absolute;
+top: 18
+px;
+right: 18
+px;
+background: var(--bg - secondary);
+border: 1
+px
+solid
+var(--border - light);
+width: 36
+px;
+height: 36
+px;
+border - radius: 50 %;
+display: flex;
+align - items: center;
+justify - content: center;
+cursor: pointer;
+z - index: 10;
+transition: var(--transition - smooth);
+}
+
+.wishlist - btn: hover
+{
+    transform: scale(1.1);
+border - color: var(--border - hover);
+}
+
+.wishlist - btn
+svg
+{
+    transition: fill 0.3s ease, stroke
+0.3
+s
+ease;
+}
+
+.wishlist - btn.active
+svg
+{
+    animation: heartBeatAnim 0.8s cubic - bezier(0.175, 0.885, 0.32, 1.275) both;
+fill:  # FF3B30;
+stroke:  # FF3B30;
+}
+
+.product - img - wrap
+{
+    width: 100 %;
+aspect - ratio: 1 / 1;
+display: flex;
+align - items: center;
+justify - content: center;
+overflow: hidden;
+position: relative;
+margin: 14
+px
+0;
+border - radius: var(--radius - md);
+}
+
+.product - img - wrap
+img
+{
+    width: 100 %;
+height: 100 %;
+object - fit: cover;
+display: block;
+border - radius: var(--radius - md);
+transition: opacity
+0.3
+s
+ease - in -out, transform
+0.5
+s
+cubic - bezier(0.16, 1, 0.3, 1);
+}
+
+.product - card: hover.product - img - wrap
+img
+{
+    transform: scale(1.05);
+}
+
+.color - picker - preview
+{
+    display: flex;
+gap: 6
+px;
+margin: 6
+px
+0;
+align - items: center;
+min - height: 16
+px;
+}
+
+.color - dot
+{
+    width: 14px;
+height: 14
+px;
+border - radius: 50 %;
+border: 1
+px
+solid
+var(--border - hover);
+display: inline - block;
+cursor: pointer;
+transition: transform
+0.2
+s
+ease, box - shadow
+0.2
+s
+ease;
+}
+.color - dot: hover
+{
+    transform: scale(1.2);
+}
+.color - dot.out - of - stock
+{
+    background - color:  # 9ca3af !important; 
+        border - color:  # 6b7280 !important; 
+opacity: 0.5;
+cursor: not -allowed;
+}
+
+.product - info
+{
+    display: flex;
+justify - content: space - between;
+align - items: flex - end;
+margin - top: auto;
+border - top: 1
+px
+solid
+var(--border - light);
+padding - top: 12
+px;
+}
+
+.product - title - group
+h4
+{font - size: 0.75rem;
+color: var(--text - muted);
+text - transform: uppercase;
+font - weight: 700;}
+.product - title - group
+h3
+{font - size: 1.1rem;
+font - weight: 800;
+margin - top: 2
+px;}
+.product - price
+{font - size: 1.15rem;
+font - weight: 600;}
+
+.advantages - section
+{
+    padding: 30px 20px;
+max - width: 1440
+px;
+margin: 0
+auto;
+width: 100 %;
+}
+
+.advantages - grid
+{
+    display: grid;
+grid - template - columns: 1
+fr;
+gap: 16
+px;
+}
+
+@media(min - width
+
+: 768
+px) {
+    .advantages - grid
+{grid - template - columns: repeat(3, 1fr);}
+}
+
+.advantage - card
+{
+    background: var(--bg - secondary);
+border: 1
+px
+solid
+var(--border - light);
+border - radius: var(--radius - md);
+padding: 20
+px;
+display: flex;
+align - items: flex - start;
+gap: 16
+px;
+box - shadow: var(--shadow - subtle);
+transition: var(--transition - smooth);
+}
+
+.advantage - card: hover
+{
+    border - color: var(--border - hover);
+transform: translateY(-2
+px);
+}
+
+.advantage - icon
+{
+    background: var(--accent - light);
+color: var(--accent);
+width: 40
+px;
+height: 40
+px;
+border - radius: 12
+px;
+display: flex;
+align - items: center;
+justify - content: center;
+flex - shrink: 0;
+}
+
+.advantage - text
+h4
+{
+    font - size: 0.95rem;
+font - weight: 700;
+margin - bottom: 4
+px;
+}
+
+.advantage - text
+p
+{
+    font - size: 0.8rem;
+color: var(--text - secondary);
+line - height: 1.4;
+}
+
+footer
+{
+    background: var(--bg - secondary);
+border - top: 1
+px
+solid
+var(--border - light);
+padding: 35
+px
+20
+px
+20
+px;
+max - width: 1440
+px;
+margin: 0
+auto;
+width: 100 %;
+}
+
+.footer - grid
+{
+    display: grid;
+grid - template - columns: 1
+fr;
+gap: 24
+px;
+margin - bottom: 24
+px;
+}
+
+@media(min - width
+
+: 768
+px) {
+    .footer - grid
+{grid - template - columns: 2fr 1fr 1fr 1fr;
+gap: 30
+px;}
+}
+
+.footer - col
+h4
+{
+    font - size: 0.8rem;
+text - transform: uppercase;
+letter - spacing: 0.05
+em;
+color: var(--text - muted);
+margin - bottom: 12
+px;
+font - weight: 800;
+}
+
+.footer - col
+ul
+{list - style: none;
+display: flex;
+flex - direction: column;
+gap: 8
+px;}
+.footer - col
+a
+{text - decoration: none;
+color: var(--text - secondary);
+font - weight: 600;
+font - size: 0.85
+rem;
+transition: var(--transition - smooth);
+cursor: pointer;}
+.footer - col
+a: hover
+{color: var(--text - primary);
+transform: translateX(2
+px);}
+
+.footer - bottom
+{
+    border - top: 1px solid var(--border - light);
+padding - top: 16
+px;
+display: flex;
+flex - direction: column;
+gap: 8
+px;
+align - items: center;
+text - align: center;
+color: var(--text - muted);
+font - size: 0.75
+rem;
+}
+
+@media(min - width
+
+: 768
+px) {
+    .footer - bottom
+{flex - direction: row;
+justify - content: space - between;}
+}
+
+.overlay - backdrop
+{
+    position: fixed;
+top: 0;
+left: 0;
+width: 100 %;
+height: 100 %;
+background: rgba(0, 0, 0, 0.4);
+backdrop - filter: blur(6
+px);
+-webkit - backdrop - filter: blur(6
+px);
+z - index: 2000;
+opacity: 0;
+visibility: hidden;
+transition: opacity
+0.3
+s
+ease, visibility
+0.3
+s
+ease;
+}
+
+.overlay - backdrop.active
+{opacity: 1;
+visibility: visible;}
+
+.drawer
+{
+    position: fixed;
+top: 0;
+right: -100 %;
+width: 100 %;
+height: 100 %;
+background: var(--bg - secondary);
+z - index: 2001;
+box - shadow: -10
+px
+0
+40
+px
+rgba(0, 0, 0, 0.15);
+display: flex;
+flex - direction: column;
+transition: right
+0.4
+s
+cubic - bezier(0.16, 1, 0.3, 1);
+}
+
+@media(min - width
+
+: 500
+px) {.drawer
+{width: 420px;
+right: -420
+px;}}
+
+.drawer.active
+{right: 0;}
+.drawer - header
+{padding: 20px;
+border - bottom: 1
+px
+solid
+var(--border - light);
+display: flex;
+justify - content: space - between;
+align - items: center;}
+.close - drawer
+{background: transparent;
+border: none;
+font - size: 1.1
+rem;
+font - weight: 800;
+cursor: pointer;
+color: var(--text - primary);
+transition: var(--transition - smooth);}
+.close - drawer: hover
+{transform: rotate(90deg) scale(1.1);
+color: var(--accent);}
+.drawer - body
+{padding: 20px;
+flex - grow: 1;
+overflow - y: auto;
+display: flex;
+flex - direction: column;
+gap: 12
+px;}
+
+.cart - item,.wishlist - item - card
+{
+    display: flex;
+align - items: center;
+gap: 12
+px;
+background: var(--bg - primary);
+padding: 10
+px;
+border - radius: var(--radius - sm);
+border: 1
+px
+solid
+var(--border - light);
+transition: var(--transition - smooth);
+}
+
+.cart - item: hover, .wishlist - item - card: hover
+{
+    border - color: var(--border - hover);
+transform: translateY(-2
+px);
+}
+
+.cart - item
+img,.wishlist - item - card
+img
+{width: 50px;
+height: 50
+px;
+object - fit: cover;
+border - radius: 6
+px;
+cursor: pointer;
+transition: transform
+0.3
+s
+ease;}
+.cart - item
+img: hover, .wishlist - item - card
+img: hover
+{transform: scale(1.05);}
+
+.quantity - controls
+{
+    display: flex;
+align - items: center;
+gap: 8
+px;
+background: var(--bg - secondary);
+border: 1
+px
+solid
+var(--border - light);
+border - radius: 6
+px;
+padding: 2
+px
+6
+px;
+width: fit - content;
+}
+
+.quantity - controls
+button
+{background: transparent;
+border: none;
+cursor: pointer;
+font - weight: 800;
+color: var(--text - primary);
+transition: transform
+0.2
+s
+ease;}
+.quantity - controls
+button: hover
+{transform: scale(1.2);
+color: var(--accent);}
+
+.drawer - footer
+{padding: 20px;
+border - top: 1
+px
+solid
+var(--border - light);
+background: var(--bg - primary);}
+.cart - total
+{display: flex;
+justify - content: space - between;
+align - items: center;
+margin - bottom: 14
+px;
+font - size: 1.1
+rem;
+font - weight: 700;}
+
+.search - modal
+{
+    position: fixed;
+top: -100 %;
+left: 0;
+width: 100 %;
+background: var(--bg - secondary);
+z - index: 2002;
+padding: 30
+px
+20
+px;
+box - shadow: 0
+20
+px
+40
+px
+rgba(0, 0, 0, 0.1);
+transition: top
+0.4
+s
+cubic - bezier(0.16, 1, 0.3, 1);
+}
+
+.search - modal.active
+{top: 0;}
+.search - container
+{max - width: 800px;
+margin: 0
+auto;}
+.search - input - wrap
+{display: flex;
+align - items: center;
+border - bottom: 2
+px
+solid
+var(--text - primary);
+padding - bottom: 10
+px;
+gap: 12
+px;}
+.search - input - wrap
+input
+{width: 100 %;
+background: transparent;
+border: none;
+font - size: 1.2
+rem;
+font - weight: 700;
+color: var(--text - primary);
+outline: none;}
+.search - results
+{margin - top: 16px;
+max - height: 320
+px;
+overflow - y: auto;
+display: flex;
+flex - direction: column;
+gap: 8
+px;}
+.search - result - item
+{display: flex;
+align - items: center;
+justify - content: space - between;
+padding: 10
+px;
+background: var(--bg - primary);
+border - radius: var(--radius - sm);
+text - decoration: none;
+color: var(--text - primary);
+cursor: pointer;
+transition: var(--transition - smooth);}
+.search - result - item: hover
+{background: var(--accent - light);
+transform: translateX(4
+px);}
+
+.product - modal
+{
+    position: fixed;
+top: 50 %;
+left: 50 %;
+transform: translate(-50 %, -50 %)
+scale(0.95);
+width: 100 %;
+max - width: 600
+px;
+max - height: 90
+vh;
+background: var(--bg - secondary);
+z - index: 2005;
+box - shadow: 0
+30
+px
+60
+px
+rgba(0, 0, 0, 0.25);
+overflow - y: auto;
+opacity: 0;
+visibility: hidden;
+transition: all
+0.4
+s
+cubic - bezier(0.16, 1, 0.3, 1);
+}
+
+@media(min - width
+
+: 768
+px) {
+    .product - modal
+{
+    width: 90 %;
+max - width: 820
+px;
+max - height: 85
+vh;
+border - radius: var(--radius - lg);
+}
+}
+
+.product - modal.active
+{opacity: 1;
+visibility: visible;
+transform: translate(-50 %, -50 %)
+scale(1);}
+
+.modal - grid
+{
+    display: flex;
+flex - direction: column;
+gap: 16
+px;
+padding: 20
+px
+16
+px
+40
+px;
+}
+
+@media(min - width
+
+: 768
+px) {
+    .modal - grid
+{
+    display: grid;
+grid - template - columns: 1
+fr
+1
+fr;
+padding: 35
+px;
+gap: 25
+px;
+}
+}
+
+.modal - gallery
+{display: flex;
+flex - direction: column;
+gap: 10
+px;}
+.modal - main - img - wrap
+{
+    width: 100 %;
+aspect - ratio: 1 / 1;
+border - radius: var(--radius - md);
+display: flex;
+align - items: center;
+justify - content: center;
+overflow: hidden;
+}
+.modal - main - img
+{
+    width: 100 %;
+height: 100 %;
+object - fit: cover;
+border - radius: var(--radius - md);
+transition: opacity
+0.3
+s
+ease - in -out, transform
+0.4
+s
+ease;
+}
+.modal - main - img: hover
+{transform: scale(1.03);}
+
+.modal - thumbs
+{display: flex;
+flex - wrap: wrap;
+gap: 8
+px;}
+.modal - thumb
+{
+    width: 52px;
+height: 52
+px;
+object - fit: cover;
+background: var(--bg - primary);
+border: 2
+px
+solid
+var(--border - light);
+border - radius: 6
+px;
+cursor: pointer;
+transition: var(--transition - smooth);
+}
+.modal - thumb: hover, .modal - thumb.active
+{border - color: var(--accent);
+transform: scale(1.05);}
+
+.modal - options - row
+{
+    display: flex;
+align - items: flex - start;
+justify - content: flex - start;
+gap: 20
+px;
+margin: 14
+px
+0;
+flex - wrap: wrap;
+}
+.option - group
+{
+    display: flex;
+flex - direction: column;
+gap: 6
+px;
+}
+
+.option - group
+label
+{
+    font - weight: 700;
+font - size: 0.75
+rem;
+color: var(--text - muted);
+text - transform: uppercase;
+}
+
+.color - selector - large
+{
+    display: flex;
+align - items: center;
+gap: 10
+px;
+}
+
+.color - option - item
+{
+    display: flex;
+align - items: center;
+gap: 6
+px;
+cursor: pointer;
+}
+
+.color - option - item.disabled
+{
+    opacity: 0.4;
+cursor: not -allowed;
+pointer - events: none;
+}
+
+.color - circle - big
+{
+    width: 20px;
+height: 20
+px;
+border - radius: 50 %;
+border: 2
+px
+solid
+var(--border - hover);
+transition: var(--transition - smooth);
+display: inline - block;
+}
+
+.color - circle - big: hover
+{transform: scale(1.15);}
+.color - circle - big.out - of - stock
+{
+    background - color:  # 9ca3af !important; 
+        border - color:  # 6b7280 !important; 
+opacity: 0.5;
+cursor: not -allowed;
+}
+
+.color - circle - big.active
+{
+    box - shadow: 0 0 0 3px var(--accent);
+border - color: var(--accent);
+opacity: 1;
+transform: scale(1.1);
+}
+
+.stock - status
+{
+    font - size: 0.75rem;
+font - weight: 700;
+margin - top: 4
+px;
+}
+.stock - status. in -stock
+{color:  # 2E7D32; }
+.stock - status.out - of - stock
+{color:  # D32F2F; }
+.stock - status.
+not -selected
+{
+    color: var(--text - muted);
+font - weight: 500;
+opacity: 0.75;
+}
+
+.specs - grid
+{display: grid;
+grid - template - columns: repeat(2, 1
+fr); gap: 8
+px;
+margin: 12
+px
+0;}
+.spec - box
+{background: var(--bg - primary);
+padding: 8
+px
+10
+px;
+border - radius: var(--radius - sm);
+border: 1
+px
+solid
+var(--border - light);
+transition: var(--transition - smooth);}
+.spec - box: hover
+{border - color: var(--border - hover);
+transform: translateY(-2
+px);}
+.spec - box
+span
+{display: block;
+font - size: 0.65
+rem;
+color: var(--text - muted);
+text - transform: uppercase;
+font - weight: 700;}
+.spec - box
+strong
+{font - size: 0.9rem;
+font - weight: 700;}
+
+.checkout - container
+{
+    display: flex;
+flex - direction: column;
+gap: 16
+px;
+}
+.checkout - group
+{
+    display: flex;
+flex - direction: column;
+gap: 6
+px;
+}
+.checkout - group
+label
+{
+    font - size: 0.8rem;
+font - weight: 700;
+color: var(--text - muted);
+text - transform: uppercase;
+}
+.checkout - group
+input,.checkout - group
+select,.checkout - group
+textarea
+{
+    background: var(--bg - primary);
+border: 1
+px
+solid
+var(--border - light);
+padding: 12
+px;
+border - radius: var(--radius - sm);
+color: var(--text - primary);
+font - family: 'Inter', sans - serif;
+font - size: 0.95
+rem;
+outline: none;
+transition: var(--transition - smooth);
+}
+.checkout - group
+input: focus, .checkout - group
+select: focus, .checkout - group
+textarea: focus
+{
+    border - color: var(--accent);
+box - shadow: 0
+0
+0
+2
+px
+var(--accent - light);
+}
+.checkout - group.field - hint
+{font - size: 0.72rem;
+color: var(--text - muted);}
+.checkout - group.field - error
+{font - size: 0.72rem;
+color:  # e53935; }
+.phone - hint
+{font - size: .72rem;
+color: var(--text - muted);
+margin - top: 5
+px;}
+
+/ *---- checkout
+stepper - --- * /
+.checkout - steps
+{
+    display: flex;
+gap: 4
+px;
+padding: 14
+px
+20
+px
+0
+20
+px;
+}
+.checkout - step - dot
+{
+    flex: 1;
+display: flex;
+flex - direction: column;
+align - items: center;
+gap: 6
+px;
+font - size: 0.62
+rem;
+font - weight: 800;
+text - transform: uppercase;
+color: var(--text - muted);
+}
+.checkout - step - dot.dot - line
+{width: 100 %;
+height: 3
+px;
+border - radius: 3
+px;
+background: var(--border - light);
+transition: var(--transition - smooth);}
+.checkout - step - dot.active
+{color: var(--accent);}
+.checkout - step - dot.active.dot - line,.checkout - step - dot.done.dot - line
+{background: var(--accent);}
+.checkout - step - panel
+{display: none;}
+.checkout - step - panel.active
+{display: flex;
+flex - direction: column;
+gap: 16
+px;}
+.checkout - step - nav
+{
+    display: flex;
+gap: 10
+px;
+width: 100 %;
+}
+.btn - secondary
+{
+    flex: 0 0 auto;
+padding: 12
+px
+18
+px;
+border - radius: var(--radius - sm);
+border: 1
+px
+solid
+var(--border - light);
+background: var(--bg - primary);
+color: var(--text - primary);
+font - weight: 700;
+cursor: pointer;
+transition: var(--transition - smooth);
+}
+.btn - secondary: hover
+{border - color: var(--border - hover);}
+
+/ *---- delivery
+provider
+chips - --- * /
+.provider - chip - group
+{display: flex;
+flex - wrap: wrap;
+gap: 8
+px;}
+.provider - chip
+{
+    padding: 10px 14px;
+border - radius: 999
+px;
+border: 1
+px
+solid
+var(--border - light);
+background: var(--bg - primary);
+font - size: 0.82
+rem;
+font - weight: 700;
+cursor: pointer;
+transition: var(--transition - smooth);
+}
+.provider - chip.active
+{border - color: var(--accent);
+color: var(--accent);
+background: var(--accent - light);}
+.provider - chip.badge - soon
+{display: block;
+font - size: 0.6
+rem;
+font - weight: 700;
+text - transform: uppercase;
+color: var(--text - muted);}
+.provider - chip.active.badge - soon
+{color: var(--accent);}
+
+.delivery - search - results
+{
+    display: flex;
+flex - direction: column;
+gap: 4
+px;
+max - height: 220
+px;
+overflow - y: auto;
+border: 1
+px
+solid
+var(--border - light);
+border - radius: var(--radius - sm);
+}
+.delivery - search - result - item
+{
+    padding: 10px 12px;
+cursor: pointer;
+font - size: 0.85
+rem;
+border - bottom: 1
+px
+solid
+var(--border - light);
+}
+.delivery - search - result - item: last - child
+{border - bottom: none;}
+.delivery - search - result - item: hover
+{background: var(--bg - primary);}
+.delivery - search - result - item.item - sub
+{font - size: 0.7rem;
+color: var(--text - muted);}
+.delivery - search - empty
+{padding: 12px;
+font - size: 0.8
+rem;
+color: var(--text - muted);
+text - align: center;}
+
+.selected - pill
+{
+    display: flex;
+align - items: center;
+justify - content: space - between;
+gap: 10
+px;
+padding: 10
+px
+12
+px;
+border - radius: var(--radius - sm);
+border: 1
+px
+solid
+var(--accent);
+background: var(--accent - light);
+font - size: 0.85
+rem;
+font - weight: 700;
+}
+.selected - pill
+button
+{background: none;
+border: none;
+color: var(--accent);
+font - weight: 800;
+cursor: pointer;}
+
+.delivery - fallback - note
+{
+    font - size: 0.78rem;
+color: var(--text - muted);
+background: var(--bg - primary);
+border: 1
+px
+dashed
+var(--border - light);
+border - radius: var(--radius - sm);
+padding: 10
+px
+12
+px;
+}
+.delivery - api - error
+{
+    display: flex;
+align - items: center;
+justify - content: space - between;
+gap: 10
+px;
+font - size: 0.8
+rem;
+color:  # e53935;
+background: rgba(229, 57, 53, 0.08);
+border - radius: var(--radius - sm);
+padding: 10
+px
+12
+px;
+}
+.delivery - api - error
+button.btn - secondary
+{padding: 6px 12px;
+font - size: 0.78
+rem;}
+
+.saved - delivery - chip
+{
+    display: flex;
+align - items: center;
+justify - content: space - between;
+gap: 10
+px;
+padding: 10
+px
+12
+px;
+border - radius: var(--radius - sm);
+border: 1
+px
+solid
+var(--border - light);
+background: var(--bg - primary);
+font - size: 0.82
+rem;
+}
+.saved - delivery - chip
+button
+{padding: 6px 10px;
+font - size: 0.75
+rem;}
+
+.review - block
+{
+    border: 1px solid var(--border - light);
+border - radius: var(--radius - sm);
+padding: 12
+px;
+display: flex;
+flex - direction: column;
+gap: 6
+px;
+}
+.review - block
+h5
+{font - size: 0.7rem;
+text - transform: uppercase;
+color: var(--text - muted);
+font - weight: 800;}
+.review - line
+{display: flex;
+justify - content: space - between;
+font - size: 0.85
+rem;
+gap: 10
+px;}
+.review - line
+span: first - child
+{color: var(--text - muted);}
+
+/ *---- profile
+drawer - --- * /
+.profile - section
+{display: flex;
+flex - direction: column;
+gap: 10
+px;
+margin - bottom: 22
+px;}
+.profile - section
+h4
+{font - size: 0.9rem;
+font - weight: 800;
+color: var(--accent);}
+.profile - order - card
+{
+    border: 1px solid var(--border - light);
+border - radius: var(--radius - sm);
+padding: 12
+px;
+cursor: pointer;
+transition: var(--transition - smooth);
+}
+.profile - order - card: hover
+{border - color: var(--border - hover);}
+.profile - order - card.order - top
+{display: flex;
+justify - content: space - between;
+font - weight: 800;
+font - size: 0.9
+rem;}
+.profile - order - card.order - meta
+{font - size: 0.75rem;
+color: var(--text - muted);
+margin - top: 4
+px;}
+.order - status - pill
+{
+    font - size: 0.65rem;
+font - weight: 800;
+text - transform: uppercase;
+padding: 3
+px
+8
+px;
+border - radius: 999
+px;
+background: var(--accent - light);
+color: var(--accent);
+}
+.profile - empty - state
+{font - size: 0.85rem;
+color: var(--text - muted);
+text - align: center;
+padding: 18
+px
+0;}
+.profile - signin - note
+{font - size: 0.85rem;
+color: var(--text - muted);
+text - align: center;
+padding: 30
+px
+10
+px;}
+
+/ *---- Fullscreen
+Lightbox
+Modal - --- * /
+.lightbox - modal
+{
+    position: fixed;
+top: 0;
+left: 0;
+right: 0;
+bottom: 0;
+background: rgba(0, 0, 0, 0.92);
+backdrop - filter: blur(16
+px);
+-webkit - backdrop - filter: blur(16
+px);
+z - index: 10000;
+display: flex;
+flex - direction: column;
+align - items: center;
+justify - content: space - between;
+padding: 20
+px
+16
+px;
+opacity: 0;
+pointer - events: none;
+transition: opacity
+0.3
+s
+cubic - bezier(0.16, 1, 0.3, 1);
+}
+.lightbox - modal.active
+{
+    opacity: 1;
+pointer - events: auto;
+}
+.lightbox - topbar
+{
+    width: 100 %;
+max - width: 900
+px;
+display: flex;
+justify - content: space - between;
+align - items: center;
+color:  # ffffff;
+z - index: 10;
+}
+.lightbox - title - wrap
+{
+    display: flex;
+align - items: center;
+gap: 10
+px;
+}
+.lightbox - title
+{
+    font - size: 1rem;
+font - weight: 800;
+letter - spacing: -0.02
+em;
+}
+.lightbox - color - badge
+{
+    background: var(--accent);
+color:  # ffffff;
+font - size: 0.72
+rem;
+font - weight: 800;
+padding: 3
+px
+10
+px;
+border - radius: 999
+px;
+text - transform: uppercase;
+}
+.lightbox - close - btn
+{
+    background: rgba(255, 255, 255, 0.12);
+border: 1
+px
+solid
+rgba(255, 255, 255, 0.2);
+color:  # ffffff;
+width: 40
+px;
+height: 40
+px;
+border - radius: 50 %;
+display: flex;
+align - items: center;
+justify - content: center;
+cursor: pointer;
+font - size: 1.1
+rem;
+transition: 0.2
+s
+ease;
+}
+.lightbox - close - btn: hover
+{
+    background: rgba(255, 255, 255, 0.25);
+transform: scale(1.05);
+}
+.lightbox - main - view
+{
+    position: relative;
+width: 100 %;
+max - width: 900
+px;
+flex: 1;
+display: flex;
+align - items: center;
+justify - content: center;
+margin: 10
+px
+0;
+overflow: hidden;
+}
+.lightbox - main - img
+{
+    max - width: 100 %;
+max - height: 70
+vh;
+object - fit: contain;
+border - radius: 12
+px;
+box - shadow: 0
+20
+px
+50
+px
+rgba(0, 0, 0, 0.5);
+transition: transform
+0.25
+s
+ease, opacity
+0.2
+s
+ease;
+user - select: none;
+}
+.lightbox - nav - btn
+{
+    position: absolute;
+top: 50 %;
+transform: translateY(-50 %);
+background: rgba(255, 255, 255, 0.15);
+backdrop - filter: blur(8
+px);
+-webkit - backdrop - filter: blur(8
+px);
+border: 1
+px
+solid
+rgba(255, 255, 255, 0.25);
+color:  # ffffff;
+width: 48
+px;
+height: 48
+px;
+border - radius: 50 %;
+display: flex;
+align - items: center;
+justify - content: center;
+cursor: pointer;
+font - size: 1.3
+rem;
+transition: 0.2
+s
+ease;
+z - index: 5;
+}
+.lightbox - nav - btn: hover
+{
+    background: rgba(255, 255, 255, 0.3);
+transform: translateY(-50 %)
+scale(1.08);
+}
+.lightbox - prev
+{left: 10px;}
+.lightbox - next
+{right: 10px;}
+.lightbox - bottombar
+{
+    width: 100 %;
+max - width: 900
+px;
+display: flex;
+flex - direction: column;
+align - items: center;
+gap: 12
+px;
+z - index: 10;
+}
+.lightbox - counter
+{
+    color: rgba(255, 255, 255, 0.7);
+font - size: 0.8
+rem;
+font - weight: 700;
+letter - spacing: 0.05
+em;
+}
+.lightbox - thumbs - strip
+{
+    display: flex;
+gap: 8
+px;
+max - width: 100 %;
+overflow - x: auto;
+padding: 4
+px;
+scrollbar - width: none;
+}
+.lightbox - thumbs - strip::-webkit - scrollbar
+{display: none;}
+.lightbox - strip - thumb
+{
+    width: 54px;
+height: 54
+px;
+border - radius: 8
+px;
+object - fit: cover;
+border: 2
+px
+solid
+transparent;
+cursor: pointer;
+opacity: 0.6;
+transition: 0.2
+s
+ease;
+background: rgba(255, 255, 255, 0.05);
+}
+.lightbox - strip - thumb.active
+{
+    border - color: var(--accent);
+opacity: 1;
+transform: scale(1.08);
+}
+.modal - main - img - wrap
+{
+    position: relative;
+cursor: zoom - in;
+}
+.modal - main - img - wrap.gallery - zoom - hint
+{
+    position: absolute;
+bottom: 10
+px;
+right: 10
+px;
+background: rgba(0, 0, 0, 0.65);
+color:  # fff;
+padding: 5
+px
+10
+px;
+border - radius: 999
+px;
+font - size: 0.72
+rem;
+font - weight: 700;
+display: flex;
+align - items: center;
+gap: 5
+px;
+pointer - events: none;
+backdrop - filter: blur(4
+px);
+}
+.color - circle - big.active
+{
+    box - shadow: 0 0 0 3px var(--bg - surface), 0
+0
+0
+5
+px
+var(--accent);
+transform: scale(1.1);
+}
+< / style >
+    < / head >
+        < body
+data - theme = "light" >
+               < div
+id = "top" > < / div >
+
+                 < header
+id = "site-header" >
+     < a
+
+
+class ="logo" id="logo-scroll-btn" >
+
+< div
+
+
+class ="logo-text-wrap" >
+
+< span
+
+
+class ="logo-part-1" > M1Lip < / span > < span class ="logo-part-2" > Store < / span >
+
+< / div >
+< / a >
+< div
+
+
+class ="nav-right" >
+
+< div
+
+
+class ="icon-btn-wrapper" >
+
+< button
+
+
+class ="icon-btn" id="theme-toggle-btn" aria-label="Змінити тему" >
+
+< svg
+
+
+class ="theme-icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" > < path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" / > < / svg >
+
+< svg
+
+
+class ="theme-icon-sun" style="display: none;" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" > < circle cx="12" cy="12" r="4" / > < path d="M12 2v2" / > < path d="M12 20v2" / > < path d="m4.93 4.93 1.41 1.41" / > < path d="m17.66 17.66 1.41 1.41" / > < path d="M2 12h2" / > < path d="M20 12h2" / > < path d="m6.34 17.66-1.41 1.41" / > < path d="m19.07 4.93-1.41 1.41" / > < / svg >
+
+< / button >
+< span
+
+
+class ="tooltip" > Змінити тему < / span >
+
+< / div >
+
+< div
+
+
+class ="icon-btn-wrapper" >
+
+< button
+
+
+class ="icon-btn" id="search-open-btn" aria-label="Пошук" >
+
+< svg
+width = "16"
+height = "16"
+viewBox = "0 0 24 24"
+fill = "none"
+stroke = "currentColor"
+stroke - width = "2" > < circle
+cx = "11"
+cy = "11"
+r = "8" / > < path
+d = "m21 21-4.35-4.35" / > < / svg >
+< / button >
+< span
+
+
+class ="tooltip" > Пошук < / span >
+
+< / div >
+
+< div
+
+
+class ="icon-btn-wrapper" >
+
+< button
+
+
+class ="icon-btn" id="wishlist-open-btn" aria-label="Обране" >
+
+< svg
+width = "16"
+height = "16"
+viewBox = "0 0 24 24"
+fill = "none"
+stroke = "currentColor"
+stroke - width = "2" > < path
+d = "M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" / > < / svg >
+< span
+
+
+class ="badge-count" id="wishlist-count" > 0 < / span >
+
+< / button >
+< span
+
+
+class ="tooltip" > Обране < / span >
+
+< / div >
+
+< div
+
+
+class ="icon-btn-wrapper" >
+
+< button
+
+
+class ="icon-btn" id="cart-open-btn" aria-label="Кошик" >
+
+< svg
+width = "16"
+height = "16"
+viewBox = "0 0 24 24"
+fill = "none"
+stroke = "currentColor"
+stroke - width = "2" > < path
+d = "M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" / > < path
+d = "M3 6h18" / > < path
+d = "M16 10a4 4 0 0 1-8 0" / > < / svg >
+< span
+
+
+class ="badge-count" id="cart-count" > 0 < / span >
+
+< / button >
+< span
+
+
+class ="tooltip" > Кошик < / span >
+
+< / div >
+< / div >
+< / header >
+
+< section
+
+
+class ="hero" >
+
+< div
+
+
+class ="hero-content" >
+
+< div
+
+
+class ="hero-badge-group" >
+
+< div
+
+
+class ="hero-badge" > M1LIPSTORE / 2026 < / div >
+
+< div
+
+
+class ="store-status" > < span class ="status-dot" > < / span > Магазин онлайн < / div >
+
+< / div >
+< h1 > ТЕХНІКА, < br > ЯКА
+СТВОРЮЄ < br > ТВОЙ
+SETUP < / h1 >
+< p > Gaming
+mice, keyboards and accessories
+для
+сучасного
+ігрового
+простору
+найвищого
+рівня. < / p >
+< div
+
+
+class ="hero-actions" >
+
+< a
+
+
+class ="btn-primary" onclick="scrollToSection('catalog')" > Дивитися каталог → < / a >
+
+< / div >
+< / div >
+< div
+
+
+class ="hero-visual" >
+
+< div
+
+
+class ="hero-card-3d" id="hero-card" onclick="openHeroProductModal()" >
+
+< span
+
+
+class ="product-tag new" id="hero-tag" > HOT NOVELTY < / span >
+
+< div
+
+
+class ="hero-card-img-wrap" >
+
+< img
+id = "hero-img"
+alt = "Hero Product" >
+< / div >
+< / div >
+< / div >
+< / section >
+
+< section
+
+
+class ="partner-brands-section" >
+
+< div
+
+
+class ="section-header" style="align-items: center;" >
+
+< div >
+< h2
+
+
+class ="section-title" style="font-size: 1.1rem;" > Популярні бренди < / h2 >
+
+< / div >
+< div
+id = "active-brand-indicator"
+style = "display: none; align-items: center; gap: 8px;" >
+< span
+id = "active-brand-text"
+style = "font-size: 0.8rem; font-weight: 700; color: var(--accent);" > < / span >
+< button
+
+
+class ="filter-btn active" style="padding: 4px 10px; font-size: 0.75rem; border-radius: 14px;" onclick="filterByBrand('All')" > Скинути ✕ < / button >
+
+< / div >
+< / div >
+< div
+
+
+class ="partner-brands-marquee" >
+
+< div
+
+
+class ="partner-brands-track" >
+
+< !-- Set
+1 -->
+< div
+
+
+class ="partner-brand-tile" onclick="filterByBrand('Attack Shark', this)" > < img src="images.png" alt="Attack Shark" onerror="this.parentElement.classList.add('fallback-styled')" > < span class ="brand-text-fallback" > Attack Shark < / span > < / div >
+
+< div
+
+
+class ="partner-brand-tile" onclick="filterByBrand('Ajazz', this)" > < img src="350954572_1917991488535350_2141770078765880809_n_2.webp" alt="Ajazz" onerror="this.parentElement.classList.add('fallback-styled')" > < span class ="brand-text-fallback" > Ajazz < / span > < / div >
+
+< div
+
+
+class ="partner-brand-tile" onclick="filterByBrand('Aula', this)" > < img src="aula копия.png" alt="Aula" onerror="this.parentElement.classList.add('fallback-styled')" > < span class ="brand-text-fallback" > Aula < / span > < / div >
+
+< div
+
+
+class ="partner-brand-tile" onclick="filterByBrand('Mchose', this)" > < img src="mchose.png" alt="Mchose" onerror="this.parentElement.classList.add('fallback-styled')" > < span class ="brand-text-fallback" > Mchose < / span > < / div >
+
+< div
+
+
+class ="partner-brand-tile" onclick="filterByBrand('VGN', this)" > < img src="vgn.jpg" alt="VGN" onerror="this.parentElement.classList.add('fallback-styled')" > < span class ="brand-text-fallback" > VGN < / span > < / div >
+
+< !-- Set
+2 -->
+< div
+
+
+class ="partner-brand-tile" onclick="filterByBrand('Attack Shark', this)" > < img src="images.png" alt="Attack Shark" onerror="this.parentElement.classList.add('fallback-styled')" > < span class ="brand-text-fallback" > Attack Shark < / span > < / div >
+
+< div
+
+
+class ="partner-brand-tile" onclick="filterByBrand('Ajazz', this)" > < img src="350954572_1917991488535350_2141770078765880809_n_2.webp" alt="Ajazz" onerror="this.parentElement.classList.add('fallback-styled')" > < span class ="brand-text-fallback" > Ajazz < / span > < / div >
+
+< div
+
+
+class ="partner-brand-tile" onclick="filterByBrand('Aula', this)" > < img src="aula копия.png" alt="Aula" onerror="this.parentElement.classList.add('fallback-styled')" > < span class ="brand-text-fallback" > Aula < / span > < / div >
+
+< div
+
+
+class ="partner-brand-tile" onclick="filterByBrand('Mchose', this)" > < img src="mchose.png" alt="Mchose" onerror="this.parentElement.classList.add('fallback-styled')" > < span class ="brand-text-fallback" > Mchose < / span > < / div >
+
+< div
+
+
+class ="partner-brand-tile" onclick="filterByBrand('VGN', this)" > < img src="vgn.jpg" alt="VGN" onerror="this.parentElement.classList.add('fallback-styled')" > < span class ="brand-text-fallback" > VGN < / span > < / div >
+
+< !-- Set
+3 -->
+< div
+
+
+class ="partner-brand-tile" onclick="filterByBrand('Attack Shark', this)" > < img src="images.png" alt="Attack Shark" onerror="this.parentElement.classList.add('fallback-styled')" > < span class ="brand-text-fallback" > Attack Shark < / span > < / div >
+
+< div
+
+
+class ="partner-brand-tile" onclick="filterByBrand('Ajazz', this)" > < img src="350954572_1917991488535350_2141770078765880809_n_2.webp" alt="Ajazz" onerror="this.parentElement.classList.add('fallback-styled')" > < span class ="brand-text-fallback" > Ajazz < / span > < / div >
+
+< div
+
+
+class ="partner-brand-tile" onclick="filterByBrand('Aula', this)" > < img src="aula копия.png" alt="Aula" onerror="this.parentElement.classList.add('fallback-styled')" > < span class ="brand-text-fallback" > Aula < / span > < / div >
+
+< div
+
+
+class ="partner-brand-tile" onclick="filterByBrand('Mchose', this)" > < img src="mchose.png" alt="Mchose" onerror="this.parentElement.classList.add('fallback-styled')" > < span class ="brand-text-fallback" > Mchose < / span > < / div >
+
+< div
+
+
+class ="partner-brand-tile" onclick="filterByBrand('VGN', this)" > < img src="vgn.jpg" alt="VGN" onerror="this.parentElement.classList.add('fallback-styled')" > < span class ="brand-text-fallback" > VGN < / span > < / div >
+
+< !-- Set
+4(Duplicated for 100 % seamless loop) -->
+< div
+
+
+class ="partner-brand-tile" onclick="filterByBrand('Attack Shark', this)" > < img src="attack-shark.jpg" alt="Attack Shark" onerror="this.parentElement.classList.add('fallback-styled')" > < span class ="brand-text-fallback" > Attack Shark < / span > < / div >
+
+< div
+
+
+class ="partner-brand-tile" onclick="filterByBrand('Ajazz', this)" > < img src="ajazz.webp" alt="Ajazz" onerror="this.parentElement.classList.add('fallback-styled')" > < span class ="brand-text-fallback" > Ajazz < / span > < / div >
+
+< div
+
+
+class ="partner-brand-tile" onclick="filterByBrand('Aula', this)" > < img src="aula.png" alt="Aula" onerror="this.parentElement.classList.add('fallback-styled')" > < span class ="brand-text-fallback" > Aula < / span > < / div >
+
+< div
+
+
+class ="partner-brand-tile" onclick="filterByBrand('Mchose', this)" > < img src="mchose.png" alt="Mchose" onerror="this.parentElement.classList.add('fallback-styled')" > < span class ="brand-text-fallback" > Mchose < / span > < / div >
+
+< div
+
+
+class ="partner-brand-tile" onclick="filterByBrand('VGN', this)" > < img src="vgn.jpg" alt="VGN" onerror="this.parentElement.classList.add('fallback-styled')" > < span class ="brand-text-fallback" > VGN < / span > < / div >
+
+< !-- Set
+5(Duplicated for 100 % seamless loop) -->
+< div
+
+
+class ="partner-brand-tile" onclick="filterByBrand('Attack Shark', this)" > < img src="attack-shark.jpg" alt="Attack Shark" onerror="this.parentElement.classList.add('fallback-styled')" > < span class ="brand-text-fallback" > Attack Shark < / span > < / div >
+
+< div
+
+
+class ="partner-brand-tile" onclick="filterByBrand('Ajazz', this)" > < img src="ajazz.webp" alt="Ajazz" onerror="this.parentElement.classList.add('fallback-styled')" > < span class ="brand-text-fallback" > Ajazz < / span > < / div >
+
+< div
+
+
+class ="partner-brand-tile" onclick="filterByBrand('Aula', this)" > < img src="aula.png" alt="Aula" onerror="this.parentElement.classList.add('fallback-styled')" > < span class ="brand-text-fallback" > Aula < / span > < / div >
+
+< div
+
+
+class ="partner-brand-tile" onclick="filterByBrand('Mchose', this)" > < img src="mchose.png" alt="Mchose" onerror="this.parentElement.classList.add('fallback-styled')" > < span class ="brand-text-fallback" > Mchose < / span > < / div >
+
+< div
+
+
+class ="partner-brand-tile" onclick="filterByBrand('VGN', this)" > < img src="vgn.jpg" alt="VGN" onerror="this.parentElement.classList.add('fallback-styled')" > < span class ="brand-text-fallback" > VGN < / span > < / div >
+
+< !-- Set
+6(Duplicated for 100 % seamless loop) -->
+< div
+
+
+class ="partner-brand-tile" onclick="filterByBrand('Attack Shark', this)" > < img src="attack-shark.jpg" alt="Attack Shark" onerror="this.parentElement.classList.add('fallback-styled')" > < span class ="brand-text-fallback" > Attack Shark < / span > < / div >
+
+< div
+
+
+class ="partner-brand-tile" onclick="filterByBrand('Ajazz', this)" > < img src="ajazz.webp" alt="Ajazz" onerror="this.parentElement.classList.add('fallback-styled')" > < span class ="brand-text-fallback" > Ajazz < / span > < / div >
+
+< div
+
+
+class ="partner-brand-tile" onclick="filterByBrand('Aula', this)" > < img src="aula.png" alt="Aula" onerror="this.parentElement.classList.add('fallback-styled')" > < span class ="brand-text-fallback" > Aula < / span > < / div >
+
+< div
+
+
+class ="partner-brand-tile" onclick="filterByBrand('Mchose', this)" > < img src="mchose.png" alt="Mchose" onerror="this.parentElement.classList.add('fallback-styled')" > < span class ="brand-text-fallback" > Mchose < / span > < / div >
+
+< div
+
+
+class ="partner-brand-tile" onclick="filterByBrand('VGN', this)" > < img src="vgn.jpg" alt="VGN" onerror="this.parentElement.classList.add('fallback-styled')" > < span class ="brand-text-fallback" > VGN < / span > < / div >
+
+< / div >
+< / div >
+< / section >
+
+< section
+
+
+class ="section-padding" id="catalog" >
+
+< div
+
+
+class ="section-header" >
+
+< div >
+< h2
+
+
+class ="section-title" > Каталог < / h2 >
+
+< p
+
+
+class ="section-subtitle" > Топові девайси в наявності < / p >
+
+< / div >
+< / div >
+< div
+
+
+class ="catalog-toolbar" >
+
+< div
+
+
+class ="catalog-filters" id="catalog-filters" style="margin-bottom: 0; flex-grow: 1;" > < / div >
+
+< / div >
+< div
+
+
+class ="catalog-grid" id="catalog-container" > < / div >
+
+< / section >
+
+< section
+
+
+class ="advantages-section" >
+
+< div
+
+
+class ="advantages-grid" >
+
+< div
+
+
+class ="advantage-card" >
+
+< div
+
+
+class ="advantage-icon" >
+
+< svg
+width = "20"
+height = "20"
+viewBox = "0 0 24 24"
+fill = "none"
+stroke = "currentColor"
+stroke - width = "2" > < rect
+x = "1"
+y = "3"
+width = "15"
+height = "13"
+rx = "2" / > < path
+d = "M16 8h4l3 3v5h-7V8z" / > < circle
+cx = "5.5"
+cy = "18.5"
+r = "2.5" / > < circle
+cx = "18.5"
+cy = "18.5"
+r = "2.5" / > < / svg >
+< / div >
+< div
+
+
+class ="advantage-text" >
+
+< h4 > Відправка
+в
+день
+замовлення < / h4 >
+< p > Замовлення, оформлені
+до
+встановленого
+часу, передаємо
+перевізнику
+в
+день
+оформлення. < / p >
+< / div >
+< / div >
+
+< div
+
+
+class ="advantage-card" >
+
+< div
+
+
+class ="advantage-icon" >
+
+< svg
+width = "20"
+height = "20"
+viewBox = "0 0 24 24"
+fill = "none"
+stroke = "currentColor"
+stroke - width = "2" > < rect
+x = "2"
+y = "5"
+width = "20"
+height = "14"
+rx = "2" / > < line
+x1 = "2"
+y1 = "10"
+x2 = "22"
+y2 = "10" / > < / svg >
+< / div >
+< div
+
+
+class ="advantage-text" >
+
+< h4 > Зручна
+оплата < / h4 >
+< p > Оплата
+онлайн
+або
+накладений
+платіж — залежно
+від
+доступного
+способу
+оплати. < / p >
+< / div >
+< / div >
+
+< div
+
+
+class ="advantage-card" >
+
+< div
+
+
+class ="advantage-icon" >
+
+< svg
+width = "20"
+height = "20"
+viewBox = "0 0 24 24"
+fill = "none"
+stroke = "currentColor"
+stroke - width = "2" > < path
+d = "M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" / > < / svg >
+< / div >
+< div
+
+
+class ="advantage-text" >
+
+< h4 > Гарантія
+від
+виробника < / h4 >
+< p > На
+товари
+діє
+гарантія
+відповідно
+до
+умов
+виробника
+та
+законодавства. < / p >
+< / div >
+< / div >
+< / div >
+< / section >
+
+< footer >
+< div
+
+
+class ="footer-grid" >
+
+< div
+
+
+class ="footer-col" >
+
+< div
+style = "display: flex; align-items: center; gap: 10px; margin-bottom: 12px; cursor: pointer;"
+onclick = "window.scrollTo({top: 0, behavior: 'smooth'})" >
+< div
+
+
+class ="logo" style="font-size: 1.3rem; animation: none;" >
+
+< div
+
+
+class ="logo-text-wrap" >
+
+< span
+
+
+class ="logo-part-1" > M1Lip < / span > < span class ="logo-part-2" > Store < / span >
+
+< / div >
+< / div >
+< / div >
+< p
+style = "color: var(--text-secondary); max-width: 260px; font-size: 0.85rem; margin-bottom: 8px; line-height: 1.4;" > Gaming
+hardware
+для
+твого
+ідеального
+setup.Преміальний
+вибір
+техніки. < / p >
+< p
+style = "font-size: 0.8rem; font-weight: 700; color: var(--text-primary);" > Обирай.Грай.Перемагай < / p >
+< / div >
+< div
+
+
+class ="footer-col" >
+
+< h4 > ДОПОМОГА < / h4 >
+< ul >
+< li > < a
+onclick = "showInfoModal('Доставка', 'Відправляємо Новою поштою щодня. Доставка за тарифами перевізника.')" > Доставка < / a > < / li >
+< li > < a
+onclick = "showInfoModal('Оплата', 'Доступна оплата при отриманні (накладений платіж) або повна передплата на реквізити.')" > Оплата < / a > < / li >
+< li > < a
+onclick = "showInfoModal('Гарантія', 'На всю продукцію поширюється офіційна гарантія від виробника та магазину.')" > Гарантія < / a > < / li >
+< li > < a
+onclick = "showInfoModal('Повернення', 'Обмін та повернення товару можливі протягом 14 днів з моменту покупки за умови збереження товарного вигляду.')" > Повернення < / a > < / li >
+< li > < a
+onclick = "showInfoModal('Часті запитання', 'Звʼяжіться з нашим менеджером у Telegram (@milipmanager), щоб отримати відповіді на будь-які запитання.')" > Часті
+запитання < / a > < / li >
+< / ul >
+< / div >
+< div
+
+
+class ="footer-col" >
+
+< h4 > ПРО
+M1lipStore < / h4 >
+< ul >
+< li > < a
+onclick = "showInfoModal('Про магазин', 'M1lipStore — ваш надійний постачальник перевіреної ігрової периферії найвищої якості.')" > Про
+магазин < / a > < / li >
+< li > < a
+onclick = "scrollToSection('catalog')" > Новинки < / a > < / li >
+< li > < a
+onclick = "scrollToSection('catalog')" > Хіти
+продажу < / a > < / li >
+< li > < a
+onclick = "showInfoModal('Знижки', 'Слідкуйте за акціями та спеціальними пропозиціями в нашому Telegram-каналі!')" > Знижки < / a > < / li >
+< / ul >
+< / div >
+< div
+
+
+class ="footer-col" >
+
+< h4 > КОНТАКТИ < / h4 >
+< ul >
+< li > < a
+href = "https://t.me/milipmanager"
+target = "_blank" > Менеджер:
+
+@milipmanager <
+
+/ a > < / li >
+< li > < a
+href = "https://t.me/+vyhe-i9vGwAwNjAy"
+target = "_blank" > Telegram
+канал: M1lipStore < / a > < / li >
+< li > < a
+href = "https://www.instagram.com/m1lip.store"
+target = "_blank" > Instagram:
+
+@m1lip.store <
+
+/ a > < / li >
+< li > < a
+href = "https://www.tiktok.com/@m1lipstore"
+target = "_blank" > TikTok:
+
+@m1lipstore <
+
+/ a > < / li >
+< / ul >
+< / div >
+< / div >
+< div
+
+
+class ="footer-bottom" >
+
+< span >© 2026
+M1lipStore.Усі
+права
+захищено. < / span >
+< / div >
+< / footer >
+
+< div
+
+
+class ="overlay-backdrop" id="backdrop" onclick="closeAllDrawers()" > < / div >
+
+< div
+
+
+class ="drawer" id="cart-drawer" >
+
+< div
+
+
+class ="drawer-header" >
+
+< h3
+style = "font-weight: 800;" > Кошик < / h3 >
+< button
+
+
+class ="close-drawer" onclick="toggleCart(false)" > ✕ < / button >
+
+< / div >
+< div
+
+
+class ="drawer-body" id="cart-items-container" > < / div >
+
+< div
+
+
+class ="drawer-footer" >
+
+< div
+
+
+class ="cart-total" >
+
+< span > Разом: < / span >
+< span
+id = "cart-total-price" > 0 < span
+
+
+class ="currency" > ₴ < / span > < / span >
+
+< / div >
+< button
+
+
+class ="btn-primary" style="width: 100%; justify-content: center;" onclick="openCheckoutModal()" > Перейти до оформлення → < / button >
+
+< / div >
+< / div >
+
+< div
+
+
+class ="drawer" id="checkout-drawer" >
+
+< div
+
+
+class ="drawer-header" >
+
+< h3
+style = "font-weight: 800;" > Оформлення
+замовлення < / h3 >
+< button
+
+
+class ="close-drawer" onclick="toggleCheckoutDrawer(false)" > ✕ < / button >
+
+< / div >
+< div
+
+
+class ="checkout-steps" id="checkout-steps-indicator" >
+
+< div
+
+
+class ="checkout-step-dot" data-step="1" > < span > Контакти < / span > < div class ="dot-line" > < / div > < / div >
+
+< div
+
+
+class ="checkout-step-dot" data-step="2" > < span > Доставка < / span > < div class ="dot-line" > < / div > < / div >
+
+< div
+
+
+class ="checkout-step-dot" data-step="3" > < span > Оплата < / span > < div class ="dot-line" > < / div > < / div >
+
+< div
+
+
+class ="checkout-step-dot" data-step="4" > < span > Перевірка < / span > < div class ="dot-line" > < / div > < / div >
+
+< / div >
+< div
+
+
+class ="drawer-body" >
+
+< div
+
+
+class ="checkout-container" >
+
+< !-- STEP
+1: contacts -->
+< div
+
+
+class ="checkout-step-panel" data-step-panel="1" >
+
+< div
+
+
+class ="checkout-group" >
+
+< label > Ім
+'я</label>
+< input
+type = "text"
+id = "chk-name"
+autocomplete = "given-name"
+maxlength = "40"
+placeholder = "Наприклад: Владислав" >
+< div
+
+
+class ="field-hint" > Тільки літери, без цифр та символів.< / div >
+
+< / div >
+< div
+
+
+class ="checkout-group" >
+
+< label > Прізвище < / label >
+< input
+type = "text"
+id = "chk-surname"
+autocomplete = "family-name"
+maxlength = "40"
+placeholder = "Наприклад: Шевченко" >
+< div
+
+
+class ="field-hint" > Тільки літери, без цифр та символів.< / div >
+
+< / div >
+< div
+
+
+class ="checkout-group" >
+
+< label > E - mail < / label >
+< input
+type = "email"
+id = "chk-email"
+autocomplete = "email"
+maxlength = "120"
+placeholder = "you@example.com" >
+< / div >
+< div
+
+
+class ="checkout-group" >
+
+< label > Номер
+телефону < / label >
+< input
+type = "tel"
+id = "chk-phone"
+autocomplete = "tel"
+inputmode = "tel"
+value = "+380"
+maxlength = "17"
+placeholder = "+380 67 123 45 67" >
+< div
+
+
+class ="phone-hint" > +380 встановлюється автоматично.Введіть 9 цифр номера.< / div >
+
+< / div >
+< / div >
+
+< !-- STEP
+2: delivery -->
+< div
+
+
+class ="checkout-step-panel" data-step-panel="2" >
+
+< div
+id = "saved-deliveries-block" > < / div >
+
+< div
+
+
+class ="checkout-group" >
+
+< label > Служба
+доставки < / label >
+< div
+
+
+class ="provider-chip-group" id="provider-chip-group" > < / div >
+
+< / div >
+
+< div
+id = "delivery-configured-flow"
+style = "display:none; flex-direction: column; gap: 16px;" >
+< div
+
+
+class ="checkout-group" id="delivery-city-group" >
+
+< label > Місто < / label >
+< input
+type = "text"
+id = "chk-city-search"
+placeholder = "Почніть вводити назву міста..." >
+< div
+
+
+class ="delivery-search-results" id="city-search-results" style="display:none;" > < / div >
+
+< div
+id = "city-selected-pill" > < / div >
+< / div >
+< div
+
+
+class ="checkout-group" id="delivery-warehouse-group" style="display:none;" >
+
+< label > Відділення / Поштомат < / label >
+< input
+type = "text"
+id = "chk-warehouse-search"
+placeholder = "Пошук відділення..." >
+< div
+
+
+class ="delivery-search-results" id="warehouse-search-results" style="display:none;" > < / div >
+
+< div
+id = "warehouse-selected-pill" > < / div >
+< / div >
+< div
+id = "delivery-api-error-block" > < / div >
+< / div >
+
+< / div >
+
+< !-- STEP
+3: payment -->
+< div
+
+
+class ="checkout-step-panel" data-step-panel="3" >
+
+< div
+
+
+class ="checkout-group" >
+
+< label > Оберіть
+спосіб
+оплати < / label >
+< select
+id = "chk-payment"
+style = "width: 100%; padding: 12px; border-radius: 8px;" >
+< option
+value = "online" > Повна
+онлайн - оплата < / option >
+< option
+value = "cod" > Накладений
+платіж < / option >
+< / select >
+< / div >
+< div
+
+
+class ="checkout-group" >
+
+< label > Коментар
+до
+замовлення(необов
+'язково)</label>
+< textarea
+id = "chk-comment"
+rows = "2"
+placeholder = "Побажання до замовлення" > < / textarea >
+                                              < / div >
+                                                  < / div >
+
+                                                      <!-- STEP
+4: review -->
+< div
+
+
+class ="checkout-step-panel" data-step-panel="4" >
+
+< div
+
+
+class ="review-block" id="review-items-block" > < / div >
+
+< div
+
+
+class ="review-block" id="review-contact-block" > < / div >
+
+< div
+
+
+class ="review-block" id="review-delivery-block" > < / div >
+
+< div
+
+
+class ="review-block" id="review-payment-block" > < / div >
+
+< / div >
+
+< / div >
+< / div >
+< div
+
+
+class ="drawer-footer" >
+
+< div
+
+
+class ="checkout-step-nav" >
+
+< button
+
+
+class ="btn-secondary" id="chk-back-btn" onclick="checkoutStepBack()" style="display:none;" > ← Назад < / button >
+
+< button
+
+
+class ="btn-primary" id="chk-next-btn" style="flex:1; justify-content: center;" onclick="checkoutStepNext()" > Далі → < / button >
+
+< button
+
+
+class ="btn-primary" id="chk-submit-btn" style="flex:1; justify-content: center; display:none;" onclick="submitOrder()" > Підтвердити замовлення < / button >
+
+< / div >
+< / div >
+< / div >
+
+< div
+
+
+class ="drawer" id="profile-drawer" >
+
+< div
+
+
+class ="drawer-header" >
+
+< h3
+style = "font-weight: 800;" > Профіль < / h3 >
+< button
+
+
+class ="close-drawer" onclick="toggleProfileDrawer(false)" > ✕ < / button >
+
+< / div >
+< div
+
+
+class ="drawer-body" id="profile-drawer-body" >
+
+< div
+
+
+class ="profile-signin-note" > Завантаження...< / div >
+
+< / div >
+< / div >
+
+< div
+
+
+class ="product-modal" id="success-modal" style="max-width: 450px; height: auto;" >
+
+< button
+
+
+class ="close-drawer" style="position: absolute; top: 16px; right: 16px; z-index: 10;" onclick="closeSuccessModal()" > ✕ < / button >
+
+< div
+style = "padding: 35px 24px; text-align: center;" >
+< div
+style = "font-size: 3rem; margin-bottom: 10px;" >🎉 < / div >
+< h3
+style = "font-size: 1.4rem; font-weight: 800; margin-bottom: 8px;" > ЗАМОВЛЕННЯ
+ПРИЙНЯТО < / h3 >
+< p
+style = "color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 16px;" > Дякуємо
+за
+замовлення
+в
+M1lipStore. < / p >
+< div
+style = "background: var(--bg-primary); padding: 14px; border-radius: var(--radius-sm); border: 1px solid var(--border-light); margin-bottom: 20px;" >
+< div
+style = "font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;" > Номер
+замовлення: < / div >
+< div
+id = "success-order-id"
+style = "font-family: 'JetBrains Mono', monospace; font-size: 1.2rem; font-weight: 800; color: var(--accent); margin-top: 4px;" >  # MLP-2026-XXXXXX</div>
+< div
+style = "font-size: 0.8rem; font-weight: 700; color: #2E7D32; margin-top: 8px;" > Статус: Нове
+замовлення < / div >
+< / div >
+< button
+
+
+class ="btn-primary" style="width: 100%; justify-content: center;" onclick="closeSuccessModal()" > Продовжити покупки < / button >
+
+< / div >
+< / div >
+
+< div
+
+
+class ="drawer" id="wishlist-drawer" >
+
+< div
+
+
+class ="drawer-header" >
+
+< h3
+style = "font-weight: 800;" > Обране < / h3 >
+< button
+
+
+class ="close-drawer" onclick="toggleWishlistDrawer(false)" > ✕ < / button >
+
+< / div >
+< div
+
+
+class ="drawer-body" id="wishlist-items-container" > < / div >
+
+< / div >
+
+< div
+
+
+class ="search-modal" id="search-modal" >
+
+< div
+
+
+class ="search-container" >
+
+< div
+
+
+class ="search-input-wrap" >
+
+< svg
+width = "20"
+height = "20"
+viewBox = "0 0 24 24"
+fill = "none"
+stroke = "currentColor"
+stroke - width = "2" > < circle
+cx = "11"
+cy = "11"
+r = "8" / > < path
+d = "m21 21-4.35-4.35" / > < / svg >
+< input
+type = "text"
+id = "search-input"
+placeholder = "Що ви шукаєте?"
+oninput = "handleSearch(this.value)" >
+< button
+
+
+class ="close-drawer" onclick="toggleSearch(false)" > ✕ < / button >
+
+< / div >
+< div
+id = "recent-searches-block" > < / div >
+< div
+
+
+class ="search-results" id="search-results" > < / div >
+
+< / div >
+< / div >
+
+< div
+
+
+class ="product-modal" id="product-modal" >
+
+< button
+
+
+class ="close-drawer" style="position: absolute; top: 16px; right: 16px; z-index: 10;" onclick="closeProductModal()" > ✕ < / button >
+
+< div
+
+
+class ="modal-grid" >
+
+< div
+
+
+class ="modal-gallery" >
+
+< div
+
+
+class ="modal-main-img-wrap" onclick="openColorGalleryLightbox()" >
+
+< img
+
+
+class ="modal-main-img" id="modal-img" alt="Product" >
+
+< div
+
+
+class ="gallery-zoom-hint" >
+
+< svg
+width = "14"
+height = "14"
+viewBox = "0 0 24 24"
+fill = "none"
+stroke = "currentColor"
+stroke - width = "2.2" > < circle
+cx = "11"
+cy = "11"
+r = "8" / > < path
+d = "m21 21-4.35-4.35" / > < path
+d = "M11 8v6" / > < path
+d = "M8 11h6" / > < / svg >
+< span > Галерея < / span >
+< / div >
+< / div >
+< div
+
+
+class ="modal-thumbs" id="modal-thumbs" > < / div >
+
+< / div >
+< div
+
+
+class ="modal-details" >
+
+< span
+
+
+class ="product-tag new" id="modal-tag" > НОВИНКА < / span >
+
+< h4
+id = "modal-brand"
+style = "color: var(--text-muted); text-transform: uppercase; font-size: 0.7rem; font-weight: 800; margin-top: 6px;" > БРЕНД < / h4 >
+< h2
+id = "modal-title"
+style = "font-size: 1.4rem; font-weight: 800; margin: 4px 0;" > < / h2 >
+< p
+id = "modal-desc"
+style = "color: var(--text-secondary); margin: 6px 0; font-size: 0.85rem;" > < / p >
+< div
+
+
+class ="product-price" id="modal-price" style="font-size: 1.3rem; color: var(--accent); margin: 8px 0;" > 0 < span class ="currency" > ₴ < / span > < / div >
+
+< div
+
+
+class ="modal-options-row" >
+
+< div
+
+
+class ="option-group" >
+
+< label > Колір < span
+id = "modal-color-name" > не
+вибрано < / span > < small
+style = "color:var(--text-muted); font-size:0.75rem; font-weight:500;" > (натисніть
+                                                                          двічі для фото) < / small > < / label >
+< div
+
+
+class ="color-selector-large" id="modal-color-selector" > < / div >
+
+< div
+id = "modal-stock-status"
+
+
+class ="stock-status" > < / div >
+
+< / div >
+
+< div
+
+
+class ="option-group" >
+
+< label > Кількість < / label >
+< div
+
+
+class ="quantity-controls" >
+
+< button
+onclick = "adjustModalQty(-1)" >− < / button >
+< span
+id = "modal-qty"
+style = "font-weight: 800; padding: 0 6px;" > 1 < / span >
+< button
+onclick = "adjustModalQty(1)" > + < / button >
+< / div >
+< / div >
+< / div >
+
+< div
+style = "display: flex; gap: 10px; margin-top: 14px; align-items: center;" >
+< button
+
+
+class ="btn-primary" id="modal-add-cart-btn" style="flex-grow: 1; justify-content: center; padding: 12px;" onclick="addCurrentProductToCart()" disabled > Оберіть колір < / button >
+
+< button
+
+
+class ="wishlist-btn" id="modal-wishlist-btn" onclick="toggleCurrentWishlist()" style="position: static; width: 42px; height: 42px; flex-shrink: 0;" >
+
+< svg
+width = "18"
+height = "18"
+viewBox = "0 0 24 24"
+fill = "none"
+stroke = "currentColor"
+stroke - width = "2" > < path
+d = "M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" / > < / svg >
+< / button >
+< / div >
+
+< div
+
+
+class ="specs-grid" id="modal-specs" > < / div >
+
+< / div >
+< / div >
+< / div >
+
+< !-- FULLSCREEN
+LIGHTBOX
+GALLERY
+MODAL -->
+< div
+
+
+class ="lightbox-modal" id="lightbox-modal" onclick="if(event.target === this) closeColorGalleryLightbox()" >
+
+< div
+
+
+class ="lightbox-topbar" >
+
+< div
+
+
+class ="lightbox-title-wrap" >
+
+< span
+
+
+class ="lightbox-title" id="lightbox-product-title" > Галерея товару < / span >
+
+< span
+
+
+class ="lightbox-color-badge" id="lightbox-color-badge" > Колір < / span >
+
+< / div >
+< button
+
+
+class ="lightbox-close-btn" onclick="closeColorGalleryLightbox()" aria-label="Закрити" > ✕ < / button >
+
+< / div >
+
+< div
+
+
+class ="lightbox-main-view" >
+
+< button
+
+
+class ="lightbox-nav-btn lightbox-prev" onclick="prevLightboxImage()" aria-label="Попереднє фото" > ‹ < / button >
+
+< img
+
+
+class ="lightbox-main-img" id="lightbox-active-img" src="" alt="Gallery full preview" >
+
+< button
+
+
+class ="lightbox-nav-btn lightbox-next" onclick="nextLightboxImage()" aria-label="Наступне фото" > › < / button >
+
+< / div >
+
+< div
+
+
+class ="lightbox-bottombar" >
+
+< div
+
+
+class ="lightbox-counter" id="lightbox-counter" > 1 / 1 < / div >
+
+< div
+
+
+class ="lightbox-thumbs-strip" id="lightbox-thumbs-strip" > < / div >
+
+< / div >
+< / div >
+
+< div
+
+
+class ="product-modal" id="info-modal" style="max-width: 450px; height: auto;" >
+
+< button
+
+
+class ="close-drawer" style="position: absolute; top: 16px; right: 16px; z-index: 10;" onclick="closeInfoModal()" > ✕ < / button >
+
+< div
+style = "padding: 30px 24px; text-align: left;" >
+< h3
+id = "info-modal-title"
+style = "font-size: 1.2rem; font-weight: 800; margin-bottom: 12px;" > Заголовок < / h3 >
+< p
+id = "info-modal-text"
+style = "color: var(--text-secondary); font-size: 0.95rem; line-height: 1.6; margin-bottom: 20px;" > < / p >
+< button
+
+
+class ="btn-primary" style="width: 100%; justify-content: center;" onclick="closeInfoModal()" > Зрозуміло < / button >
+
+< / div >
+< / div >
+
+< script >
+let
+tg = window.Telegram?.WebApp;
+if (tg) {
+try {
+tg.expand();
+tg.ready();
+if (tg.colorScheme == = 'dark') {
+setTheme('dark', false);
+}
+} catch (e) {
+console.log('Telegram WebApp Init Error:', e);
+}
+}
+
+const
+INITIAL_FALLBACK_PRODUCTS = [
+{
+    id: 'prod-as-r5-ultra',
+    brand: 'Attack Shark',
+    title: 'Attack Shark R5 Ultra Magnesium Wireless',
+    price: 3299,
+    oldPrice: 3899,
+    tag: 'ТОП ПРОДАЖІВ',
+    category: 'Мишки',
+    sku: 'AS-R5-MAG',
+    popular: true,
+    desc: 'Ультралегка бездротова мишка з магнієвого сплаву з підтримкою 8000Hz опитування, сенсором PAW3395 та вагою лише 39 грамів.',
+    img: 'attack-shark-r5-ultra-top-angle.jpg',
+    gallery: [
+        'attack-shark-r5-ultra-top-angle.jpg',
+        'attack-shark-r5-ultra-back-grip.jpg',
+        'attack-shark-r5-ultra-colors-price.jpg',
+        'attack-shark-r5-ultra-in-hand-setup.jpg',
+        'attack-shark-r5-ultra-box-bundle-contents.jpg'
+    ],
+    specs: [
+        {key: 'Сенсор', value: 'PixArt PAW3395 (до 26 000 DPI)'},
+        {key: 'Вага', value: '39 грам'},
+        {key: 'Частота опитування', value: 'До 8000 Hz'},
+        {key: 'Перемикачі', value: 'TTC Dustproof Gold (80M натискань)'},
+        {key: 'Підключення', value: '2.4GHz Wireless / Bluetooth / Type-C'},
+        {key: 'Автономність', value: 'До 60 годин роботи'}
+    ],
+    colors: [
+        {name: 'Black', isOut: false, stock: 8, image: 'attack-shark-r5-ultra-top-angle.jpg',
+         gallery: ['attack-shark-r5-ultra-top-angle.jpg']},
+        {name: 'White', isOut: false, stock: 6, image: 'attack-shark-r5-ultra-back-grip.jpg',
+         gallery: ['attack-shark-r5-ultra-back-grip.jpg']},
+        {name: 'Red', isOut: false, stock: 4, image: 'attack-shark-r5-ultra-colors-price.jpg',
+         gallery: ['attack-shark-r5-ultra-colors-price.jpg']}
+    ],
+    colorImagesMap: {
+        Black: {main: 'attack-shark-r5-ultra-top-angle.jpg', gallery: ['attack-shark-r5-ultra-top-angle.jpg']},
+        White: {main: 'attack-shark-r5-ultra-back-grip.jpg', gallery: ['attack-shark-r5-ultra-back-grip.jpg']},
+        Red: {main: 'attack-shark-r5-ultra-colors-price.jpg', gallery: ['attack-shark-r5-ultra-colors-price.jpg']}
     }
-    for legacy_status, (new_status, new_payment_status) in legacy_status_map.items():
-        cursor.execute(
-            "UPDATE orders SET status = %s, payment_status = %s WHERE status = %s",
-            (new_status, new_payment_status, legacy_status),
-        )
-    conn.commit()
-
-    cursor.execute("SELECT DISTINCT category FROM products WHERE category IS NOT NULL AND category != ''")
-    existing_categories = [r["category"] for r in cursor.fetchall()]
-    cursor.execute("SELECT id FROM categories")
-    known_cat_ids = {r["id"] for r in cursor.fetchall()}
-    for i, cat_name in enumerate(existing_categories):
-        cat_id = _slugify(cat_name)
-        if cat_id not in known_cat_ids:
-            cursor.execute(
-                "INSERT INTO categories (id, name, position) VALUES (%s, %s, %s) ON CONFLICT (id) DO NOTHING",
-                (cat_id, cat_name, i),
-            )
-
-    cursor.execute("SELECT DISTINCT brand FROM products WHERE brand IS NOT NULL AND brand != ''")
-    existing_brands = [r["brand"] for r in cursor.fetchall()]
-    cursor.execute("SELECT id FROM brands")
-    known_brand_ids = {r["id"] for r in cursor.fetchall()}
-    for i, brand_name in enumerate(existing_brands):
-        brand_id = _slugify(brand_name)
-        if brand_id not in known_brand_ids:
-            cursor.execute(
-                "INSERT INTO brands (id, name, position) VALUES (%s, %s, %s) ON CONFLICT (id) DO NOTHING",
-                (brand_id, brand_name, i),
-            )
-
-    conn.commit()
-    cursor.close()
-    conn.close()
-
-
-def _slugify(text: str) -> str:
-    text = (text or "").strip().lower()
-    slug = re.sub(r"[^a-z0-9а-яіїєґ]+", "-", text).strip("-")
-    return slug or ("x-" + str(uuid.uuid4())[:6])
-
-
-init_db()
-
-
-async def get_file_url(bot: Bot, file_id: str) -> str:
-    if not file_id: return ""
-    if file_id.startswith("http"): return file_id
-    try:
-        file_info = await bot.get_file(file_id)
-        return f"https://api.telegram.org/file/bot{TOKEN}/{file_info.file_path}"
-    except Exception as e:
-        logging.error(f"Error getting file URL for {file_id}: {e}")
-        return file_id
-
-
-def validate_init_data(init_data: str, bot_token: str):
-    try:
-        if not init_data:
-            return None
-        parsed = dict(parse_qsl(init_data, strict_parsing=True))
-        received_hash = parsed.pop("hash", None)
-        if not received_hash:
-            return None
-        data_check_string = "\n".join(f"{k}={v}" for k, v in sorted(parsed.items()))
-        secret_key = hmac.new(b"WebAppData", bot_token.encode(), hashlib.sha256).digest()
-        calculated_hash = hmac.new(secret_key, data_check_string.encode(), hashlib.sha256).hexdigest()
-        if not hmac.compare_digest(calculated_hash, received_hash):
-            return None
-        user_json = parsed.get("user")
-        return json.loads(user_json) if user_json else {}
-    except Exception as e:
-        logging.error(f"initData validation error: {e}")
-        return None
-
-
-def get_admin_user(request: Request):
-    init_data = request.headers.get("X-Init-Data", "")
-    user = validate_init_data(init_data, TOKEN)
-    if not user or user.get("id") not in ADMIN_IDS:
-        return None
-    return user
-
-
-def get_verified_user(request: Request):
-    init_data = request.headers.get("X-Init-Data", "")
-    return validate_init_data(init_data, TOKEN)
-
-
-def require_admin(request: Request):
-    user = get_admin_user(request)
-    if not user:
-        raise HTTPException(status_code=403, detail="Доступ заборонено")
-    return user
-
-
-def get_db_products(include_hidden: bool = False):
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    if include_hidden:
-        cursor.execute("SELECT * FROM products ORDER BY created_at DESC")
-    else:
-        cursor.execute("SELECT * FROM products WHERE hidden IS NOT TRUE ORDER BY created_at DESC")
-    rows = cursor.fetchall()
-    cursor.close()
-    conn.close()
-
-    result = []
-    for row in rows:
-        p = dict(row)
-        for key, default in [("color_images", {}), ("specs", []), ("color_quantities", {}), ("gallery", [])]:
-            mapKey = "colorImages" if key == "color_images" else (
-                "colorQuantities" if key == "color_quantities" else key)
-            try:
-                val = p.get(key)
-                if isinstance(val, str):
-                    parsed = json.loads(val) if val.strip() else default
-                elif isinstance(val, (dict, list)):
-                    parsed = val
-                else:
-                    parsed = default
-
-                if key == "color_images" and isinstance(parsed, dict):
-                    formatted_ci = {}
-                    for col_name, col_data in parsed.items():
-                        if isinstance(col_data, dict):
-                            formatted_ci[col_name] = {
-                                "main": str(col_data.get("main", "")),
-                                "gallery": [str(g) for g in col_data.get("gallery", []) if isinstance(g, str)]
-                            }
-                        else:
-                            formatted_ci[col_name] = {"main": str(col_data), "gallery": []}
-                    p[mapKey] = formatted_ci
-                else:
-                    p[mapKey] = parsed
-            except Exception:
-                p[mapKey] = default
-        result.append(p)
-    return result
-
-
-app = FastAPI()
-app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"],
-                   allow_headers=["*"])
-
-api_router = APIRouter()
-
-
-@api_router.get("/")
-async def root():
-    return {"status": "ok", "message": "M1lipStore API is running!"}
-
-
-# ============================================================================
-# PUBLIC CATALOG
-# ============================================================================
-
-@api_router.get("/api/products")
-async def get_products(
-        category: str = None,
-        brand: str = None,
-        search: str = None,
-        min_price: int = None,
-        max_price: int = None,
-        in_stock: bool = None,
-        sort: str = None,
-):
-    products = get_db_products()
-
-    if category:
-        products = [p for p in products if (p.get("category") or "").lower() == category.lower()]
-    if brand:
-        products = [p for p in products if (p.get("brand") or "").lower() == brand.lower()]
-    if search:
-        q = search.lower().strip()
-        products = [
-            p for p in products
-            if q in (p.get("title") or "").lower()
-               or q in (p.get("brand") or "").lower()
-               or q in (p.get("category") or "").lower()
-               or q in (p.get("sku") or "").lower()
-        ]
-    if min_price is not None:
-        products = [p for p in products if p.get("price", 0) >= min_price]
-    if max_price is not None:
-        products = [p for p in products if p.get("price", 0) <= max_price]
-    if in_stock:
-        products = [p for p in products if p.get("quantity", 0) > 0]
-
-    if sort == "price_asc":
-        products.sort(key=lambda p: p.get("price", 0))
-    elif sort == "price_desc":
-        products.sort(key=lambda p: p.get("price", 0), reverse=True)
-    elif sort == "new":
-        pass
-    elif sort == "popular":
-        products.sort(key=lambda p: bool(p.get("popular")), reverse=True)
-
-    return products
-
-
-@api_router.get("/api/products/{product_id}")
-async def get_product(product_id: str):
-    products = get_db_products()
-    product = next((p for p in products if p["id"] == product_id), None)
-    if not product:
-        raise HTTPException(status_code=404, detail="Товар не знайдено")
-    return product
-
-
-@api_router.get("/api/categories")
-async def get_categories():
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM categories WHERE hidden IS NOT TRUE ORDER BY position ASC, name ASC")
-    rows = [dict(r) for r in cursor.fetchall()]
-    cursor.close()
-    conn.close()
-    return rows
-
-
-@api_router.get("/api/brands")
-async def get_brands():
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM brands WHERE hidden IS NOT TRUE ORDER BY position ASC, name ASC")
-    rows = [dict(r) for r in cursor.fetchall()]
-    cursor.close()
-    conn.close()
-    return rows
-
-
-# ============================================================================
-# ORDER CREATION
-# ============================================================================
-
-class OrderValidationError(Exception):
-    def __init__(self, message: str, item_id: str = None):
-        self.message = message
-        self.item_id = item_id
-        super().__init__(message)
-
-
-def _validate_and_price_items(cursor, items: list):
-    if not items:
-        raise OrderValidationError("Кошик порожній")
-
-    priced_items = []
-    total = 0
-
-    for raw_item in items:
-        product_id = raw_item.get("id")
-        color = (raw_item.get("color") or "").strip()
-        qty = raw_item.get("qty")
-
-        if not product_id or not isinstance(qty, int) or qty <= 0:
-            raise OrderValidationError("Некоректний товар у кошику", product_id)
-
-        cursor.execute("SELECT * FROM products WHERE id = %s FOR UPDATE", (product_id,))
-        row = cursor.fetchone()
-        if not row or row.get("hidden"):
-            raise OrderValidationError(f"Товар більше недоступний", product_id)
-
-        try:
-            cq = json.loads(row["color_quantities"]) if row.get("color_quantities") else {}
-        except Exception:
-            cq = {}
-
-        if cq:
-            if color not in cq:
-                raise OrderValidationError(f"Колір «{color}» недоступний для цього товару", product_id)
-            available = cq.get(color, 0)
-            if available < qty:
-                raise OrderValidationError(
-                    f"Недостатньо товару «{row['title']}» ({color}) на складі: доступно {available}", product_id
-                )
-        else:
-            if (row.get("quantity") or 0) < qty:
-                raise OrderValidationError(f"Недостатньо товару «{row['title']}» на складі", product_id)
-
-        price = row["price"]
-        line_total = price * qty
-        total += line_total
-        priced_items.append({
-            "id": product_id,
-            "title": row["title"],
-            "brand": row.get("brand", ""),
-            "color": color,
-            "qty": qty,
-            "price": price,
-            "lineTotal": line_total,
-            "_cq": cq,
-        })
-
-    return priced_items, total
-
-
-def _reserve_stock(cursor, priced_items: list):
-    for item in priced_items:
-        cq = item["_cq"]
-        if cq:
-            cq[item["color"]] = cq.get(item["color"], 0) - item["qty"]
-            new_total = sum(cq.values())
-            cursor.execute(
-                "UPDATE products SET color_quantities = %s, quantity = %s WHERE id = %s",
-                (json.dumps(cq, ensure_ascii=False), new_total, item["id"]),
-            )
-        else:
-            cursor.execute(
-                "UPDATE products SET quantity = quantity - %s WHERE id = %s",
-                (item["qty"], item["id"]),
-            )
-
-
-def _restock(cursor, order_data: dict):
-    for item in order_data.get("items", []):
-        product_id = item.get("id")
-        color = item.get("color")
-        qty = item.get("qty", 0)
-        cursor.execute("SELECT color_quantities, quantity FROM products WHERE id = %s FOR UPDATE", (product_id,))
-        row = cursor.fetchone()
-        if not row:
-            continue
-        try:
-            cq = json.loads(row["color_quantities"]) if row.get("color_quantities") else {}
-        except Exception:
-            cq = {}
-        if cq and color in cq:
-            cq[color] = cq.get(color, 0) + qty
-            new_total = sum(cq.values())
-            cursor.execute(
-                "UPDATE products SET color_quantities = %s, quantity = %s WHERE id = %s",
-                (json.dumps(cq, ensure_ascii=False), new_total, product_id),
-            )
-        else:
-            cursor.execute("UPDATE products SET quantity = quantity + %s WHERE id = %s", (qty, product_id))
-
-
-UA_PHONE_RE = re.compile(r"^\+380\d{9}$")
-
-
-def normalize_ua_phone(raw: str) -> str:
-    digits = re.sub(r"\D", "", raw or "")
-    if digits.startswith("380") and len(digits) == 12:
-        normalized = "+" + digits
-    elif digits.startswith("0") and len(digits) == 10:
-        normalized = "+38" + digits
-    elif len(digits) == 9:
-        normalized = "+380" + digits
-    else:
-        normalized = "+" + digits if not raw.strip().startswith("+") else raw.strip()
-    if not UA_PHONE_RE.match(normalized):
-        raise OrderValidationError("Введіть коректний номер телефону у форматі +380XXXXXXXXX")
-    return normalized
-
-
-def normalize_email(raw: str) -> str:
-    email = (raw or "").strip().lower()
-    if not EMAIL_RE.fullmatch(email) or len(email) > 120:
-        raise HTTPException(status_code=400, detail="Введіть коректний e-mail")
-    return email
-
-
-async def _create_invoice_link(order_id: str, total: int, items_summary: str) -> str:
-    """Creates a Telegram Payments invoice link for an order (Bot API
-    createInvoiceLink). This never touches the frontend with the payment
-    provider token — it lives only here, server-side."""
-    if not TELEGRAM_PAYMENT_TOKEN:
-        raise HTTPException(status_code=503, detail="Онлайн-оплата тимчасово недоступна. Спробуйте пізніше.")
-    bot = Bot(token=TOKEN)
-    try:
-        invoice_url = await bot.create_invoice_link(
-            title=f"Замовлення #{order_id}",
-            description=(items_summary or f"Оплата замовлення #{order_id} в M1lipStore")[:255],
-            payload=order_id,
-            provider_token=TELEGRAM_PAYMENT_TOKEN,
-            currency=PAYMENT_CURRENCY,
-            prices=[LabeledPrice(label=f"Замовлення #{order_id}", amount=total * 100)],
-        )
-    except Exception as e:
-        logging.error(f"Failed to create invoice link for {order_id}: {e}")
-        raise HTTPException(status_code=502, detail="Не вдалося сформувати рахунок на оплату. Спробуйте ще раз.")
-    finally:
-        await bot.session.close()
-    return invoice_url
-
-
-@api_router.post("/api/orders")
-async def create_order(request: Request):
-    body = await request.json()
-    customer = body.get("customer", {}) or {}
-    delivery = body.get("delivery", {}) or {}
-    payment = {"method": "online", "provider": PAYMENT_PROVIDER_LABEL}
-    comment = (body.get("comment") or "").strip()
-    raw_items = body.get("items", []) or []
-
-    verified_user = get_verified_user(request)
-    telegram_id = verified_user.get("id") if verified_user else None
-    if not telegram_id:
-        # Payment happens through Telegram Payments inside the Telegram
-        # WebApp, so we need a verified Telegram user to bind the invoice
-        # (and the eventual successful_payment update) to this order.
-        raise HTTPException(status_code=403,
-                            detail="Оформлення замовлення доступне лише через Telegram-бота M1lipStore.")
-
-    first_name = (customer.get("firstName") or "").strip()
-    last_name = (customer.get("lastName") or "").strip()
-    email = normalize_email(customer.get("email"))
-    if not NAME_RE.fullmatch(first_name):
-        raise HTTPException(status_code=400, detail="Введіть коректне ім'я: тільки літери")
-    if not NAME_RE.fullmatch(last_name):
-        raise HTTPException(status_code=400, detail="Введіть коректне прізвище: тільки літери")
-    if not customer.get("phone"):
-        raise HTTPException(status_code=400, detail="Вкажіть номер телефону")
-
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    try:
-        try:
-            phone = normalize_ua_phone(customer.get("phone"))
-        except OrderValidationError as e:
-            raise HTTPException(status_code=400, detail=e.message)
-
-        provider_id = delivery.get("provider")
-        if provider_id not in ("nova_poshta", "ukrposhta", "mist"):
-            raise HTTPException(status_code=400, detail="Оберіть службу доставки")
-        try:
-            provider = delivery_service.get(provider_id)
-        except KeyError:
-            raise HTTPException(status_code=400, detail="Невідома служба доставки")
-        if not provider.configured:
-            raise HTTPException(status_code=503, detail=f"{provider.label}: автоматичний пошук ще не налаштований")
-        if not delivery.get("cityRef") or not delivery.get("warehouseRef") or not delivery.get(
-                "city") or not delivery.get("department"):
-            raise HTTPException(status_code=400, detail="Оберіть місто та відділення зі списку")
-
-        try:
-            priced_items, total = _validate_and_price_items(cursor, raw_items)
-        except OrderValidationError as e:
-            conn.rollback()
-            raise HTTPException(status_code=400, detail=e.message)
-
-        _reserve_stock(cursor, priced_items)
-
-        customer["firstName"] = first_name
-        customer["lastName"] = last_name
-        customer["email"] = email
-        customer["phone"] = phone
-        clean_items = [{k: v for k, v in it.items() if k != "_cq"} for it in priced_items]
-        order_id_str = f"MLP-{random.randint(100000, 999999)}"
-        order_data = {
-            "customer": customer,
-            "items": clean_items,
-            "delivery": delivery,
-            "payment": payment,
-            "comment": comment,
-            "totals": total,
-        }
-
-        cursor.execute(
-            """INSERT INTO orders (order_id, data, status, payment_status, telegram_id, total, invoice_payload)
-               VALUES (%s, %s, 'NEW', 'WAITING_PAYMENT', %s, %s, %s)""",
-            (order_id_str, json.dumps(order_data, ensure_ascii=False), telegram_id, total, order_id_str),
-        )
-        _log_order_history(cursor, order_id_str, status="NEW", payment_status="WAITING_PAYMENT",
-                           note="Замовлення створено, очікує оплати")
-
-        conn.commit()
-    except HTTPException:
-        conn.rollback()
-        raise
-    except Exception as e:
-        conn.rollback()
-        logging.error(f"Order creation failed: {e}")
-        raise HTTPException(status_code=500, detail="Не вдалося створити замовлення. Спробуйте ще раз.")
-    finally:
-        cursor.close()
-        conn.close()
-
-    items_str = "\n".join([
-        f"• {i.get('brand', '')} {i.get('title', '')} ({i.get('color', '')}) x {i['qty']} — {i['lineTotal']} ₴"
-        for i in clean_items])
-    invoice_url = await _create_invoice_link(order_id_str, total, items_str)
-
-    # NOTE: no admin notification here on purpose — an order that hasn't
-    # been paid yet isn't real inventory demand. The admin gets notified
-    # only from the successful_payment handler, once payment is confirmed
-    # server-side (spec sections 5 & 8: never trust a client-side "paid").
-    return {
-        "status": "waiting_payment",
-        "orderId": order_id_str,
-        "total": total,
-        "orderStatus": "NEW",
-        "paymentStatus": "WAITING_PAYMENT",
-        "invoiceUrl": invoice_url,
+},
+{
+    id: 'prod-as-x3-pro',
+    brand: 'Attack Shark',
+    title: 'Attack Shark X3 Wireless Gaming Mouse',
+    price: 1599,
+    oldPrice: 1999,
+    tag: 'ХІТ',
+    category: 'Мишки',
+    sku: 'AS-X3-BLK',
+    popular: true,
+    desc: 'Надзвичайно популярна бюджетна бездротова мишка на флагманському сенсорі PAW3395 вагою 49 грамів.',
+    img: 'attack-shark-x3-black.jpg',
+    gallery: [
+        'attack-shark-x3-black.jpg',
+        'attack-shark-x3-white.jpg',
+        'attack-shark-x3-box.jpg'
+    ],
+    specs: [
+        {key: 'Сенсор', value: 'PixArt PAW3395 (26 000 DPI)'},
+        {key: 'Вага', value: '49 грам'},
+        {key: 'Підключення', value: 'Tri-Mode: 2.4G, BT5.2, Type-C'},
+        {key: 'Свічі', value: 'Kailh GM8.0 Black Mamba'},
+        {key: 'Акумулятор', value: '300 mAh (до 200 годин BT)'}
+    ],
+    colors: [
+        {name: 'Black', isOut: false, stock: 15, image: 'attack-shark-x3-black.jpg',
+         gallery: ['attack-shark-x3-box.jpg']},
+        {name: 'White', isOut: false, stock: 10, image: 'attack-shark-x3-white.jpg',
+         gallery: ['attack-shark-x3-white.jpg']}
+    ],
+    colorImagesMap: {
+        Black: {main: 'attack-shark-x3-black.jpg', gallery: ['attack-shark-x3-box.jpg']},
+        White: {main: 'attack-shark-x3-white.jpg', gallery: ['attack-shark-x3-white.jpg']}
     }
-
-
-@api_router.post("/api/orders/{order_id}/invoice")
-async def retry_order_invoice(order_id: str, request: Request):
-    """Re-issues a fresh Telegram Payments invoice link for an order whose
-    payment hasn't gone through yet — used by the 'Повторити оплату' button
-    if the first attempt was cancelled or failed."""
-    verified_user = get_verified_user(request)
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM orders WHERE order_id = %s", (order_id,))
-    row = cursor.fetchone()
-    cursor.close()
-    conn.close()
-    if not row:
-        raise HTTPException(status_code=404, detail="Замовлення не знайдено")
-    if not verified_user or row.get("telegram_id") != verified_user.get("id"):
-        raise HTTPException(status_code=403, detail="Доступ заборонено")
-    if row.get("payment_status") == "PAID":
-        raise HTTPException(status_code=400, detail="Це замовлення вже оплачено")
-
-    data = row["data"] if isinstance(row["data"], dict) else json.loads(row["data"])
-    items = data.get("items", [])
-    items_str = "\n".join([
-        f"• {i.get('brand', '')} {i.get('title', '')} ({i.get('color', '')}) x {i['qty']} — {i.get('lineTotal', 0)} ₴"
-        for i in items])
-    invoice_url = await _create_invoice_link(order_id, row["total"], items_str)
-    return {"invoiceUrl": invoice_url}
-
-
-@api_router.get("/api/orders/{order_id}")
-async def get_order_status(order_id: str, request: Request):
-    verified_user = get_verified_user(request)
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM orders WHERE order_id = %s", (order_id,))
-    row = cursor.fetchone()
-    if not row:
-        cursor.close()
-        conn.close()
-        raise HTTPException(status_code=404, detail="Замовлення не знайдено")
-    if not verified_user or (row.get("telegram_id") and row["telegram_id"] != verified_user.get("id")):
-        if not verified_user:
-            cursor.close()
-            conn.close()
-            raise HTTPException(status_code=403, detail="Доступ заборонено")
-    history = _get_order_history(cursor, order_id)
-    cursor.close()
-    conn.close()
-    return {
-        "order_id": row["order_id"],
-        "status": row["status"],
-        "status_label": ORDER_STATUS_LABELS_UA.get(row["status"], row["status"]),
-        "payment_status": row.get("payment_status", "WAITING_PAYMENT"),
-        "payment_status_label": PAYMENT_STATUS_LABELS_UA.get(row.get("payment_status"), row.get("payment_status")),
-        "tracking_number": row["tracking_number"],
-        "total": row["total"],
-        "created_at": str(row["created_at"]),
-        "items": row["data"].get("items", []) if isinstance(row["data"], dict) else [],
-        "delivery": row["data"].get("delivery", {}) if isinstance(row["data"], dict) else {},
-        "history": history,
+},
+{
+    id: 'prod-aula-f75',
+    brand: 'AULA',
+    title: 'AULA F75 Wireless Mechanical Keyboard',
+    price: 2899,
+    oldPrice: 3299,
+    tag: 'НОВИНКА',
+    category: 'Клавіатури',
+    sku: 'AULA-F75-ICE',
+    popular: true,
+    desc: '75% механічна клавіатура з Gasket Mount, попередньо змащеними свічами LEOBOG Reaper та гарячою заміною Hot-swap.',
+    img: 'aula копия.png',
+    gallery: [
+        'aula копия.png',
+        'photo_2026-08-25_15-31-22.jpg',
+        'photo_2026-08-25_15-31-28.jpg'
+    ],
+    specs: [
+        {key: 'Формат', value: '75% (80 клавіш + регулятор гучності)'},
+        {key: 'Конструкція', value: 'Gasket Mount з 5-шаровою шумоізоляцією'},
+        {key: 'Свічі', value: 'LEOBOG Reaper Linear (змащені)'},
+        {key: 'Підключення', value: 'Bluetooth 5.0 / 2.4GHz / Type-C'},
+        {key: 'Акумулятор', value: '4000 mAh'}
+    ],
+    colors: [
+        {name: 'White', isOut: false, stock: 8, image: 'aula копия.png', gallery: ['photo_2026-08-25_15-31-22.jpg']},
+        {name: 'Black', isOut: false, stock: 4, image: 'photo_2026-08-25_15-31-28.jpg', gallery: []}
+    ],
+    colorImagesMap: {
+        White: {main: 'aula копия.png', gallery: ['photo_2026-08-25_15-31-22.jpg']},
+        Black: {main: 'photo_2026-08-25_15-31-28.jpg', gallery: []}
     }
-
-
-@api_router.get("/api/users/me/orders")
-async def get_my_orders(request: Request):
-    verified_user = get_verified_user(request)
-    if not verified_user:
-        raise HTTPException(status_code=403, detail="Доступ заборонено")
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute(
-        "SELECT order_id, status, payment_status, total, created_at FROM orders WHERE telegram_id = %s ORDER BY id DESC",
-        (verified_user.get("id"),),
-    )
-    rows = [dict(r) for r in cursor.fetchall()]
-    cursor.close()
-    conn.close()
-    for r in rows:
-        r["created_at"] = str(r["created_at"])
-        r["status_label"] = ORDER_STATUS_LABELS_UA.get(r["status"], r["status"])
-        r["payment_status_label"] = PAYMENT_STATUS_LABELS_UA.get(r.get("payment_status"), r.get("payment_status"))
-    return rows
-
-
-# ============================================================================
-# DELIVERY
-# ============================================================================
-
-@api_router.get("/api/delivery/providers")
-async def list_delivery_providers():
-    return delivery_service.list_providers()
-
-
-@api_router.get("/api/delivery/{provider_id}/cities")
-async def delivery_search_cities(provider_id: str, query: str = ""):
-    try:
-        provider = delivery_service.get(provider_id)
-    except KeyError:
-        raise HTTPException(status_code=404, detail="Невідома служба доставки")
-    if not query or len(query.strip()) < 2:
-        return []
-    try:
-        return await provider.search_cities(query.strip())
-    except DeliveryProviderNotConfigured:
-        raise HTTPException(
-            status_code=503,
-            detail=f"Пошук міст для «{provider.label}» ще не підключено. Спробуйте іншу службу доставки.",
-        )
-    except DeliveryProviderError:
-        raise HTTPException(status_code=502, detail="Не вдалося отримати список міст. Спробуйте ще раз.")
-
-
-@api_router.get("/api/delivery/{provider_id}/warehouses")
-async def delivery_search_warehouses(provider_id: str, city_ref: str = "", query: str = ""):
-    try:
-        provider = delivery_service.get(provider_id)
-    except KeyError:
-        raise HTTPException(status_code=404, detail="Невідома служба доставки")
-    if not city_ref and provider_id != "pickup":
-        raise HTTPException(status_code=400, detail="Спочатку оберіть місто")
-    try:
-        return await provider.search_warehouses(city_ref, query.strip())
-    except DeliveryProviderNotConfigured:
-        raise HTTPException(
-            status_code=503,
-            detail=f"Пошук відділень для «{provider.label}» ще не підключено. Спробуйте іншу службу доставки.",
-        )
-    except DeliveryProviderError:
-        raise HTTPException(status_code=502, detail="Не вдалося отримати список відділень. Спробуйте ще раз.")
-
-
-# ============================================================================
-# USER PROFILE
-# ============================================================================
-
-def _get_or_create_profile(cursor, telegram_id: int) -> dict:
-    cursor.execute("SELECT * FROM user_profiles WHERE telegram_id = %s", (telegram_id,))
-    row = cursor.fetchone()
-    if row:
-        profile = dict(row)
-        if isinstance(profile.get("saved_deliveries"), str):
-            try:
-                profile["saved_deliveries"] = json.loads(profile["saved_deliveries"])
-            except Exception:
-                profile["saved_deliveries"] = []
-        return profile
-    cursor.execute(
-        "INSERT INTO user_profiles (telegram_id) VALUES (%s) ON CONFLICT DO NOTHING",
-        (telegram_id,),
-    )
-    return {"telegram_id": telegram_id, "first_name": None, "last_name": None, "phone": None, "saved_deliveries": []}
-
-
-@api_router.get("/api/users/me/profile")
-async def get_my_profile(request: Request):
-    verified_user = get_verified_user(request)
-    if not verified_user:
-        raise HTTPException(status_code=403, detail="Доступ заборонено")
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    try:
-        profile = _get_or_create_profile(cursor, verified_user["id"])
-        conn.commit()
-    finally:
-        cursor.close()
-        conn.close()
-    profile.pop("updated_at", None)
-    return profile
-
-
-@api_router.put("/api/users/me/profile")
-async def update_my_profile(request: Request):
-    verified_user = get_verified_user(request)
-    if not verified_user:
-        raise HTTPException(status_code=403, detail="Доступ заборонено")
-    body = await request.json()
-    first_name = (body.get("first_name") or "").strip() or None
-    last_name = (body.get("last_name") or "").strip() or None
-    phone_raw = (body.get("phone") or "").strip()
-    phone = None
-    if phone_raw:
-        try:
-            phone = normalize_ua_phone(phone_raw)
-        except OrderValidationError as e:
-            raise HTTPException(status_code=400, detail=e.message)
-
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    try:
-        _get_or_create_profile(cursor, verified_user["id"])
-        cursor.execute(
-            """UPDATE user_profiles
-               SET first_name = %s,
-                   last_name  = %s,
-                   phone      = COALESCE(%s, phone),
-                   updated_at = CURRENT_TIMESTAMP
-               WHERE telegram_id = %s""",
-            (first_name, last_name, phone, verified_user["id"]),
-        )
-        conn.commit()
-    finally:
-        cursor.close()
-        conn.close()
-    return {"status": "ok"}
-
-
-@api_router.post("/api/users/me/deliveries")
-async def add_saved_delivery(request: Request):
-    verified_user = get_verified_user(request)
-    if not verified_user:
-        raise HTTPException(status_code=403, detail="Доступ заборонено")
-    body = await request.json()
-    provider = body.get("provider")
-    city = (body.get("city") or "").strip()
-    city_ref = (body.get("cityRef") or "").strip()
-    warehouse = (body.get("warehouse") or "").strip()
-    warehouse_ref = (body.get("warehouseRef") or "").strip()
-    if not provider or not city or not warehouse:
-        raise HTTPException(status_code=400, detail="Вкажіть службу доставки, місто та відділення")
-
-    entry = {
-        "id": body.get("id") or str(uuid.uuid4())[:8],
-        "provider": provider,
-        "city": city,
-        "cityRef": city_ref,
-        "warehouse": warehouse,
-        "warehouseRef": warehouse_ref,
-        "label": (body.get("label") or "").strip(),
-    }
-
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    try:
-        profile = _get_or_create_profile(cursor, verified_user["id"])
-        deliveries = [d for d in profile["saved_deliveries"] if d.get("id") != entry["id"]]
-        deliveries.insert(0, entry)
-        deliveries = deliveries[:5]
-        cursor.execute(
-            "UPDATE user_profiles SET saved_deliveries = %s, updated_at = CURRENT_TIMESTAMP WHERE telegram_id = %s",
-            (json.dumps(deliveries, ensure_ascii=False), verified_user["id"]),
-        )
-        conn.commit()
-    finally:
-        cursor.close()
-        conn.close()
-    return {"status": "ok", "saved_deliveries": deliveries}
-
-
-@api_router.delete("/api/users/me/deliveries/{delivery_id}")
-async def delete_saved_delivery(delivery_id: str, request: Request):
-    verified_user = get_verified_user(request)
-    if not verified_user:
-        raise HTTPException(status_code=403, detail="Доступ заборонено")
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    try:
-        profile = _get_or_create_profile(cursor, verified_user["id"])
-        deliveries = [d for d in profile["saved_deliveries"] if d.get("id") != delivery_id]
-        cursor.execute(
-            "UPDATE user_profiles SET saved_deliveries = %s, updated_at = CURRENT_TIMESTAMP WHERE telegram_id = %s",
-            (json.dumps(deliveries, ensure_ascii=False), verified_user["id"]),
-        )
-        conn.commit()
-    finally:
-        cursor.close()
-        conn.close()
-    return {"status": "ok", "saved_deliveries": deliveries}
-
-
-# ============================================================================
-# ADMIN — PRODUCTS
-# ============================================================================
-
-def _product_row_to_admin_json(product: dict) -> dict:
-    cq = product.get("colorQuantities", {}) or {}
-    ci = product.get("colorImages", {}) or {}
-    color_names = list(cq.keys()) or [c.strip() for c in (product.get("colors") or "").split(",") if c.strip()]
-    colors = []
-    for name in color_names:
-        img = ci.get(name, {})
-        colors.append({
-            "name": name,
-            "quantity": cq.get(name, 0),
-            "main": img.get("main", ""),
-            "gallery": img.get("gallery", []),
-        })
-    return {
-        "id": product.get("id"),
-        "brand": product.get("brand", ""),
-        "title": product.get("title", ""),
-        "price": product.get("price", 0),
-        "oldPrice": product.get("old_price"),
-        "tag": product.get("tag", ""),
-        "sku": product.get("sku", ""),
-        "category": product.get("category", ""),
-        "description": product.get("description", ""),
-        "img": product.get("img", ""),
-        "gallery": product.get("gallery", []) or [],
-        "specs": product.get("specs", []) or [],
-        "colors": colors,
-        "featured": bool(product.get("featured")),
-        "popular": bool(product.get("popular")),
-        "hidden": bool(product.get("hidden")),
-    }
-
-
-def _save_admin_product(body: dict, product_id: str = None) -> str:
-    product_id = product_id or ("prod-" + str(uuid.uuid4())[:8])
-    brand = (body.get("brand") or "M1LIP").strip()
-    title = (body.get("title") or "Товар").strip()
-    price = int(body.get("price") or 0)
-    old_price = body.get("oldPrice")
-    old_price = int(old_price) if old_price not in (None, "") else None
-    tag = (body.get("tag") or "").strip()
-    sku = (body.get("sku") or "").strip()
-    category = (body.get("category") or "Аксесуари").strip()
-    description = (body.get("description") or "").strip()
-    img = body.get("img") or ""
-    gallery = body.get("gallery") or []
-    specs = body.get("specs") or []
-    colors = body.get("colors") or []
-    featured = bool(body.get("featured"))
-    popular = bool(body.get("popular"))
-    hidden = bool(body.get("hidden"))
-
-    colors_str = ", ".join([c.get("name", "") for c in colors if c.get("name")])
-    cq_dict = {c["name"]: int(c.get("quantity") or 0) for c in colors if c.get("name")}
-    ci_dict = {c["name"]: {"main": c.get("main", ""), "gallery": c.get("gallery") or []} for c in colors if
-               c.get("name")}
-    total_qty = sum(cq_dict.values())
-
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute("SELECT id FROM products WHERE id = %s", (product_id,))
-    exists = cursor.fetchone()
-
-    if exists:
-        cursor.execute("""
-                       UPDATE products
-                       SET brand=%s,
-                           title=%s,
-                           price=%s,
-                           old_price=%s,
-                           tag=%s,
-                           sku=%s,
-                           category=%s,
-                           quantity=%s,
-                           colors=%s,
-                           description=%s,
-                           img=%s,
-                           gallery=%s,
-                           specs=%s,
-                           color_images=%s,
-                           color_quantities=%s,
-                           featured=%s,
-                           popular=%s,
-                           hidden=%s
-                       WHERE id = %s
-                       """, (brand, title, price, old_price, tag, sku, category, total_qty, colors_str, description,
-                             img, json.dumps(gallery, ensure_ascii=False), json.dumps(specs, ensure_ascii=False),
-                             json.dumps(ci_dict, ensure_ascii=False), json.dumps(cq_dict, ensure_ascii=False),
-                             featured, popular, hidden, product_id))
-    else:
-        cursor.execute("""
-                       INSERT INTO products (id, brand, title, price, old_price, tag, sku, category, quantity,
-                                             colors, description, img, gallery, specs, color_images,
-                                             color_quantities, featured, popular, hidden)
-                       VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-                       """, (product_id, brand, title, price, old_price, tag, sku, category, total_qty, colors_str,
-                             description, img, json.dumps(gallery, ensure_ascii=False),
-                             json.dumps(specs, ensure_ascii=False), json.dumps(ci_dict, ensure_ascii=False),
-                             json.dumps(cq_dict, ensure_ascii=False), featured, popular, hidden))
-
-    cat_id = _slugify(category)
-    cursor.execute(
-        "INSERT INTO categories (id, name, position) VALUES (%s, %s, (SELECT COALESCE(MAX(position), -1) + 1 FROM categories)) ON CONFLICT (id) DO NOTHING",
-        (cat_id, category),
-    )
-    brand_id = _slugify(brand)
-    cursor.execute(
-        "INSERT INTO brands (id, name, position) VALUES (%s, %s, (SELECT COALESCE(MAX(position), -1) + 1 FROM brands)) ON CONFLICT (id) DO NOTHING",
-        (brand_id, brand),
-    )
-
-    conn.commit()
-    cursor.close()
-    conn.close()
-    return product_id
-
-
-@api_router.get("/api/admin/check")
-async def admin_check(request: Request):
-    user = require_admin(request)
-    return {"ok": True, "user": {"id": user.get("id"), "first_name": user.get("first_name", "")}}
-
-
-@api_router.get("/api/admin/products")
-async def admin_list_products(request: Request):
-    require_admin(request)
-    return [_product_row_to_admin_json(p) for p in get_db_products(include_hidden=True)]
-
-
-@api_router.post("/api/admin/products")
-async def admin_create_product(request: Request):
-    require_admin(request)
-    body = await request.json()
-    new_id = _save_admin_product(body)
-    return {"status": "created", "id": new_id}
-
-
-@api_router.put("/api/admin/products/{product_id}")
-async def admin_update_product(product_id: str, request: Request):
-    require_admin(request)
-    body = await request.json()
-    _save_admin_product(body, product_id=product_id)
-    return {"status": "updated", "id": product_id}
-
-
-@api_router.delete("/api/admin/products/{product_id}")
-async def admin_delete_product(product_id: str, request: Request):
-    require_admin(request)
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute("DELETE FROM products WHERE id = %s", (product_id,))
-    conn.commit()
-    cursor.close()
-    conn.close()
-    return {"status": "deleted", "id": product_id}
-
-
-@api_router.patch("/api/admin/products/{product_id}/stock")
-async def admin_quick_update_stock(product_id: str, request: Request):
-    require_admin(request)
-    body = await request.json()
-    color = body.get("color")
-    quantity = body.get("quantity")
-    if quantity is None or int(quantity) < 0:
-        raise HTTPException(status_code=400, detail="Некоректна кількість")
-    quantity = int(quantity)
-
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute("SELECT color_quantities FROM products WHERE id = %s FOR UPDATE", (product_id,))
-    row = cursor.fetchone()
-    if not row:
-        conn.rollback()
-        cursor.close()
-        conn.close()
-        raise HTTPException(status_code=404, detail="Товар не знайдено")
-
-    try:
-        cq = json.loads(row["color_quantities"]) if row.get("color_quantities") else {}
-    except Exception:
-        cq = {}
-
-    if color and cq:
-        cq[color] = quantity
-        new_total = sum(cq.values())
-        cursor.execute("UPDATE products SET color_quantities = %s, quantity = %s WHERE id = %s",
-                       (json.dumps(cq, ensure_ascii=False), new_total, product_id))
-    else:
-        cursor.execute("UPDATE products SET quantity = %s WHERE id = %s", (quantity, product_id))
-
-    conn.commit()
-    cursor.close()
-    conn.close()
-    return {"status": "updated"}
-
-
-@api_router.post("/api/admin/upload")
-async def admin_upload_image(request: Request, file: UploadFile = File(...)):
-    user = require_admin(request)
-    contents = await file.read()
-    if len(contents) > 19 * 1024 * 1024:
-        raise HTTPException(status_code=400, detail="Файл занадто великий (макс. 19 МБ)")
-
-    bot_upload = Bot(token=TOKEN)
-    try:
-        sent = await bot_upload.send_photo(
-            chat_id=user["id"],
-            photo=BufferedInputFile(contents, filename=file.filename or "photo.jpg"),
-        )
-        photo_file_id = sent.photo[-1].file_id
-        url = await get_file_url(bot_upload, photo_file_id)
-        return {"url": url}
-    except Exception as e:
-        logging.error(f"Upload error: {e}")
-        raise HTTPException(status_code=500,
-                            detail="Не вдалося завантажити фото. Переконайтесь, що ви писали боту /start.")
-    finally:
-        await bot_upload.session.close()
-
-
-# ============================================================================
-# ADMIN — CATEGORIES
-# ============================================================================
-
-@api_router.get("/api/admin/categories")
-async def admin_list_categories(request: Request):
-    require_admin(request)
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM categories ORDER BY position ASC, name ASC")
-    rows = [dict(r) for r in cursor.fetchall()]
-    cursor.close()
-    conn.close()
-    return rows
-
-
-@api_router.post("/api/admin/categories")
-async def admin_create_category(request: Request):
-    require_admin(request)
-    body = await request.json()
-    name = (body.get("name") or "").strip()
-    if not name:
-        raise HTTPException(status_code=400, detail="Вкажіть назву категорії")
-    cat_id = _slugify(name)
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute(
-        """INSERT INTO categories (id, name, image, position)
-           VALUES (%s, %s, %s, (SELECT COALESCE(MAX(position), -1) + 1 FROM categories)) ON CONFLICT (id) DO
-        UPDATE SET name = EXCLUDED.name, image = EXCLUDED.image""",
-        (cat_id, name, body.get("image", "")),
-    )
-    conn.commit()
-    cursor.close()
-    conn.close()
-    return {"status": "created", "id": cat_id}
-
-
-@api_router.put("/api/admin/categories/{cat_id}")
-async def admin_update_category(cat_id: str, request: Request):
-    require_admin(request)
-    body = await request.json()
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute(
-        "UPDATE categories SET name=%s, image=%s, position=COALESCE(%s, position), hidden=%s WHERE id=%s",
-        (body.get("name"), body.get("image", ""), body.get("position"), bool(body.get("hidden")), cat_id),
-    )
-    conn.commit()
-    cursor.close()
-    conn.close()
-    return {"status": "updated"}
-
-
-@api_router.delete("/api/admin/categories/{cat_id}")
-async def admin_delete_category(cat_id: str, request: Request):
-    require_admin(request)
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute("DELETE FROM categories WHERE id = %s", (cat_id,))
-    conn.commit()
-    cursor.close()
-    conn.close()
-    return {"status": "deleted"}
-
-
-# ============================================================================
-# ADMIN — BRANDS
-# ============================================================================
-
-@api_router.get("/api/admin/brands")
-async def admin_list_brands(request: Request):
-    require_admin(request)
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM brands ORDER BY position ASC, name ASC")
-    rows = [dict(r) for r in cursor.fetchall()]
-    cursor.close()
-    conn.close()
-    return rows
-
-
-@api_router.post("/api/admin/brands")
-async def admin_create_brand(request: Request):
-    require_admin(request)
-    body = await request.json()
-    name = (body.get("name") or "").strip()
-    if not name:
-        raise HTTPException(status_code=400, detail="Вкажіть назву бренду")
-    brand_id = _slugify(name)
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute(
-        """INSERT INTO brands (id, name, logo, position)
-           VALUES (%s, %s, %s, (SELECT COALESCE(MAX(position), -1) + 1 FROM brands)) ON CONFLICT (id) DO
-        UPDATE SET name = EXCLUDED.name, logo = EXCLUDED.logo""",
-        (brand_id, name, body.get("logo", "")),
-    )
-    conn.commit()
-    cursor.close()
-    conn.close()
-    return {"status": "created", "id": brand_id}
-
-
-@api_router.put("/api/admin/brands/{brand_id}")
-async def admin_update_brand(brand_id: str, request: Request):
-    require_admin(request)
-    body = await request.json()
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute(
-        "UPDATE brands SET name=%s, logo=%s, position=COALESCE(%s, position), hidden=%s WHERE id=%s",
-        (body.get("name"), body.get("logo", ""), body.get("position"), bool(body.get("hidden")), brand_id),
-    )
-    conn.commit()
-    cursor.close()
-    conn.close()
-    return {"status": "updated"}
-
-
-@api_router.delete("/api/admin/brands/{brand_id}")
-async def admin_delete_brand(brand_id: str, request: Request):
-    require_admin(request)
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute("DELETE FROM brands WHERE id = %s", (brand_id,))
-    conn.commit()
-    cursor.close()
-    conn.close()
-    return {"status": "deleted"}
-
-
-# ============================================================================
-# ADMIN — ORDERS
-# ============================================================================
-
-def _order_row_to_json(row: dict) -> dict:
-    data = row["data"] if isinstance(row["data"], dict) else json.loads(row["data"])
-    return {
-        "order_id": row["order_id"],
-        "status": row["status"],
-        "status_label": ORDER_STATUS_LABELS_UA.get(row["status"], row["status"]),
-        "payment_status": row.get("payment_status", "WAITING_PAYMENT"),
-        "payment_status_label": PAYMENT_STATUS_LABELS_UA.get(row.get("payment_status", "WAITING_PAYMENT"),
-                                                              row.get("payment_status")),
-        "payment_charge_id": row.get("payment_charge_id"),
-        "paid_at": str(row["paid_at"]) if row.get("paid_at") else None,
-        "tracking_number": row.get("tracking_number"),
-        "admin_comment": row.get("admin_comment"),
-        "total": row.get("total"),
-        "telegram_id": row.get("telegram_id"),
-        "created_at": str(row["created_at"]),
-        "updated_at": str(row.get("updated_at") or row["created_at"]),
-        "customer": data.get("customer", {}),
-        "items": data.get("items", []),
-        "delivery": data.get("delivery", {}),
-        "payment": data.get("payment", {}),
-        "comment": data.get("comment", ""),
-    }
-
-
-def _get_order_history(cursor, order_id: str) -> list:
-    cursor.execute(
-        "SELECT status, payment_status, note, created_at FROM order_status_history "
-        "WHERE order_id = %s ORDER BY id ASC",
-        (order_id,),
-    )
-    history = []
-    for r in cursor.fetchall():
-        history.append({
-            "status": r["status"],
-            "status_label": ORDER_STATUS_LABELS_UA.get(r["status"], r["status"]) if r["status"] else None,
-            "payment_status": r["payment_status"],
-            "payment_status_label": PAYMENT_STATUS_LABELS_UA.get(r["payment_status"], r["payment_status"])
-            if r["payment_status"] else None,
-            "note": r["note"],
-            "created_at": str(r["created_at"]),
-        })
-    return history
-
-
-def _log_order_history(cursor, order_id: str, status: str = None, payment_status: str = None, note: str = ""):
-    cursor.execute(
-        "INSERT INTO order_status_history (order_id, status, payment_status, note) VALUES (%s, %s, %s, %s)",
-        (order_id, status, payment_status, note),
-    )
-
-
-@api_router.get("/api/admin/orders")
-async def admin_list_orders(request: Request, status: str = None, payment_status: str = None, search: str = None,
-                            delivery_provider: str = None, date_from: str = None, date_to: str = None,
-                            limit: int = 100, offset: int = 0):
-    require_admin(request)
-    conn = get_db_connection()
-    cursor = conn.cursor()
-
-    query = "SELECT * FROM orders WHERE 1=1"
-    params = []
-    if status and status != "ALL":
-        query += " AND status = %s"
-        params.append(status)
-    if payment_status and payment_status != "ALL":
-        query += " AND payment_status = %s"
-        params.append(payment_status)
-    if delivery_provider and delivery_provider != "ALL":
-        query += " AND data->'delivery'->>'provider' = %s"
-        params.append(delivery_provider)
-    if date_from:
-        query += " AND created_at >= %s"
-        params.append(date_from)
-    if date_to:
-        query += " AND created_at <= %s"
-        params.append(date_to)
-    if search:
-        s = f"%{search.lower()}%"
-        query += """ AND (
-            LOWER(order_id) LIKE %s
-            OR LOWER(tracking_number) LIKE %s
-            OR LOWER(data->'customer'->>'firstName') LIKE %s
-            OR LOWER(data->'customer'->>'lastName') LIKE %s
-            OR data->'customer'->>'phone' LIKE %s
-            OR telegram_id::TEXT LIKE %s
-        )"""
-        params += [s, s, s, s, s, s]
-    query += " ORDER BY id DESC LIMIT %s OFFSET %s"
-    params += [limit, offset]
-
-    cursor.execute(query, params)
-    rows = cursor.fetchall()
-    cursor.close()
-    conn.close()
-    return [_order_row_to_json(r) for r in rows]
-
-
-@api_router.get("/api/admin/orders/{order_id}")
-async def admin_get_order(order_id: str, request: Request):
-    require_admin(request)
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM orders WHERE order_id = %s", (order_id,))
-    row = cursor.fetchone()
-    if not row:
-        cursor.close()
-        conn.close()
-        raise HTTPException(status_code=404, detail="Замовлення не знайдено")
-    result = _order_row_to_json(row)
-    result["history"] = _get_order_history(cursor, order_id)
-    cursor.close()
-    conn.close()
-    return result
-
-
-class OrderStatusError(Exception):
-    def __init__(self, message: str, status_code: int = 400):
-        self.message = message
-        self.status_code = status_code
-        super().__init__(message)
-
-
-async def _set_order_status(order_id: str, new_status: str = None, tracking_number: str = None,
-                            admin_comment: str = None, note_prefix: str = "Статус змінено адміністратором"):
-    """Single source of truth for changing an order's fulfillment status /
-    tracking number / admin comment. Used by both the admin REST API and the
-    bot's classic text panel so the two never drift apart (spec section 13)."""
-    if new_status is not None and new_status not in ORDER_STATUSES:
-        raise OrderStatusError(f"Невідомий статус. Дозволені: {', '.join(ORDER_STATUSES)}")
-
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    try:
-        cursor.execute("SELECT * FROM orders WHERE order_id = %s FOR UPDATE", (order_id,))
-        row = cursor.fetchone()
-        if not row:
-            raise OrderStatusError("Замовлення не знайдено", status_code=404)
-
-        old_status = row["status"]
-        payment_status = row.get("payment_status", "WAITING_PAYMENT")
-        order_data = row["data"] if isinstance(row["data"], dict) else json.loads(row["data"])
-
-        # An order can only move through the fulfillment pipeline once payment
-        # is confirmed server-side. Cancelling is always allowed (e.g. to
-        # release stock on an abandoned/unpaid order).
-        if new_status is not None and new_status != old_status and new_status != "CANCELLED":
-            if payment_status != "PAID":
-                raise OrderStatusError("Неможливо змінити статус: оплата за це замовлення ще не підтверджена.")
-
-        if new_status is not None and new_status != old_status:
-            if old_status in STOCK_HELD_STATUSES and new_status == "CANCELLED":
-                _restock(cursor, order_data)
-            elif old_status == "CANCELLED" and new_status in STOCK_HELD_STATUSES:
-                try:
-                    priced_items, _ = _validate_and_price_items(cursor, order_data.get("items", []))
-                    _reserve_stock(cursor, priced_items)
-                except OrderValidationError as e:
-                    raise OrderStatusError(f"Неможливо відновити замовлення: {e.message}")
-
-        updates = []
-        params = []
-        if new_status is not None:
-            updates.append("status = %s")
-            params.append(new_status)
-        if tracking_number is not None:
-            updates.append("tracking_number = %s")
-            params.append(tracking_number)
-        if admin_comment is not None:
-            updates.append("admin_comment = %s")
-            params.append(admin_comment)
-        updates.append("updated_at = CURRENT_TIMESTAMP")
-
-        if updates:
-            params.append(order_id)
-            cursor.execute(f"UPDATE orders SET {', '.join(updates)} WHERE order_id = %s", params)
-
-        if new_status is not None and new_status != old_status:
-            note = note_prefix
-            if new_status == "SHIPPED" and tracking_number:
-                note += f" (ТТН: {tracking_number})"
-            _log_order_history(cursor, order_id, status=new_status, note=note)
-
-        conn.commit()
-
-        cursor.execute("SELECT * FROM orders WHERE order_id = %s", (order_id,))
-        updated_row = cursor.fetchone()
-        result = _order_row_to_json(updated_row)
-        result["history"] = _get_order_history(cursor, order_id)
-    except OrderStatusError:
-        conn.rollback()
-        raise
-    except Exception:
-        conn.rollback()
-        raise
-    finally:
-        cursor.close()
-        conn.close()
-
-    if new_status is not None and new_status != old_status and row.get("telegram_id"):
-        template = STATUS_CUSTOMER_MESSAGES.get(new_status)
-        if template:
-            ttn_line = f"\n\nТТН: {tracking_number}" if (new_status == "SHIPPED" and tracking_number) else ""
-            text = template.format(order_id=order_id, ttn_line=ttn_line)
-            try:
-                bot_notify = Bot(token=TOKEN)
-                await bot_notify.send_message(row["telegram_id"], text)
-                await bot_notify.session.close()
-            except Exception as e:
-                logging.error(f"Error sending status notification: {e}")
-
-    return result
-
-
-@api_router.patch("/api/admin/orders/{order_id}")
-async def admin_update_order(order_id: str, request: Request):
-    require_admin(request)
-    body = await request.json()
-    try:
-        return await _set_order_status(
-            order_id,
-            new_status=body.get("status"),
-            tracking_number=body.get("tracking_number"),
-            admin_comment=body.get("admin_comment"),
-        )
-    except OrderStatusError as e:
-        raise HTTPException(status_code=e.status_code, detail=e.message)
-
-
-@api_router.get("/api/admin/dashboard")
-async def admin_dashboard(request: Request):
-    require_admin(request)
-    conn = get_db_connection()
-    cursor = conn.cursor()
-
-    cursor.execute("SELECT status, COUNT(*) AS c, COALESCE(SUM(total), 0) AS s FROM orders GROUP BY status")
-    status_counts = {r["status"]: {"count": r["c"], "total": r["s"]} for r in cursor.fetchall()}
-
-    cursor.execute(
-        "SELECT COALESCE(SUM(total), 0) AS revenue FROM orders WHERE payment_status = 'PAID' AND status != 'CANCELLED'")
-    revenue = cursor.fetchone()["revenue"]
-
-    cursor.execute("SELECT COUNT(*) AS c FROM orders WHERE status = 'NEW' AND payment_status = 'PAID'")
-    new_orders_count = cursor.fetchone()["c"]
-
-    cursor.execute("SELECT COUNT(*) AS c FROM products WHERE hidden IS NOT TRUE")
-    product_count = cursor.fetchone()["c"]
-
-    cursor.execute(
-        "SELECT id, title, brand, quantity FROM products WHERE quantity <= 3 AND hidden IS NOT TRUE ORDER BY quantity ASC LIMIT 10")
-    low_stock = [dict(r) for r in cursor.fetchall()]
-
-    cursor.execute("SELECT order_id, status, total, created_at FROM orders ORDER BY id DESC LIMIT 10")
-    recent_orders = [dict(r) for r in cursor.fetchall()]
-    for o in recent_orders:
-        o["created_at"] = str(o["created_at"])
-
-    cursor.close()
-    conn.close()
-
-    return {
-        "statusCounts": status_counts,
-        "revenue": revenue,
-        "newOrdersCount": new_orders_count,
-        "productCount": product_count,
-        "lowStock": low_stock,
-        "recentOrders": recent_orders,
-    }
-
-
-app.include_router(api_router)
-router = Router()
-
-
-class AddProductStates(StatesGroup):
-    waiting_for_brand = State()
-    waiting_for_title = State()
-    waiting_for_price = State()
-    waiting_for_tag = State()
-    waiting_for_category = State()
-    waiting_for_specs = State()
-    waiting_for_colors = State()
-    waiting_for_color_qty = State()
-    waiting_for_color_main_photo = State()
-    waiting_for_color_gallery_photos = State()
-    waiting_for_description = State()
-    waiting_for_img = State()
-    waiting_for_gallery = State()
-
-
-class AdminEditStates(StatesGroup):
-    waiting_for_new_value = State()
-    waiting_for_ttn = State()
-
-
-def get_active_categories():
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute("SELECT name FROM categories WHERE hidden IS NOT TRUE ORDER BY position ASC, name ASC")
-    names = [r["name"] for r in cursor.fetchall()]
-    cursor.close()
-    conn.close()
-    return names or ["Миші", "Клавіатури", "Гарнітури", "Аксесуари"]
-
-
-@router.message(Command("start"))
-async def cmd_start(message: Message):
-    shop_reply_keyboard = ReplyKeyboardMarkup(
-        keyboard=[
-            [KeyboardButton(text="🛍 Відкрити M1lipStore", web_app=WebAppInfo(url=SHOP_URL))],
-            [KeyboardButton(text="🛍 Мої замовлення")],
-        ],
-        resize_keyboard=True,
-    )
-    await message.answer("Привіт! Вітаємо в **M1lipStore**.", reply_markup=shop_reply_keyboard, parse_mode="Markdown")
-
-
-@router.message(F.text == "🛍 Мої замовлення")
-async def cmd_my_orders(message: Message):
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute(
-        "SELECT order_id, data, status, payment_status, total FROM orders WHERE telegram_id = %s ORDER BY id DESC LIMIT 20",
-        (message.from_user.id,),
-    )
-    orders = cursor.fetchall()
-    cursor.close()
-    conn.close()
-
-    if not orders:
-        await message.answer("У вас поки немає замовлень. Оформіть перше в M1lipStore! 🛍")
-        return
-
-    buttons = []
-    for o in orders:
-        data = o['data'] if isinstance(o['data'], dict) else json.loads(o['data'])
-        items = data.get("items", [])
-        first_item = items[0] if items else {}
-        item_desc = f"{o['total']} × 1" if not items else f"{first_item.get('qty', 1)} × {first_item.get('title', 'товар')}"
-        if o.get("payment_status") != "PAID":
-            label = PAYMENT_STATUS_LABELS_UA.get(o.get("payment_status"), "⏳ Очікує оплати")
-        else:
-            label = ORDER_STATUS_LABELS_UA.get(o['status'], o['status'])
-        buttons.append([InlineKeyboardButton(
-            text=f"#{o['order_id']} | {o['total']} ₴ | {label}",
-            callback_data=f"my_order_{o['order_id']}")])
-    markup = InlineKeyboardMarkup(inline_keyboard=buttons)
-    await message.answer("🛍 **Мої замовлення:**", reply_markup=markup, parse_mode="Markdown")
-
-
-@router.callback_query(F.data.startswith("my_order_"))
-async def cb_my_order_details(callback: CallbackQuery):
-    o_id = callback.data.replace("my_order_", "")
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM orders WHERE order_id = %s AND telegram_id = %s", (o_id, callback.from_user.id))
-    row = cursor.fetchone()
-    if row:
-        history = _get_order_history(cursor, o_id)
-    cursor.close()
-    conn.close()
-
-    if not row:
-        await callback.answer("Замовлення не знайдено.", show_alert=True)
-        return
-
-    data = row['data'] if isinstance(row['data'], dict) else json.loads(row['data'])
-    items = data.get("items", [])
-    delivery = data.get("delivery", {})
-    payment_status = row.get("payment_status", "WAITING_PAYMENT")
-
-    items_str = "\n".join([
-        f"• {i.get('brand', '')} {i.get('title', '')} ({i.get('color', '')}) x {i['qty']} — {i.get('lineTotal', 0)} ₴"
-        for i in items])
-    if payment_status != "PAID":
-        status_line = f"📊 *Статус:* {PAYMENT_STATUS_LABELS_UA.get(payment_status, payment_status)}"
-    else:
-        status_line = f"📊 *Статус:* {ORDER_STATUS_LABELS_UA.get(row['status'], row['status'])}"
-    timeline_str = "\n".join(
-        f"{h['created_at']} — {h.get('status_label') or h.get('payment_status_label') or h.get('note') or ''}"
-        for h in history) or "—"
-
-    msg_text = (
-        f"📋 *Замовлення #{o_id}*\n"
-        f"{status_line}\n\n"
-        f"📦 *Товари:*\n{items_str}\n\n"
-        f"🚚 *Доставка:* {delivery.get('provider', '')}, м. {delivery.get('city', '')}, відділ. {delivery.get('department', '')}\n"
-        f"💰 *Сума:* *{row['total']} ₴*\n"
-        f"🔖 *ТТН:* {row.get('tracking_number') or 'ще не присвоєно'}\n\n"
-        f"🕓 *Історія:*\n{timeline_str}"
-    )
-    buttons = []
-    if payment_status == "WAITING_PAYMENT":
-        buttons.append([InlineKeyboardButton(text="💳 Повторити оплату", callback_data=f"retry_pay_{o_id}")])
-    markup = InlineKeyboardMarkup(inline_keyboard=buttons) if buttons else None
-    await callback.message.answer(msg_text, reply_markup=markup, parse_mode="Markdown")
-    await callback.answer()
-
-
-@router.callback_query(F.data.startswith("retry_pay_"))
-async def cb_retry_payment(callback: CallbackQuery):
-    o_id = callback.data.replace("retry_pay_", "")
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM orders WHERE order_id = %s AND telegram_id = %s", (o_id, callback.from_user.id))
-    row = cursor.fetchone()
-    cursor.close()
-    conn.close()
-    if not row:
-        await callback.answer("Замовлення не знайдено.", show_alert=True)
-        return
-    if row.get("payment_status") == "PAID":
-        await callback.answer("Це замовлення вже оплачено.", show_alert=True)
-        return
-    data = row["data"] if isinstance(row["data"], dict) else json.loads(row["data"])
-    items = data.get("items", [])
-    items_str = "\n".join([
-        f"• {i.get('brand', '')} {i.get('title', '')} x {i['qty']} — {i.get('lineTotal', 0)} ₴" for i in items])
-    await callback.answer()
-    try:
-        invoice_url = await _create_invoice_link(o_id, row["total"], items_str)
-    except HTTPException as e:
-        await callback.message.answer(f"❌ {e.detail}")
-        return
-    await callback.message.answer(
-        f"💳 Рахунок на оплату замовлення #{o_id} готовий:",
-        reply_markup=InlineKeyboardMarkup(
-            inline_keyboard=[[InlineKeyboardButton(text="Оплатити", url=invoice_url)]]),
-    )
-
-
-@router.pre_checkout_query()
-async def process_pre_checkout(pre_checkout_query: PreCheckoutQuery):
-    """Bot API requires this to be answered within 10 seconds. We re-verify
-    the order and the exact amount server-side before accepting — never trust
-    the amount the client thinks it's paying."""
-    order_id = pre_checkout_query.invoice_payload
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute("SELECT total, payment_status FROM orders WHERE order_id = %s", (order_id,))
-    row = cursor.fetchone()
-    cursor.close()
-    conn.close()
-
-    if not row:
-        await pre_checkout_query.answer(ok=False, error_message="Замовлення не знайдено. Спробуйте оформити знову.")
-        return
-    if row["payment_status"] == "PAID":
-        await pre_checkout_query.answer(ok=False, error_message="Це замовлення вже оплачено.")
-        return
-    if pre_checkout_query.total_amount != row["total"] * 100 or pre_checkout_query.currency != PAYMENT_CURRENCY:
-        await pre_checkout_query.answer(ok=False, error_message="Сума оплати не відповідає сумі замовлення.")
-        return
-
-    await pre_checkout_query.answer(ok=True)
-
-
-@router.message(F.successful_payment)
-async def process_successful_payment(message: Message):
-    sp = message.successful_payment
-    order_id = sp.invoice_payload
-
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    try:
-        cursor.execute("SELECT * FROM orders WHERE order_id = %s FOR UPDATE", (order_id,))
-        row = cursor.fetchone()
-        if not row:
-            logging.error(f"successful_payment for unknown order {order_id}")
-            conn.rollback()
-            return
-        # Idempotency guard: Telegram can, in rare cases, redeliver updates.
-        if row.get("payment_status") == "PAID":
-            conn.rollback()
-            return
-        # Final server-side amount check before flipping the order to PAID.
-        if sp.total_amount != row["total"] * 100 or sp.currency != PAYMENT_CURRENCY:
-            logging.error(f"Payment amount mismatch for {order_id}: got {sp.total_amount}, expected {row['total']*100}")
-            conn.rollback()
-            return
-
-        cursor.execute(
-            """UPDATE orders SET payment_status = 'PAID', payment_charge_id = %s, provider_charge_id = %s,
-               paid_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP WHERE order_id = %s""",
-            (sp.telegram_payment_charge_id, sp.provider_payment_charge_id, order_id),
-        )
-        _log_order_history(cursor, order_id, payment_status="PAID", note="Оплата підтверджена (Telegram Payments)")
-        conn.commit()
-
-        cursor.execute("SELECT * FROM orders WHERE order_id = %s", (order_id,))
-        paid_row = cursor.fetchone()
-    except Exception as e:
-        conn.rollback()
-        logging.error(f"Error processing successful_payment for {order_id}: {e}")
-        cursor.close()
-        conn.close()
-        return
-    finally:
-        cursor.close()
-        conn.close()
-
-    data = paid_row["data"] if isinstance(paid_row["data"], dict) else json.loads(paid_row["data"])
-    customer = data.get("customer", {})
-    items = data.get("items", [])
-    delivery = data.get("delivery", {})
-    items_str = "\n".join([
-        f"• {i.get('brand', '')} {i.get('title', '')} ({i.get('color', '')}) x {i['qty']} — {i.get('lineTotal', 0)} ₴"
-        for i in items])
-
-    await message.answer(
-        f"✅ *Оплата підтверджена!*\n\n"
-        f"Замовлення *#{order_id}* оплачено на суму *{paid_row['total']} ₴*.\n"
-        f"Ми вже почали його обробку. Слідкувати за статусом можна в розділі «🛍 Мої замовлення».",
-        parse_mode="Markdown",
-    )
-
-    # Notify all admins with a full order card + a button straight to it.
-    try:
-        bot_notify = Bot(token=TOKEN)
-        admin_text = (
-            f"🔔 *НОВЕ ОПЛАЧЕНЕ ЗАМОВЛЕННЯ*\n\n"
-            f"Замовлення: *#{order_id}*\n\n"
-            f"👤 *Клієнт:* {customer.get('firstName')} {customer.get('lastName', '')} ({customer.get('phone')})\n"
-            f"✉️ *Email:* {customer.get('email', 'не вказано')}\n\n"
-            f"📦 *Товари:*\n{items_str}\n\n"
-            f"🚚 *Доставка:* {delivery.get('provider', '')}, м. {delivery.get('city', '')}, відділення: {delivery.get('department', '')}\n"
-            f"💳 *Оплата:* {PAYMENT_PROVIDER_LABEL} — ✅ Успішно\n"
-            f"💰 *Сума:* *{paid_row['total']} ₴*\n"
-            f"📅 *Дата:* {paid_row['created_at']}"
-        )
-        admin_markup = InlineKeyboardMarkup(inline_keyboard=[
-            [InlineKeyboardButton(text="📋 Переглянути замовлення", callback_data=f"show_order_{order_id}")],
-        ])
-        for admin_id in ADMIN_IDS:
-            await bot_notify.send_message(admin_id, admin_text, reply_markup=admin_markup, parse_mode="Markdown")
-        await bot_notify.session.close()
-    except Exception as e:
-        logging.error(f"Error sending paid-order admin notification: {e}")
-
-
-@router.message(Command("admin"))
-async def cmd_admin(message: Message):
-    if message.from_user.id not in ADMIN_IDS:
-        await message.answer("❌ У вас немає прав доступу.")
-        return
-    open_panel_markup = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="🖥 Відкрити адмін-панель", web_app=WebAppInfo(url=ADMIN_PANEL_URL))],
-        [InlineKeyboardButton(text="📋 Класична текстова панель", callback_data="show_classic_admin")],
-    ])
-    await message.answer(
-        "⚙️ **Адмін-панель M1lipStore**\n\nНатисніть кнопку нижче, щоб відкрити зручну панель керування:",
-        reply_markup=open_panel_markup, parse_mode="Markdown"
-    )
-
-
-@router.callback_query(F.data == "show_classic_admin")
-async def show_classic_admin_cb(callback: CallbackQuery):
-    if callback.from_user.id not in ADMIN_IDS: return
-    await show_admin_panel(callback.message)
-    await callback.answer()
-
-
-async def show_admin_panel(message_or_callback_msg, edit_mode=False):
-    products = get_db_products(include_hidden=True)
-    keyboard_buttons = []
-    for product in products:
-        stock_status = f"📦 {product['quantity']} шт." if product['quantity'] > 0 else "❌ Немає"
-        keyboard_buttons.append([InlineKeyboardButton(
-            text=f"{product.get('brand', '')} {product['title']} | {product['price']} ₴ | {stock_status}",
-            callback_data=f"manage_{product['id']}"
-        )])
-    keyboard_buttons.append([InlineKeyboardButton(text="➕ Додати новий товар", callback_data="add_new_product")])
-    keyboard_buttons.append([InlineKeyboardButton(text="📦 Переглянути замовлення", callback_data="view_orders")])
-    admin_markup = InlineKeyboardMarkup(inline_keyboard=keyboard_buttons)
-
-    text = "⚙️ **Панель адміністратора M1lipStore**\n\nОберіть товар для редагування або створіть новий:"
-    if edit_mode:
-        try:
-            await message_or_callback_msg.message.edit_text(text, reply_markup=admin_markup, parse_mode="Markdown")
-            return
-        except Exception:
-            pass
-    await message_or_callback_msg.answer(text, reply_markup=admin_markup, parse_mode="Markdown")
-
-
-@router.callback_query(F.data == "view_orders")
-async def process_view_orders(callback: CallbackQuery):
-    if callback.from_user.id not in ADMIN_IDS:
-        await callback.answer("Доступ заборонено!", show_alert=True)
-        return
-
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute("SELECT order_id, data, status, payment_status, total FROM orders ORDER BY id DESC LIMIT 15")
-    orders = cursor.fetchall()
-    cursor.close()
-    conn.close()
-
-    if not orders:
-        await callback.answer("Замовлень поки немає.", show_alert=True)
-        return
-
-    buttons = []
-    for ord_row in orders:
-        o_id = ord_row['order_id']
-        data = ord_row['data'] if isinstance(ord_row['data'], dict) else json.loads(ord_row['data'])
-        customer = data.get("customer", {})
-        name = f"{customer.get('firstName', '')} {customer.get('lastName', '')}".strip() or "Клієнт"
-        if ord_row.get("payment_status") != "PAID":
-            status_label = PAYMENT_STATUS_LABELS_UA.get(ord_row.get("payment_status"), "⏳ Очікує оплати")
-        else:
-            status_label = ORDER_STATUS_LABELS_UA.get(ord_row['status'], ord_row['status'])
-        buttons.append(
-            [InlineKeyboardButton(text=f"#{o_id} | {name} | {ord_row['total']} ₴ | {status_label}",
-                                  callback_data=f"show_order_{o_id}")])
-
-    buttons.append([InlineKeyboardButton(text="🔙 Назад до адмін-панелі", callback_data="back_to_admin")])
-    markup = InlineKeyboardMarkup(inline_keyboard=buttons)
-
-    try:
-        await callback.message.edit_text("📦 **Останні замовлення:**", reply_markup=markup, parse_mode="Markdown")
-    except Exception:
-        await callback.message.answer("📦 **Останні замовлення:**", reply_markup=markup, parse_mode="Markdown")
-    await callback.answer()
-
-
-@router.callback_query(F.data.startswith("show_order_"))
-async def process_show_order_details(callback: CallbackQuery):
-    if callback.from_user.id not in ADMIN_IDS: return
-    o_id = callback.data.replace("show_order_", "")
-
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM orders WHERE order_id = %s", (o_id,))
-    row = cursor.fetchone()
-    cursor.close()
-    conn.close()
-
-    if not row:
-        await callback.answer("Замовлення не знайдено!", show_alert=True)
-        return
-
-    data = row['data'] if isinstance(row['data'], dict) else json.loads(row['data'])
-    customer = data.get("customer", {})
-    items = data.get("items", [])
-    delivery = data.get("delivery", {})
-    payment_status = row.get("payment_status", "WAITING_PAYMENT")
-    status_label = ORDER_STATUS_LABELS_UA.get(row['status'], row['status'])
-    payment_label = PAYMENT_STATUS_LABELS_UA.get(payment_status, payment_status)
-
-    items_str = "\n".join([
-        f"• {i.get('brand', '')} {i.get('title', '')} ({i.get('color', '')}) x {i['qty']} — {i.get('lineTotal', i.get('price', 0) * i['qty'])} ₴"
-        for i in items])
-    msg_text = (
-        f"📋 *Деталі замовлення #{o_id}*\n"
-        f"📅 *Дата:* {row['created_at']}\n"
-        f"📊 *Статус:* {status_label}\n"
-        f"💳 *Оплата:* {payment_label} ({PAYMENT_PROVIDER_LABEL})\n\n"
-        f"👤 *Клієнт:* {customer.get('firstName')} {customer.get('lastName', '')} ({customer.get('phone')})\n"
-        f"✉️ *Email:* {customer.get('email', 'не вказано')}\n\n"
-        f"📦 *Товари:*\n{items_str}\n\n"
-        f"🚚 *Доставка:* {delivery.get('provider', '')}, м. {delivery.get('city', '')}, відділ. {delivery.get('department', '')}\n"
-        f"💰 *Сума:* *{row['total']} ₴*\n"
-        f"🔖 *ТТН:* {row.get('tracking_number') or 'відсутній'}\n"
-        f"📝 *Коментар:* {data.get('comment', 'відсутній')}"
-    )
-
-    status_buttons = []
-    if payment_status != "PAID":
-        msg_text += "\n\n⚠️ Статус можна змінювати лише після підтвердженої оплати."
-        status_buttons.append([InlineKeyboardButton(text="❌ Скасувати замовлення",
-                                                     callback_data=f"setstatus_{o_id}_CANCELLED")])
-    else:
-        row_buttons = []
-        for st in ORDER_STATUSES:
-            if st == row['status']:
-                continue
-            row_buttons.append(InlineKeyboardButton(text=ORDER_STATUS_LABELS_UA.get(st, st),
-                                                    callback_data=f"setstatus_{o_id}_{st}"))
-            if len(row_buttons) == 2:
-                status_buttons.append(row_buttons)
-                row_buttons = []
-        if row_buttons:
-            status_buttons.append(row_buttons)
-    status_buttons.append([InlineKeyboardButton(text="🔙 До списку замовлень", callback_data="view_orders")])
-
-    markup = InlineKeyboardMarkup(inline_keyboard=status_buttons)
-    try:
-        await callback.message.edit_text(msg_text, reply_markup=markup, parse_mode="Markdown")
-    except Exception:
-        await callback.message.answer(msg_text, reply_markup=markup, parse_mode="Markdown")
-    await callback.answer()
-
-
-@router.callback_query(F.data.startswith("setstatus_"))
-async def process_set_order_status(callback: CallbackQuery, state: FSMContext):
-    if callback.from_user.id not in ADMIN_IDS: return
-    parts = callback.data.replace("setstatus_", "").rsplit("_", 1)
-    o_id, new_status = parts[0], parts[1]
-
-    if new_status not in ORDER_STATUSES:
-        await callback.answer("Невідомий статус", show_alert=True)
-        return
-
-    # Ask for a TTN before marking SHIPPED, if the order doesn't have one yet.
-    if new_status == "SHIPPED":
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute("SELECT tracking_number FROM orders WHERE order_id = %s", (o_id,))
-        row = cursor.fetchone()
-        cursor.close()
-        conn.close()
-        if row and not row.get("tracking_number"):
-            await state.set_state(AdminEditStates.waiting_for_ttn)
-            await state.update_data(ttn_order_id=o_id)
-            await callback.message.answer(
-                f"🔖 Введіть номер ТТН для замовлення #{o_id} (або напишіть «-», щоб пропустити):")
-            await callback.answer()
-            return
-
-    try:
-        await _set_order_status(o_id, new_status=new_status)
-    except OrderStatusError as e:
-        await callback.answer(e.message, show_alert=True)
-        return
-
-    await callback.answer(f"Статус оновлено: {ORDER_STATUS_LABELS_UA.get(new_status, new_status)}", show_alert=True)
-    await process_show_order_details(callback)
-
-
-@router.message(AdminEditStates.waiting_for_ttn)
-async def process_ttn_input(message: Message, state: FSMContext):
-    if message.from_user.id not in ADMIN_IDS: return
-    data = await state.get_data()
-    o_id = data.get("ttn_order_id")
-    ttn = message.text.strip()
-    await state.clear()
-    try:
-        await _set_order_status(o_id, new_status="SHIPPED", tracking_number=None if ttn == "-" else ttn)
-    except OrderStatusError as e:
-        await message.answer(f"❌ {e.message}")
-        return
-    await message.answer(f"🚚 Замовлення #{o_id} відправлено" + (f", ТТН: {ttn}" if ttn != "-" else "") + ".")
-
-
-@router.callback_query(F.data == "back_to_admin")
-async def process_back_to_admin(callback: CallbackQuery):
-    if callback.from_user.id not in ADMIN_IDS: return
-    try:
-        await callback.message.delete()
-    except Exception:
-        pass
-    await show_admin_panel(callback.message)
-    await callback.answer()
-
-
-@router.callback_query(F.data.startswith("manage_"))
-async def process_manage_product(callback: CallbackQuery):
-    if callback.from_user.id not in ADMIN_IDS:
-        await callback.answer("Доступ заборонено!", show_alert=True)
-        return
-
-    product_id = callback.data.replace("manage_", "")
-    products = get_db_products(include_hidden=True)
-    product = next((p for p in products if p["id"] == product_id), None)
-
-    if not product:
-        await callback.answer("Товар не знайдено!", show_alert=True)
-        return
-
-    cq = product.get('colorQuantities', {})
-    colors_info = ", ".join([f"{c}: {q} шт." for c, q in cq.items()]) if cq else product.get('colors', 'не вказано')
-
-    brand_esc = product.get('brand', 'не вказано').replace('*', '\\*').replace('_', '\\_')
-    title_esc = product['title'].replace('*', '\\*').replace('_', '\\_')
-    cat_esc = product['category'].replace('*', '\\*').replace('_', '\\_')
-    desc_snippet = (product.get('description') or 'немає')[:50].replace('*', '\\*').replace('_', '\\_')
-    colors_esc = colors_info.replace('*', '\\*').replace('_', '\\_')
-
-    caption = (
-        f"🛠 *Редагування товару: {brand_esc} {title_esc}*\n\n"
-        f"• Бренд: {brand_esc}\n"
-        f"• Назва: {title_esc}\n"
-        f"• Категорія: {cat_esc}\n"
-        f"• Ціна: {product['price']} ₴\n"
-        f"• Тег: `{product.get('tag') or 'немає'}`\n"
-        f"• Опис: {desc_snippet}...\n"
-        f"• Загалом на складі: *{product['quantity']} шт.*\n"
-        f"• Кольори та залишки: {colors_esc}"
-    )
-
-    action_markup = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="✏️ Змінити назву", callback_data=f"edit_field_{product_id}_title"),
-         InlineKeyboardButton(text="💰 Змінити ціну", callback_data=f"edit_field_{product_id}_price")],
-        [InlineKeyboardButton(text="🏷 Змінити бренд", callback_data=f"edit_field_{product_id}_brand"),
-         InlineKeyboardButton(text="📁 Змінити категорію", callback_data=f"edit_field_{product_id}_category")],
-        [InlineKeyboardButton(text="📝 Змінити опис", callback_data=f"edit_field_{product_id}_description")],
-        [InlineKeyboardButton(text="🖼 Змінити головне фото", callback_data=f"edit_field_{product_id}_img")],
-        [InlineKeyboardButton(text="🎨 Редагувати залишки кольорів", callback_data=f"edit_colors_{product_id}")],
-        [InlineKeyboardButton(text="❌ Видалити товар", callback_data=f"delete_prod_{product_id}")],
-        [InlineKeyboardButton(text="🔙 Назад до списку", callback_data="back_to_admin")]
-    ])
-
-    try:
-        await callback.message.delete()
-    except Exception:
-        pass
-
-    photo_url = product.get('img')
-    try:
-        if photo_url and photo_url.startswith("http"):
-            await callback.message.answer_photo(photo=photo_url, caption=caption, parse_mode="Markdown",
-                                                reply_markup=action_markup)
-        else:
-            await callback.message.answer(caption, parse_mode="Markdown", reply_markup=action_markup)
-    except Exception:
-        await callback.message.answer(caption, parse_mode="Markdown", reply_markup=action_markup)
-    await callback.answer()
-
-
-@router.callback_query(F.data.startswith("edit_field_"))
-async def process_edit_field_start(callback: CallbackQuery, state: FSMContext):
-    if callback.from_user.id not in ADMIN_IDS: return
-    parts = callback.data.replace("edit_field_", "").split("_", 1)
-    prod_id = parts[0]
-    field_name = parts[1]
-
-    await state.update_data(edit_product_id=prod_id, edit_field_name=field_name)
-    await state.set_state(AdminEditStates.waiting_for_new_value)
-
-    field_names_ua = {
-        "title": "назву товару",
-        "price": "ціну (тільки число в грн)",
-        "brand": "бренд",
-        "category": "категорію",
-        "description": "опис товару",
-        "img": "посилання на нове головне фото або надішліть картинку"
-    }
-    await callback.message.answer(f"✏️ Введіть нову **{field_names_ua.get(field_name, field_name)}**:",
-                                  parse_mode="Markdown")
-    await callback.answer()
-
-
-@router.message(AdminEditStates.waiting_for_new_value)
-async def process_edit_field_save(message: Message, state: FSMContext):
-    if message.from_user.id not in ADMIN_IDS: return
-    data = await state.get_data()
-    if data.get("edit_field_name") == "color_qty": return
-
-    prod_id = data.get("edit_product_id")
-    field = data.get("edit_field_name")
-
-    new_value = message.text.strip() if message.text else ""
-    if field == "price":
-        try:
-            new_value = int(new_value)
-            if new_value < 0: raise ValueError()
-        except ValueError:
-            await message.answer("❌ Будь ласка, введіть коректне число для ціни:")
-            return
-    elif field == "img" and message.photo:
-        new_value = await get_file_url(message.bot, message.photo[-1].file_id)
-
-    allowed_fields = {"title", "price", "brand", "category", "description", "img"}
-    if field not in allowed_fields:
-        await message.answer("❌ Непідтримуване поле.")
-        return
-
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute(f"UPDATE products SET {field} = %s WHERE id = %s", (new_value, prod_id))
-    if field == "category":
-        cat_id = _slugify(new_value)
-        cursor.execute(
-            "INSERT INTO categories (id, name, position) VALUES (%s, %s, (SELECT COALESCE(MAX(position), -1) + 1 FROM categories)) ON CONFLICT (id) DO NOTHING",
-            (cat_id, new_value),
-        )
-    if field == "brand":
-        brand_id = _slugify(new_value)
-        cursor.execute(
-            "INSERT INTO brands (id, name, position) VALUES (%s, %s, (SELECT COALESCE(MAX(position), -1) + 1 FROM brands)) ON CONFLICT (id) DO NOTHING",
-            (brand_id, new_value),
-        )
-    conn.commit()
-    cursor.close()
-    conn.close()
-
-    await state.clear()
-    await message.answer("✅ Успішно оновлено! Напишіть /admin для повернення в панель.")
-
-
-@router.callback_query(F.data.startswith("edit_colors_"))
-async def process_edit_colors(callback: CallbackQuery):
-    if callback.from_user.id not in ADMIN_IDS: return
-    product_id = callback.data.replace("edit_colors_", "")
-    products = get_db_products(include_hidden=True)
-    product = next((p for p in products if p["id"] == product_id), None)
-    if not product:
-        await callback.answer("Товар не знайдено!")
-        return
-
-    cq = product.get('colorQuantities', {})
-    buttons = []
-    for color in cq.keys():
-        buttons.append([InlineKeyboardButton(text=f"Змінити залишок: {color} ({cq[color]} шт.)",
-                                             callback_data=f"ch_cqty_{product_id}_{color}")])
-    buttons.append([InlineKeyboardButton(text="🔙 Назад до товару", callback_data=f"manage_{product_id}")])
-
-    markup = InlineKeyboardMarkup(inline_keyboard=buttons)
-    try:
-        await callback.message.edit_reply_markup(reply_markup=markup)
-    except Exception:
-        await callback.message.answer("Оберіть колір для редагування залишку:", reply_markup=markup)
-    await callback.answer()
-
-
-@router.callback_query(F.data.startswith("ch_cqty_"))
-async def process_change_color_qty(callback: CallbackQuery, state: FSMContext):
-    if callback.from_user.id not in ADMIN_IDS: return
-    parts = callback.data.replace("ch_cqty_", "").split("_", 1)
-    await state.update_data(editing_product_id=parts[0], editing_color_name=parts[1], edit_field_name="color_qty")
-    await state.set_state(AdminEditStates.waiting_for_new_value)
-    await callback.message.answer(f"📦 Введіть нову кількість для кольору **{parts[1]}**:", parse_mode="Markdown")
-    await callback.answer()
-
-
-@router.message(AdminEditStates.waiting_for_new_value, F.text)
-async def save_edited_color_qty_proxy(message: Message, state: FSMContext):
-    if message.from_user.id not in ADMIN_IDS: return
-    data = await state.get_data()
-    if data.get("edit_field_name") != "color_qty": return
-
-    try:
-        new_q = int(message.text.strip())
-        if new_q < 0: raise ValueError()
-
-        products = get_db_products(include_hidden=True)
-        product = next((p for p in products if p["id"] == data.get("editing_product_id")), None)
-        if product:
-            cq = product.get("colorQuantities", {})
-            cq[data.get("editing_color_name")] = new_q
-            total_qty = sum(cq.values())
-
-            conn = get_db_connection()
-            cursor = conn.cursor()
-            cursor.execute("UPDATE products SET color_quantities = %s, quantity = %s WHERE id = %s",
-                           (json.dumps(cq, ensure_ascii=False), total_qty, data.get("editing_product_id")))
-            conn.commit()
-            cursor.close()
-            conn.close()
-
-        await message.answer("✅ Кількість кольору оновлено! Напишіть /admin.", parse_mode="Markdown")
-        await state.clear()
-    except ValueError:
-        await message.answer("❌ Будь ласка, введіть ціле число (0 або більше):")
-
-
-# ============================================================================
-# ДОДАВАННЯ ТОВАРУ ЗІ ШВИДКИМ ВИБОРОМ БРЕНДІВ КНОПКАМИ
-# ============================================================================
-
-@router.callback_query(F.data == "add_new_product")
-async def process_add_new(callback: CallbackQuery, state: FSMContext):
-    if callback.from_user.id not in ADMIN_IDS: return
-    await state.set_state(AddProductStates.waiting_for_brand)
-
-    brand_markup = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="🦈 Attack Shark", callback_data="brand_Attack Shark"),
-         InlineKeyboardButton(text="⚡ AJAZZ", callback_data="brand_AJAZZ")],
-        [InlineKeyboardButton(text="🎹 AULA", callback_data="brand_AULA"),
-         InlineKeyboardButton(text="🚀 MCHOSE", callback_data="brand_MCHOSE")],
-        [InlineKeyboardButton(text="🎮 VGN", callback_data="brand_VGN")],
-        [InlineKeyboardButton(text="✍️ Ввести інший бренд вручну", callback_data="brand_custom")]
-    ])
-    await callback.message.answer(
-        "🏷 Оберіть **бренд** товару за допомогою кнопок або введіть вручну:",
-        reply_markup=brand_markup,
-        parse_mode="Markdown"
-    )
-    await callback.answer()
-
-
-@router.callback_query(F.data.startswith("brand_"), AddProductStates.waiting_for_brand)
-async def select_brand_cb(callback: CallbackQuery, state: FSMContext):
-    brand = callback.data.replace("brand_", "")
-    if brand == "custom":
-        await callback.message.answer("🏷 Введіть **назву бренду** текстом:")
-        await callback.answer()
-        return
-    await state.update_data(brand=brand)
-    await state.set_state(AddProductStates.waiting_for_title)
-    try:
-        await callback.message.delete()
-    except Exception:
-        pass
-    await callback.message.answer(
-        f"✅ Обрано бренд: **{brand}**\n\n✏️ Введіть **модель / назву** товару:",
-        parse_mode="Markdown"
-    )
-    await callback.answer()
-
-
-@router.message(AddProductStates.waiting_for_brand)
-async def add_brand(message: Message, state: FSMContext):
-    if message.from_user.id not in ADMIN_IDS: return
-    await state.update_data(brand=message.text.strip())
-    await state.set_state(AddProductStates.waiting_for_title)
-    await message.answer("✏️ Введіть **модель / назву** товару:", parse_mode="Markdown")
-
-
-@router.message(AddProductStates.waiting_for_title)
-async def add_title(message: Message, state: FSMContext):
-    if message.from_user.id not in ADMIN_IDS: return
-    await state.update_data(title=message.text.strip())
-    await state.set_state(AddProductStates.waiting_for_price)
-    await message.answer("💰 Введіть **ціну** товару в гривнях (тільки число):")
-
-
-@router.message(AddProductStates.waiting_for_price)
-async def add_price(message: Message, state: FSMContext):
-    if message.from_user.id not in ADMIN_IDS: return
-    try:
-        price = int(message.text.strip())
-        await state.update_data(price=price)
-        await state.set_state(AddProductStates.waiting_for_tag)
-        skip_markup = InlineKeyboardMarkup(
-            inline_keyboard=[[InlineKeyboardButton(text="⏭ Пропустити тег", callback_data="skip_tag")]])
-        await message.answer("🏷 Введіть **тег** товару (або пропустіть):", reply_markup=skip_markup)
-    except ValueError:
-        await message.answer("❌ Введіть числове значення ціни:")
-
-
-@router.callback_query(F.data == "skip_tag", AddProductStates.waiting_for_tag)
-async def skip_tag_cb(callback: CallbackQuery, state: FSMContext):
-    await state.update_data(tag="")
-    await ask_category_step(callback.message, state)
-    try:
-        await callback.message.delete()
-    except Exception:
-        pass
-    await callback.answer()
-
-
-@router.message(AddProductStates.waiting_for_tag)
-async def add_tag(message: Message, state: FSMContext):
-    if message.from_user.id not in ADMIN_IDS: return
-    await state.update_data(tag=message.text.strip())
-    await ask_category_step(message, state)
-
-
-async def ask_category_step(message: Message, state: FSMContext):
-    await state.set_state(AddProductStates.waiting_for_category)
-    categories = get_active_categories()
-    rows = []
-    row_buf = []
-    for cat in categories:
-        row_buf.append(InlineKeyboardButton(text=cat, callback_data=f"cat_{cat}"))
-        if len(row_buf) == 2:
-            rows.append(row_buf)
-            row_buf = []
-    if row_buf:
-        rows.append(row_buf)
-    category_markup = InlineKeyboardMarkup(inline_keyboard=rows)
-    await message.answer("📁 Оберіть **категорію** товару за допомогою кнопок:", reply_markup=category_markup,
-                         parse_mode="Markdown")
-
-
-@router.callback_query(F.data.startswith("cat_"), AddProductStates.waiting_for_category)
-async def select_category_cb(callback: CallbackQuery, state: FSMContext):
-    category = callback.data.replace("cat_", "")
-    await state.update_data(category=category)
-    await state.set_state(AddProductStates.waiting_for_specs)
-    await state.update_data(specs=[], current_spec_index=1)
-    try:
-        await callback.message.delete()
-    except Exception:
-        pass
-    await callback.message.answer(
-        f"✅ Обрано категорію: **{category}**\n\n⚙️ Блок характеристик №1 (наприклад: `Сенсор (PAW3349)`).\n\n*(Коли закінчите, надішліть /done)*",
-        parse_mode="Markdown")
-    await callback.answer()
-
-
-@router.message(AddProductStates.waiting_for_specs)
-async def process_spec_input(message: Message, state: FSMContext):
-    if message.from_user.id not in ADMIN_IDS: return
-    text = message.text.strip()
-    if text.lower() == '/done':
-        await state.set_state(AddProductStates.waiting_for_colors)
-        colors_markup = InlineKeyboardMarkup(inline_keyboard=[
-            [InlineKeyboardButton(text="🖤 Чорний", callback_data="col_Чорний"),
-             InlineKeyboardButton(text="🤍 Білий", callback_data="col_Білий")],
-            [InlineKeyboardButton(text="🌸 Рожевий", callback_data="col_Рожевий"),
-             InlineKeyboardButton(text="✅ Готово / Завершити вибір", callback_data="col_done")]
-        ])
-        await state.update_data(selected_colors=[])
-        await message.answer("🎨 Оберіть кольори та натисніть «Готово»:", reply_markup=colors_markup)
-        return
-
-    data = await state.get_data()
-    specs = data.get("specs", [])
-    spec_index = data.get("current_spec_index", 1)
-    cleaned_text = re.sub(r'^\d+[\.\)]\s*', '', text)
-    if "(" in cleaned_text and ")" in cleaned_text:
-        parts = cleaned_text.split("(", 1)
-        label = parts[0].strip().upper()
-        value = parts[1].replace(")", "").strip()
-    else:
-        label = f"БЛОК {spec_index}"
-        value = cleaned_text
-    specs.append({"label": label, "value": value})
-    await state.update_data(specs=specs, current_spec_index=spec_index + 1)
-    await message.answer(f"⚙️ Блок характеристик №{spec_index + 1} (або надішліть /done):")
-
-
-@router.callback_query(F.data.startswith("col_"), AddProductStates.waiting_for_colors)
-async def select_color_cb(callback: CallbackQuery, state: FSMContext):
-    action = callback.data.replace("col_", "")
-    data = await state.get_data()
-    colors_list = data.get("selected_colors", [])
-
-    if action == "done":
-        if not colors_list: colors_list = ["Чорний", "Білий"]
-        await state.update_data(selected_colors=colors_list, color_quantities_dict={}, current_color_qty_index=0)
-        await state.set_state(AddProductStates.waiting_for_color_qty)
-        try:
-            await callback.message.delete()
-        except Exception:
-            pass
-        first_color = colors_list[0]
-        await callback.message.answer(f"📦 Введіть кількість на складі для кольору **{first_color}** (ціле число):",
-                                      parse_mode="Markdown")
-        await callback.answer()
-        return
-
-    if action not in colors_list: colors_list.append(action)
-    await state.update_data(selected_colors=colors_list)
-    await callback.answer(f"Додано: {action}! Обрано: {', '.join(colors_list)}")
-
-
-@router.message(AddProductStates.waiting_for_color_qty)
-async def process_color_qty_input(message: Message, state: FSMContext):
-    if message.from_user.id not in ADMIN_IDS: return
-    try:
-        qty = int(message.text.strip())
-        if qty < 0: raise ValueError()
-        data = await state.get_data()
-        colors_list = data.get("selected_colors", [])
-        idx = data.get("current_color_qty_index", 0)
-        cq_dict = data.get("color_quantities_dict", {})
-
-        current_color = colors_list[idx]
-        cq_dict[current_color] = qty
-        idx += 1
-
-        if idx < len(colors_list):
-            await state.update_data(current_color_qty_index=idx, color_quantities_dict=cq_dict)
-            next_color = colors_list[idx]
-            await message.answer(f"📦 Введіть кількість для кольору **{next_color}**:", parse_mode="Markdown")
-        else:
-            await state.update_data(color_quantities_dict=cq_dict, current_color_photo_index=0, color_images_dict={})
-            await state.set_state(AddProductStates.waiting_for_color_main_photo)
-            first_c = colors_list[0]
-            await message.answer(f"🖼 Надішліть **обов'язкове головне фото** для кольору **{first_c}**:",
-                                 parse_mode="Markdown")
-    except ValueError:
-        await message.answer("❌ Будь ласка, введіть ціле число (0 або більше):")
-
-
-@router.message(AddProductStates.waiting_for_color_main_photo, F.photo)
-async def process_color_main_photo(message: Message, state: FSMContext):
-    if message.from_user.id not in ADMIN_IDS: return
-
-    photo_file_id = message.photo[-1].file_id
-    photo_url = await get_file_url(message.bot, photo_file_id)
-
-    data = await state.get_data()
-    colors_list = data.get("selected_colors", [])
-    idx = data.get("current_color_photo_index", 0)
-    ci_dict = data.get("color_images_dict", {})
-    current_color = colors_list[idx]
-
-    if current_color not in ci_dict:
-        ci_dict[current_color] = {"main": photo_url, "gallery": []}
-    else:
-        ci_dict[current_color]["main"] = photo_url
-
-    await state.update_data(color_images_dict=ci_dict)
-    await state.set_state(AddProductStates.waiting_for_color_gallery_photos)
-
-    done_markup = InlineKeyboardMarkup(
-        inline_keyboard=[[InlineKeyboardButton(text="✅ Готово (перейти далі)", callback_data="col_gallery_done")]]
-    )
-    await message.answer(
-        f"✅ Головне фото для кольору **{current_color}** успішно збережено!\n\n📸 Тепер надішліть додаткові фото галереї (або натисніть «Готово»):",
-        reply_markup=done_markup, parse_mode="Markdown"
-    )
-
-
-@router.message(AddProductStates.waiting_for_color_main_photo)
-async def process_color_main_photo_wrong(message: Message, state: FSMContext):
-    if message.from_user.id not in ADMIN_IDS: return
-    await message.answer("❌ Будь ласка, надішліть **головне фото** для цього кольору (це обов'язкове поле):",
-                         parse_mode="Markdown")
-
-
-album_cache = {}
-
-
-@router.message(AddProductStates.waiting_for_color_gallery_photos, F.photo)
-async def process_color_gallery_photo(message: Message, state: FSMContext):
-    if message.from_user.id not in ADMIN_IDS: return
-    photo_file_id = message.photo[-1].file_id
-    photo_url = await get_file_url(message.bot, photo_file_id)
-    data = await state.get_data()
-    colors_list = data.get("selected_colors", [])
-    idx = data.get("current_color_photo_index", 0)
-    current_color = colors_list[idx]
-    ci_dict = data.get("color_images_dict", {})
-    if current_color not in ci_dict: ci_dict[current_color] = {"main": "", "gallery": []}
-
-    if message.media_group_id:
-        if message.media_group_id not in album_cache: album_cache[message.media_group_id] = []
-        album_cache[message.media_group_id].append(photo_url)
-        await asyncio.sleep(0.7)
-        photos = album_cache.pop(message.media_group_id, None)
-        if not photos: return
-        for p in photos:
-            if p not in ci_dict[current_color]["gallery"]: ci_dict[current_color]["gallery"].append(p)
-    else:
-        if photo_url not in ci_dict[current_color]["gallery"]: ci_dict[current_color]["gallery"].append(photo_url)
-
-    await state.update_data(color_images_dict=ci_dict)
-    await message.answer(
-        f"✅ Додано в галерею кольору **{current_color}** (всього: {len(ci_dict[current_color]['gallery'])}).",
-        parse_mode="Markdown")
-
-
-@router.callback_query(F.data == "col_gallery_done", AddProductStates.waiting_for_color_gallery_photos)
-async def col_gallery_done_cb(callback: CallbackQuery, state: FSMContext):
-    await advance_to_next_color_or_desc(callback.message, state, from_callback=True, callback_query=callback)
-
-
-async def advance_to_next_color_or_desc(message_or_callback_msg, state: FSMContext, from_callback=False,
-                                        callback_query=None):
-    data = await state.get_data()
-    colors_list = data.get("selected_colors", [])
-    idx = data.get("current_color_photo_index", 0)
-    target_msg = callback_query.message if (from_callback and callback_query) else message_or_callback_msg
-    if from_callback and callback_query:
-        try:
-            await callback_query.message.delete()
-        except Exception:
-            pass
-
-    idx += 1
-    if idx < len(colors_list):
-        await state.update_data(current_color_photo_index=idx)
-        await state.set_state(AddProductStates.waiting_for_color_main_photo)
-        next_color = colors_list[idx]
-        await target_msg.answer(f"🖼 Надішліть **обов'язкове головне фото** для наступного кольору **{next_color}**:",
-                                parse_mode="Markdown")
-        if callback_query: await callback_query.answer()
-    else:
-        await state.set_state(AddProductStates.waiting_for_description)
-        await target_msg.answer("📝 Введіть короткий опис товару:", parse_mode="Markdown")
-        if callback_query: await callback_query.answer()
-
-
-@router.message(AddProductStates.waiting_for_description)
-async def add_description(message: Message, state: FSMContext):
-    if message.from_user.id not in ADMIN_IDS: return
-    await state.update_data(description=message.text.strip())
-    await state.set_state(AddProductStates.waiting_for_img)
-    await message.answer("🖼 Надішліть **головне фото** товару для каталогу:", parse_mode="Markdown")
-
-
-@router.message(AddProductStates.waiting_for_img, F.photo)
-async def add_img(message: Message, state: FSMContext):
-    if message.from_user.id not in ADMIN_IDS: return
-    main_photo_url = await get_file_url(message.bot, message.photo[-1].file_id)
-    await state.update_data(img=main_photo_url)
-    await state.set_state(AddProductStates.waiting_for_gallery)
-    skip_gal_markup = InlineKeyboardMarkup(
-        inline_keyboard=[[InlineKeyboardButton(text="⏭ Пропустити / Завершити", callback_data="skip_general_gallery")]])
-    await message.answer("📸 Надішліть загальні додаткові фото галереї:", reply_markup=skip_gal_markup,
-                         parse_mode="Markdown")
-
-
-@router.callback_query(F.data == "skip_general_gallery", AddProductStates.waiting_for_gallery)
-async def skip_general_gallery_cb(callback: CallbackQuery, state: FSMContext):
-    try:
-        await callback.message.delete()
-    except Exception:
-        pass
-    await save_product_to_db(callback.message, state, gallery_list=[])
-    await callback.answer()
-
-
-@router.message(AddProductStates.waiting_for_gallery, F.photo)
-async def add_general_gallery_photo(message: Message, state: FSMContext):
-    if message.from_user.id not in ADMIN_IDS: return
-    photo_url = await get_file_url(message.bot, photo_file_id=message.photo[-1].file_id)
-    data = await state.get_data()
-    gallery_list = data.get("gallery_list", [])
-    if photo_url not in gallery_list: gallery_list.append(photo_url)
-    await state.update_data(gallery_list=gallery_list)
-    await message.answer(f"✅ Додано в загальну галерею ({len(gallery_list)}). Напишіть /done для збереження.")
-
-
-@router.message(AddProductStates.waiting_for_gallery, F.text)
-async def add_general_gallery_text(message: Message, state: FSMContext):
-    if message.from_user.id not in ADMIN_IDS: return
-    data = await state.get_data()
-    gallery_list = data.get("gallery_list", [])
-    await save_product_to_db(message, state, gallery_list=gallery_list)
-
-
-async def save_product_to_db(message: Message, state: FSMContext, gallery_list=None):
-    if gallery_list is None:
-        data = await state.get_data()
-        gallery_list = data.get("gallery_list", [])
-    data = await state.get_data()
-
-    body = {
-        "brand": data.get("brand", "M1LIP"),
-        "title": data.get("title", "Товар"),
-        "price": data.get("price", 0),
-        "tag": data.get("tag", ""),
-        "category": data.get("category", "Аксесуари"),
-        "description": data.get("description", ""),
-        "img": data.get("img", ""),
-        "gallery": gallery_list,
-        "specs": data.get("specs", []),
-        "colors": [
-            {
-                "name": name,
-                "quantity": qty,
-                "main": data.get("color_images_dict", {}).get(name, {}).get("main", ""),
-                "gallery": data.get("color_images_dict", {}).get(name, {}).get("gallery", []),
-            }
-            for name, qty in data.get("color_quantities_dict", {"Чорний": 5, "Білий": 5}).items()
-        ],
-    }
-    product_id = _save_admin_product(body)
-
-    await state.clear()
-    await message.answer(
-        f"🎉 Товар **{body['brand']} {body['title']}** успішно створено та додано в базу!\n\nНапишіть /admin для керування.",
-        parse_mode="Markdown")
-
-
-@router.callback_query(F.data.startswith("delete_prod_"))
-async def process_delete_product(callback: CallbackQuery):
-    if callback.from_user.id not in ADMIN_IDS: return
-    product_id = callback.data.replace("delete_prod_", "")
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute("DELETE FROM products WHERE id = %s", (product_id,))
-    conn.commit()
-    cursor.close()
-    conn.close()
-    await callback.message.answer("🗑 Товар успішно видалено з бази!")
-    await callback.answer()
-
-
-async def run_server():
-    port = int(os.environ.get("PORT", 10000))
-    config = uvicorn.Config(app, host="0.0.0.0", port=port, log_level="info")
-    server = uvicorn.Server(config)
-    await server.serve()
-
-
-async def run_bot():
-    if not TOKEN:
-        logging.warning("BOT_TOKEN не встановлено — бот вимкнено, працює лише сайт/API.")
-        return
-    bot = Bot(token=TOKEN)
-    dp = Dispatcher()
-    dp.include_router(router)
-    try:
-        await bot.delete_webhook(drop_pending_updates=True)
-        await dp.start_polling(bot)
-    except Exception:
-        logging.exception("Bot polling stopped due to an error. The site/API keeps running.")
-
-
-async def main():
-    await asyncio.gather(run_server(), run_bot(), return_exceptions=True)
-
-
-if __name__ == "__main__":
-    asyncio.run(main())
+}
+];
+
+let
+products = [...INITIAL_FALLBACK_PRODUCTS];
+let
+categories = [
+{id: 'mice', name: 'Мишки'},
+{id: 'keyboards', name: 'Клавіатури'},
+{id: 'accessories', name: 'Аксесуари'},
+{id: 'audio', name: 'Аудіо'}
+];
+let
+brands = [
+{id: 'attack-shark', name: 'Attack Shark'},
+{id: 'ajazz', name: 'Ajazz'},
+{id: 'aula', name: 'AULA'},
+{id: 'mchose', name: 'Mchose'},
+{id: 'vgn', name: 'VGN'}
+];
+let
+cart = JSON.parse(localStorage.getItem('m1lip_cart')) | | [];
+let
+wishlist = JSON.parse(localStorage.getItem('m1lip_wishlist')) | | [];
+let
+currentModalProduct = null;
+let
+modalQty = 1;
+let
+selectedColorIndex = null;
+let
+currentCategoryFilter = 'All';
+let
+currentBrandFilter = 'All';
+let
+searchDebounceTimer = null;
+let
+heroIndex = 0;
+
+const
+API_BASE = (window.location.hostname === "localhost" & & window.location.port == = "3000")
+? (window.location.origin + "/api") \
+    : "https://m1lipstore.onrender.com/api";
+const
+API_URL = API_BASE + "/products";
+const
+CATEGORIES_API_URL = API_BASE + "/categories";
+const
+BRANDS_API_URL = API_BASE + "/brands";
+const
+ORDER_API_URL = API_BASE + "/orders";
+const
+DELIVERY_PROVIDERS_URL = API_BASE + "/delivery/providers";
+const
+PROFILE_API_URL = API_BASE + "/users/me/profile";
+const
+SAVED_DELIVERIES_API_URL = API_BASE + "/users/me/deliveries";
+const
+MY_ORDERS_API_URL = API_BASE + "/users/me/orders";
+
+const
+PROVIDER_LABELS = {nova_poshta: "Нова Пошта", ukrposhta: "Укрпошта", mist: "MIST"};
+
+let
+deliveryProviders = []; // [{id, name, configured}]
+let
+myProfile = null; // {first_name, last_name, phone, saved_deliveries}
+let
+checkoutStepIndex = 1;
+let
+checkoutDelivery = { // what
+actually
+gets
+sent
+on
+the
+order
+provider: '', city: '', cityRef: '', department: '', warehouseRef: ''
+};
+
+function
+formatColorEnglish(name)
+{
+if (!name) return 'Selected';
+let
+lower = name.toLowerCase().trim();
+if (lower.includes('pink') | | lower.includes('рожев')) return 'pink';
+if (lower.includes('white') | | lower.includes('біл')) return 'white';
+if (lower.includes('black') | | lower.includes('чорн')) return 'black';
+if (lower.includes('red') | | lower.includes('червон') | | lower.includes('красн')) return 'red';
+if (lower.includes('blue') | | lower.includes('блакит') | | lower.includes('син')) return 'blue';
+if (lower.includes('green') | | lower.includes('зелен')) return 'green';
+if (lower.includes('mint') | | lower.includes('м\'ят') | | lower.includes('мят')) return 'mint';
+if (lower.includes('cyan') | | lower.includes('бірюз') | | lower.includes('бирюз')) return 'turquoise';
+if (lower.includes('purple') | | lower.includes('фіолет') | | lower.includes('пурпур')) return 'purple';
+if (lower.includes('yellow') | | lower.includes('жовт')) return 'yellow';
+if (lower.includes('grey') | | lower.includes('gray') | | lower.includes('сір') | | lower.includes(
+        'графіт')) return 'grey';
+if (lower.includes('silver') | | lower.includes('срібл') | | lower.includes('серебр')) return 'silver';
+if (lower.includes('orange') | | lower.includes('помаранч') | | lower.includes('оранж')) return 'orange';
+return lower;
+}
+
+function
+getColorHex(name)
+{
+if (!name) return '#ccc';
+let
+lower = name.toLowerCase().trim();
+if (lower.includes('pink') | | lower.includes('рожев')) return '#ff2a85';
+if (lower.includes('white') | | lower.includes('біл')) return '#ffffff';
+if (lower.includes('black') | | lower.includes('чорн')) return '#181818';
+if (lower.includes('red') | | lower.includes('червон') | | lower.includes('красн')) return '#e53935';
+if (lower.includes('blue') | | lower.includes('блакит') | | lower.includes('син')) return '#1e88e5';
+if (lower.includes('green') | | lower.includes('зелен')) return '#43a047';
+if (lower.includes('mint') | | lower.includes('м\'ят') | | lower.includes('мят')) return '#00e5a3';
+if (lower.includes('cyan') | | lower.includes('бірюз') | | lower.includes('бирюз')) return '#00bcd4';
+if (lower.includes('purple') | | lower.includes('фіолет') | | lower.includes('пурпур')) return '#8e24aa';
+if (lower.includes('yellow') | | lower.includes('жовт')) return '#fbc02d';
+if (lower.includes('grey') | | lower.includes('gray') | | lower.includes('сір') | | lower.includes(
+        'графіт')) return '#616161';
+if (lower.includes('silver') | | lower.includes('срібл') | | lower.includes('серебр')) return '#b0bec5';
+if (lower.includes('orange') | | lower.includes('помаранч') | | lower.includes('оранж')) return '#fb8c00';
+return lower;
+}
+
+async function
+fetchProducts()
+{
+try {
+let response = await fetch(API_URL);
+if (!response.ok) {
+renderCatalog();
+return;
+}
+let
+contentType = response.headers.get("content-type");
+if (!contentType | | !contentType.includes("application/json")) {
+renderCatalog();
+return;
+}
+let
+backendData = await response.json();
+if (!Array.isArray(backendData) | | backendData.length == = 0) {
+renderCatalog();
+return;
+}
+
+products = backendData.map(item= > {
+    let
+parsedColors = [];
+let
+rawColors = item.color_images | | item.colorImages;
+let
+colorStocks = item.color_quantities | | item.colorQuantities | | {};
+
+if (typeof rawColors == = 'string')
+{
+try {rawColors = JSON.parse(rawColors);} catch(err) {rawColors = {};}
+}
+if (typeof colorStocks == = 'string') {
+try {colorStocks = JSON.parse(colorStocks);} catch(err) {colorStocks = {};}
+}
+
+if (rawColors & & Object.keys(rawColors).length > 0) {
+parsedColors = Object.keys(rawColors).map(colorName= > {
+    let
+stockVal = 5;
+if (colorStocks[colorName] !== undefined)
+{
+    stockVal = Number(colorStocks[colorName]);
+} else if (item.stock !== undefined) {
+stockVal = Number(item.stock);
+}
+
+let colorData = rawColors[colorName];
+let colorImg = '';
+let colorGallery =[];
+if (colorData & & typeof colorData == = 'object') {
+colorImg = colorData.main | | '';
+colorGallery = Array.isArray(colorData.gallery) ? colorData.gallery: [];
+} else if (typeof colorData == = 'string') {
+colorImg = colorData;
+}
+return {
+    name: colorName,
+    isOut: stockVal <= 0,
+    stock: stockVal,
+    image: colorImg,
+    gallery: colorGallery
+};
+});
+}
+
+if (parsedColors.length === 0 & & item.colors) {
+let colorNames = typeof item.colors == = 'string' ? item.colors.split(',').map(s = > s.trim()): item.colors;
+parsedColors = colorNames.map(colorName= > {
+let
+stockVal = 5;
+if (colorStocks[colorName] !== undefined) {
+stockVal = Number(colorStocks[colorName]);
+} else if (item.stock != = undefined) {
+stockVal = Number(item.stock);
+}
+return {
+    name: colorName,
+    isOut: stockVal <= 0,
+    stock: stockVal
+};
+});
+}
+
+if (parsedColors.length === 0) {
+let defaultStock = item.stock != = undefined ? Number(item.stock): 5;
+parsedColors = [{name: 'Default', isOut: defaultStock <= 0, stock: defaultStock}];
+}
+
+let
+parsedGallery = [];
+if (item.gallery)
+{
+if (typeof item.gallery == = 'string')
+{
+    parsedGallery = item.gallery.split(',').map(s= > s.trim()).filter(Boolean);
+} else if (Array.isArray(item.gallery)) {
+parsedGallery = item.gallery;
+}
+}
+if (parsedGallery.length == = 0 & & item.img) {
+parsedGallery =[item.img];
+}
+
+let allImagesSet = new Set();
+if (item.img) allImagesSet.add(item.img);
+parsedGallery.forEach(img = > allImagesSet.add(img));
+parsedColors.forEach(c = > {
+if (c.image) allImagesSet.add(c.image);
+if (Array.isArray(c.gallery)) c.gallery.forEach(g = > allImagesSet.add(g));
+});
+
+let parsedSpecs =[];
+if (item.specs) {
+if (typeof item.specs == = 'string') {
+try {parsedSpecs = JSON.parse(item.specs);} catch(err) {parsedSpecs =[];}
+} else if (Array.isArray(item.specs)) {
+parsedSpecs = item.specs;
+}
+}
+
+return {
+    id: item.id | | 'prod-' + Math.random(),
+    brand: item.brand | | 'M1LIP',
+    title: item.title | | 'Товар',
+    price: Number(item.price) | | 0,
+    oldPrice: item.old_price | | item.oldPrice | | null,
+    sku: item.sku | | '',
+    popular: !!item.popular,
+tag: item.tag | | 'НОВИНКА',
+category: item.category | | 'Аксесуари',
+desc: item.description | | item.desc | | 'Якісний ігровий девайс.',
+img: item.img | | (parsedGallery.length > 0 ? parsedGallery[0]: ''),
+gallery: Array.
+from
+
+(allImagesSet),
+specs: parsedSpecs,
+colors: parsedColors,
+colorImagesMap: rawColors | | {}
+};
+});
+} catch(e)
+{
+// keep
+INITIAL_FALLBACK_PRODUCTS
+}
+
+renderCatalog();
+updateHeroBanner();
+}
+
+async function
+fetchCategories()
+{
+try {
+const response = await fetch(CATEGORIES_API_URL);
+if (!response.ok)
+return;
+const
+contentType = response.headers.get("content-type");
+if (!contentType | | !contentType.includes("application/json")) return;
+const
+data = await response.json();
+if (Array.isArray(data) & & data.length > 0) {
+categories = data;
+}
+} catch(e)
+{
+// keep
+fallback
+categories
+}
+renderCategoryFilters();
+}
+
+async function
+fetchBrands()
+{
+try {
+const response = await fetch(BRANDS_API_URL);
+if (!response.ok)
+return;
+const
+contentType = response.headers.get("content-type");
+if (!contentType | | !contentType.includes("application/json")) return;
+const
+data = await response.json();
+if (Array.isArray(data) & & data.length > 0) {
+brands = data;
+}
+} catch(e)
+{
+// keep
+fallback
+brands
+}
+}
+
+function
+renderCategoryFilters()
+{
+    const
+container = document.getElementById('catalog-filters');
+if (!container)
+return;
+const
+items = [{id: 'All', name: 'Всі товари'}, ...categories];
+container.innerHTML = items.map(cat= > `
+                      < button
+
+
+class ="filter-btn ${cat.id === currentCategoryFilter || (cat.id === 'All' && currentCategoryFilter === 'All') ? 'active' : ''}"
+
+
+data - category = "${cat.id === 'All' ? 'All' : cat.name}"
+onclick = "filterByCategory('${cat.id === 'All' ? 'All' : cat.name.replace(/'/g, "\\'")}')">
+                                                                                          < span >${cat.name} < / span >
+                                                                                                                  < / button >
+                                                                                                                      `).join(
+    '');
+}
+
+function
+filterByBrand(brandName, el)
+{
+if (currentBrandFilter.toLowerCase() === brandName.toLowerCase() & & brandName != = 'All') {
+    currentBrandFilter = 'All';
+} else {
+    currentBrandFilter = brandName;
+}
+
+document.querySelectorAll('.partner-brand-tile').forEach(tile= > {
+const
+img = tile.querySelector('img');
+const
+alt = img ? img.getAttribute('alt') | | '': '';
+const
+isActive = currentBrandFilter != = 'All' & & alt.toLowerCase().includes(currentBrandFilter.toLowerCase());
+tile.classList.toggle('active', isActive);
+});
+
+if (el) {
+el.classList.add('just-clicked');
+setTimeout(() = > el.classList.remove('just-clicked'), 600);
+}
+
+const heroCard = document.getElementById('hero-card');
+const heroImg = document.getElementById('hero-img');
+const heroTag = document.getElementById('hero-tag');
+
+if (heroCard) {
+heroCard.classList.remove('brand-focus');
+void heroCard.offsetWidth;
+heroCard.classList.add('brand-focus');
+setTimeout(() = > heroCard.classList.remove('brand-focus'), 800);
+}
+
+if (currentBrandFilter != = 'All') {
+const brandProducts = products.filter(p = > (p.brand | | '').toLowerCase().includes(currentBrandFilter.toLowerCase()));
+if (heroImg & & heroTag) {
+heroImg.style.opacity = '0';
+setTimeout(() = > {
+if (brandProducts.length > 0 & & brandProducts[0].img)
+{
+    heroImg.src = brandProducts[0].img;
+}
+heroTag.innerText = `🔥 ${currentBrandFilter.toUpperCase()}
+`;
+heroImg.style.opacity = '1';
+}, 200);
+}
+} else {
+if (heroTag)
+heroTag.innerText = 'НОВИНКА';
+updateHeroBanner();
+}
+
+const
+indicator = document.getElementById('active-brand-indicator');
+const
+indicatorText = document.getElementById('active-brand-text');
+if (indicator & & indicatorText)
+{
+if (currentBrandFilter !== 'All')
+{
+indicator.style.display = 'inline-flex';
+indicatorText.innerText = `Бренд: ${currentBrandFilter}
+`;
+} else {
+indicator.style.display = 'none';
+}
+}
+
+renderCatalog();
+if (brandName !== 'All')
+{
+    scrollToSection('catalog');
+}
+}
+
+function
+getFilteredProducts()
+{
+    let
+list = products;
+
+if (currentCategoryFilter !== 'All')
+{
+    list = list.filter(p= > (p.category | | '').toLowerCase() == = currentCategoryFilter.toLowerCase());
+}
+if (currentBrandFilter !== 'All') {
+const bQuery = currentBrandFilter.toLowerCase().trim();
+list = list.filter(p = > {
+const prodBrand = (p.brand | | '').toLowerCase().trim();
+return prodBrand.includes(bQuery) | | bQuery.includes(prodBrand);
+});
+}
+return [...list];
+}
+
+function
+updateHeroBanner()
+{
+if (products.length === 0) return;
+const
+p = products[heroIndex % products.length];
+const
+imgEl = document.getElementById('hero-img');
+const
+tagEl = document.getElementById('hero-tag');
+
+if (imgEl & & tagEl) {
+imgEl.style.opacity = '0';
+setTimeout(() = > {
+imgEl.src = p.img;
+tagEl.innerText = p.tag | | 'НОВИНКА';
+imgEl.style.opacity = '1';
+}, 300);
+}
+heroIndex + +;
+}
+
+function
+openHeroProductModal()
+{
+if (products.length === 0) return;
+const
+currentHeroProd = products[(heroIndex - 2 + products.length) % products.length];
+openProductModal(currentHeroProd);
+}
+
+function
+formatPrice(price)
+{
+return `${Number(price).toLocaleString('uk-UA')} < span
+
+
+class ="currency" > ₴ < / span > `;
+
+}
+
+function
+filterByCategory(category)
+{
+currentCategoryFilter = category;
+document.querySelectorAll('.filter-btn').forEach(btn= > {
+    btn.classList.toggle('active', btn.getAttribute('data-category') == = category);
+});
+renderCatalog();
+}
+
+document.addEventListener('DOMContentLoaded', () = > {
+    setupPhoneInput();
+const
+savedTheme = localStorage.getItem('m1lip_theme');
+if (savedTheme)
+{
+    setTheme(savedTheme, false);
+}
+
+fetchProducts();
+fetchCategories();
+fetchBrands();
+updateBadges();
+renderRecentSearches();
+
+setInterval(updateHeroBanner, 4000);
+
+window.addEventListener('scroll', () = > {
+    const
+header = document.getElementById('site-header');
+if (header)
+{
+    header.classList.toggle('scrolled', window.scrollY > 30);
+}
+});
+
+document.getElementById('logo-scroll-btn')?.addEventListener('click', (e) = > {
+    e.preventDefault();
+window.scrollTo({top: 0, behavior: 'smooth'});
+});
+
+const
+themeBtn = document.getElementById('theme-toggle-btn');
+if (themeBtn)
+{
+    themeBtn.addEventListener('click', () = > {
+    const
+currentTheme = document.body.getAttribute('data-theme');
+const
+newTheme = currentTheme == = 'light' ? 'dark': 'light';
+setTheme(newTheme, true);
+});
+}
+
+document.getElementById('search-open-btn')?.addEventListener('click', () = > toggleSearch(true));
+document.getElementById('wishlist-open-btn')?.addEventListener('click', () = > toggleWishlistDrawer(true));
+document.getElementById('cart-open-btn')?.addEventListener('click', () = > toggleCart(true));
+document.getElementById('profile-open-btn')?.addEventListener('click', () = > toggleProfileDrawer(true));
+
+let
+citySearchTimer = null;
+document.getElementById('chk-city-search')?.addEventListener('input', (e) = > {
+    clearTimeout(citySearchTimer);
+const
+q = e.target.value;
+citySearchTimer = setTimeout(() = > searchDeliveryCities(q), 350);
+});
+let
+warehouseSearchTimer = null;
+document.getElementById('chk-warehouse-search')?.addEventListener('input', (e) = > {
+    clearTimeout(warehouseSearchTimer);
+const
+q = e.target.value;
+warehouseSearchTimer = setTimeout(() = > searchDeliveryWarehouses(q), 350);
+});
+});
+
+function
+setTheme(theme, save=true)
+{
+document.body.setAttribute('data-theme', theme);
+if (save) {
+localStorage.setItem('m1lip_theme', theme);
+}
+const
+moonIcon = document.querySelector('.theme-icon-moon');
+const
+sunIcon = document.querySelector('.theme-icon-sun');
+if (moonIcon & & sunIcon) {
+if (theme == = 'dark') {
+moonIcon.style.display = 'none';
+sunIcon.style.display = 'block';
+} else {
+moonIcon.style.display = 'block';
+sunIcon.style.display = 'none';
+}
+}
+}
+
+function
+scrollToSection(id)
+{
+document.getElementById(id)?.scrollIntoView({behavior: 'smooth'});
+}
+
+function
+showInfoModal(title, text)
+{
+document.getElementById('info-modal-title').innerText = title;
+document.getElementById('info-modal-text').innerText = text;
+document.getElementById('info-modal').classList.add('active');
+document.getElementById('backdrop').classList.add('active');
+}
+
+function
+closeInfoModal()
+{
+document.getElementById('info-modal').classList.remove('active');
+document.getElementById('backdrop').classList.remove('active');
+}
+
+function
+renderCatalog()
+{
+const
+container = document.getElementById('catalog-container');
+if (!container) return;
+
+const
+filteredProducts = getFilteredProducts();
+
+if (filteredProducts.length === 0) {
+container.innerHTML = ` < p style="color: var(--text-secondary); grid-column: span 12; text-align: center; padding: 30px;" > Товарів за цими фільтрами не знайдено < / p > `;
+return;
+}
+
+container.innerHTML = filteredProducts.map((p) = > {
+    const
+isFav = wishlist.some(item= > item.id == = p.id);
+
+const
+colorDotsHtml = p.colors & & p.colors.length > 0 ? p.colors.map((c, idx) = > {
+    const
+bgHex = getColorHex(c.name);
+const
+isOut = c.isOut;
+const
+dotClass = isOut ? 'out-of-stock': '';
+const
+styleAttr = isOut ? '': `background - color: ${bgHex};
+`;
+return ` < span
+
+
+class ="color-dot ${dotClass}" style="${styleAttr}" title="${c.name}" ${isOut ? '': `onclick = "event.stopPropagation(); openProductModal(products.find(x => x.id === '${p.id}'), ${idx})"
+
+
+`} > < / span > `;
+}).join(''): '';
+
+return `
+< div
+
+
+class ="product-card" onclick="openProductModal(products.find(x => x.id === '${p.id}'))" >
+
+< span
+
+
+class ="product-tag new" > ${p.tag | | ''} < / span >
+
+< button
+
+
+class ="wishlist-btn ${isFav ? 'active' : ''}" id="wishlist-btn-${p.id}" onclick="event.stopPropagation(); toggleWishlist('${p.id}')" >
+
+< svg
+width = "16"
+height = "16"
+viewBox = "0 0 24 24"
+fill = "${isFav ? '#FF3B30' : 'none'}"
+stroke = "${isFav ? '#FF3B30' : 'currentColor'}"
+stroke - width = "2" > < path
+d = "M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" / > < / svg >
+< / button >
+< div
+
+
+class ="product-img-wrap" id="card-img-wrap-${p.id}" >
+
+< img
+src = "${p.img}"
+alt = "${p.title}"
+id = "card-img-${p.id}" >
+< / div >
+
+< div
+
+
+class ="color-picker-preview" >
+
+${colorDotsHtml}
+< / div >
+
+< div
+
+
+class ="product-info" >
+
+< div
+
+
+class ="product-title-group" >
+
+< h4 >${p.brand} < / h4 >
+< h3 >${p.title} < / h3 >
+< / div >
+< div
+
+
+class ="product-price" > ${formatPrice(p.price)} < / div >
+
+< / div >
+< / div >
+`;
+}).join('');
+}
+
+function
+openProductModal(product, colorIdx=null)
+{
+if (!product)
+return;
+currentModalProduct = product;
+modalQty = 1;
+
+if (colorIdx !== null & & product.colors[colorIdx] & & !product.colors[colorIdx].isOut) {
+selectedColorIndex = colorIdx;
+} else {
+selectedColorIndex = null;
+}
+
+document.getElementById('modal-tag').innerText = product.tag | | 'НОВИНКА';
+document.getElementById('modal-brand').innerText = product.brand;
+document.getElementById('modal-title').innerText = product.title;
+document.getElementById('modal-desc').innerText = product.desc;
+document.getElementById('modal-price').innerHTML = formatPrice(product.price);
+document.getElementById('modal-qty').innerText = modalQty;
+
+updateModalGalleryAndColor();
+
+const
+specsContainer = document.getElementById('modal-specs');
+if (specsContainer) {
+if (product.specs & & product.specs.length > 0) {
+specsContainer.innerHTML = product.specs.map(s = > `
+< div
+
+
+class ="spec-box" >
+
+< span >${s.label | | s.key | | 'Характеристика'} < / span >
+< strong >${s.value | | ''} < / strong >
+< / div >
+`).join('');
+} else {
+    specsContainer.innerHTML = '';
+}
+}
+
+const
+isFav = wishlist.some(item= > item.id == = product.id);
+const
+wishBtn = document.getElementById('modal-wishlist-btn');
+if (wishBtn)
+{
+    wishBtn.classList.toggle('active', isFav);
+wishBtn.querySelector('svg').style.fill = isFav ? '#FF3B30': 'none';
+wishBtn.querySelector('svg').style.stroke = isFav ? '#FF3B30': 'currentColor';
+}
+
+document.getElementById('product-modal').classList.add('active');
+document.getElementById('backdrop').classList.add('active');
+}
+
+function
+updateModalGalleryAndColor()
+{
+if (!currentModalProduct)
+return;
+const
+colors = currentModalProduct.colors | | [];
+const
+colorSelector = document.getElementById('modal-color-selector');
+const
+colorNameEl = document.getElementById('modal-color-name');
+const
+stockStatusEl = document.getElementById('modal-stock-status');
+const
+addCartBtn = document.getElementById('modal-add-cart-btn');
+const
+mainImg = document.getElementById('modal-img');
+const
+thumbsContainer = document.getElementById('modal-thumbs');
+
+let
+activeImg = currentModalProduct.img;
+let
+currentGalleryImages = [];
+
+if (selectedColorIndex !== null & & colors[selectedColorIndex]) {
+const activeColor = colors[selectedColorIndex];
+if (colorNameEl) colorNameEl.innerText = `(${formatColorEnglish(activeColor.name).toUpperCase()})`;
+
+if (activeColor.image) {
+activeImg = activeColor.image;
+currentGalleryImages =[activeColor.image, ...(activeColor.gallery | |[])];
+} else {
+currentGalleryImages = currentModalProduct.gallery | |[currentModalProduct.img];
+}
+
+if (stockStatusEl) {
+if (activeColor.stock > 0) {
+stockStatusEl.innerText = `В наявності (${activeColor.stock} шт.)`;
+stockStatusEl.className = 'stock-status in-stock';
+if (addCartBtn) {
+addCartBtn.disabled = false;
+addCartBtn.innerText = 'Додати в кошик';
+}
+} else {
+stockStatusEl.innerText = 'Немає в наявності';
+stockStatusEl.className = 'stock-status out-of-stock';
+if (addCartBtn) {
+addCartBtn.disabled = true;
+addCartBtn.innerText = 'Немає в наявності';
+}
+}
+}
+} else {
+if (colorNameEl) colorNameEl.innerText = 'не вибрано';
+currentGalleryImages = currentModalProduct.gallery | |[currentModalProduct.img];
+activeImg = currentGalleryImages[0] | | currentModalProduct.img;
+
+if (stockStatusEl) {
+stockStatusEl.innerText = 'Будь ласка, оберіть колір товару';
+stockStatusEl.className = 'stock-status not-selected';
+}
+if (addCartBtn) {
+addCartBtn.disabled = true;
+addCartBtn.innerText = 'Оберіть колір';
+}
+}
+
+if (mainImg) {
+mainImg.style.opacity = '0';
+setTimeout(() = > {
+mainImg.src = activeImg;
+mainImg.style.opacity = '1';
+}, 150);
+}
+
+if (thumbsContainer) {
+thumbsContainer.innerHTML = currentGalleryImages.map((imgUrl) = > {
+const isActive = imgUrl == = activeImg ? 'active': '';
+    return `
+< img
+
+
+class ="modal-thumb ${isActive}" src="${imgUrl}" onclick="changeModalImage('${imgUrl}', this)" alt="thumb" >
+
+
+`;
+}).join('');
+}
+
+if (colorSelector) {
+colorSelector.innerHTML = colors.map((c, idx) = > {
+const
+bgHex = getColorHex(c.name);
+const
+isOut = c.isOut;
+const
+circleClass = isOut ? 'out-of-stock': '';
+const
+activeClass = idx == = selectedColorIndex ? 'active': '';
+const
+styleAttr = isOut ? '': `background - color: ${bgHex};
+`;
+return `
+< div
+
+
+class ="color-option-item ${isOut ? 'disabled' : ''}" ${isOut ? '': `onclick = "selectModalColor(${idx})"
+
+
+`} >
+< span
+
+
+class ="color-circle-big ${circleClass} ${activeClass}" style="${styleAttr}" title="${c.name}" > < / span >
+
+< / div >
+`;
+}).join('');
+}
+}
+
+let
+lightboxImages = [];
+let
+lightboxCurrentIndex = 0;
+
+function
+selectModalColor(idx)
+{
+    const
+colors = currentModalProduct?.colors | | [];
+if (colors[idx] & & colors[idx].isOut)
+return;
+
+// If
+the
+user
+taps
+the
+ALREADY
+selected
+color, open
+its
+photo
+gallery!
+if (selectedColorIndex === idx) {
+openColorGalleryLightbox();
+return;
+}
+
+selectedColorIndex = idx;
+updateModalGalleryAndColor();
+}
+
+function
+openColorGalleryLightbox(startImgUrl=null)
+{
+if (!currentModalProduct)
+return;
+const
+colors = currentModalProduct.colors | | [];
+let
+images = [];
+let
+colorName = '';
+
+if (selectedColorIndex !== null & & colors[selectedColorIndex]) {
+const activeColor = colors[selectedColorIndex];
+colorName = activeColor.name;
+if (activeColor.image) images.push(activeColor.image);
+if (Array.isArray(activeColor.gallery)) {
+activeColor.gallery.forEach(g = > {if (g & & !images.includes(g)) images.push(g);});
+}
+}
+
+// If
+color
+has
+no
+specific
+gallery or no
+color
+selected, use
+product
+general
+gallery
+if (images.length === 0) {
+images = currentModalProduct.gallery & & currentModalProduct.gallery.length > 0
+?[...currentModalProduct.gallery]
+: [currentModalProduct.img];
+if
+(!colorName & & selectedColorIndex != = null & & colors[selectedColorIndex])
+{
+    colorName = colors[selectedColorIndex].name;
+}
+}
+
+// Also
+append
+any
+extra
+general
+images if they
+are
+distinct
+if (currentModalProduct.gallery) {
+currentModalProduct.gallery.forEach(g = > {
+if (g & & !images.includes(g)) images.push(g);
+});
+}
+
+lightboxImages = images.filter(Boolean);
+if (lightboxImages.length === 0) {
+lightboxImages =[currentModalProduct.img];
+}
+
+let
+initialIdx = 0;
+if (startImgUrl) {
+const found = lightboxImages.indexOf(startImgUrl);
+if (found != = -1) initialIdx = found;
+} else {
+const currentMainImg = document.getElementById('modal-img')?.src;
+if (currentMainImg) {
+const found = lightboxImages.findIndex(img = > currentMainImg.includes(img) | | img.includes(currentMainImg));
+if (found != = -1) initialIdx = found;
+}
+}
+
+lightboxCurrentIndex = initialIdx;
+
+const
+modalTitleEl = document.getElementById('lightbox-product-title');
+const
+colorBadgeEl = document.getElementById('lightbox-color-badge');
+if (modalTitleEl) modalTitleEl.innerText = `${currentModalProduct.brand} ${currentModalProduct.title}`;
+if (colorBadgeEl) {
+if (colorName) {
+colorBadgeEl.innerText = colorName;
+colorBadgeEl.style.display = 'inline-block';
+} else {
+colorBadgeEl.style.display = 'none';
+}
+}
+
+renderLightboxView();
+document.getElementById('lightbox-modal')?.classList.add('active');
+}
+
+function
+renderLightboxView()
+{
+if (lightboxImages.length === 0) return;
+if (lightboxCurrentIndex < 0) lightboxCurrentIndex = 0;
+if (lightboxCurrentIndex >= lightboxImages.length) lightboxCurrentIndex = lightboxImages.length - 1;
+
+const
+activeImg = lightboxImages[lightboxCurrentIndex];
+const
+imgEl = document.getElementById('lightbox-active-img');
+const
+counterEl = document.getElementById('lightbox-counter');
+const
+stripEl = document.getElementById('lightbox-thumbs-strip');
+
+if (imgEl) {
+imgEl.style.opacity = '0.3';
+imgEl.src = activeImg;
+setTimeout(() = > {imgEl.style.opacity = '1';}, 100);
+}
+
+if (counterEl) {
+counterEl.innerText = `${lightboxCurrentIndex + 1} / ${lightboxImages.length}`;
+}
+
+if (stripEl) {
+if (lightboxImages.length > 1) {
+stripEl.style.display = 'flex';
+stripEl.innerHTML = lightboxImages.map((url, idx) = > `
+< img
+
+
+class ="lightbox-strip-thumb ${idx === lightboxCurrentIndex ? 'active' : ''}"
+
+
+src = "${url}"
+onclick = "setLightboxImageIndex(${idx})"
+alt = "thumb ${idx + 1}" >
+`).join('');
+} else {
+    stripEl.style.display = 'none';
+}
+}
+}
+
+function
+setLightboxImageIndex(idx)
+{
+    lightboxCurrentIndex = idx;
+renderLightboxView();
+}
+
+function
+nextLightboxImage()
+{
+if (lightboxImages.length <= 1)
+return;
+lightboxCurrentIndex = (lightboxCurrentIndex + 1) % lightboxImages.length;
+renderLightboxView();
+}
+
+function
+prevLightboxImage()
+{
+if (lightboxImages.length <= 1) return;
+lightboxCurrentIndex = (lightboxCurrentIndex - 1 + lightboxImages.length) % lightboxImages.length;
+renderLightboxView();
+}
+
+function
+closeColorGalleryLightbox()
+{
+document.getElementById('lightbox-modal')?.classList.remove('active');
+}
+
+// Add
+keyboard
+navigation
+for the gallery
+document.addEventListener('keydown', (e) = > {
+const lightbox = document.getElementById('lightbox-modal');
+if (lightbox & & lightbox.classList.contains('active')) {
+if (e.key == = 'ArrowRight') nextLightboxImage();
+if (e.key == = 'ArrowLeft') prevLightboxImage();
+if (e.key == = 'Escape') closeColorGalleryLightbox();
+}
+});
+
+function changeModalImage(url, thumbEl) {
+const
+mainImg = document.getElementById('modal-img');
+if (mainImg) {
+mainImg.style.opacity = '0';
+setTimeout(() = > {
+mainImg.src = url;
+mainImg.style.opacity = '1';
+}, 150);
+}
+document.querySelectorAll('.modal-thumb').forEach(t= > t.classList.remove('active'));
+if (thumbEl) thumbEl.classList.add('active');
+}
+
+function
+closeProductModal()
+{
+document.getElementById('product-modal').classList.remove('active');
+document.getElementById('backdrop').classList.remove('active');
+currentModalProduct = null;
+}
+
+function
+adjustModalQty(delta)
+{
+modalQty += delta;
+if (modalQty < 1) modalQty = 1;
+const
+qtyEl = document.getElementById('modal-qty');
+if (qtyEl) qtyEl.innerText = modalQty;
+}
+
+function
+addCurrentProductToCart()
+{
+if (!currentModalProduct | | selectedColorIndex == = null) return;
+const
+colors = currentModalProduct.colors | | [];
+let
+originalColorName = colors[selectedColorIndex].name;
+
+const
+existingIndex = cart.findIndex(item= > item.id == = currentModalProduct.id & & item.color == = originalColorName);
+if (existingIndex > -1) {
+cart[existingIndex].qty += modalQty;
+} else {
+cart.push({
+id: currentModalProduct.id,
+title: currentModalProduct.title,
+brand: currentModalProduct.brand,
+price: currentModalProduct.price,
+img: colors[selectedColorIndex].image | | currentModalProduct.img,
+color: originalColorName,
+qty: modalQty
+});
+}
+
+saveCart();
+closeProductModal();
+toggleCart(true);
+}
+
+function
+toggleCart(open)
+{
+const
+drawer = document.getElementById('cart-drawer');
+const
+backdrop = document.getElementById('backdrop');
+if (open) {
+drawer.classList.add('active');
+backdrop.classList.add('active');
+renderCartItems();
+} else {
+drawer.classList.remove('active');
+if (!document.getElementById('wishlist-drawer').classList.contains('active') & & !document.getElementById('checkout-drawer').classList.contains('active')) {
+backdrop.classList.remove('active');
+}
+}
+}
+
+function
+toggleCheckoutDrawer(open)
+{
+const
+drawer = document.getElementById('checkout-drawer');
+const
+backdrop = document.getElementById('backdrop');
+if (open) {
+toggleCart(false);
+drawer.classList.add('active');
+backdrop.classList.add('active');
+} else {
+drawer.classList.remove('active');
+backdrop.classList.remove('active');
+}
+}
+
+async function
+openCheckoutModal()
+{
+if (cart.length === 0) return;
+checkoutStepIndex = 1;
+checkoutDelivery = {provider: '', city: '', cityRef: '', department: '', warehouseRef: ''};
+renderCheckoutStep();
+toggleCheckoutDrawer(true);
+
+if (tg?.initData) {
+await Promise.all([loadDeliveryProviders(), loadMyProfile()]);
+} else {
+renderProviderChips();
+}
+prefillContactsFromProfile();
+renderSavedDeliveriesBlock();
+}
+
+const
+CHECKOUT_STEP_COUNT = 4;
+
+function
+renderCheckoutStep()
+{
+document.querySelectorAll('.checkout-step-panel').forEach(panel= > {
+    panel.classList.toggle('active', Number(panel.dataset.stepPanel) == = checkoutStepIndex);
+});
+document.querySelectorAll('.checkout-step-dot').forEach(dot= > {
+    const
+n = Number(dot.dataset.step);
+dot.classList.toggle('active', n == = checkoutStepIndex);
+dot.classList.toggle('done', n < checkoutStepIndex);
+});
+document.getElementById('chk-back-btn').style.display = checkoutStepIndex > 1 ? '': 'none';
+const
+isLast = checkoutStepIndex == = CHECKOUT_STEP_COUNT;
+document.getElementById('chk-next-btn').style.display = isLast ? 'none': '';
+document.getElementById('chk-submit-btn').style.display = isLast ? '': 'none';
+if (isLast) renderReviewStep();
+}
+
+function
+normalizePhoneDisplay(value)
+{
+let
+digits = String(value | | '').replace( /\D / g, '');
+if (digits.startsWith('380')) digits = digits.slice(3);
+if (digits.startsWith('0')) digits = digits.slice(1);
+digits = digits.slice(0, 9);
+let
+out = '+380';
+if (digits.length) out += ' ' + digits.slice(0, 2);
+if (digits.length > 2) out += ' ' + digits.slice(2, 5);
+if (digits.length > 5) out += ' ' + digits.slice(5, 7);
+if (digits.length > 7) out += ' ' + digits.slice(7, 9);
+return out;
+}
+
+function
+setupPhoneInput()
+{
+const
+input = document.getElementById('chk-phone');
+if (!input | | input.dataset.ready) return;
+input.dataset.ready = '1';
+input.addEventListener('focus', () = > { if (!input.value.trim()) input.value = '+380';});
+input.addEventListener('input', () = > {input.value = normalizePhoneDisplay(input.value);});
+input.addEventListener('keydown', e= > {
+if (e.key === 'Backspace' & & input.selectionStart <= 4 & & input.selectionEnd <= 4)
+e.preventDefault();
+});
+input.value = normalizePhoneDisplay(input.value);
+}
+
+function
+validateCheckoutStep(step)
+{
+if (step === 1) {
+const name = document.getElementById('chk-name').value.trim();
+const surname = document.getElementById('chk-surname').value.trim();
+const email = document.getElementById('chk-email').value.trim().toLowerCase();
+const phone = normalizePhoneDisplay(document.getElementById('chk-phone').value);
+const nameRe = / ^[A-Za-zА-Яа-яІіЇїЄєҐґ'’\-]{2,40}$/u;
+const emailRe = / ^[^ \s @]+ @[^ \s @]+\.[^ \s @]{2, }$ /;
+if (!nameRe.test(name)) {alert("Введіть коректне ім'я: тільки літери.");
+return false;}
+if (!nameRe.test(surname)) {alert("Введіть коректне прізвище: тільки літери."); return false;}
+if (!emailRe.test(email)) {alert("Введіть коректний e-mail."); return false;}
+if (! / ^ \+380 \d{2} \d{3} \d{2} \d{2}$ /.test(phone)) {
+alert("Введіть коректний номер телефону у форматі +380 67 123 45 67.");
+return false;
+}
+document.getElementById('chk-phone').value = phone;
+return true;
+}
+if (step === 2) {
+const
+configuredProvider = deliveryProviders.find(p= > p.id == = checkoutDelivery.provider & & p.configured);
+if (!configuredProvider) {
+alert("Оберіть службу доставки з доступним автоматичним пошуком.");
+return false;
+}
+if (!checkoutDelivery.cityRef | | !checkoutDelivery.warehouseRef) {
+alert("Оберіть місто та відділення зі списку.");
+return false;
+}
+return true;
+}
+return true;
+}
+
+function
+checkoutStepNext()
+{
+if (!validateCheckoutStep(checkoutStepIndex)) return;
+checkoutStepIndex = Math.min(CHECKOUT_STEP_COUNT, checkoutStepIndex + 1);
+renderCheckoutStep();
+}
+
+function
+checkoutStepBack()
+{
+checkoutStepIndex = Math.max(1, checkoutStepIndex - 1);
+renderCheckoutStep();
+}
+
+async function
+loadDeliveryProviders()
+{
+try {
+const res = await fetch(DELIVERY_PROVIDERS_URL);
+deliveryProviders = res.ok ? await res.json(): [];
+}
+catch(err)
+{
+    deliveryProviders = [];
+}
+renderProviderChips();
+}
+
+function
+renderProviderChips()
+{
+const
+group = document.getElementById('provider-chip-group');
+const
+known = ['nova_poshta', 'ukrposhta', 'mist'];
+const
+byId = Object.fromEntries(deliveryProviders.map(p= > [p.id, p]));
+const
+available = known.filter(id= > byId[id]?.configured);
+group.innerHTML = available.map(id= > {
+    const
+p = byId[id];
+return ` < div
+
+
+class ="provider-chip ${checkoutDelivery.provider === id ? 'active' : ''}" onclick="selectDeliveryProvider('${id}')" > ${p.name} < / div > `;
+
+}).join(
+    '') | | '<div class="delivery-api-error">Автоматичний пошук служб доставки ще не налаштований на сервері.</div>';
+}
+
+function
+selectDeliveryProvider(providerId)
+{
+    checkoutDelivery = {provider: providerId, city: '', cityRef: '', department: '', warehouseRef: ''};
+renderProviderChips();
+
+const
+configuredFlow = document.getElementById('delivery-configured-flow');
+configuredFlow.style.display = 'flex';
+document.getElementById('city-search-results').style.display = 'none';
+document.getElementById('city-selected-pill').innerHTML = '';
+document.getElementById('warehouse-selected-pill').innerHTML = '';
+document.getElementById('warehouse-search-results').innerHTML = '';
+document.getElementById('delivery-warehouse-group').style.display = 'none';
+}
+
+async function
+searchDeliveryCities(query)
+{
+    const
+resultsBox = document.getElementById('city-search-results');
+if (!query | | query.length < 2)
+{
+    resultsBox.style.display = 'none';
+return;
+}
+try {
+const url = `${API_BASE} / delivery / cities?provider=${encodeURIComponent(checkoutDelivery.provider)} & query=${encodeURIComponent(query)}`;
+const res = await fetch(url);
+const data = res.ok ? await res.json(): [];
+if
+(!Array.isArray(data) | | data.length == = 0) {
+    resultsBox.innerHTML = '<div class="delivery-search-empty">Міст не знайдено</div>';
+resultsBox.style.display = 'block';
+return;
+}
+resultsBox.innerHTML = data.map(item= > `
+< div
+
+
+class ="delivery-search-result-item" onclick="selectCity('${item.ref || item.id}', '${item.name.replace(/'/g, "\\'")}')">
+< div > ${item.name} < / div >
+${item.region ? ` < div class ="item-sub" > ${item.region} < / div > `: ''
+
+}
+< / div >
+    `).join('');
+resultsBox.style.display = 'block';
+} catch(err)
+{
+    resultsBox.style.display = 'none';
+}
+}
+
+function
+selectCity(ref, name)
+{
+    checkoutDelivery.cityRef = ref;
+checkoutDelivery.city = name;
+checkoutDelivery.warehouseRef = '';
+checkoutDelivery.department = '';
+document.getElementById('city-search-results').style.display = 'none';
+document.getElementById('chk-city-search').value = '';
+document.getElementById('city-selected-pill').innerHTML = `
+                                                          < div
+
+
+class ="selected-pill" >
+
+< span > Місто: ${name} < / span >
+< button
+onclick = "clearCitySelection()" > Змінити < / button >
+< / div >
+`;
+document.getElementById('delivery-warehouse-group').style.display = 'flex';
+document.getElementById('warehouse-search-results').innerHTML = '';
+document.getElementById('warehouse-selected-pill').innerHTML = '';
+}
+
+function
+clearCitySelection()
+{
+checkoutDelivery.cityRef = '';
+checkoutDelivery.city = '';
+checkoutDelivery.warehouseRef = '';
+checkoutDelivery.department = '';
+document.getElementById('city-selected-pill').innerHTML = '';
+document.getElementById('delivery-warehouse-group').style.display = 'none';
+}
+
+async function
+searchDeliveryWarehouses(query)
+{
+const
+resultsBox = document.getElementById('warehouse-search-results');
+if (!checkoutDelivery.cityRef) return;
+try {
+const url = `${API_BASE} / delivery / warehouses?provider=${encodeURIComponent(checkoutDelivery.provider)} & city_ref=${encodeURIComponent(checkoutDelivery.cityRef)} & query=${encodeURIComponent(query | | '')}`;
+const res = await fetch(url);
+const data = res.ok ? await res.json(): [];
+if
+(!Array.isArray(data) | | data.length == = 0) {
+    resultsBox.innerHTML = '<div class="delivery-search-empty">Відділень не знайдено</div>';
+resultsBox.style.display = 'block';
+return;
+}
+resultsBox.innerHTML = data.map(item= > `
+< div
+
+
+class ="delivery-search-result-item" onclick="selectWarehouse('${item.ref || item.id}', '${item.name.replace(/'/g, "\\'")}')">
+< div > ${item.name} < / div >
+< / div >
+`).join('');
+resultsBox.style.display = 'block';
+} catch (err) {
+resultsBox.style.display = 'none';
+}
+}
+
+function selectWarehouse(ref, name) {
+checkoutDelivery.warehouseRef = ref;
+checkoutDelivery.department = name;
+document.getElementById('warehouse-search-results').style.display = 'none';
+document.getElementById('chk-warehouse-search').value = '';
+document.getElementById('warehouse-selected-pill').innerHTML = `
+< div
+
+
+class ="selected-pill" >
+
+< span > Відділення: ${name} < / span >
+< button
+onclick = "clearWarehouseSelection()" > Змінити < / button >
+< / div >
+`;
+}
+
+function
+clearWarehouseSelection()
+{
+checkoutDelivery.warehouseRef = '';
+checkoutDelivery.department = '';
+document.getElementById('warehouse-selected-pill').innerHTML = '';
+}
+
+async function
+loadMyProfile()
+{
+try {
+const res = await fetch(PROFILE_API_URL, {
+headers: {'X-Telegram-Init-Data': tg.initData}
+});
+if (res.ok) {
+myProfile = await res.json();
+prefillContactsFromProfile();
+renderSavedDeliveriesBlock();
+}
+} catch (err) {
+myProfile = null;
+}
+}
+
+function
+prefillContactsFromProfile()
+{
+if (!myProfile) return;
+const
+nameEl = document.getElementById('chk-name');
+const
+surnameEl = document.getElementById('chk-surname');
+const
+phoneEl = document.getElementById('chk-phone');
+if (nameEl & & !nameEl.value & & myProfile.first_name) nameEl.value = myProfile.first_name;
+if (surnameEl & & !surnameEl.value & & myProfile.last_name) surnameEl.value = myProfile.last_name;
+if (phoneEl & & (!phoneEl.value | | phoneEl.value == = '+380') & & myProfile.phone) {
+phoneEl.value = normalizePhoneDisplay(myProfile.phone);
+}
+}
+
+function
+renderSavedDeliveriesBlock()
+{
+const
+block = document.getElementById('saved-deliveries-block');
+if (!block | | !myProfile | | !Array.isArray(myProfile.saved_deliveries) | | myProfile.saved_deliveries.length === 0) {
+if (block) block.innerHTML = '';
+return;
+}
+block.innerHTML = `
+                  < div
+
+
+class ="checkout-group" style="margin-bottom: 12px;" >
+
+< label > Збережені
+адреси
+доставки < / label >
+< div
+style = "display:flex; flex-direction:column; gap:6px;" >
+${myProfile.saved_deliveries.map((sd, i) = > `
+                                             < div
+
+
+class ="saved-delivery-chip" >
+
+< div > < strong >${PROVIDER_LABELS[sd.provider] | | sd.provider} < / strong >: ${sd.city}, ${sd.department} < / div >
+< button
+
+
+class ="btn-secondary" onclick="useSavedDelivery(${i})" > Обрати < / button >
+
+< / div >
+`).join('')}
+< / div >
+    < / div >
+        `;
+}
+
+function
+useSavedDelivery(idx)
+{
+    const
+sd = myProfile.saved_deliveries[idx];
+if (!sd)
+return;
+selectDeliveryProvider(sd.provider);
+selectCity(sd.city_ref, sd.city);
+selectWarehouse(sd.warehouse_ref, sd.department);
+}
+
+function
+renderReviewStep()
+{
+const
+name = document.getElementById('chk-name').value.trim();
+const
+surname = document.getElementById('chk-surname').value.trim();
+const
+email = document.getElementById('chk-email').value.trim();
+const
+phone = document.getElementById('chk-phone').value.trim();
+const
+payment = document.getElementById('chk-payment').value;
+const
+comment = document.getElementById('chk-comment').value.trim();
+
+const
+total = cart.reduce((sum, item) = > sum + (item.price * item.qty), 0);
+
+document.getElementById('review-items-block').innerHTML = `
+< h5 > Товари(${cart.reduce((s, i) = > s + i.qty, 0)}) < / h5 >
+${cart.map(item= > `
+  < div
+
+
+class ="review-line" >
+
+< span >${item.title}(${item.color}) × ${item.qty} < / span >
+< span >${formatPrice(item.price * item.qty)} < / span >
+< / div >
+`).join('')}
+< div
+
+
+class ="review-line" style="border-top:1px solid var(--border-light); margin-top:6px; padding-top:6px; font-weight:800;" >
+
+< span > Разом
+до
+сплати: < / span >
+< span >${formatPrice(total)} < / span >
+< / div >
+`;
+
+document.getElementById('review-contact-block').innerHTML = `
+< h5 > Отримувач < / h5 >
+< div
+
+
+class ="review-line" > < span > ПІБ:<
+
+    / span > < span >${name} ${surname} < / span > < / div >
+< div
+
+
+class ="review-line" > < span > Телефон:<
+
+    / span > < span >${phone} < / span > < / div >
+< div
+
+
+class ="review-line" > < span > E-mail:<
+
+    / span > < span >${email} < / span > < / div >
+`;
+
+const
+provName = PROVIDER_LABELS[checkoutDelivery.provider] | | checkoutDelivery.provider;
+document.getElementById('review-delivery-block').innerHTML = `
+< h5 > Доставка < / h5 >
+< div
+
+
+class ="review-line" > < span > Служба:<
+
+    / span > < span >${provName} < / span > < / div >
+< div
+
+
+class ="review-line" > < span > Місто:<
+
+    / span > < span >${checkoutDelivery.city} < / span > < / div >
+< div
+
+
+class ="review-line" > < span > Відділення:<
+
+    / span > < span >${checkoutDelivery.department} < / span > < / div >
+`;
+
+const
+payName = payment == = 'online' ? 'Повна онлайн-оплата': 'Накладений платіж';
+document.getElementById('review-payment-block').innerHTML = `
+< h5 > Оплата < / h5 >
+< div
+
+
+class ="review-line" > < span > Спосіб:<
+
+    / span > < span >${payName} < / span > < / div >
+${comment ? ` < div
+
+
+class ="review-line" > < span > Коментар:<
+
+    / span > < span >${comment} < / span > < / div > `: ''}
+`;
+}
+
+async function
+submitOrder()
+{
+if (!validateCheckoutStep(1) | | !validateCheckoutStep(2)) return;
+
+const
+payload = {
+    customer: {
+        first_name: document.getElementById('chk-name').value.trim(),
+        last_name: document.getElementById('chk-surname').value.trim(),
+        email: document.getElementById('chk-email').value.trim(),
+        phone: document.getElementById('chk-phone').value.trim()
+    },
+    delivery: checkoutDelivery,
+    payment: {
+        method: document.getElementById('chk-payment').value,
+        comment: document.getElementById('chk-comment').value.trim()
+    },
+    items: cart.map(i= > ({
+        id: i.id,
+        color: i.color,
+        qty: i.qty
+    }))
+};
+
+const
+submitBtn = document.getElementById('chk-submit-btn');
+submitBtn.disabled = true;
+submitBtn.innerText = 'Оформлюємо...';
+
+try {
+const headers = {'Content-Type': 'application/json'};
+if (tg?.initData) headers['X-Telegram-Init-Data'] = tg.initData;
+
+const res = await fetch(ORDER_API_URL, {
+method: 'POST',
+headers,
+body: JSON.stringify(payload)
+});
+const
+data = await res.json();
+
+if (!res.ok)
+{
+    alert(data.detail | | "Помилка при оформленні замовлення.");
+submitBtn.disabled = false;
+submitBtn.innerText = 'Підтвердити замовлення';
+return;
+}
+
+cart = [];
+saveCart();
+toggleCheckoutDrawer(false);
+
+const
+orderIdStr = data.order_id | | data.id | | '#MLP-2026-000000';
+document.getElementById('success-order-id').innerText = orderIdStr;
+document.getElementById('success-modal').classList.add('active');
+document.getElementById('backdrop').classList.add('active');
+} catch(err)
+{
+    alert("Помилка мережі при відправці замовлення.");
+} finally {
+    submitBtn.disabled = false;
+submitBtn.innerText = 'Підтвердити замовлення';
+}
+}
+
+async function
+toggleProfileDrawer(open)
+{
+const
+drawer = document.getElementById('profile-drawer');
+const
+backdrop = document.getElementById('backdrop');
+if (open) {
+drawer.classList.add('active');
+backdrop.classList.add('active');
+await renderProfileDrawerContent();
+} else {
+drawer.classList.remove('active');
+backdrop.classList.remove('active');
+}
+}
+
+async function
+renderProfileDrawerContent()
+{
+const
+body = document.getElementById('profile-drawer-body');
+if (!tg?.initData) {
+body.innerHTML = ` < div
+
+
+class ="profile-signin-note" > Профіль доступний лише при відкритті магазину через Telegram Web App.< / div > `;
+
+
+return;
+}
+body.innerHTML = ` < div
+
+
+class ="profile-signin-note" > Завантаження профілю та замовлень...< / div > `;
+
+
+try {
+const[profRes, ordersRes] = await Promise.all([
+fetch(PROFILE_API_URL, {headers: {'X-Telegram-Init-Data': tg.initData}}),
+fetch(MY_ORDERS_API_URL, {headers: {'X-Telegram-Init-Data': tg.initData}})
+]);
+
+const
+profileData = profRes.ok ? await profRes.json(): null;
+const
+ordersData = ordersRes.ok ? await ordersRes.json(): [];
+
+if (!profileData)
+{
+    body.innerHTML = ` < div
+
+
+class ="profile-signin-note" > Не вдалося завантажити профіль користувача.< / div > `;
+
+
+return;
+}
+
+body.innerHTML = `
+                 < div
+
+
+class ="profile-section" >
+
+< h4 > Дані
+профілю < / h4 >
+< div
+
+
+class ="review-block" >
+
+< div
+
+
+class ="review-line" > < span > Ім'я:</span> <span>${profileData.first_name || ''} ${profileData.last_name || ''}</span></div>
+
+< div
+
+
+class ="review-line" > < span > Телефон:<
+
+    / span > < span >${profileData.phone | | 'не вказано'} < / span > < / div >
+< / div >
+< / div >
+< div
+
+
+class ="profile-section" >
+
+< h4 > Історія
+замовлень < / h4 >
+${Array.isArray(ordersData) & & ordersData.length > 0 ? ordersData.map(o= > `
+                                                        < div
+
+
+class ="profile-order-card" >
+
+< div
+
+
+class ="order-top" >
+
+< span >${o.order_id | | o.id} < / span >
+< span
+
+
+class ="order-status-pill" > ${o.status | | 'Нове'} < / span >
+
+< / div >
+< div
+
+
+class ="order-meta" > ${o.created_at | | ''} • ${formatPrice(o.total | | 0)} < / div >
+
+< / div >
+`).join(''): '<div class="profile-empty-state">У вас ще немає замовлень</div>'}
+< / div >
+    `;
+} catch(err)
+{
+    body.innerHTML = ` < div
+
+
+class ="profile-signin-note" > Помилка завантаження даних профілю.< / div > `;
+
+}
+}
+
+function
+closeSuccessModal()
+{
+    document.getElementById('success-modal').classList.remove('active');
+document.getElementById('backdrop').classList.remove('active');
+}
+
+function
+closeAllDrawers()
+{
+    toggleCart(false);
+toggleWishlistDrawer(false);
+toggleCheckoutDrawer(false);
+toggleProfileDrawer(false);
+toggleSearch(false);
+closeProductModal();
+closeSuccessModal();
+closeInfoModal();
+}
+
+function
+saveCart()
+{
+    localStorage.setItem('m1lip_cart', JSON.stringify(cart));
+updateBadges();
+renderCartItems();
+}
+
+function
+renderCartItems()
+{
+    const
+container = document.getElementById('cart-items-container');
+const
+totalEl = document.getElementById('cart-total-price');
+if (!container)
+return;
+
+if (cart.length === 0) {
+container.innerHTML = ` < p style="color: var(--text-secondary); text-align: center; padding: 40px 0;" > Ваш кошик порожній < / p > `;
+if (totalEl) totalEl.innerHTML = formatPrice(0);
+return;
+}
+
+let
+total = 0;
+container.innerHTML = cart.map((item, index) = > {
+    total += item.price * item.qty;
+const
+displayColor = formatColorEnglish(item.color).toUpperCase();
+return `
+< div
+
+
+class ="cart-item" >
+
+< img
+src = "${item.img}"
+alt = "${item.title}"
+onclick = "openProductModal(products.find(x => x.id === '${item.id}'))" >
+< div
+style = "flex-grow: 1; overflow: hidden;" >
+< h4
+style = "font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase;" >${item.brand} < / h4 >
+< h3
+style = "font-size: 0.9rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" >${item.title} < / h3 >
+< div
+style = "font-size: 0.72rem; color: var(--text-secondary);" > Колір: ${displayColor} < / div >
+< div
+
+
+class ="product-price" style="font-size: 0.85rem; margin-top: 2px;" > ${formatPrice(item.price)} < / div >
+
+< / div >
+< div
+style = "display: flex; flex-direction: column; align-items: flex-end; gap: 8px;" >
+< button
+
+
+class ="close-drawer" style="font-size: 0.85rem;" onclick="removeFromCart(${index})" > ✕ < / button >
+
+< div
+
+
+class ="quantity-controls" >
+
+< button
+onclick = "adjustCartQty(${index}, -1)" >− < / button >
+< span
+style = "font-weight: 800; font-size: 0.85rem; padding: 0 4px;" >${item.qty} < / span >
+< button
+onclick = "adjustCartQty(${index}, 1)" > + < / button >
+< / div >
+< / div >
+< / div >
+`;
+}).join('');
+
+if (totalEl)
+totalEl.innerHTML = formatPrice(total);
+}
+
+function
+adjustCartQty(index, delta)
+{
+    cart[index].qty += delta;
+if (cart[index].qty < 1)
+cart[index].qty = 1;
+saveCart();
+}
+
+function
+removeFromCart(index)
+{
+    cart.splice(index, 1);
+saveCart();
+}
+
+function
+toggleWishlist(productId)
+{
+    const
+product = products.find(p= > p.id == = productId);
+if (!product)
+    return;
+
+const
+index = wishlist.findIndex(item= > item.id == = productId);
+if (index > -1) {
+wishlist.splice(index, 1);
+} else {
+wishlist.push(product);
+}
+
+localStorage.setItem('m1lip_wishlist', JSON.stringify(wishlist));
+updateBadges();
+renderCatalog();
+renderWishlistItems();
+
+const
+wishBtn = document.getElementById(`wishlist - btn -${productId}
+`);
+if (wishBtn) {
+const isFav = index == = -1;
+wishBtn.classList.toggle('active', isFav);
+wishBtn.querySelector('svg').style.fill = isFav ? '#FF3B30': 'none';
+wishBtn.querySelector('svg').style.stroke = isFav ? '#FF3B30': 'currentColor';
+}
+}
+
+function
+toggleCurrentWishlist()
+{
+if (!currentModalProduct) return;
+toggleWishlist(currentModalProduct.id);
+const
+isFav = wishlist.some(item= > item.id == = currentModalProduct.id);
+const
+wishBtn = document.getElementById('modal-wishlist-btn');
+if (wishBtn) {
+wishBtn.classList.toggle('active', isFav);
+wishBtn.querySelector('svg').style.fill = isFav ? '#FF3B30': 'none';
+wishBtn.querySelector('svg').style.stroke = isFav ? '#FF3B30': 'currentColor';
+}
+}
+
+function
+toggleWishlistDrawer(open)
+{
+const
+drawer = document.getElementById('wishlist-drawer');
+const
+backdrop = document.getElementById('backdrop');
+if (open) {
+drawer.classList.add('active');
+backdrop.classList.add('active');
+renderWishlistItems();
+} else {
+drawer.classList.remove('active');
+if (!document.getElementById('cart-drawer').classList.contains('active') & & !document.getElementById('checkout-drawer').classList.contains('active')) {
+backdrop.classList.remove('active');
+}
+}
+}
+
+function
+renderWishlistItems()
+{
+const
+container = document.getElementById('wishlist-items-container');
+if (!container) return;
+
+if (wishlist.length === 0) {
+container.innerHTML = ` < p style="color: var(--text-secondary); text-align: center; padding: 40px 0;" > Список обраного порожній < / p > `;
+return;
+}
+
+container.innerHTML = wishlist.map((item) = > `
+< div
+
+
+class ="wishlist-item-card" >
+
+< img
+src = "${item.img}"
+alt = "${item.title}"
+onclick = "openProductModal(products.find(x => x.id === '${item.id}'))" >
+< div
+style = "flex-grow: 1; overflow: hidden;"
+onclick = "openProductModal(products.find(x => x.id === '${item.id}'))"
+style = "cursor: pointer;" >
+< h4
+style = "font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase;" >${item.brand} < / h4 >
+< h3
+style = "font-size: 0.9rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" >${item.title} < / h3 >
+< div
+
+
+class ="product-price" style="font-size: 0.85rem; margin-top: 2px;" > ${formatPrice(item.price)} < / div >
+
+< / div >
+< button
+
+
+class ="close-drawer" style="font-size: 0.85rem;" onclick="toggleWishlist('${item.id}')" > ✕ < / button >
+
+< / div >
+`).join('');
+}
+
+function
+updateBadges()
+{
+    const
+cartCountEl = document.getElementById('cart-count');
+const
+wishlistCountEl = document.getElementById('wishlist-count');
+
+const
+totalCartItems = cart.reduce((sum, item) = > sum + item.qty, 0);
+if (cartCountEl) cartCountEl.innerText = totalCartItems;
+if (wishlistCountEl) wishlistCountEl.innerText = wishlist.length;
+}
+
+function toggleSearch(open) {
+const modal = document.getElementById('search-modal');
+const backdrop = document.getElementById('backdrop');
+if (open) {
+modal.classList.add('active');
+backdrop.classList.add('active');
+setTimeout(() = > document.getElementById('search-input')?.focus(), 100);
+} else {
+modal.classList.remove('active');
+backdrop.classList.remove('active');
+}
+}
+
+function
+handleSearch(query)
+{
+    clearTimeout(searchDebounceTimer);
+const
+resultsBox = document.getElementById('search-results');
+if (!resultsBox)
+return;
+
+const
+q = query.trim().toLowerCase();
+if (!q) {
+resultsBox.innerHTML = '';
+return;
+}
+
+searchDebounceTimer = setTimeout(() = > {
+    const
+matches = products.filter(p= >
+          p.title.toLowerCase().includes(q) | |
+          p.brand.toLowerCase().includes(q) | |
+          p.category.toLowerCase().includes(q)
+);
+
+if (matches.length === 0) {
+resultsBox.innerHTML = ` < div
+
+
+class ="search-empty-state" > Нічого не знайдено за запитом "${query}" < / div > `;
+
+
+return;
+}
+
+resultsBox.innerHTML = matches.map(p= > `
+< div
+
+
+class ="search-result-item" onclick="saveRecentSearch('${query}'); toggleSearch(false); openProductModal(products.find(x => x.id === '${p.id}'))" >
+
+< div
+style = "display: flex; align-items: center; gap: 10px;" >
+< img
+src = "${p.img}"
+alt = "${p.title}"
+style = "width: 40px; height: 40px; object-fit: cover; border-radius: 6px;" >
+< div >
+< h4
+style = "font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase;" >${p.brand} < / h4 >
+< h3
+style = "font-size: 0.9rem; font-weight: 700;" >${p.title} < / h3 >
+< / div >
+< / div >
+< div
+
+
+class ="product-price" style="font-size: 0.95rem;" > ${formatPrice(p.price)} < / div >
+
+< / div >
+`).join('');
+}, 250);
+}
+
+function
+saveRecentSearch(query)
+{
+    let
+searches = JSON.parse(localStorage.getItem('m1lip_recent_searches')) | | [];
+searches = [query, ...searches.filter(s= > s != = query)].slice(0, 5);
+localStorage.setItem('m1lip_recent_searches', JSON.stringify(searches));
+renderRecentSearches();
+}
+
+function
+renderRecentSearches()
+{
+    const
+block = document.getElementById('recent-searches-block');
+if (!block)
+return;
+const
+searches = JSON.parse(localStorage.getItem('m1lip_recent_searches')) | | [];
+if (searches.length === 0) {
+block.innerHTML = '';
+return;
+}
+block.innerHTML = `
+                  < div
+style = "margin-top: 12px;" >
+        < div
+style = "font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; margin-bottom: 6px;" > Популярні
+та
+недавні
+пошуки: < / div >
+            < div
+
+
+class ="recent-searches" >
+
+${searches.map(s= > ` < div
+
+
+class ="recent-search-chip" onclick="document.getElementById('search-input').value = '${s}'; handleSearch('${s}')" > ${s} < / div > `).join('')}
+< / div >
+< / div >
+`;
+}
+< / script >
+< / body >
+< / html >
