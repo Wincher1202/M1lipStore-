@@ -1452,301 +1452,55 @@
         }
         .btn-secondary:hover { border-color: var(--border-hover); }
 
-        /* ---- delivery provider cards & chips ---- */
-        .provider-cards-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-            margin-top: 4px;
-        }
-        @media (max-width: 480px) {
-            .provider-cards-grid { grid-template-columns: 1fr; }
-        }
-        /* Delivery & Checkout Styles */
-        .provider-cards-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 8px;
-            margin-top: 6px;
-        }
-        @media (max-width: 520px) {
-            .provider-cards-grid { grid-template-columns: 1fr; }
-        }
-        .delivery-provider-card {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 14px;
-            border-radius: var(--radius-sm);
-            border: 2px solid var(--border-light);
-            background: var(--bg-primary);
-            cursor: pointer;
-            transition: all 0.2s ease;
-            position: relative;
-        }
-        .delivery-provider-card:hover {
-            border-color: var(--border-hover);
-            transform: translateY(-1px);
-        }
-        .delivery-provider-card.active {
-            border-color: var(--accent);
-            background: var(--accent-light);
-            box-shadow: 0 0 0 1px var(--accent);
-        }
-        .delivery-provider-icon {
-            width: 36px;
-            height: 36px;
-            border-radius: 8px;
-            background: var(--card-bg);
+        /* ---- delivery provider chips ---- */
+        .provider-chip-group { display: flex; flex-wrap: wrap; gap: 8px; }
+        .provider-chip {
+            padding: 10px 14px;
+            border-radius: 999px;
             border: 1px solid var(--border-light);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-            overflow: hidden;
-        }
-        .delivery-provider-info {
-            flex: 1;
-            min-width: 0;
-        }
-        .delivery-provider-title {
-            font-weight: 800;
-            font-size: 0.88rem;
-            color: var(--text-primary);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .delivery-provider-sub {
-            font-size: 0.72rem;
-            color: var(--text-muted);
-            margin-top: 2px;
-            line-height: 1.25;
-        }
-        .provider-check-mark {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            border: 2px solid var(--border-light);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-            font-size: 0.75rem;
-            transition: all 0.2s ease;
-        }
-        .delivery-provider-card.active .provider-check-mark {
-            border-color: var(--accent);
-            background: var(--accent);
-            color: #fff;
-        }
-
-        .delivery-input-wrap {
-            position: relative;
-            display: flex;
-            align-items: center;
-            width: 100%;
-        }
-        .delivery-input-wrap .delivery-input-icon {
-            position: absolute;
-            left: 12px;
-            font-size: 0.95rem;
-            color: var(--text-muted);
-            pointer-events: none;
-        }
-        .delivery-input-wrap input {
-            width: 100%;
-            padding-left: 36px !important;
-            padding-right: 36px !important;
-        }
-        .delivery-input-wrap .delivery-input-clear {
-            position: absolute;
-            right: 10px;
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            font-size: 0.95rem;
-            cursor: pointer;
-            padding: 4px 6px;
-            border-radius: 50%;
-            display: none;
-        }
-        .delivery-input-wrap .delivery-input-clear:hover {
-            color: var(--text-primary);
-            background: rgba(0,0,0,0.06);
-        }
-
-        .quick-cities-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-            margin-top: 8px;
-        }
-        .quick-city-chip {
-            padding: 6px 12px;
-            border-radius: 16px;
-            font-size: 0.76rem;
+            background: var(--bg-primary);
+            font-size: 0.82rem;
             font-weight: 700;
-            background: var(--bg-primary);
-            border: 1px solid var(--border-light);
-            color: var(--text-secondary);
             cursor: pointer;
-            transition: all 0.15s ease;
+            transition: var(--transition-smooth);
         }
-        .quick-city-chip:hover {
-            border-color: var(--accent);
-            color: var(--accent);
-            background: var(--accent-light);
-        }
-        .quick-city-chip.active {
-            border-color: var(--accent);
-            color: #fff;
-            background: var(--accent);
-        }
-
-        .delivery-type-filters {
-            display: flex;
-            gap: 6px;
-            margin-top: 6px;
-            margin-bottom: 6px;
-        }
-        .delivery-filter-btn {
-            padding: 5px 10px;
-            border-radius: 8px;
-            font-size: 0.74rem;
-            font-weight: 700;
-            background: var(--bg-primary);
-            border: 1px solid var(--border-light);
-            color: var(--text-secondary);
-            cursor: pointer;
-            transition: all 0.15s ease;
-        }
-        .delivery-filter-btn:hover {
-            border-color: var(--border-hover);
-            color: var(--text-primary);
-        }
-        .delivery-filter-btn.active {
-            background: var(--accent);
-            border-color: var(--accent);
-            color: #fff;
-        }
+        .provider-chip.active { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+        .provider-chip .badge-soon { display: block; font-size: 0.6rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); }
+        .provider-chip.active .badge-soon { color: var(--accent); }
 
         .delivery-search-results {
             display: flex;
             flex-direction: column;
-            gap: 2px;
-            max-height: 250px;
+            gap: 4px;
+            max-height: 220px;
             overflow-y: auto;
-            border: 1.5px solid var(--border-light);
+            border: 1px solid var(--border-light);
             border-radius: var(--radius-sm);
-            background: var(--card-bg);
-            margin-top: 6px;
-            box-shadow: var(--shadow-subtle);
         }
         .delivery-search-result-item {
-            padding: 11px 14px;
+            padding: 10px 12px;
             cursor: pointer;
             font-size: 0.85rem;
             border-bottom: 1px solid var(--border-light);
-            display: flex;
-            flex-direction: column;
-            gap: 3px;
-            transition: background 0.15s ease;
         }
         .delivery-search-result-item:last-child { border-bottom: none; }
         .delivery-search-result-item:hover { background: var(--bg-primary); }
-        .delivery-search-result-item .item-title {
-            font-weight: 700;
-            color: var(--text-primary);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 8px;
-        }
-        .delivery-search-result-item .item-sub {
-            font-size: 0.74rem;
-            color: var(--text-muted);
-        }
-        .delivery-search-result-item .wh-badge {
-            font-size: 0.68rem;
-            font-weight: 800;
-            padding: 2px 7px;
-            border-radius: 6px;
-            background: rgba(87,100,226,0.1);
-            color: var(--accent);
-            white-space: nowrap;
-        }
-        .delivery-search-result-item.selected {
-            background: var(--accent-light);
-            border-left: 3px solid var(--accent);
-        }
-        .delivery-search-empty {
-            padding: 16px;
-            font-size: 0.82rem;
-            color: var(--text-muted);
-            text-align: center;
-        }
+        .delivery-search-result-item .item-sub { font-size: 0.7rem; color: var(--text-muted); }
+        .delivery-search-empty { padding: 12px; font-size: 0.8rem; color: var(--text-muted); text-align: center; }
 
         .selected-pill {
             display: flex;
             align-items: center;
             justify-content: space-between;
             gap: 10px;
-            padding: 12px 14px;
+            padding: 10px 12px;
             border-radius: var(--radius-sm);
-            border: 1.5px solid var(--accent);
-            background: var(--accent-light);
-            font-size: 0.88rem;
-            font-weight: 700;
-            margin-top: 4px;
-            animation: fadeIn 0.2s ease;
-        }
-        .selected-pill-info {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-            min-width: 0;
-        }
-        .selected-pill-title {
-            color: var(--text-primary);
-            font-weight: 800;
-        }
-        .selected-pill-sub {
-            font-size: 0.74rem;
-            color: var(--text-secondary);
-            font-weight: 500;
-        }
-        .selected-pill button {
-            background: var(--card-bg);
             border: 1px solid var(--accent);
-            color: var(--accent);
-            font-weight: 800;
-            font-size: 0.78rem;
-            cursor: pointer;
-            padding: 6px 10px;
-            border-radius: 6px;
-            flex-shrink: 0;
-            transition: all 0.15s ease;
+            background: var(--accent-light);
+            font-size: 0.85rem;
+            font-weight: 700;
         }
-        .selected-pill button:hover {
-            background: var(--accent);
-            color: #fff;
-        }
-
-        .courier-address-grid {
-            display: grid;
-            grid-template-columns: 2fr 1fr 1fr;
-            gap: 8px;
-            margin-top: 4px;
-        }
-        @media (max-width: 480px) {
-            .courier-address-grid {
-                grid-template-columns: 1fr 1fr;
-            }
-            .courier-address-grid .street-col {
-                grid-column: span 2;
-            }
-        }
+        .selected-pill button { background: none; border: none; color: var(--accent); font-weight: 800; cursor: pointer; }
 
         .delivery-fallback-note {
             font-size: 0.78rem;
@@ -1818,184 +1572,6 @@
         }
         .profile-empty-state { font-size: 0.85rem; color: var(--text-muted); text-align: center; padding: 18px 0; }
         .profile-signin-note { font-size: 0.85rem; color: var(--text-muted); text-align: center; padding: 30px 10px; }
-
-        /* ---- Fullscreen Lightbox Modal ---- */
-        .lightbox-modal {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0, 0, 0, 0.92);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            z-index: 10000;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: space-between;
-            padding: 20px 16px;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        .lightbox-modal.active {
-            opacity: 1;
-            pointer-events: auto;
-        }
-        .lightbox-topbar {
-            width: 100%;
-            max-width: 900px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            color: #ffffff;
-            z-index: 10;
-        }
-        .lightbox-title-wrap {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .lightbox-title {
-            font-size: 1rem;
-            font-weight: 800;
-            letter-spacing: -0.02em;
-        }
-        .lightbox-color-badge {
-            background: var(--accent);
-            color: #ffffff;
-            font-size: 0.72rem;
-            font-weight: 800;
-            padding: 3px 10px;
-            border-radius: 999px;
-            text-transform: uppercase;
-        }
-        .lightbox-close-btn {
-            background: rgba(255, 255, 255, 0.12);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: #ffffff;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            font-size: 1.1rem;
-            transition: 0.2s ease;
-        }
-        .lightbox-close-btn:hover {
-            background: rgba(255, 255, 255, 0.25);
-            transform: scale(1.05);
-        }
-        .lightbox-main-view {
-            position: relative;
-            width: 100%;
-            max-width: 900px;
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 10px 0;
-            overflow: hidden;
-        }
-        .lightbox-main-img {
-            max-width: 100%;
-            max-height: 70vh;
-            object-fit: contain;
-            border-radius: 12px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-            transition: transform 0.25s ease, opacity 0.2s ease;
-            user-select: none;
-        }
-        .lightbox-nav-btn {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            border: 1px solid rgba(255, 255, 255, 0.25);
-            color: #ffffff;
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            font-size: 1.3rem;
-            transition: 0.2s ease;
-            z-index: 5;
-        }
-        .lightbox-nav-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: translateY(-50%) scale(1.08);
-        }
-        .lightbox-prev { left: 10px; }
-        .lightbox-next { right: 10px; }
-        .lightbox-bottombar {
-            width: 100%;
-            max-width: 900px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 12px;
-            z-index: 10;
-        }
-        .lightbox-counter {
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 0.8rem;
-            font-weight: 700;
-            letter-spacing: 0.05em;
-        }
-        .lightbox-thumbs-strip {
-            display: flex;
-            gap: 8px;
-            max-width: 100%;
-            overflow-x: auto;
-            padding: 4px;
-            scrollbar-width: none;
-        }
-        .lightbox-thumbs-strip::-webkit-scrollbar { display: none; }
-        .lightbox-strip-thumb {
-            width: 54px;
-            height: 54px;
-            border-radius: 8px;
-            object-fit: cover;
-            border: 2px solid transparent;
-            cursor: pointer;
-            opacity: 0.6;
-            transition: 0.2s ease;
-            background: rgba(255,255,255,0.05);
-        }
-        .lightbox-strip-thumb.active {
-            border-color: var(--accent);
-            opacity: 1;
-            transform: scale(1.08);
-        }
-        .modal-main-img-wrap {
-            position: relative;
-            cursor: zoom-in;
-        }
-        .modal-main-img-wrap .gallery-zoom-hint {
-            position: absolute;
-            bottom: 10px;
-            right: 10px;
-            background: rgba(0, 0, 0, 0.65);
-            color: #fff;
-            padding: 5px 10px;
-            border-radius: 999px;
-            font-size: 0.72rem;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            pointer-events: none;
-            backdrop-filter: blur(4px);
-        }
-        .color-circle-big.active {
-            box-shadow: 0 0 0 3px var(--bg-surface), 0 0 0 5px var(--accent);
-            transform: scale(1.1);
-        }
     </style>
 </head>
 <body data-theme="light">
@@ -2038,6 +1614,13 @@
                 </button>
                 <span class="tooltip">Кошик</span>
             </div>
+
+            <div class="icon-btn-wrapper">
+                <button class="icon-btn" id="profile-open-btn" aria-label="Профіль">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21a8 8 0 0 0-16 0"/><circle cx="12" cy="7" r="4"/></svg>
+                </button>
+                <span class="tooltip">Профіль</span>
+            </div>
         </div>
     </header>
 
@@ -2076,32 +1659,46 @@
         <div class="partner-brands-marquee">
             <div class="partner-brands-track">
                 <!-- Set 1 -->
-                <div class="partner-brand-tile" onclick="filterByBrand('Attack Shark', this)"><img src="attack-shark.jpg" alt="Attack Shark" loading="lazy" onerror="this.src='brand-attack-shark.svg'"><span class="brand-text-fallback">Attack Shark</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('Ajazz', this)"><img src="ajazz.webp" alt="Ajazz" loading="lazy" onerror="this.src='brand-ajazz.svg'"><span class="brand-text-fallback">Ajazz</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('AULA', this)"><img src="aula.png" alt="AULA" loading="lazy" onerror="this.src='brand-aula.svg'"><span class="brand-text-fallback">AULA</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('Mchose', this)"><img src="mchose.png" alt="Mchose" loading="lazy" onerror="this.src='brand-mchose.svg'"><span class="brand-text-fallback">Mchose</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('VGN', this)"><img src="vgn.jpg" alt="VGN" loading="lazy" onerror="this.src='brand-vgn.svg'"><span class="brand-text-fallback">VGN</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Attack Shark', this)"><img src="attack-shark.jpg" alt="Attack Shark" onerror="this.parentElement.classList.add('fallback-styled')"><span class="brand-text-fallback">Attack Shark</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Ajazz', this)"><img src="ajazz.webp" alt="Ajazz" onerror="this.parentElement.classList.add('fallback-styled')"><span class="brand-text-fallback">Ajazz</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Aula', this)"><img src="aula.png" alt="Aula" onerror="this.parentElement.classList.add('fallback-styled')"><span class="brand-text-fallback">Aula</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Mchose', this)"><img src="mchose.png" alt="Mchose" onerror="this.parentElement.classList.add('fallback-styled')"><span class="brand-text-fallback">Mchose</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('VGN', this)"><img src="vgn.jpg" alt="VGN" onerror="this.parentElement.classList.add('fallback-styled')"><span class="brand-text-fallback">VGN</span></div>
 
                 <!-- Set 2 -->
-                <div class="partner-brand-tile" onclick="filterByBrand('Attack Shark', this)"><img src="attack-shark.jpg" alt="Attack Shark" loading="lazy" onerror="this.src='brand-attack-shark.svg'"><span class="brand-text-fallback">Attack Shark</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('Ajazz', this)"><img src="ajazz.webp" alt="Ajazz" loading="lazy" onerror="this.src='brand-ajazz.svg'"><span class="brand-text-fallback">Ajazz</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('AULA', this)"><img src="aula.png" alt="AULA" loading="lazy" onerror="this.src='brand-aula.svg'"><span class="brand-text-fallback">AULA</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('Mchose', this)"><img src="mchose.png" alt="Mchose" loading="lazy" onerror="this.src='brand-mchose.svg'"><span class="brand-text-fallback">Mchose</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('VGN', this)"><img src="vgn.jpg" alt="VGN" loading="lazy" onerror="this.src='brand-vgn.svg'"><span class="brand-text-fallback">VGN</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Attack Shark', this)"><img src="attack-shark.jpg" alt="Attack Shark" onerror="this.parentElement.classList.add('fallback-styled')"><span class="brand-text-fallback">Attack Shark</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Ajazz', this)"><img src="ajazz.webp" alt="Ajazz" onerror="this.parentElement.classList.add('fallback-styled')"><span class="brand-text-fallback">Ajazz</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Aula', this)"><img src="aula.png" alt="Aula" onerror="this.parentElement.classList.add('fallback-styled')"><span class="brand-text-fallback">Aula</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Mchose', this)"><img src="mchose.png" alt="Mchose" onerror="this.parentElement.classList.add('fallback-styled')"><span class="brand-text-fallback">Mchose</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('VGN', this)"><img src="vgn.jpg" alt="VGN" onerror="this.parentElement.classList.add('fallback-styled')"><span class="brand-text-fallback">VGN</span></div>
 
                 <!-- Set 3 -->
-                <div class="partner-brand-tile" onclick="filterByBrand('Attack Shark', this)"><img src="attack-shark.jpg" alt="Attack Shark" loading="lazy" onerror="this.src='brand-attack-shark.svg'"><span class="brand-text-fallback">Attack Shark</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('Ajazz', this)"><img src="ajazz.webp" alt="Ajazz" loading="lazy" onerror="this.src='brand-ajazz.svg'"><span class="brand-text-fallback">Ajazz</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('AULA', this)"><img src="aula.png" alt="AULA" loading="lazy" onerror="this.src='brand-aula.svg'"><span class="brand-text-fallback">AULA</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('Mchose', this)"><img src="mchose.png" alt="Mchose" loading="lazy" onerror="this.src='brand-mchose.svg'"><span class="brand-text-fallback">Mchose</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('VGN', this)"><img src="vgn.jpg" alt="VGN" loading="lazy" onerror="this.src='brand-vgn.svg'"><span class="brand-text-fallback">VGN</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Attack Shark', this)"><img src="attack-shark.jpg" alt="Attack Shark" onerror="this.parentElement.classList.add('fallback-styled')"><span class="brand-text-fallback">Attack Shark</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Ajazz', this)"><img src="ajazz.webp" alt="Ajazz" onerror="this.parentElement.classList.add('fallback-styled')"><span class="brand-text-fallback">Ajazz</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Aula', this)"><img src="aula.png" alt="Aula" onerror="this.parentElement.classList.add('fallback-styled')"><span class="brand-text-fallback">Aula</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Mchose', this)"><img src="mchose.png" alt="Mchose" onerror="this.parentElement.classList.add('fallback-styled')"><span class="brand-text-fallback">Mchose</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('VGN', this)"><img src="vgn.jpg" alt="VGN" onerror="this.parentElement.classList.add('fallback-styled')"><span class="brand-text-fallback">VGN</span></div>
 
-                <!-- Set 4 -->
-                <div class="partner-brand-tile" onclick="filterByBrand('Attack Shark', this)"><img src="attack-shark.jpg" alt="Attack Shark" loading="lazy" onerror="this.src='brand-attack-shark.svg'"><span class="brand-text-fallback">Attack Shark</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('Ajazz', this)"><img src="ajazz.webp" alt="Ajazz" loading="lazy" onerror="this.src='brand-ajazz.svg'"><span class="brand-text-fallback">Ajazz</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('AULA', this)"><img src="aula.png" alt="AULA" loading="lazy" onerror="this.src='brand-aula.svg'"><span class="brand-text-fallback">AULA</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('Mchose', this)"><img src="mchose.png" alt="Mchose" loading="lazy" onerror="this.src='brand-mchose.svg'"><span class="brand-text-fallback">Mchose</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('VGN', this)"><img src="vgn.jpg" alt="VGN" loading="lazy" onerror="this.src='brand-vgn.svg'"><span class="brand-text-fallback">VGN</span></div>
+                <!-- Set 4 (Duplicated for 100% seamless loop) -->
+                <div class="partner-brand-tile" onclick="filterByBrand('Attack Shark', this)"><img src="attack-shark.jpg" alt="Attack Shark" onerror="this.parentElement.classList.add('fallback-styled')"><span class="brand-text-fallback">Attack Shark</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Ajazz', this)"><img src="ajazz.webp" alt="Ajazz" onerror="this.parentElement.classList.add('fallback-styled')"><span class="brand-text-fallback">Ajazz</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Aula', this)"><img src="aula.png" alt="Aula" onerror="this.parentElement.classList.add('fallback-styled')"><span class="brand-text-fallback">Aula</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Mchose', this)"><img src="mchose.png" alt="Mchose" onerror="this.parentElement.classList.add('fallback-styled')"><span class="brand-text-fallback">Mchose</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('VGN', this)"><img src="vgn.jpg" alt="VGN" onerror="this.parentElement.classList.add('fallback-styled')"><span class="brand-text-fallback">VGN</span></div>
+
+                <!-- Set 5 (Duplicated for 100% seamless loop) -->
+                <div class="partner-brand-tile" onclick="filterByBrand('Attack Shark', this)"><img src="attack-shark.jpg" alt="Attack Shark" onerror="this.parentElement.classList.add('fallback-styled')"><span class="brand-text-fallback">Attack Shark</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Ajazz', this)"><img src="ajazz.webp" alt="Ajazz" onerror="this.parentElement.classList.add('fallback-styled')"><span class="brand-text-fallback">Ajazz</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Aula', this)"><img src="aula.png" alt="Aula" onerror="this.parentElement.classList.add('fallback-styled')"><span class="brand-text-fallback">Aula</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Mchose', this)"><img src="mchose.png" alt="Mchose" onerror="this.parentElement.classList.add('fallback-styled')"><span class="brand-text-fallback">Mchose</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('VGN', this)"><img src="vgn.jpg" alt="VGN" onerror="this.parentElement.classList.add('fallback-styled')"><span class="brand-text-fallback">VGN</span></div>
+
+                <!-- Set 6 (Duplicated for 100% seamless loop) -->
+                <div class="partner-brand-tile" onclick="filterByBrand('Attack Shark', this)"><img src="attack-shark.jpg" alt="Attack Shark" onerror="this.parentElement.classList.add('fallback-styled')"><span class="brand-text-fallback">Attack Shark</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Ajazz', this)"><img src="ajazz.webp" alt="Ajazz" onerror="this.parentElement.classList.add('fallback-styled')"><span class="brand-text-fallback">Ajazz</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Aula', this)"><img src="aula.png" alt="Aula" onerror="this.parentElement.classList.add('fallback-styled')"><span class="brand-text-fallback">Aula</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Mchose', this)"><img src="mchose.png" alt="Mchose" onerror="this.parentElement.classList.add('fallback-styled')"><span class="brand-text-fallback">Mchose</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('VGN', this)"><img src="vgn.jpg" alt="VGN" onerror="this.parentElement.classList.add('fallback-styled')"><span class="brand-text-fallback">VGN</span></div>
             </div>
         </div>
     </section>
@@ -2259,104 +1856,44 @@
                     <div id="saved-deliveries-block"></div>
 
                     <div class="checkout-group">
-                        <label>Спосіб доставки</label>
-                        <div class="provider-cards-grid" id="provider-chip-group"></div>
+                        <label>Служба доставки</label>
+                        <div class="provider-chip-group" id="provider-chip-group"></div>
                     </div>
 
-                    <div id="delivery-configured-flow" style="display: flex; flex-direction: column; gap: 14px; margin-top: 6px;">
-                        <!-- CITY SELECTION -->
+                    <div id="delivery-configured-flow" style="display:none; flex-direction: column; gap: 16px;">
                         <div class="checkout-group" id="delivery-city-group">
-                            <label>Місто отримання</label>
+                            <label>Місто</label>
+                            <input type="text" id="chk-city-search" placeholder="Почніть вводити назву міста...">
+                            <div class="delivery-search-results" id="city-search-results" style="display:none;"></div>
                             <div id="city-selected-pill"></div>
-                            <div id="city-search-box-wrap">
-                                <div class="delivery-input-wrap">
-                                    <span class="delivery-input-icon">🔍</span>
-                                    <input type="text" id="chk-city-search" placeholder="Почніть вводити назву міста..." autocomplete="off" oninput="searchDeliveryCities(this.value)">
-                                    <button type="button" class="delivery-input-clear" id="chk-city-clear-btn" onclick="clearCityInput()">✕</button>
-                                </div>
-                                <div class="quick-cities-container" id="quick-cities-container"></div>
-                                <div class="delivery-search-results" id="city-search-results" style="display:none;"></div>
-                            </div>
                         </div>
-
-                        <!-- WAREHOUSE / POSTOMAT SELECTION -->
                         <div class="checkout-group" id="delivery-warehouse-group" style="display:none;">
-                            <label id="warehouse-group-label">Пункт отримання</label>
-                            <div id="warehouse-type-filter-row" class="delivery-type-filters" style="display:none;">
-                                <button type="button" class="delivery-filter-btn active" id="wh-filter-all" onclick="setWarehouseFilter('all')">Усі відділення</button>
-                                <button type="button" class="delivery-filter-btn" id="wh-filter-branch30" onclick="setWarehouseFilter('30')">До 30 кг</button>
-                                <button type="button" class="delivery-filter-btn" id="wh-filter-cargo" onclick="setWarehouseFilter('cargo')">Вантажні</button>
-                            </div>
+                            <label>Відділення / Поштомат</label>
+                            <input type="text" id="chk-warehouse-search" placeholder="Пошук відділення...">
+                            <div class="delivery-search-results" id="warehouse-search-results" style="display:none;"></div>
                             <div id="warehouse-selected-pill"></div>
-                            <div id="warehouse-search-box-wrap">
-                                <div class="delivery-input-wrap">
-                                    <span class="delivery-input-icon">🔍</span>
-                                    <input type="text" id="chk-warehouse-search" placeholder="Пошук за номером або вулицею..." autocomplete="off" oninput="searchDeliveryWarehouses(this.value)">
-                                    <button type="button" class="delivery-input-clear" id="chk-warehouse-clear-btn" onclick="clearWarehouseInput()">✕</button>
-                                </div>
-                                <div class="delivery-search-results" id="warehouse-search-results" style="display:none;"></div>
-                            </div>
                         </div>
-
-                        <!-- COURIER ADDRESS FORM -->
-                        <div class="checkout-group" id="delivery-courier-group" style="display:none;">
-                            <label>Адреса доставки кур'єром</label>
-                            <div class="courier-address-grid">
-                                <div class="street-col">
-                                    <input type="text" id="chk-courier-street" placeholder="Вулиця / Проспект / Бульвар" autocomplete="address-line1">
-                                </div>
-                                <div>
-                                    <input type="text" id="chk-courier-building" placeholder="Будинок" autocomplete="address-line2">
-                                </div>
-                                <div>
-                                    <input type="text" id="chk-courier-apt" placeholder="Кв. / Офіс">
-                                </div>
-                            </div>
-                        </div>
+                        <div id="delivery-api-error-block"></div>
                     </div>
+
+
                 </div>
 
                 <!-- STEP 3: payment -->
                 <div class="checkout-step-panel" data-step-panel="3">
                     <div class="checkout-group">
-                        <label>Оберіть спосіб оплати</label>
-                        <div class="payment-cards-grid" style="display: flex; flex-direction: column; gap: 10px; margin-top: 6px;">
-                            <label class="payment-card active" id="pay-card-online" onclick="selectPaymentMethod('online')" style="display: flex; align-items: flex-start; gap: 12px; padding: 14px; border: 2px solid var(--accent); border-radius: var(--radius-sm); background: var(--card-bg); cursor: pointer;">
-                                <input type="radio" name="pay-method" id="pay-opt-online" value="online" checked style="margin-top: 3px;">
-                                <div style="flex: 1;">
-                                    <div style="font-weight: 700; font-size: 0.95rem; display: flex; align-items: center; justify-content: space-between;">
-                                        <span>💳 Онлайн-оплата (Telegram / Картка)</span>
-                                        <span style="font-size: 0.75rem; color: #2E7D32; font-weight: 800; background: rgba(46,125,50,0.1); padding: 2px 8px; border-radius: 10px;">0% комісії</span>
-                                    </div>
-                                    <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px;">Миттєва та безпечна оплата банківською картою, Apple Pay або Google Pay прямо в Telegram.</div>
-                                </div>
-                            </label>
-
-                            <label class="payment-card" id="pay-card-cod" onclick="selectPaymentMethod('cod')" style="display: flex; align-items: flex-start; gap: 12px; padding: 14px; border: 2px solid var(--border-light); border-radius: var(--radius-sm); background: var(--card-bg); cursor: pointer;">
-                                <input type="radio" name="pay-method" id="pay-opt-cod" value="cod" style="margin-top: 3px;">
-                                <div style="flex: 1;">
-                                    <div style="font-weight: 700; font-size: 0.95rem; display: flex; align-items: center; justify-content: space-between;">
-                                        <span>📦 Оплата при отриманні (Накладений)</span>
-                                        <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700;">+20 ₴ + 2%</span>
-                                    </div>
-                                    <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px;">Сплата готівкою або карткою у відділенні пошти після огляду товару.</div>
-                                </div>
-                            </label>
-                        </div>
-                        <input type="hidden" id="chk-payment" value="online">
-                    </div>
-
-                    <!-- Dispatch time info banner -->
-                    <div style="display: flex; align-items: center; gap: 12px; background: rgba(87, 100, 226, 0.08); border: 1px solid rgba(87, 100, 226, 0.25); border-radius: var(--radius-sm); padding: 12px 14px; margin-top: 8px;">
-                        <span style="font-size: 1.5rem;">⚡</span>
-                        <div style="font-size: 0.82rem; color: var(--text-primary); line-height: 1.4;">
-                            <strong>Швидка відправка:</strong> Замовлення комплектується та відправляється протягом <strong>1–2 робочих днів</strong>.
+                        <label>Спосіб оплати</label>
+                        <div class="payment-method-card" style="display:flex; align-items:center; gap:12px; padding:14px 16px; border:1px solid rgba(255,255,255,0.12); border-radius:12px;">
+                            <span style="font-size:22px;">💳</span>
+                            <div>
+                                <div style="font-weight:600;">Оплата карткою онлайн</div>
+                                <div style="font-size:13px; opacity:.7;">Безпечна оплата через Telegram Payments</div>
+                            </div>
                         </div>
                     </div>
-
-                    <div class="checkout-group" style="margin-top: 10px;">
-                        <label>Коментар або побажання до замовлення</label>
-                        <textarea id="chk-comment" rows="2" placeholder="Наприклад: зателефонуйте для уточнення деталей або зручний час відправки"></textarea>
+                    <div class="checkout-group">
+                        <label>Коментар до замовлення (необов'язково)</label>
+                        <textarea id="chk-comment" rows="2" placeholder="Побажання до замовлення"></textarea>
                     </div>
                 </div>
 
@@ -2374,7 +1911,7 @@
             <div class="checkout-step-nav">
                 <button class="btn-secondary" id="chk-back-btn" onclick="checkoutStepBack()" style="display:none;">← Назад</button>
                 <button class="btn-primary" id="chk-next-btn" style="flex:1; justify-content: center;" onclick="checkoutStepNext()">Далі →</button>
-                <button class="btn-primary" id="chk-submit-btn" style="flex:1; justify-content: center; display:none;" onclick="submitOrder()">Підтвердити замовлення</button>
+                <button class="btn-primary" id="chk-submit-btn" style="flex:1; justify-content: center; display:none;" onclick="submitOrder()">Перейти до оплати</button>
             </div>
         </div>
     </div>
@@ -2389,34 +1926,26 @@
         </div>
     </div>
 
-    <div class="product-modal" id="success-modal" style="max-width: 480px; height: auto;">
+    <div class="product-modal" id="success-modal" style="max-width: 450px; height: auto;">
         <button class="close-drawer" style="position: absolute; top: 16px; right: 16px; z-index: 10;" onclick="closeSuccessModal()">✕</button>
-        <div style="padding: 30px 22px; text-align: center;">
-            <div style="font-size: 3.2rem; margin-bottom: 8px;">🎉</div>
-            <h3 style="font-size: 1.4rem; font-weight: 800; margin-bottom: 6px; letter-spacing: -0.5px;">ЗАМОВЛЕННЯ ОФОРМЛЕНО!</h3>
-            <p style="color: var(--text-secondary); font-size: 0.88rem; margin-bottom: 16px;">Дякуємо за покупку в M1lipStore. Ми вже почали комплектувати ваше замовлення.</p>
-            
-            <div style="background: var(--bg-primary); padding: 14px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border-light); margin-bottom: 16px; text-align: left;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; border-bottom: 1px dashed var(--border-light); padding-bottom: 8px;">
-                    <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 700;">НОМЕР ЗАМОВЛЕННЯ:</span>
-                    <span id="success-order-id" style="font-family: 'JetBrains Mono', monospace; font-size: 1.05rem; font-weight: 800; color: var(--accent);">#MLP-2026-XXXXXX</span>
-                </div>
-                <div id="success-details-content" style="font-size: 0.83rem; color: var(--text-secondary); display: flex; flex-direction: column; gap: 5px;"></div>
-                
-                <div style="margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--border-light); display: flex; align-items: center; justify-content: space-between;">
-                    <span style="font-size: 0.8rem; font-weight: 700; color: #2E7D32; display: flex; align-items: center; gap: 4px;">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-                        Статус: Прийнято в обробку
-                    </span>
-                    <span style="font-size: 0.78rem; font-weight: 700; background: rgba(87,100,226,0.12); color: var(--accent); padding: 2px 8px; border-radius: 12px;">
-                        ⚡ Відправка 1-2 дні
-                    </span>
-                </div>
+        <div style="padding: 35px 24px; text-align: center;">
+            <div id="success-modal-icon" style="font-size: 3rem; margin-bottom: 10px;">🎉</div>
+            <h3 id="success-modal-title" style="font-size: 1.4rem; font-weight: 800; margin-bottom: 8px;">ОПЛАТА ПІДТВЕРДЖЕНА</h3>
+            <p id="success-modal-text" style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 16px;">Дякуємо за замовлення в M1lipStore.</p>
+            <div style="background: var(--bg-primary); padding: 14px; border-radius: var(--radius-sm); border: 1px solid var(--border-light); margin-bottom: 20px;">
+                <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Номер замовлення:</div>
+                <div id="success-order-id" style="font-family: 'JetBrains Mono', monospace; font-size: 1.2rem; font-weight: 800; color: var(--accent); margin-top: 4px;">#MLP-2026-XXXXXX</div>
+                <div id="success-order-status" style="font-size: 0.8rem; font-weight: 700; color: #2E7D32; margin-top: 8px;">Статус: Оплата підтверджена ✅</div>
             </div>
+            <button class="btn-primary" style="width: 100%; justify-content: center;" onclick="closeSuccessModal()">Продовжити покупки</button>
+        </div>
+    </div>
 
-            <div style="display: flex; gap: 10px;">
-                <button class="btn-primary" style="width: 100%; justify-content: center;" onclick="closeSuccessModal()">Продовжити покупки</button>
-            </div>
+    <div class="product-modal" id="payment-pending-modal" style="max-width: 420px; height: auto;">
+        <div style="padding: 35px 24px; text-align: center;">
+            <div style="font-size: 2.6rem; margin-bottom: 10px;">⏳</div>
+            <h3 style="font-size: 1.2rem; font-weight: 800; margin-bottom: 8px;">Перевіряємо оплату…</h3>
+            <p style="color: var(--text-secondary); font-size: 0.9rem;">Замовлення <span id="pending-order-id" style="font-weight:700;"></span> — зачекайте кілька секунд, ми підтверджуємо платіж на сервері.</p>
         </div>
     </div>
 
@@ -2444,12 +1973,8 @@
         <button class="close-drawer" style="position: absolute; top: 16px; right: 16px; z-index: 10;" onclick="closeProductModal()">✕</button>
         <div class="modal-grid">
             <div class="modal-gallery">
-                <div class="modal-main-img-wrap" onclick="openColorGalleryLightbox()">
+                <div class="modal-main-img-wrap">
                     <img class="modal-main-img" id="modal-img" alt="Product">
-                    <div class="gallery-zoom-hint">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/><path d="M11 8v6"/><path d="M8 11h6"/></svg>
-                        <span>Галерея</span>
-                    </div>
                 </div>
                 <div class="modal-thumbs" id="modal-thumbs"></div>
             </div>
@@ -2486,28 +2011,6 @@
 
                 <div class="specs-grid" id="modal-specs"></div>
             </div>
-        </div>
-    </div>
-
-    <!-- FULLSCREEN LIGHTBOX GALLERY MODAL -->
-    <div class="lightbox-modal" id="lightbox-modal" onclick="if(event.target === this) closeColorGalleryLightbox()">
-        <div class="lightbox-topbar">
-            <div class="lightbox-title-wrap">
-                <span class="lightbox-title" id="lightbox-product-title">Галерея товару</span>
-                <span class="lightbox-color-badge" id="lightbox-color-badge">Колір</span>
-            </div>
-            <button class="lightbox-close-btn" onclick="closeColorGalleryLightbox()" aria-label="Закрити">✕</button>
-        </div>
-
-        <div class="lightbox-main-view">
-            <button class="lightbox-nav-btn lightbox-prev" onclick="prevLightboxImage()" aria-label="Попереднє фото">‹</button>
-            <img class="lightbox-main-img" id="lightbox-active-img" src="" alt="Gallery full preview">
-            <button class="lightbox-nav-btn lightbox-next" onclick="nextLightboxImage()" aria-label="Наступне фото">›</button>
-        </div>
-
-        <div class="lightbox-bottombar">
-            <div class="lightbox-counter" id="lightbox-counter">1 / 1</div>
-            <div class="lightbox-thumbs-strip" id="lightbox-thumbs-strip"></div>
         </div>
     </div>
 
@@ -2638,105 +2141,6 @@
                     White: { main: 'aula копия.png', gallery: ['photo_2026-08-25_15-31-22.jpg'] },
                     Black: { main: 'photo_2026-08-25_15-31-28.jpg', gallery: [] }
                 }
-            },
-            {
-                id: 'prod-ajazz-ak820-pro',
-                brand: 'Ajazz',
-                title: 'Ajazz AK820 Pro Wireless Gasket Keyboard (TFT Screen)',
-                price: 2799,
-                oldPrice: 3299,
-                tag: 'ТОП ПРОДАЖІВ',
-                category: 'Клавіатури',
-                sku: 'AJAZZ-AK820-PRO',
-                popular: true,
-                desc: '75% механічна клавіатура з повноколірним TFT-дисплеєм, металевим енкодером, структурою Gasket Mount та бездротовим підключенням 2.4G/BT5.1.',
-                img: 'photo_2026-08-25_15-31-22.jpg',
-                gallery: [
-                    'photo_2026-08-25_15-31-22.jpg',
-                    'photo_2026-08-25_15-31-28.jpg',
-                    'aula копия.png'
-                ],
-                specs: [
-                    { key: 'Формат', value: '75% (81 клавіша + 0.85" TFT екран)' },
-                    { key: 'Свічі', value: 'Ajazz Flying Fish Linear (Hot-swap 5-pin)' },
-                    { key: 'Шумоізоляція', value: '5 шарів (Poron, IXPE, PET, силікон)' },
-                    { key: 'Підключення', value: 'Tri-Mode: 2.4GHz / Bluetooth 5.1 / Type-C' },
-                    { key: 'Акумулятор', value: '4000 mAh' }
-                ],
-                colors: [
-                    { name: 'Grey', isOut: false, stock: 8, image: 'photo_2026-08-25_15-31-22.jpg', gallery: [] },
-                    { name: 'Purple', isOut: false, stock: 5, image: 'photo_2026-08-25_15-31-28.jpg', gallery: [] },
-                    { name: 'White', isOut: false, stock: 3, image: 'aula копия.png', gallery: [] }
-                ],
-                colorImagesMap: {
-                    Grey: { main: 'photo_2026-08-25_15-31-22.jpg', gallery: [] },
-                    Purple: { main: 'photo_2026-08-25_15-31-28.jpg', gallery: [] },
-                    White: { main: 'aula копия.png', gallery: [] }
-                }
-            },
-            {
-                id: 'prod-mchose-ax5',
-                brand: 'Mchose',
-                title: 'Mchose AX5 Magnesium 8K Wireless Mouse',
-                price: 3499,
-                oldPrice: 3999,
-                tag: 'ФЛАГМАН',
-                category: 'Мишки',
-                sku: 'MCHOSE-AX5-MAG',
-                popular: true,
-                desc: 'Флагманська мишка з алюмінієво-магнієвого сплаву з ЧПК-обробкою, 8KHz Dongle у комплекті та сенсором PAW3395.',
-                img: 'attack-shark-r5-ultra-top-angle.jpg',
-                gallery: [
-                    'attack-shark-r5-ultra-top-angle.jpg',
-                    'attack-shark-r5-ultra-back-grip.jpg',
-                    'attack-shark-r5-ultra-colors-price.jpg'
-                ],
-                specs: [
-                    { key: 'Сенсор', value: 'PixArt PAW3395 (26 000 DPI)' },
-                    { key: 'Корпус', value: 'Магнієвий сплав Exoskeleton' },
-                    { key: 'Вага', value: '49 грамів' },
-                    { key: 'Частота опитування', value: 'До 8000 Hz Wireless' }
-                ],
-                colors: [
-                    { name: 'Silver', isOut: false, stock: 8, image: 'attack-shark-r5-ultra-top-angle.jpg', gallery: [] },
-                    { name: 'Black', isOut: false, stock: 6, image: 'attack-shark-r5-ultra-back-grip.jpg', gallery: [] }
-                ],
-                colorImagesMap: {
-                    Silver: { main: 'attack-shark-r5-ultra-top-angle.jpg', gallery: [] },
-                    Black: { main: 'attack-shark-r5-ultra-back-grip.jpg', gallery: [] }
-                }
-            },
-            {
-                id: 'prod-vgn-f1-promax',
-                brand: 'VGN',
-                title: 'VGN Dragonfly F1 Pro Max Wireless Mouse',
-                price: 2199,
-                oldPrice: 2599,
-                tag: 'ТОП ПРОДАЖІВ',
-                category: 'Мишки',
-                sku: 'VGN-F1-PROMAX',
-                popular: true,
-                desc: 'Еталонна ультралегка кіберспортивна мишка вагою 55 грамів на чіпі Nordic 52840 та сенсорі PAW3395 з ресурсом батареї до 130 годин.',
-                img: 'attack-shark-x3-white.jpg',
-                gallery: [
-                    'attack-shark-x3-white.jpg',
-                    'attack-shark-x3-black.jpg',
-                    'attack-shark-x3-box.jpg'
-                ],
-                specs: [
-                    { key: 'Сенсор', value: 'PixArt PAW3395 (26 000 DPI)' },
-                    { key: 'Чіпсет', value: 'Nordic 52840 Flagship MCU' },
-                    { key: 'Вага', value: '55 грам' },
-                    { key: 'Акумулятор', value: '500 mAh (до 130 годин безперервної гри)' }
-                ],
-                colors: [
-                    { name: 'Black', isOut: false, stock: 12, image: 'attack-shark-x3-black.jpg', gallery: [] },
-                    { name: 'White', isOut: false, stock: 10, image: 'attack-shark-x3-white.jpg', gallery: [] }
-                ],
-                colorImagesMap: {
-                    Black: { main: 'attack-shark-x3-black.jpg', gallery: [] },
-                    White: { main: 'attack-shark-x3-white.jpg', gallery: [] }
-                }
             }
         ];
 
@@ -2764,7 +2168,9 @@
         let searchDebounceTimer = null;
         let heroIndex = 0;
 
-        const API_BASE = "/api";
+        const API_BASE = (window.location.hostname === "localhost" && window.location.port === "3000")
+            ? (window.location.origin + "/api")
+            : "https://m1lipstore.onrender.com/api";
         const API_URL = API_BASE + "/products";
         const CATEGORIES_API_URL = API_BASE + "/categories";
         const BRANDS_API_URL = API_BASE + "/brands";
@@ -2789,16 +2195,13 @@
             if (lower.includes('pink') || lower.includes('рожев')) return 'pink';
             if (lower.includes('white') || lower.includes('біл')) return 'white';
             if (lower.includes('black') || lower.includes('чорн')) return 'black';
-            if (lower.includes('red') || lower.includes('червон') || lower.includes('красн')) return 'red';
+            if (lower.includes('red') || lower.includes('червон')) return 'red';
             if (lower.includes('blue') || lower.includes('блакит') || lower.includes('син')) return 'blue';
             if (lower.includes('green') || lower.includes('зелен')) return 'green';
-            if (lower.includes('mint') || lower.includes('м\'ят') || lower.includes('мят')) return 'mint';
-            if (lower.includes('cyan') || lower.includes('бірюз') || lower.includes('бирюз')) return 'turquoise';
-            if (lower.includes('purple') || lower.includes('фіолет') || lower.includes('пурпур')) return 'purple';
+            if (lower.includes('purple') || lower.includes('фіолет')) return 'purple';
             if (lower.includes('yellow') || lower.includes('жовт')) return 'yellow';
-            if (lower.includes('grey') || lower.includes('gray') || lower.includes('сір') || lower.includes('графіт')) return 'grey';
-            if (lower.includes('silver') || lower.includes('срібл') || lower.includes('серебр')) return 'silver';
-            if (lower.includes('orange') || lower.includes('помаранч') || lower.includes('оранж')) return 'orange';
+            if (lower.includes('grey') || lower.includes('gray') || lower.includes('сір')) return 'grey';
+            if (lower.includes('orange') || lower.includes('помаранч')) return 'orange';
             return lower;
         }
 
@@ -2807,17 +2210,14 @@
             let lower = name.toLowerCase().trim();
             if (lower.includes('pink') || lower.includes('рожев')) return '#ff2a85';
             if (lower.includes('white') || lower.includes('біл')) return '#ffffff';
-            if (lower.includes('black') || lower.includes('чорн')) return '#181818';
-            if (lower.includes('red') || lower.includes('червон') || lower.includes('красн')) return '#e53935';
+            if (lower.includes('black') || lower.includes('чорн')) return '#1a1a1a';
+            if (lower.includes('red') || lower.includes('червон')) return '#e53935';
             if (lower.includes('blue') || lower.includes('блакит') || lower.includes('син')) return '#1e88e5';
             if (lower.includes('green') || lower.includes('зелен')) return '#43a047';
-            if (lower.includes('mint') || lower.includes('м\'ят') || lower.includes('мят')) return '#00e5a3';
-            if (lower.includes('cyan') || lower.includes('бірюз') || lower.includes('бирюз')) return '#00bcd4';
-            if (lower.includes('purple') || lower.includes('фіолет') || lower.includes('пурпур')) return '#8e24aa';
+            if (lower.includes('purple') || lower.includes('фіолет')) return '#8e24aa';
             if (lower.includes('yellow') || lower.includes('жовт')) return '#fbc02d';
-            if (lower.includes('grey') || lower.includes('gray') || lower.includes('сір') || lower.includes('графіт')) return '#616161';
-            if (lower.includes('silver') || lower.includes('срібл') || lower.includes('серебр')) return '#b0bec5';
-            if (lower.includes('orange') || lower.includes('помаранч') || lower.includes('оранж')) return '#fb8c00';
+            if (lower.includes('grey') || lower.includes('gray') || lower.includes('сір')) return '#9e9e9e';
+            if (lower.includes('orange') || lower.includes('помаранч')) return '#fb8c00';
             return lower;
         }
 
@@ -3387,154 +2787,12 @@
             }
         }
 
-        let lightboxImages = [];
-        let lightboxCurrentIndex = 0;
-
         function selectModalColor(idx) {
-            const colors = currentModalProduct?.colors || [];
+            const colors = currentModalProduct.colors || [];
             if (colors[idx] && colors[idx].isOut) return;
-
-            // If the user clicks the ALREADY selected color circle, toggle off and revert to general product gallery
-            if (selectedColorIndex === idx) {
-                selectedColorIndex = null;
-            } else {
-                selectedColorIndex = idx;
-            }
+            selectedColorIndex = idx;
             updateModalGalleryAndColor();
         }
-
-        function openColorGalleryLightbox(startImgUrl = null) {
-            if (!currentModalProduct) return;
-            const colors = currentModalProduct.colors || [];
-            let images = [];
-            let colorName = '';
-
-            if (selectedColorIndex !== null && colors[selectedColorIndex]) {
-                const activeColor = colors[selectedColorIndex];
-                colorName = activeColor.name;
-                if (activeColor.image) images.push(activeColor.image);
-                if (Array.isArray(activeColor.gallery)) {
-                    activeColor.gallery.forEach(g => { if (g && !images.includes(g)) images.push(g); });
-                }
-            }
-
-            // If color has no specific gallery or no color selected, use product general gallery
-            if (images.length === 0) {
-                images = currentModalProduct.gallery && currentModalProduct.gallery.length > 0
-                    ? [...currentModalProduct.gallery]
-                    : [currentModalProduct.img];
-                if (!colorName && selectedColorIndex !== null && colors[selectedColorIndex]) {
-                    colorName = colors[selectedColorIndex].name;
-                }
-            }
-
-            // Also append any extra general images if they are distinct
-            if (currentModalProduct.gallery) {
-                currentModalProduct.gallery.forEach(g => {
-                    if (g && !images.includes(g)) images.push(g);
-                });
-            }
-
-            lightboxImages = images.filter(Boolean);
-            if (lightboxImages.length === 0) {
-                lightboxImages = [currentModalProduct.img];
-            }
-
-            let initialIdx = 0;
-            if (startImgUrl) {
-                const found = lightboxImages.indexOf(startImgUrl);
-                if (found !== -1) initialIdx = found;
-            } else {
-                const currentMainImg = document.getElementById('modal-img')?.src;
-                if (currentMainImg) {
-                    const found = lightboxImages.findIndex(img => currentMainImg.includes(img) || img.includes(currentMainImg));
-                    if (found !== -1) initialIdx = found;
-                }
-            }
-
-            lightboxCurrentIndex = initialIdx;
-
-            const modalTitleEl = document.getElementById('lightbox-product-title');
-            const colorBadgeEl = document.getElementById('lightbox-color-badge');
-            if (modalTitleEl) modalTitleEl.innerText = `${currentModalProduct.brand} ${currentModalProduct.title}`;
-            if (colorBadgeEl) {
-                if (colorName) {
-                    colorBadgeEl.innerText = colorName;
-                    colorBadgeEl.style.display = 'inline-block';
-                } else {
-                    colorBadgeEl.style.display = 'none';
-                }
-            }
-
-            renderLightboxView();
-            document.getElementById('lightbox-modal')?.classList.add('active');
-        }
-
-        function renderLightboxView() {
-            if (lightboxImages.length === 0) return;
-            if (lightboxCurrentIndex < 0) lightboxCurrentIndex = 0;
-            if (lightboxCurrentIndex >= lightboxImages.length) lightboxCurrentIndex = lightboxImages.length - 1;
-
-            const activeImg = lightboxImages[lightboxCurrentIndex];
-            const imgEl = document.getElementById('lightbox-active-img');
-            const counterEl = document.getElementById('lightbox-counter');
-            const stripEl = document.getElementById('lightbox-thumbs-strip');
-
-            if (imgEl) {
-                imgEl.style.opacity = '0.3';
-                imgEl.src = activeImg;
-                setTimeout(() => { imgEl.style.opacity = '1'; }, 100);
-            }
-
-            if (counterEl) {
-                counterEl.innerText = `${lightboxCurrentIndex + 1} / ${lightboxImages.length}`;
-            }
-
-            if (stripEl) {
-                if (lightboxImages.length > 1) {
-                    stripEl.style.display = 'flex';
-                    stripEl.innerHTML = lightboxImages.map((url, idx) => `
-                        <img class="lightbox-strip-thumb ${idx === lightboxCurrentIndex ? 'active' : ''}" 
-                             src="${url}" 
-                             onclick="setLightboxImageIndex(${idx})" 
-                             alt="thumb ${idx + 1}">
-                    `).join('');
-                } else {
-                    stripEl.style.display = 'none';
-                }
-            }
-        }
-
-        function setLightboxImageIndex(idx) {
-            lightboxCurrentIndex = idx;
-            renderLightboxView();
-        }
-
-        function nextLightboxImage() {
-            if (lightboxImages.length <= 1) return;
-            lightboxCurrentIndex = (lightboxCurrentIndex + 1) % lightboxImages.length;
-            renderLightboxView();
-        }
-
-        function prevLightboxImage() {
-            if (lightboxImages.length <= 1) return;
-            lightboxCurrentIndex = (lightboxCurrentIndex - 1 + lightboxImages.length) % lightboxImages.length;
-            renderLightboxView();
-        }
-
-        function closeColorGalleryLightbox() {
-            document.getElementById('lightbox-modal')?.classList.remove('active');
-        }
-
-        // Add keyboard navigation for the gallery
-        document.addEventListener('keydown', (e) => {
-            const lightbox = document.getElementById('lightbox-modal');
-            if (lightbox && lightbox.classList.contains('active')) {
-                if (e.key === 'ArrowRight') nextLightboxImage();
-                if (e.key === 'ArrowLeft') prevLightboxImage();
-                if (e.key === 'Escape') closeColorGalleryLightbox();
-            }
-        });
 
         function changeModalImage(url, thumbEl) {
             const mainImg = document.getElementById('modal-img');
@@ -3618,13 +2876,14 @@
         async function openCheckoutModal() {
             if (cart.length === 0) return;
             checkoutStepIndex = 1;
-            checkoutDelivery = { provider: 'nova_poshta', city: '', cityRef: '', department: '', warehouseRef: '' };
+            checkoutDelivery = { provider: '', city: '', cityRef: '', department: '', warehouseRef: '' };
             renderCheckoutStep();
             toggleCheckoutDrawer(true);
 
-            loadDeliveryProviders();
             if (tg?.initData) {
-                await loadMyProfile();
+                await Promise.all([loadDeliveryProviders(), loadMyProfile()]);
+            } else {
+                renderProviderChips();
             }
             prefillContactsFromProfile();
             renderSavedDeliveriesBlock();
@@ -3692,31 +2951,13 @@
                 return true;
             }
             if (step === 2) {
-                if (!checkoutDelivery.provider) {
-                    alert("Будь ласка, оберіть спосіб доставки.");
+                const configuredProvider = deliveryProviders.find(p => p.id === checkoutDelivery.provider && p.configured);
+                if (!configuredProvider) {
+                    alert("Оберіть службу доставки з доступним автоматичним пошуком.");
                     return false;
                 }
-                if (!checkoutDelivery.city) {
-                    alert("Будь ласка, оберіть місто доставки зі списку.");
-                    return false;
-                }
-                if (checkoutDelivery.method === 'courier') {
-                    const street = (document.getElementById('chk-courier-street')?.value || '').trim();
-                    const building = (document.getElementById('chk-courier-building')?.value || '').trim();
-                    const apt = (document.getElementById('chk-courier-apt')?.value || '').trim();
-                    if (!street || !building) {
-                        alert("Будь ласка, вкажіть вулицю та номер будинку для кур'єрської доставки.");
-                        return false;
-                    }
-                    checkoutDelivery.courierStreet = street;
-                    checkoutDelivery.courierBuilding = building;
-                    checkoutDelivery.courierApt = apt;
-                    checkoutDelivery.department = `вул. ${street}, буд. ${building}${apt ? ', кв./оф. ' + apt : ''}`;
-                    return true;
-                }
-                if (!checkoutDelivery.department && !checkoutDelivery.warehouseRef) {
-                    const label = checkoutDelivery.method === 'postomat' ? 'поштомат' : 'відділення';
-                    alert(`Будь ласка, оберіть ${label} доставки.`);
+                if (!checkoutDelivery.cityRef || !checkoutDelivery.warehouseRef) {
+                    alert("Оберіть місто та відділення зі списку.");
                     return false;
                 }
                 return true;
@@ -3735,344 +2976,83 @@
             renderCheckoutStep();
         }
 
-        const DELIVERY_METHODS = [
-            {
-                id: 'nova_poshta_branch',
-                provider: 'nova_poshta',
-                method: 'branch',
-                name: 'Відділення Нової Пошти',
-                sub: 'До 30 кг та вантажні • 1–2 дні',
-                icon: '<img src="brand-novaposhta.svg" alt="Нова Пошта" style="width: 26px; height: 26px; object-fit: contain;">'
-            },
-            {
-                id: 'nova_poshta_postomat',
-                provider: 'nova_poshta',
-                method: 'postomat',
-                name: 'Поштомат Нової Пошти',
-                sub: 'Швидко 24/7 біля дому • до 20 кг',
-                icon: '<img src="brand-novaposhta.svg" alt="Нова Пошта" style="width: 26px; height: 26px; object-fit: contain;">'
-            },
-            {
-                id: 'nova_poshta_courier',
-                provider: 'nova_poshta',
-                method: 'courier',
-                name: "Кур'єр Нової Пошти",
-                sub: 'Адресна доставка до дверей',
-                icon: '<img src="brand-novaposhta.svg" alt="Нова Пошта" style="width: 26px; height: 26px; object-fit: contain;">'
-            },
-            {
-                id: 'ukrposhta_branch',
-                provider: 'ukrposhta',
-                method: 'branch',
-                name: 'Відділення Укрпошти',
-                sub: 'Експрес / Стандарт по Україні',
-                icon: '<img src="brand-ukrposhta.svg" alt="Укрпошта" style="width: 26px; height: 26px; object-fit: contain;">'
-            }
-        ];
-
-        const POPULAR_CITIES = [
-            { name: 'Київ', ref: 'e718a680-4b33-11e4-ab6d-005056801329', region: 'Київська обл.' },
-            { name: 'Львів', ref: 'db5c88f5-391c-11dd-90d9-001a92567626', region: 'Львівська обл.' },
-            { name: 'Одеса', ref: 'db5c88d0-391c-11dd-90d9-001a92567626', region: 'Одеська обл.' },
-            { name: 'Харків', ref: 'db5c88e0-391c-11dd-90d9-001a92567626', region: 'Харківська обл.' },
-            { name: 'Дніпро', ref: 'db5c88f0-391c-11dd-90d9-001a92567626', region: 'Дніпропетровська обл.' },
-            { name: 'Запоріжжя', ref: 'db5c88c6-391c-11dd-90d9-001a92567626', region: 'Запорізька обл.' },
-            { name: 'Вінниця', ref: 'db5c8892-391c-11dd-90d9-001a92567626', region: 'Вінницька обл.' },
-            { name: 'Івано-Франківськ', ref: 'db5c88ec-391c-11dd-90d9-001a92567626', region: 'Івано-Франківська обл.' },
-            { name: 'Полтава', ref: 'db5c88f9-391c-11dd-90d9-001a92567626', region: 'Полтавська обл.' },
-            { name: 'Кривий Ріг', ref: 'db5c88b9-391c-11dd-90d9-001a92567626', region: 'Дніпропетровська обл.' },
-            { name: 'Черкаси', ref: 'db5c8914-391c-11dd-90d9-001a92567626', region: 'Черкаська обл.' }
-        ];
-
-        let warehouseFilterState = 'all';
-        let currentWarehousesList = [];
-
         async function loadDeliveryProviders() {
-            if (!checkoutDelivery.selectedMethodId) {
-                checkoutDelivery.selectedMethodId = 'nova_poshta_branch';
-                checkoutDelivery.provider = 'nova_poshta';
-                checkoutDelivery.method = 'branch';
+            try {
+                const res = await fetch(DELIVERY_PROVIDERS_URL);
+                deliveryProviders = res.ok ? await res.json() : [];
+            } catch (err) {
+                deliveryProviders = [];
             }
             renderProviderChips();
-            renderQuickCities();
         }
 
         function renderProviderChips() {
             const group = document.getElementById('provider-chip-group');
-            if (!group) return;
-            
-            group.innerHTML = DELIVERY_METHODS.map(m => {
-                const isActive = checkoutDelivery.selectedMethodId === m.id;
-                return `
-                    <div class="delivery-provider-card ${isActive ? 'active' : ''}" onclick="selectDeliveryMethod('${m.id}')">
-                        <div class="delivery-provider-icon">${m.icon}</div>
-                        <div class="delivery-provider-info">
-                            <div class="delivery-provider-title">
-                                <span>${m.name}</span>
-                                <div class="provider-check-mark">${isActive ? '✓' : ''}</div>
-                            </div>
-                            <div class="delivery-provider-sub">${m.sub}</div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
+            const known = ['nova_poshta', 'ukrposhta', 'mist'];
+            const byId = Object.fromEntries(deliveryProviders.map(p => [p.id, p]));
+            const available = known.filter(id => byId[id]?.configured);
+            group.innerHTML = available.map(id => {
+                const p = byId[id];
+                return `<div class="provider-chip ${checkoutDelivery.provider === id ? 'active' : ''}" onclick="selectDeliveryProvider('${id}')">${p.name}</div>`;
+            }).join('') || '<div class="delivery-api-error">Автоматичний пошук служб доставки ще не налаштований на сервері.</div>';
         }
 
-        function selectDeliveryMethod(methodId) {
-            const m = DELIVERY_METHODS.find(item => item.id === methodId) || DELIVERY_METHODS[0];
-            checkoutDelivery.selectedMethodId = m.id;
-            checkoutDelivery.provider = m.provider;
-            checkoutDelivery.method = m.method;
+        function selectDeliveryProvider(providerId) {
+            checkoutDelivery = { provider: providerId, city: '', cityRef: '', department: '', warehouseRef: '' };
             renderProviderChips();
 
-            const flow = document.getElementById('delivery-configured-flow');
-            if (flow) flow.style.display = 'flex';
-
-            const whGroup = document.getElementById('delivery-warehouse-group');
-            const courierGroup = document.getElementById('delivery-courier-group');
-            const filterRow = document.getElementById('warehouse-type-filter-row');
-            const whGroupLabel = document.getElementById('warehouse-group-label');
-            const whInput = document.getElementById('chk-warehouse-search');
-
-            if (m.method === 'courier') {
-                if (whGroup) whGroup.style.display = 'none';
-                if (courierGroup) courierGroup.style.display = 'block';
-            } else {
-                if (courierGroup) courierGroup.style.display = 'none';
-                if (checkoutDelivery.city || checkoutDelivery.cityRef) {
-                    if (whGroup) whGroup.style.display = 'flex';
-                }
-
-                if (m.id === 'nova_poshta_branch') {
-                    if (whGroupLabel) whGroupLabel.innerText = 'Відділення Нової Пошти';
-                    if (whInput) whInput.placeholder = 'Пошук за номером (напр. 315) або вулицею...';
-                    if (filterRow) filterRow.style.display = 'flex';
-                } else if (m.id === 'nova_poshta_postomat') {
-                    if (whGroupLabel) whGroupLabel.innerText = 'Поштомат Нової Пошти';
-                    if (whInput) whInput.placeholder = 'Пошук за номером поштомату (напр. 3154) або вулицею...';
-                    if (filterRow) filterRow.style.display = 'none';
-                } else {
-                    if (whGroupLabel) whGroupLabel.innerText = 'Відділення Укрпошти';
-                    if (whInput) whInput.placeholder = 'Введіть номер відділення або індекс (напр. 01001)...';
-                    if (filterRow) filterRow.style.display = 'none';
-                }
-
-                // If city is already selected, re-fetch warehouses
-                if (checkoutDelivery.city || checkoutDelivery.cityRef) {
-                    checkoutDelivery.warehouseRef = '';
-                    checkoutDelivery.department = '';
-                    const whPill = document.getElementById('warehouse-selected-pill');
-                    if (whPill) whPill.innerHTML = '';
-                    const whWrap = document.getElementById('warehouse-search-box-wrap');
-                    if (whWrap) whWrap.style.display = 'block';
-                    loadDeliveryWarehouses('');
-                }
-            }
+            const configuredFlow = document.getElementById('delivery-configured-flow');
+            configuredFlow.style.display = 'flex';
+            document.getElementById('city-search-results').style.display = 'none';
+            document.getElementById('city-selected-pill').innerHTML = '';
+            document.getElementById('warehouse-selected-pill').innerHTML = '';
+            document.getElementById('warehouse-search-results').innerHTML = '';
+            document.getElementById('delivery-warehouse-group').style.display = 'none';
         }
 
-        // Backward compatible alias
-        function selectDeliveryProvider(providerId) {
-            if (providerId === 'ukrposhta') selectDeliveryMethod('ukrposhta_branch');
-            else selectDeliveryMethod('nova_poshta_branch');
-        }
-
-        function setWarehouseFilter(filterType) {
-            warehouseFilterState = filterType;
-            document.querySelectorAll('#warehouse-type-filter-row .delivery-filter-btn').forEach(btn => btn.classList.remove('active'));
-            if (filterType === 'all') document.getElementById('wh-filter-all')?.classList.add('active');
-            else if (filterType === '30') document.getElementById('wh-filter-branch30')?.classList.add('active');
-            else if (filterType === 'cargo') document.getElementById('wh-filter-cargo')?.classList.add('active');
-            renderWarehousesResults(currentWarehousesList);
-        }
-
-        function renderQuickCities() {
-            const container = document.getElementById('quick-cities-container');
-            if (!container) return;
-            container.innerHTML = POPULAR_CITIES.map(c => `
-                <div class="quick-city-chip ${checkoutDelivery.city === c.name ? 'active' : ''}" onclick="selectQuickCity('${c.ref}', '${c.name.replace(/'/g, "\\'")}', '${c.region.replace(/'/g, "\\'")}')">${c.name}</div>
-            `).join('');
-        }
-
-        function selectQuickCity(ref, name, region) {
-            selectCity(ref, name, region);
-        }
-
-        const NOVA_POSHTA_PUBLIC_KEY = '38993fae866d85598bf3e851cb919a6a';
-
-        async function callNovaPoshtaDirect(modelName, calledMethod, methodProperties) {
-            try {
-                const response = await fetch('https://api.novaposhta.ua/v2.0/json/', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        apiKey: NOVA_POSHTA_PUBLIC_KEY,
-                        modelName: modelName,
-                        calledMethod: calledMethod,
-                        methodProperties: methodProperties
-                    })
-                });
-                if (!response.ok) return { success: false };
-                return await response.json();
-            } catch (err) {
-                return { success: false };
-            }
-        }
-
-        function parseDeliveryQueryTokens(q) {
-            if (!q) return { raw: '', clean: '', tokens: [], words: [], numbers: [], primaryWord: '', primaryNumber: '' };
-            const raw = q.toString().trim();
-            const normalized = raw.replace(/вулиця|вул\.?|проспект|просп\.?|бульвар|бул\.?|провулок|пров\.?|площа|шосе|набережна|тупик|№|#|\bд\.\b|\bбуд\.\b|\bкв\.\b|\bоф\.\b/gi, ' ')
-                                  .replace(/[,\.:;!?'"()]/g, ' ')
-                                  .replace(/\s+/g, ' ')
-                                  .trim();
-            const tokens = normalized.toLowerCase().split(/\s+/).filter(t => t.length > 0);
-            const words = tokens.filter(t => !/^\d+[\wа-яіїєґ]*$/i.test(t));
-            const numbers = tokens.filter(t => /^\d+[\wа-яіїєґ]*$/i.test(t));
-            return {
-                raw,
-                clean: normalized,
-                tokens,
-                words,
-                numbers,
-                primaryWord: words[0] || '',
-                primaryNumber: numbers[0] || ''
-            };
-        }
-
-        let citySearchDebounce = null;
         async function searchDeliveryCities(query) {
-            clearTimeout(citySearchDebounce);
-            const clearBtn = document.getElementById('chk-city-clear-btn');
-            if (clearBtn) clearBtn.style.display = query && query.length > 0 ? 'block' : 'none';
-
             const resultsBox = document.getElementById('city-search-results');
-            if (!query || query.trim().length < 2) {
-                if (resultsBox) resultsBox.style.display = 'none';
+            if (!query || query.length < 2) {
+                resultsBox.style.display = 'none';
                 return;
             }
-            citySearchDebounce = setTimeout(async () => {
-                const qTrim = query.trim();
-                let citiesList = [];
-
-                // 1. Try server backend route first if available
-                try {
-                    const url = `${API_BASE}/delivery/cities?provider=${encodeURIComponent(checkoutDelivery.provider || 'nova_poshta')}&query=${encodeURIComponent(qTrim)}`;
-                    const res = await fetch(url);
-                    if (res.ok) {
-                        const data = await res.json();
-                        if (Array.isArray(data) && data.length > 0) {
-                            citiesList = data;
-                        }
-                    }
-                } catch (e) {}
-
-                // 2. Direct Nova Poshta API (for GitHub Pages / static hosting where /api is 404)
-                if (citiesList.length === 0) {
-                    const npData = await callNovaPoshtaDirect('Address', 'searchSettlements', {
-                        CityName: qTrim,
-                        Limit: '30',
-                        Page: '1'
-                    });
-                    if (npData && npData.success && npData.data && npData.data[0]?.Addresses) {
-                        citiesList = npData.data[0].Addresses.map(addr => ({
-                            ref: addr.DeliveryCity || addr.Ref,
-                            name: addr.MainDescription || addr.Present,
-                            fullName: addr.Present,
-                            region: addr.Area ? `${addr.Area} обл.` : (addr.Region || '')
-                        }));
-                    }
-                }
-
-                // 3. Fallback to local popular cities directory
-                if (citiesList.length === 0) {
-                    const qLower = qTrim.toLowerCase();
-                    citiesList = POPULAR_CITIES.filter(c => 
-                        c.name.toLowerCase().includes(qLower) || c.region.toLowerCase().includes(qLower)
-                    );
-                }
-
-                if (!Array.isArray(citiesList) || citiesList.length === 0) {
-                    resultsBox.innerHTML = '<div class="delivery-search-empty">Міст за запитом не знайдено</div>';
-                    resultsBox.style.display = 'flex';
+            try {
+                const url = `${API_BASE}/delivery/cities?provider=${encodeURIComponent(checkoutDelivery.provider)}&query=${encodeURIComponent(query)}`;
+                const res = await fetch(url);
+                const data = res.ok ? await res.json() : [];
+                if (!Array.isArray(data) || data.length === 0) {
+                    resultsBox.innerHTML = '<div class="delivery-search-empty">Міст не знайдено</div>';
+                    resultsBox.style.display = 'block';
                     return;
                 }
-
-                resultsBox.innerHTML = citiesList.map(item => {
-                    const displayName = item.fullName || item.name;
-                    const regionText = item.region && !displayName.includes(item.region) ? item.region : '';
-                    return `
-                        <div class="delivery-search-result-item" onclick="selectCity('${item.ref || item.id}', '${(item.name || item.fullName).replace(/'/g, "\\'")}', '${(item.region || '').replace(/'/g, "\\'")}')">
-                            <div class="item-title"><span>🏙️ ${displayName}</span></div>
-                            ${regionText ? `<div class="item-sub">${regionText}</div>` : ''}
-                        </div>
-                    `;
-                }).join('');
-                resultsBox.style.display = 'flex';
-            }, 180);
-        }
-
-        function clearCityInput() {
-            const input = document.getElementById('chk-city-search');
-            if (input) {
-                input.value = '';
-                input.focus();
+                resultsBox.innerHTML = data.map(item => `
+                    <div class="delivery-search-result-item" onclick="selectCity('${item.ref || item.id}', '${item.name.replace(/'/g, "\\'")}')">
+                        <div>${item.name}</div>
+                        ${item.region ? `<div class="item-sub">${item.region}</div>` : ''}
+                    </div>
+                `).join('');
+                resultsBox.style.display = 'block';
+            } catch (err) {
+                resultsBox.style.display = 'none';
             }
-            const clearBtn = document.getElementById('chk-city-clear-btn');
-            if (clearBtn) clearBtn.style.display = 'none';
-            const resultsBox = document.getElementById('city-search-results');
-            if (resultsBox) resultsBox.style.display = 'none';
         }
 
-        function selectCity(ref, name, region = '') {
+        function selectCity(ref, name) {
             checkoutDelivery.cityRef = ref;
             checkoutDelivery.city = name;
             checkoutDelivery.warehouseRef = '';
             checkoutDelivery.department = '';
-
-            const resultsBox = document.getElementById('city-search-results');
-            if (resultsBox) resultsBox.style.display = 'none';
-
-            const cityInput = document.getElementById('chk-city-search');
-            if (cityInput) cityInput.value = '';
-
-            const clearBtn = document.getElementById('chk-city-clear-btn');
-            if (clearBtn) clearBtn.style.display = 'none';
-
-            const cityBoxWrap = document.getElementById('city-search-box-wrap');
-            if (cityBoxWrap) cityBoxWrap.style.display = 'none';
-
-            const pill = document.getElementById('city-selected-pill');
-            if (pill) {
-                pill.innerHTML = `
-                    <div class="selected-pill">
-                        <div class="selected-pill-info">
-                            <span class="selected-pill-title">📍 ${name}</span>
-                            ${region ? `<span class="selected-pill-sub">${region}</span>` : ''}
-                        </div>
-                        <button type="button" onclick="clearCitySelection()">✕ Змінити</button>
-                    </div>
-                `;
-            }
-
-            if (checkoutDelivery.method === 'courier') {
-                const whGroup = document.getElementById('delivery-warehouse-group');
-                if (whGroup) whGroup.style.display = 'none';
-                const courierGroup = document.getElementById('delivery-courier-group');
-                if (courierGroup) courierGroup.style.display = 'block';
-            } else {
-                const whGroup = document.getElementById('delivery-warehouse-group');
-                if (whGroup) whGroup.style.display = 'flex';
-
-                const whSearchWrap = document.getElementById('warehouse-search-box-wrap');
-                if (whSearchWrap) whSearchWrap.style.display = 'block';
-
-                const whPill = document.getElementById('warehouse-selected-pill');
-                if (whPill) whPill.innerHTML = '';
-
-                loadDeliveryWarehouses('');
-            }
-
-            renderQuickCities();
+            document.getElementById('city-search-results').style.display = 'none';
+            document.getElementById('chk-city-search').value = '';
+            document.getElementById('city-selected-pill').innerHTML = `
+                <div class="selected-pill">
+                    <span>Місто: ${name}</span>
+                    <button onclick="clearCitySelection()">Змінити</button>
+                </div>
+            `;
+            document.getElementById('delivery-warehouse-group').style.display = 'flex';
+            document.getElementById('warehouse-search-results').innerHTML = '';
+            document.getElementById('warehouse-selected-pill').innerHTML = '';
         }
 
         function clearCitySelection() {
@@ -4080,274 +3060,177 @@
             checkoutDelivery.city = '';
             checkoutDelivery.warehouseRef = '';
             checkoutDelivery.department = '';
-
-            const pill = document.getElementById('city-selected-pill');
-            if (pill) pill.innerHTML = '';
-
-            const cityBoxWrap = document.getElementById('city-search-box-wrap');
-            if (cityBoxWrap) cityBoxWrap.style.display = 'block';
-
-            const whGroup = document.getElementById('delivery-warehouse-group');
-            if (whGroup) whGroup.style.display = 'none';
-
-            renderQuickCities();
+            document.getElementById('city-selected-pill').innerHTML = '';
+            document.getElementById('delivery-warehouse-group').style.display = 'none';
         }
 
-        let whSearchDebounce = null;
-
-        async function loadDeliveryWarehouses(query = '') {
+        async function searchDeliveryWarehouses(query) {
             const resultsBox = document.getElementById('warehouse-search-results');
-            if (!resultsBox) return;
-            if (!checkoutDelivery.cityRef && !checkoutDelivery.city) return;
-
-            resultsBox.style.display = 'flex';
-            resultsBox.innerHTML = '<div class="delivery-search-empty">🔍 Завантаження пунктів видачі...</div>';
-
-            const cityName = checkoutDelivery.city || 'Київ';
-            const typeParam = checkoutDelivery.method === 'postomat' ? 'postomat' : (checkoutDelivery.method === 'branch' ? 'branch' : '');
-            const qInfo = parseDeliveryQueryTokens(query);
-            let whList = [];
-
-            // 1. Try server backend route first
+            if (!checkoutDelivery.cityRef) return;
             try {
-                const url = `${API_BASE}/delivery/warehouses?provider=${encodeURIComponent(checkoutDelivery.provider || 'nova_poshta')}&city_ref=${encodeURIComponent(checkoutDelivery.cityRef || '')}&city_name=${encodeURIComponent(cityName)}&type=${encodeURIComponent(typeParam)}&query=${encodeURIComponent(query || '')}`;
+                const url = `${API_BASE}/delivery/warehouses?provider=${encodeURIComponent(checkoutDelivery.provider)}&city_ref=${encodeURIComponent(checkoutDelivery.cityRef)}&query=${encodeURIComponent(query || '')}`;
                 const res = await fetch(url);
-                if (res.ok) {
-                    const data = await res.json();
-                    if (Array.isArray(data) && data.length > 0) {
-                        whList = data;
-                    }
+                const data = res.ok ? await res.json() : [];
+                if (!Array.isArray(data) || data.length === 0) {
+                    resultsBox.innerHTML = '<div class="delivery-search-empty">Відділень не знайдено</div>';
+                    resultsBox.style.display = 'block';
+                    return;
                 }
-            } catch (err) {}
-
-            // 2. Direct Nova Poshta API for static hosting (GitHub Pages) or if /api is offline
-            if (whList.length === 0 && (checkoutDelivery.provider === 'nova_poshta' || !checkoutDelivery.provider || checkoutDelivery.provider.startsWith('nova'))) {
-                const npSearchTerm = qInfo.primaryWord || qInfo.primaryNumber || qInfo.clean;
-                const methodProps = {
-                    CityName: cityName,
-                    Limit: '100',
-                    Page: '1'
-                };
-                if (npSearchTerm) {
-                    methodProps.FindByString = npSearchTerm;
-                }
-
-                let npData = await callNovaPoshtaDirect('Address', 'getWarehouses', methodProps);
-                let rawData = (npData && npData.success && Array.isArray(npData.data)) ? npData.data : [];
-
-                if (rawData.length === 0 && npSearchTerm) {
-                    // Fallback to full city warehouses
-                    const fallbackData = await callNovaPoshtaDirect('Address', 'getWarehouses', {
-                        CityName: cityName,
-                        Limit: '150',
-                        Page: '1'
-                    });
-                    if (fallbackData && fallbackData.success && Array.isArray(fallbackData.data)) {
-                        rawData = fallbackData.data;
-                    }
-                }
-
-                if (rawData.length > 0) {
-                    whList = rawData.map(w => {
-                        const isPostomat = w.CategoryOfWarehouse === 'Postomat' || (w.Description && w.Description.toLowerCase().includes('поштомат'));
-                        const maxWeight = w.TotalMaxWeightAllowed ? `${w.TotalMaxWeightAllowed} кг` : (w.PlaceMaxWeightAllowed ? `${w.PlaceMaxWeightAllowed} кг` : '');
-                        return {
-                            ref: w.Ref,
-                            number: w.Number,
-                            name: w.Description,
-                            address: w.ShortAddress || w.Description,
-                            type: isPostomat ? 'postomat' : 'branch',
-                            maxWeight: maxWeight,
-                            schedule: w.Schedule || null
-                        };
-                    });
-
-                    // Filter by type
-                    if (typeParam === 'postomat') whList = whList.filter(w => w.type === 'postomat');
-                    else if (typeParam === 'branch') whList = whList.filter(w => w.type === 'branch');
-
-                    // Token scoring and ranking
-                    if (qInfo.tokens.length > 0) {
-                        whList.forEach(item => {
-                            const fullText = (item.name + ' ' + item.address + ' ' + item.number).toLowerCase();
-                            let matchCount = 0;
-                            qInfo.tokens.forEach(tok => {
-                                if (fullText.includes(tok)) matchCount++;
-                            });
-                            item._matchScore = matchCount;
-                            if (qInfo.primaryNumber && (item.number === qInfo.primaryNumber || item.address.includes(qInfo.primaryNumber))) {
-                                item._matchScore += 2;
-                            }
-                        });
-
-                        const matching = whList.filter(item => item._matchScore > 0);
-                        if (matching.length > 0) {
-                            matching.sort((a, b) => b._matchScore - a._matchScore);
-                            whList = matching;
-                        }
-                    }
-                }
-            }
-
-            // 3. Fallback to mock / generator if still empty
-            if (whList.length === 0) {
-                const isPostomat = typeParam === 'postomat';
-                const searchLabel = qInfo.primaryWord || 'Центральна';
-                const searchNum = qInfo.primaryNumber || '1';
-                if (checkoutDelivery.provider === 'ukrposhta') {
-                    whList = [
-                        { ref: `up-1`, name: `Відділення Укрпошти №01001: вул. Хрещатик, 22`, address: `вул. Хрещатик, 22`, type: 'branch' },
-                        { ref: `up-2`, name: `Відділення Укрпошти №02002: вул. Микільсько-Слобідська, 4`, address: `вул. Микільсько-Слобідська, 4`, type: 'branch' },
-                        { ref: `up-custom`, name: `Відділення Укрпошти №${searchNum}: вул. ${searchLabel}, ${searchNum}`, address: `вул. ${searchLabel}, ${searchNum}`, type: 'branch' }
-                    ];
-                } else {
-                    whList = [
-                        isPostomat
-                            ? { ref: `np-pm-1`, name: `Поштомат №${searchNum || '7045'}: вул. ${searchLabel}, ${searchNum || '35'}`, address: `вул. ${searchLabel}, ${searchNum || '35'}`, type: 'postomat' }
-                            : { ref: `np-wh-1`, name: `Відділення №${searchNum || '4'} (до 200 кг): вул. ${searchLabel}, ${searchNum || '69'}`, address: `вул. ${searchLabel}, ${searchNum || '69'}`, type: 'branch' },
-                        { ref: `np-wh-2`, name: `Відділення №1 (Вантажне, без обмежень): вул. Пирогівський шлях, 135`, address: `вул. Пирогівський шлях, 135`, type: 'branch' }
-                    ];
-                }
-            }
-
-            currentWarehousesList = whList;
-            renderWarehousesResults(currentWarehousesList);
-        }
-
-        function renderWarehousesResults(list) {
-            const resultsBox = document.getElementById('warehouse-search-results');
-            if (!resultsBox) return;
-
-            let filtered = list || [];
-            if (warehouseFilterState === '30') {
-                filtered = filtered.filter(item => {
-                    const n = (item.name || '').toLowerCase();
-                    return n.includes('30') || n.includes('поштомат') || !n.includes('вантажне');
-                });
-            } else if (warehouseFilterState === 'cargo') {
-                filtered = filtered.filter(item => {
-                    const n = (item.name || '').toLowerCase();
-                    return n.includes('вантажне') || n.includes('1100') || n.includes('без обмежень');
-                });
-            }
-
-            if (!filtered || filtered.length === 0) {
-                resultsBox.innerHTML = '<div class="delivery-search-empty">Пунктів за цим запитом не знайдено</div>';
-                resultsBox.style.display = 'flex';
-                return;
-            }
-
-            resultsBox.innerHTML = filtered.map(item => {
-                const isSelected = checkoutDelivery.warehouseRef === (item.ref || item.id);
-                const isPostomat = item.type === 'postomat' || (item.name && item.name.toLowerCase().includes('поштомат'));
-                const isCargo = (item.name && item.name.toLowerCase().includes('вантажне'));
-                const icon = isPostomat ? '📮' : (isCargo ? '🚛' : '🏢');
-                const badge = isPostomat ? 'Поштомат 24/7' : (isCargo ? 'Вантажне' : 'До 30 кг');
-
-                return `
-                    <div class="delivery-search-result-item ${isSelected ? 'selected' : ''}" onclick="selectWarehouse('${item.ref || item.id}', '${item.name.replace(/'/g, "\\'")}', '${(item.address || '').replace(/'/g, "\\'")}')">
-                        <div class="item-title">
-                            <span>${icon} ${item.name}</span>
-                            <span class="wh-badge">${badge}</span>
-                        </div>
-                        ${item.address && item.address !== item.name ? `<div class="item-sub">📍 ${item.address}</div>` : ''}
+                resultsBox.innerHTML = data.map(item => `
+                    <div class="delivery-search-result-item" onclick="selectWarehouse('${item.ref || item.id}', '${item.name.replace(/'/g, "\\'")}')">
+                        <div>${item.name}</div>
                     </div>
-                `;
-            }).join('');
-            resultsBox.style.display = 'flex';
-        }
-
-        function searchDeliveryWarehouses(query) {
-            clearTimeout(whSearchDebounce);
-            const clearBtn = document.getElementById('chk-warehouse-clear-btn');
-            if (clearBtn) clearBtn.style.display = query && query.length > 0 ? 'block' : 'none';
-
-            whSearchDebounce = setTimeout(() => {
-                loadDeliveryWarehouses(query);
-            }, 200);
-        }
-
-        function clearWarehouseInput() {
-            const input = document.getElementById('chk-warehouse-search');
-            if (input) {
-                input.value = '';
-                input.focus();
+                `).join('');
+                resultsBox.style.display = 'block';
+            } catch (err) {
+                resultsBox.style.display = 'none';
             }
-            const clearBtn = document.getElementById('chk-warehouse-clear-btn');
-            if (clearBtn) clearBtn.style.display = 'none';
-            loadDeliveryWarehouses('');
         }
 
-        function selectWarehouse(ref, name, address = '') {
+        function selectWarehouse(ref, name) {
             checkoutDelivery.warehouseRef = ref;
             checkoutDelivery.department = name;
-
-            const whSearchWrap = document.getElementById('warehouse-search-box-wrap');
-            if (whSearchWrap) whSearchWrap.style.display = 'none';
-
-            const whInput = document.getElementById('chk-warehouse-search');
-            if (whInput) whInput.value = '';
-
-            const clearBtn = document.getElementById('chk-warehouse-clear-btn');
-            if (clearBtn) clearBtn.style.display = 'none';
-
-            const isPostomat = checkoutDelivery.method === 'postomat' || name.toLowerCase().includes('поштомат');
-            const icon = isPostomat ? '📮' : '🏢';
-
-            const whPill = document.getElementById('warehouse-selected-pill');
-            if (whPill) {
-                whPill.innerHTML = `
-                    <div class="selected-pill">
-                        <div class="selected-pill-info">
-                            <span class="selected-pill-title">${icon} ${name}</span>
-                            ${address && address !== name ? `<span class="selected-pill-sub">📍 ${address}</span>` : ''}
-                        </div>
-                        <button type="button" onclick="clearWarehouseSelection()">✕ Змінити</button>
-                    </div>
-                `;
-            }
+            document.getElementById('warehouse-search-results').style.display = 'none';
+            document.getElementById('chk-warehouse-search').value = '';
+            document.getElementById('warehouse-selected-pill').innerHTML = `
+                <div class="selected-pill">
+                    <span>Відділення: ${name}</span>
+                    <button onclick="clearWarehouseSelection()">Змінити</button>
+                </div>
+            `;
         }
 
         function clearWarehouseSelection() {
             checkoutDelivery.warehouseRef = '';
             checkoutDelivery.department = '';
+            document.getElementById('warehouse-selected-pill').innerHTML = '';
+        }
 
-            const whPill = document.getElementById('warehouse-selected-pill');
-            if (whPill) whPill.innerHTML = '';
+        async function loadMyProfile() {
+            try {
+                const res = await fetch(PROFILE_API_URL, {
+                    headers: { 'X-Telegram-Init-Data': tg.initData }
+                });
+                if (res.ok) {
+                    myProfile = await res.json();
+                    prefillContactsFromProfile();
+                    renderSavedDeliveriesBlock();
+                }
+            } catch (err) {
+                myProfile = null;
+            }
+        }
 
-            const whSearchWrap = document.getElementById('warehouse-search-box-wrap');
-            if (whSearchWrap) whSearchWrap.style.display = 'block';
+        function prefillContactsFromProfile() {
+            if (!myProfile) return;
+            const nameEl = document.getElementById('chk-name');
+            const surnameEl = document.getElementById('chk-surname');
+            const phoneEl = document.getElementById('chk-phone');
+            if (nameEl && !nameEl.value && myProfile.first_name) nameEl.value = myProfile.first_name;
+            if (surnameEl && !surnameEl.value && myProfile.last_name) surnameEl.value = myProfile.last_name;
+            if (phoneEl && (!phoneEl.value || phoneEl.value === '+380') && myProfile.phone) {
+                phoneEl.value = normalizePhoneDisplay(myProfile.phone);
+            }
+        }
 
-            loadDeliveryWarehouses('');
+        function renderSavedDeliveriesBlock() {
+            const block = document.getElementById('saved-deliveries-block');
+            if (!block || !myProfile || !Array.isArray(myProfile.saved_deliveries) || myProfile.saved_deliveries.length === 0) {
+                if (block) block.innerHTML = '';
+                return;
+            }
+            block.innerHTML = `
+                <div class="checkout-group" style="margin-bottom: 12px;">
+                    <label>Збережені адреси доставки</label>
+                    <div style="display:flex; flex-direction:column; gap:6px;">
+                        ${myProfile.saved_deliveries.map((sd, i) => `
+                            <div class="saved-delivery-chip">
+                                <div><strong>${PROVIDER_LABELS[sd.provider] || sd.provider}</strong>: ${sd.city}, ${sd.department}</div>
+                                <button class="btn-secondary" onclick="useSavedDelivery(${i})">Обрати</button>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function useSavedDelivery(idx) {
+            const sd = myProfile.saved_deliveries[idx];
+            if (!sd) return;
+            selectDeliveryProvider(sd.provider);
+            selectCity(sd.city_ref, sd.city);
+            selectWarehouse(sd.warehouse_ref, sd.department);
+        }
+
+        function renderReviewStep() {
+            const name = document.getElementById('chk-name').value.trim();
+            const surname = document.getElementById('chk-surname').value.trim();
+            const email = document.getElementById('chk-email').value.trim();
+            const phone = document.getElementById('chk-phone').value.trim();
+            const comment = document.getElementById('chk-comment').value.trim();
+
+            const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+
+            document.getElementById('review-items-block').innerHTML = `
+                <h5>Товари (${cart.reduce((s, i) => s + i.qty, 0)})</h5>
+                ${cart.map(item => `
+                    <div class="review-line">
+                        <span>${item.title} (${item.color}) × ${item.qty}</span>
+                        <span>${formatPrice(item.price * item.qty)}</span>
+                    </div>
+                `).join('')}
+                <div class="review-line" style="border-top:1px solid var(--border-light); margin-top:6px; padding-top:6px; font-weight:800;">
+                    <span>Разом до сплати:</span>
+                    <span>${formatPrice(total)}</span>
+                </div>
+            `;
+
+            document.getElementById('review-contact-block').innerHTML = `
+                <h5>Отримувач</h5>
+                <div class="review-line"><span>ПІБ:</span> <span>${name} ${surname}</span></div>
+                <div class="review-line"><span>Телефон:</span> <span>${phone}</span></div>
+                <div class="review-line"><span>E-mail:</span> <span>${email}</span></div>
+            `;
+
+            const provName = PROVIDER_LABELS[checkoutDelivery.provider] || checkoutDelivery.provider;
+            document.getElementById('review-delivery-block').innerHTML = `
+                <h5>Доставка</h5>
+                <div class="review-line"><span>Служба:</span> <span>${provName}</span></div>
+                <div class="review-line"><span>Місто:</span> <span>${checkoutDelivery.city}</span></div>
+                <div class="review-line"><span>Відділення:</span> <span>${checkoutDelivery.department}</span></div>
+            `;
+
+            document.getElementById('review-payment-block').innerHTML = `
+                <h5>Оплата</h5>
+                <div class="review-line"><span>Спосіб:</span> <span>💳 Оплата карткою онлайн</span></div>
+                <div class="review-line" style="font-weight:800; border-top:1px solid var(--border-light); margin-top:6px; padding-top:6px;"><span>До сплати:</span> <span>${formatPrice(total)}</span></div>
+                ${comment ? `<div class="review-line"><span>Коментар:</span> <span>${comment}</span></div>` : ''}
+            `;
+        }
+
+        function setSubmitBtnState(disabled, text) {
+            const submitBtn = document.getElementById('chk-submit-btn');
+            submitBtn.disabled = disabled;
+            submitBtn.innerText = text;
         }
 
         async function submitOrder() {
             if (!validateCheckoutStep(1) || !validateCheckoutStep(2)) return;
 
-            const name = document.getElementById('chk-name').value.trim();
-            const surname = document.getElementById('chk-surname').value.trim();
-            const email = document.getElementById('chk-email').value.trim();
-            const phone = document.getElementById('chk-phone').value.trim();
-            const paymentMethod = document.getElementById('chk-payment').value;
-            const comment = document.getElementById('chk-comment').value.trim();
-
-            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-            const isCod = paymentMethod === 'cod';
-            const codFee = isCod ? Math.round(20 + subtotal * 0.02) : 0;
-            const grandTotal = subtotal + codFee;
+            if (!tg?.initData) {
+                alert("Оформлення замовлення доступне лише через Telegram-бота M1lipStore. Відкрийте магазин через бота.");
+                return;
+            }
 
             const payload = {
                 customer: {
-                    first_name: name,
-                    last_name: surname,
-                    email: email,
-                    phone: phone
+                    first_name: document.getElementById('chk-name').value.trim(),
+                    last_name: document.getElementById('chk-surname').value.trim(),
+                    email: document.getElementById('chk-email').value.trim(),
+                    phone: document.getElementById('chk-phone').value.trim()
                 },
                 delivery: checkoutDelivery,
-                payment: {
-                    method: paymentMethod,
-                    comment: comment
-                },
+                comment: document.getElementById('chk-comment').value.trim(),
                 items: cart.map(i => ({
                     id: i.id,
                     color: i.color,
@@ -4355,75 +3238,130 @@
                 }))
             };
 
-            const submitBtn = document.getElementById('chk-submit-btn');
-            submitBtn.disabled = true;
-            submitBtn.innerText = 'Оформлюємо...';
+            setSubmitBtnState(true, 'Формуємо рахунок...');
 
             try {
-                const headers = { 'Content-Type': 'application/json' };
-                if (tg?.initData) headers['X-Telegram-Init-Data'] = tg.initData;
+                const headers = { 'Content-Type': 'application/json', 'X-Telegram-Init-Data': tg.initData };
+                const res = await fetch(ORDER_API_URL, {
+                    method: 'POST',
+                    headers,
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
 
-                let data = null;
-                try {
-                    const res = await fetch(ORDER_API_URL, {
-                        method: 'POST',
-                        headers,
-                        body: JSON.stringify(payload)
-                    });
-                    if (res.ok) {
-                        data = await res.json();
-                    }
-                } catch (e) {}
-
-                if (!data) {
-                    const randomNum = Math.floor(100000 + Math.random() * 900000);
-                    data = { order_id: `MLP-${randomNum}`, id: `MLP-${randomNum}` };
-                    // If in Telegram bot webapp, also send data back to bot
-                    if (tg?.sendData) {
-                        try { tg.sendData(JSON.stringify({ ...payload, order_id: data.order_id })); } catch(e) {}
-                    }
+                if (!res.ok) {
+                    alert(data.detail || "Помилка при оформленні замовлення.");
+                    setSubmitBtnState(false, 'Перейти до оплати');
+                    return;
                 }
 
-                const orderIdStr = data.order_id || data.id || data.orderId || `#MLP-2026-${Math.floor(100000 + Math.random() * 900000)}`;
-                const provName = PROVIDER_LABELS[checkoutDelivery.provider] || (checkoutDelivery.provider === 'nova_poshta' ? 'Нова Пошта' : 'Укрпошта');
-
-                // If online payment and Telegram WebApp is available, trigger haptic feedback or invoice
-                if (paymentMethod === 'online' && tg?.HapticFeedback) {
-                    try {
-                        tg.HapticFeedback.notificationOccurred('success');
-                    } catch (e) {}
-                }
-
-                // Populate success modal details
-                const detailsBox = document.getElementById('success-details-content');
-                if (detailsBox) {
-                    detailsBox.innerHTML = `
-                        <div><strong>Отримувач:</strong> ${name} ${surname} (${phone})</div>
-                        <div><strong>Доставка:</strong> ${provName}, м. ${checkoutDelivery.city}, ${checkoutDelivery.department}</div>
-                        <div><strong>Оплата:</strong> ${paymentMethod === 'online' ? 'Онлайн-оплата (Telegram / Картка)' : 'Накладений платіж'}</div>
-                        <div style="font-weight: 700; color: var(--text-primary); margin-top: 4px;"><strong>Сума до сплати:</strong> ${formatPrice(grandTotal)}</div>
-                    `;
-                }
-
-                cart = [];
-                saveCart();
-                toggleCheckoutDrawer(false);
-
-                document.getElementById('success-order-id').innerText = orderIdStr;
-                document.getElementById('success-modal').classList.add('active');
-                document.getElementById('backdrop').classList.add('active');
+                openInvoiceForOrder(data.orderId, data.invoiceUrl, /*isRetry=*/false);
             } catch (err) {
-                alert("Помилка при оформленні замовлення. Спробуйте ще раз.");
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.innerText = 'Підтвердити замовлення';
+                alert("Помилка мережі при відправці замовлення.");
+                setSubmitBtnState(false, 'Перейти до оплати');
             }
         }
 
-        function closeSuccessModal() {
-            document.getElementById('success-modal')?.classList.remove('active');
-            document.getElementById('backdrop')?.classList.remove('active');
-            filterByBrand('All');
+        function openInvoiceForOrder(orderId, invoiceUrl, isRetry) {
+            if (tg?.openInvoice) {
+                setSubmitBtnState(true, 'Очікуємо оплату...');
+                tg.openInvoice(invoiceUrl, (status) => handleInvoiceResult(orderId, status, isRetry));
+            } else {
+                // Fallback for testing outside the Telegram client — open the
+                // Telegram invoice link directly and poll for confirmation.
+                window.open(invoiceUrl, '_blank');
+                showPaymentPendingModal(orderId);
+                pollOrderPaymentStatus(orderId).then((result) => handlePaymentPollResult(orderId, result, isRetry));
+            }
+        }
+
+        async function handleInvoiceResult(orderId, status, isRetry) {
+            if (status === 'paid') {
+                showPaymentPendingModal(orderId);
+                const result = await pollOrderPaymentStatus(orderId);
+                handlePaymentPollResult(orderId, result, isRetry);
+            } else if (status === 'cancelled') {
+                setSubmitBtnState(false, 'Перейти до оплати');
+            } else if (status === 'failed') {
+                hidePaymentPendingModal();
+                if (confirm(`Оплату замовлення #${orderId} не вдалося провести. Спробувати ще раз?`)) {
+                    await retryOrderPayment(orderId);
+                } else {
+                    setSubmitBtnState(false, 'Перейти до оплати');
+                }
+            } else {
+                // 'pending' — provider is still processing; confirmation will
+                // still arrive via the backend, so just poll for it.
+                showPaymentPendingModal(orderId);
+                const result = await pollOrderPaymentStatus(orderId);
+                handlePaymentPollResult(orderId, result, isRetry);
+            }
+        }
+
+        function showPaymentPendingModal(orderId) {
+            document.getElementById('pending-order-id').innerText = '#' + orderId;
+            document.getElementById('payment-pending-modal').classList.add('active');
+            document.getElementById('backdrop').classList.add('active');
+        }
+
+        function hidePaymentPendingModal() {
+            document.getElementById('payment-pending-modal').classList.remove('active');
+            document.getElementById('backdrop').classList.remove('active');
+        }
+
+        async function pollOrderPaymentStatus(orderId, maxTries = 20, intervalMs = 1500) {
+            for (let i = 0; i < maxTries; i++) {
+                await new Promise(r => setTimeout(r, intervalMs));
+                try {
+                    const headers = {};
+                    if (tg?.initData) headers['X-Telegram-Init-Data'] = tg.initData;
+                    const res = await fetch(`${ORDER_API_URL}/${orderId}`, { headers });
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (data.payment_status === 'PAID' || data.payment_status === 'FAILED') return data;
+                    }
+                } catch (err) { /* keep polling */ }
+            }
+            return null; // timed out — backend confirmation is still authoritative and may arrive later
+        }
+
+        function handlePaymentPollResult(orderId, result, isRetry) {
+            hidePaymentPendingModal();
+            if (result && result.payment_status === 'PAID') {
+                cart = [];
+                saveCart();
+                toggleCheckoutDrawer(false);
+                document.getElementById('success-order-id').innerText = '#' + orderId;
+                document.getElementById('success-modal').classList.add('active');
+                document.getElementById('backdrop').classList.add('active');
+            } else if (result && result.payment_status === 'FAILED') {
+                if (confirm(`Оплату замовлення #${orderId} не вдалося підтвердити. Спробувати ще раз?`)) {
+                    retryOrderPayment(orderId);
+                } else {
+                    setSubmitBtnState(false, 'Перейти до оплати');
+                }
+            } else {
+                alert(`Ми ще не отримали підтвердження оплати замовлення #${orderId}. Статус з'явиться в розділі «Мої замовлення» в боті, щойно оплата підтвердиться.`);
+                setSubmitBtnState(false, 'Перейти до оплати');
+            }
+        }
+
+        async function retryOrderPayment(orderId) {
+            try {
+                const headers = { 'Content-Type': 'application/json' };
+                if (tg?.initData) headers['X-Telegram-Init-Data'] = tg.initData;
+                const res = await fetch(`${ORDER_API_URL}/${orderId}/invoice`, { method: 'POST', headers });
+                const data = await res.json();
+                if (!res.ok) {
+                    alert(data.detail || 'Не вдалося сформувати новий рахунок на оплату.');
+                    setSubmitBtnState(false, 'Перейти до оплати');
+                    return;
+                }
+                openInvoiceForOrder(orderId, data.invoiceUrl, /*isRetry=*/true);
+            } catch (err) {
+                alert('Помилка мережі при повторній спробі оплати.');
+                setSubmitBtnState(false, 'Перейти до оплати');
+            }
         }
 
         async function toggleProfileDrawer(open) {
@@ -4474,8 +3412,8 @@
                         ${Array.isArray(ordersData) && ordersData.length > 0 ? ordersData.map(o => `
                             <div class="profile-order-card">
                                 <div class="order-top">
-                                    <span>${o.order_id || o.id}</span>
-                                    <span class="order-status-pill">${o.status || 'Нове'}</span>
+                                    <span>#${o.order_id || o.id}</span>
+                                    <span class="order-status-pill">${o.payment_status !== 'PAID' ? (o.payment_status_label || 'Очікує оплати') : (o.status_label || o.status || 'Нове')}</span>
                                 </div>
                                 <div class="order-meta">${o.created_at || ''} • ${formatPrice(o.total || 0)}</div>
                             </div>
@@ -4501,6 +3439,7 @@
             closeProductModal();
             closeSuccessModal();
             closeInfoModal();
+            hidePaymentPendingModal();
         }
 
         function saveCart() {
