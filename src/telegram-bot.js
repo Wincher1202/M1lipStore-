@@ -94,6 +94,9 @@ export class TelegramBotService {
             this.lastUpdateId = update.update_id;
             await this.handleUpdate(update);
           }
+        } else if (res.error_code === 409 || res.description?.includes('Conflict')) {
+          console.warn('[TelegramBot] Conflict: Another bot instance is polling with this token. Waiting 8s before retry...');
+          await new Promise(r => setTimeout(r, 8000));
         }
       } catch (err) {
         await new Promise(r => setTimeout(r, 3000));
@@ -127,13 +130,17 @@ export class TelegramBotService {
 
   getReplyKeyboard(from) {
     const isAdminUser = this.isAdmin(from);
+    const storeUrl = process.env.PUBLIC_APP_URL || 'https://wincher1202.github.io/M1lipStore-/';
     const keyboard = [];
 
     if (isAdminUser) {
       keyboard.push([{ text: '👑 Панель адміністратора' }, { text: '📦 Переглянути замовлення' }]);
     }
 
-    keyboard.push([{ text: '🛍 Мої замовлення' }, { text: '🌐 Відкрити магазин' }]);
+    keyboard.push([
+      { text: '🛍 Мої замовлення' },
+      { text: '🌐 Відкрити магазин', web_app: { url: storeUrl } }
+    ]);
     keyboard.push([{ text: '📦 Відстежити замовлення' }, { text: '💬 Підтримка' }]);
 
     return {
@@ -263,25 +270,38 @@ export class TelegramBotService {
         `📦 Відстежувати статус замовлення та номер ТТН\n` +
         `🛍 Переглядати історію покупок`;
 
+      const appUrl = process.env.PUBLIC_APP_URL || 'https://wincher1202.github.io/M1lipStore-/';
       await this.callApi('sendMessage', {
         chat_id: chatId,
         text: welcomeText,
         parse_mode: 'HTML',
-        reply_markup: this.getReplyKeyboard(from)
+        reply_markup: {
+          inline_keyboard: [
+            [{ text: '🚀 Відкрити каталог MILIPSTORE', web_app: { url: appUrl } }],
+            [{ text: '🛍 Мої замовлення', callback_data: `orders_list:${chatId}` }, { text: '💬 Підтримка', callback_data: 'customer_support' }]
+          ]
+        }
       });
       return;
     }
 
     // OPEN WEB STORE
-    if (text === '🌐 Відкрити магазин' || text === '🌐 Відкрити каталог') {
-      const appUrl = process.env.PUBLIC_APP_URL || 'https://m1lipstore.ua';
+    if (
+      text === '🌐 Відкрити магазин' || 
+      text === '🌐 Відкрити каталог' || 
+      text === '/shop' || 
+      text === '/store' ||
+      text === '/catalog'
+    ) {
+      const appUrl = process.env.PUBLIC_APP_URL || 'https://wincher1202.github.io/M1lipStore-/';
       await this.callApi('sendMessage', {
         chat_id: chatId,
-        text: `🛒 <b>Каталог MILIPSTORE</b>\n\nОбирайте найкращі ігрові девайси з доставкою по всій Україні:`,
+        text: `🛒 <b>Каталог MILIPSTORE</b>\n\nОбирайте найкращі ігрові девайси зі швидкою доставкою по всій Україні:\n👉 <a href="${appUrl}">${appUrl}</a>`,
         parse_mode: 'HTML',
         reply_markup: {
           inline_keyboard: [
-            [{ text: '🚀 Перейти до магазину', web_app: { url: appUrl } }]
+            [{ text: '🚀 Відкрити магазин (Web App)', web_app: { url: appUrl } }],
+            [{ text: '🌐 Відкрити в браузері', url: appUrl }]
           ]
         }
       });
@@ -538,6 +558,16 @@ export class TelegramBotService {
       if (order) {
         await this.sendNativeTelegramInvoice(chatId, order);
       }
+      return;
+    }
+
+    // CUSTOMER: Support
+    if (data === 'customer_support') {
+      await this.callApi('sendMessage', {
+        chat_id: chatId,
+        text: `💬 <b>Служба підтримки MILIPSTORE</b>\n\nГрафік роботи: Щодня 09:00 — 21:00\nTelegram менеджера: @milipmanager\nКанал магазину: @m1lipstore\n\nМи з радістю відповімо на будь-які ваші запитання!`,
+        parse_mode: 'HTML'
+      });
       return;
     }
 
