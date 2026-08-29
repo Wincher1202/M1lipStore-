@@ -1025,9 +1025,10 @@ export class TelegramBotService {
     orders.slice(0, 8).forEach(o => {
       let emoji = '📦';
       if (o.status === 'PENDING_PAYMENT') emoji = '⏳';
-      if (o.status === 'NEW') emoji = '🟡';
+      if (o.status === 'NEW') emoji = '🆕';
       if (o.status === 'CONFIRMED') emoji = '✅';
-      if (o.status === 'SHIPPED') emoji = '🚚';
+      if (o.status === 'PACKING_PREP' || o.status === 'PACKED') emoji = '📦';
+      if (o.status === 'DISPATCH_PREP' || o.status === 'SHIPPED') emoji = '🚚';
       if (o.status === 'DELIVERED') emoji = '🏢';
       if (o.status === 'COMPLETED') emoji = '🎉';
       if (o.status === 'CANCELLED') emoji = '❌';
@@ -1073,37 +1074,36 @@ export class TelegramBotService {
     const stats = db.getStats();
     const orders = db.getOrders();
 
-    const activeOrders = orders.filter(o => !['COMPLETED', 'CANCELLED'].includes(o.status));
-    const archiveOrders = orders.filter(o => ['COMPLETED', 'CANCELLED'].includes(o.status));
+    const activeOrders = orders.filter(o => !['DELIVERED', 'COMPLETED', 'CANCELLED'].includes(o.status));
+    const archiveOrders = orders.filter(o => ['DELIVERED', 'COMPLETED', 'CANCELLED'].includes(o.status));
 
     const newCount = orders.filter(o => o.status === 'NEW').length;
     const pendingPaymentCount = orders.filter(o => o.status === 'PENDING_PAYMENT').length;
     const confirmedCount = orders.filter(o => o.status === 'CONFIRMED').length;
+    const packingCount = orders.filter(o => o.status === 'PACKING_PREP' || o.status === 'PACKED' || o.status === 'DISPATCH_PREP').length;
     const shippedCount = orders.filter(o => o.status === 'SHIPPED').length;
 
-    let text = `👑 <b>Панель керування MILIPSTORE</b>\n`;
+    let text = `👑 <b>Адмін-панель MILIPSTORE</b>\n\n`;
     text += `Адміністратор: <b>${from.first_name || ''}</b> ${from.username ? '(@' + from.username + ')' : ''}\n\n`;
     text += `📊 <b>Стан замовлень:</b>\n`;
-    text += `• ⚡ <b>В роботі (активні): ${activeOrders.length}</b>\n`;
+    text += `• ⚡ <b>Активні (в роботі): ${activeOrders.length}</b>\n`;
     if (activeOrders.length > 0) {
-      text += `  └ 🆕 Нові: ${newCount} | ⏳ Очікують: ${pendingPaymentCount} | ✅ Підтверджені: ${confirmedCount} | 🚚 Відправлені: ${shippedCount}\n`;
+      text += `  └ 🆕 Нові: ${newCount} | ⏳ Очікують: ${pendingPaymentCount} | ✅ Підтверджені: ${confirmedCount} | 📦 Пакування: ${packingCount} | 🚚 Відправлені: ${shippedCount}\n`;
     }
-    text += `• 🗄 <b>Архів (завершені та скасовані): ${archiveOrders.length}</b>\n`;
-    text += `• 📋 <b>Всього замовлень: ${stats.total_orders}</b>\n`;
-    text += `• 💰 <b>Загальний виторг: ${stats.total_sales.toLocaleString('uk-UA')} ₴</b>\n\n`;
-    text += `Оберіть дію:`;
+    text += `• 🗄 <b>Архів (доставлені / завершені): ${archiveOrders.length}</b>\n`;
+    text += `• 💰 <b>Виторг: ${stats.total_sales.toLocaleString('uk-UA')} ₴</b>\n\n`;
+    text += `<i>Оберіть розділ нижче:</i>`;
 
     const buttons = [
       [
         { text: `⚡ Активні замовлення (${activeOrders.length})`, callback_data: 'admin_list:ACTIVE' }
       ],
       [
-        { text: `🗄 Архів / Завершені (${archiveOrders.length})`, callback_data: 'admin_list:ARCHIVE' },
-        { text: `📋 Всі (${stats.total_orders})`, callback_data: 'admin_list:ALL' }
+        { text: `🗄 Архів (${archiveOrders.length})`, callback_data: 'admin_list:ARCHIVE' }
       ],
       [
         { text: '➕ Додати новий товар', callback_data: 'add_new_product' },
-        { text: '🔄 Оновити дані', callback_data: 'admin_dashboard' }
+        { text: '🔄 Оновити', callback_data: 'admin_dashboard' }
       ]
     ];
 
@@ -1120,31 +1120,21 @@ export class TelegramBotService {
     let orders = [];
     let filterTitle = 'Активні замовлення';
 
-    const activeCount = allOrders.filter(o => !['COMPLETED', 'CANCELLED'].includes(o.status)).length;
-    const archiveCount = allOrders.filter(o => ['COMPLETED', 'CANCELLED'].includes(o.status)).length;
-    const totalCount = allOrders.length;
+    const activeCount = allOrders.filter(o => !['DELIVERED', 'COMPLETED', 'CANCELLED'].includes(o.status)).length;
+    const archiveCount = allOrders.filter(o => ['DELIVERED', 'COMPLETED', 'CANCELLED'].includes(o.status)).length;
 
-    if (filter === 'ACTIVE') {
-      orders = allOrders.filter(o => !['COMPLETED', 'CANCELLED'].includes(o.status));
-      filterTitle = '⚡ Активні замовлення (в роботі)';
-    } else if (filter === 'ARCHIVE') {
-      orders = allOrders.filter(o => ['COMPLETED', 'CANCELLED'].includes(o.status));
-      filterTitle = '🗄 Архів та завершені замовлення';
-    } else if (filter === 'ALL') {
-      orders = allOrders;
-      filterTitle = '📋 Всі замовлення';
+    if (filter === 'ARCHIVE') {
+      orders = allOrders.filter(o => ['DELIVERED', 'COMPLETED', 'CANCELLED'].includes(o.status));
+      filterTitle = '🗄 Архів замовлень (доставлені та завершені)';
     } else {
-      orders = allOrders.filter(o => o.status === filter);
-      filterTitle = ORDER_STATUSES[filter]?.name || filter;
+      orders = allOrders.filter(o => !['DELIVERED', 'COMPLETED', 'CANCELLED'].includes(o.status));
+      filterTitle = '⚡ Активні замовлення (в роботі)';
     }
 
     if (orders.length === 0) {
-      let emptyMsg = `📋 <b>${filterTitle}:</b>\n\nЗамовлень у цій категорії немає.`;
-      if (filter === 'ACTIVE') {
-        emptyMsg = `⚡ <b>Активні замовлення:</b>\n\nВсі замовлення опрацьовані! Активних замовлень у роботі зараз немає.`;
-      } else if (filter === 'ARCHIVE') {
-        emptyMsg = `🗄 <b>Архів замовлень:</b>\n\nАрхів порожній. Тут відображаються виконані та скасовані замовлення.`;
-      }
+      const emptyMsg = filter === 'ARCHIVE'
+        ? `🗄 <b>Архів замовлень порожній</b>\n\nСюди потрапляють замовлення зі статусом «Доставлено», «Виконано» або «Скасовано».`
+        : `⚡ <b>Активних замовлень немає</b>\n\nВсі поточні замовлення опрацьовані та переміщені до архіву.`;
 
       await this.callApi('sendMessage', {
         chat_id: chatId,
@@ -1157,8 +1147,7 @@ export class TelegramBotService {
               { text: `🗄 Архів (${archiveCount})`, callback_data: 'admin_list:ARCHIVE' }
             ],
             [
-              { text: `📋 Всі (${totalCount})`, callback_data: 'admin_list:ALL' },
-              { text: '🔙 До панелі керування', callback_data: 'admin_dashboard' }
+              { text: '🔙 До адмін-панелі', callback_data: 'admin_dashboard' }
             ]
           ]
         }
@@ -1167,7 +1156,7 @@ export class TelegramBotService {
     }
 
     let text = `📋 <b>${filterTitle} (${orders.length}):</b>\n\n`;
-    text += `Оберіть замовлення для детального перегляду або зміни статусу:\n\n`;
+    text += `<i>Натисніть на замовлення нижче, щоб відкрити інформацію та керувати статусом:</i>\n\n`;
 
     const buttons = [];
 
@@ -1178,8 +1167,8 @@ export class TelegramBotService {
       if (o.status === 'NEW') statusIcon = '🆕';
       else if (o.status === 'PENDING_PAYMENT') statusIcon = '⏳';
       else if (o.status === 'CONFIRMED') statusIcon = '✅';
-      else if (o.status === 'PACKING_PREP' || o.status === 'PACKED') statusIcon = '⚙️';
-      else if (o.status === 'SHIPPED') statusIcon = '🚚';
+      else if (o.status === 'PACKING_PREP' || o.status === 'PACKED') statusIcon = '📦';
+      else if (o.status === 'DISPATCH_PREP' || o.status === 'SHIPPED') statusIcon = '🚚';
       else if (o.status === 'DELIVERED') statusIcon = '🏢';
       else if (o.status === 'COMPLETED') statusIcon = '🎉';
       else if (o.status === 'CANCELLED') statusIcon = '❌';
@@ -1191,21 +1180,16 @@ export class TelegramBotService {
       text += `\n`;
 
       buttons.push([
-        { text: `🔍 #${o.order_id} | ${o.total} ₴ | ${statusIcon} ${statusLabel}`, callback_data: `admin_view:${o.order_id}` }
+        { text: `🔍 #${o.order_id} • ${o.total} ₴ • ${statusIcon} ${statusLabel}`, callback_data: `admin_view:${o.order_id}` }
       ]);
     });
 
     buttons.push([
       { text: `⚡ Активні (${activeCount})`, callback_data: 'admin_list:ACTIVE' },
-      { text: `🗄 Архів (${archiveCount})`, callback_data: 'admin_list:ARCHIVE' },
-      { text: `📋 Всі (${totalCount})`, callback_data: 'admin_list:ALL' }
+      { text: `🗄 Архів (${archiveCount})`, callback_data: 'admin_list:ARCHIVE' }
     ]);
     buttons.push([
-      { text: '➕ Додати товар', callback_data: 'add_new_product' },
-      { text: '🔄 Оновити', callback_data: `admin_list:${filter}` }
-    ]);
-    buttons.push([
-      { text: '🔙 До панелі керування', callback_data: 'admin_dashboard' }
+      { text: '🔙 До адмін-панелі', callback_data: 'admin_dashboard' }
     ]);
 
     await this.callApi('sendMessage', {
@@ -1226,8 +1210,7 @@ export class TelegramBotService {
     if (order.status === 'PENDING_PAYMENT') statusEmoji = '⏳';
     if (order.status === 'NEW') statusEmoji = '🆕';
     if (order.status === 'CONFIRMED') statusEmoji = '✅';
-    if (order.status === 'PACKING_PREP') statusEmoji = '⚙️';
-    if (order.status === 'PACKED') statusEmoji = '📦';
+    if (order.status === 'PACKING_PREP' || order.status === 'PACKED') statusEmoji = '📦';
     if (order.status === 'DISPATCH_PREP') statusEmoji = '🚚';
     if (order.status === 'SHIPPED') statusEmoji = '🚚';
     if (order.status === 'DELIVERED') statusEmoji = '🏢';
@@ -1241,67 +1224,58 @@ export class TelegramBotService {
 
     let text = `👑 <b>ЗАМОВЛЕННЯ #${order.order_id}</b>\n\n`;
     text += `📊 <b>Статус:</b> ${statusEmoji} <b>${statusName}</b>\n`;
-    text += `📅 <b>Дата:</b> ${new Date(order.created_at || Date.now()).toLocaleString('uk-UA')}\n`;
+    text += `📅 <b>Дата створення:</b> ${new Date(order.created_at || Date.now()).toLocaleString('uk-UA')}\n`;
     if (order.tracking_number) {
       text += `🚚 <b>Номер ТТН:</b> <code>${order.tracking_number}</code>\n`;
     }
 
     text += `\n👤 <b>Покупець:</b>\n`;
-    text += `• Ім'я: ${cust.first_name} ${cust.last_name || ''}\n`;
+    text += `• Ім'я: <b>${cust.first_name} ${cust.last_name || ''}</b>\n`;
     text += `• Телефон: <code>${cust.phone || 'не вказано'}</code>\n`;
     if (cust.telegram_username) text += `• Telegram: @${cust.telegram_username}\n`;
     else if (cust.telegram_id) text += `• Telegram ID: <code>${cust.telegram_id}</code>\n`;
     if (cust.email) text += `• Email: ${cust.email}\n`;
 
     text += `\n🏢 <b>Доставка:</b>\n`;
-    text += `• Служба: ${deliv.provider_name || 'Нова Пошта'}\n`;
-    text += `• Місто: ${deliv.city}\n`;
+    text += `• Перевізник: <b>${deliv.provider_name || 'Нова Пошта'}</b>\n`;
+    text += `• Місто: <b>${deliv.city}</b>\n`;
     text += `• Відділення / адреса: ${deliv.department || deliv.address}\n`;
 
     text += `\n💳 <b>Оплата:</b>\n`;
     const payMethodName = pay.method === 'online' ? 'Онлайн у Telegram-боті' : 'Оплата при отриманні (Накладений платіж)';
     const payStatusName = pay.status === 'PAID' ? '✅ ОПЛАЧЕНО' : (pay.is_cod ? '📦 Накладений платіж' : '⏳ Очікує оплати');
     text += `• Спосіб: ${payMethodName}\n`;
-    text += `• Статус: ${payStatusName}\n`;
+    text += `• Стан: <b>${payStatusName}</b>\n`;
     if (pay.transaction_id) text += `• ID транзакції: <code>${pay.transaction_id}</code>\n`;
 
-    text += `\n🛍 <b>Товари (${order.items?.length || 0}):</b>\n${itemsText}\n\n`;
-    text += `💰 <b>Загальна сума: ${order.total} ₴</b>\n`;
+    text += `\n🛍 <b>Товари в замовленні:</b>\n${itemsText}\n\n`;
+    text += `💰 <b>ЗАГАЛЬНА СУМА: ${order.total} ₴</b>\n`;
     if (order.admin_comment || pay.comment) {
-      text += `📝 <b>Коментар:</b> <i>${order.admin_comment || pay.comment}</i>\n`;
+      text += `📝 <b>Примітка:</b> <i>${order.admin_comment || pay.comment}</i>\n`;
     }
 
     const buttons = [];
 
-    // Row 1: Fast actions (Confirm / TTN)
-    if (order.status === 'NEW' || order.status === 'PENDING_PAYMENT') {
-      buttons.push([
-        { text: '✅ Підтвердити замовлення', callback_data: `admin_confirm:${order.order_id}` },
-        { text: '🚚 Вказати ТТН', callback_data: `admin_ttn_prompt:${order.order_id}` }
-      ]);
-    } else {
-      buttons.push([
-        { text: '🚚 Вказати / Змінити ТТН', callback_data: `admin_ttn_prompt:${order.order_id}` }
-      ]);
-    }
-
-    // Row 2: Status sub-menu
+    // Row 1: Change status
     buttons.push([
       { text: '🔄 Змінити статус замовлення', callback_data: `admin_status_menu:${order.order_id}` }
     ]);
 
-    // Row 3: Delete order (with confirmation prompt)
+    // Row 2: TTN
+    buttons.push([
+      { text: order.tracking_number ? '🚚 Змінити номер ТТН' : '🚚 Вказати номер ТТН', callback_data: `admin_ttn_prompt:${order.order_id}` }
+    ]);
+
+    // Row 3: Delete
     buttons.push([
       { text: '🗑 Видалити замовлення', callback_data: `admin_delete_prompt:${order.order_id}` }
     ]);
 
     // Row 4: Navigation
+    const isArchived = ['DELIVERED', 'COMPLETED', 'CANCELLED'].includes(order.status);
     buttons.push([
-      { text: '⚡ До активних', callback_data: 'admin_list:ACTIVE' },
-      { text: '🗄 Архів', callback_data: 'admin_list:ARCHIVE' }
-    ]);
-    buttons.push([
-      { text: '🔙 До адмін-панелі', callback_data: 'admin_dashboard' }
+      { text: isArchived ? '🗄 До архіву' : '⚡ До активних', callback_data: isArchived ? 'admin_list:ARCHIVE' : 'admin_list:ACTIVE' },
+      { text: '👑 До адмін-панелі', callback_data: 'admin_dashboard' }
     ]);
 
     await this.callApi('sendMessage', {
@@ -1319,28 +1293,27 @@ export class TelegramBotService {
     const currentStatusName = ORDER_STATUSES[order.status]?.name || order.status;
     const text = `🔄 <b>Зміна статусу замовлення #${orderId}</b>\n\n` +
       `Поточний статус: <b>${currentStatusName}</b>\n` +
-      `Сума: <b>${order.total} ₴</b> | Клієнт: <b>${order.customer?.first_name || ''} ${order.customer?.last_name || ''}</b>\n\n` +
-      `<i>Оберіть новий статус для цього замовлення:</i>`;
+      `Клієнт: <b>${order.customer?.first_name || ''} ${order.customer?.last_name || ''}</b> | Сума: <b>${order.total} ₴</b>\n\n` +
+      `<i>Оберіть новий статус (покупцю буде надіслано автоматичне сповіщення в Telegram):</i>`;
 
     const buttons = [
-      [
-        { text: '🆕 Нове (NEW)', callback_data: `admin_set_status:NEW:${orderId}` },
-        { text: '⏳ Очікує оплати', callback_data: `admin_set_status:PENDING_PAYMENT:${orderId}` }
-      ],
       [
         { text: '✅ Підтверджено', callback_data: `admin_set_status:CONFIRMED:${orderId}` },
         { text: '💳 Оплачено', callback_data: `admin_set_status:PAID:${orderId}` }
       ],
       [
-        { text: '⚙️ В обробці / Пакування', callback_data: `admin_set_status:PACKING_PREP:${orderId}` },
-        { text: '🚚 Відправлено', callback_data: `admin_set_status:SHIPPED:${orderId}` }
+        { text: '📦 Пакування товару', callback_data: `admin_set_status:PACKING_PREP:${orderId}` },
+        { text: '🚚 Готується до відправки', callback_data: `admin_set_status:DISPATCH_PREP:${orderId}` }
       ],
       [
-        { text: '🏢 Доставлено', callback_data: `admin_set_status:DELIVERED:${orderId}` },
+        { text: '🚚 Відправлено (Вказати ТТН)', callback_data: `admin_ttn_prompt:${orderId}` }
+      ],
+      [
+        { text: '🏢 Доставлено (В архів)', callback_data: `admin_set_status:DELIVERED:${orderId}` },
         { text: '🎉 Виконано (В архів)', callback_data: `admin_set_status:COMPLETED:${orderId}` }
       ],
       [
-        { text: '❌ Скасувати замовлення', callback_data: `admin_set_status:CANCELLED:${orderId}` }
+        { text: '❌ Скасувати замовлення (В архів)', callback_data: `admin_set_status:CANCELLED:${orderId}` }
       ],
       [
         { text: '🔙 Назад до замовлення', callback_data: `admin_view:${orderId}` }
@@ -1367,7 +1340,7 @@ export class TelegramBotService {
 
     await this.callApi('sendMessage', {
       chat_id: chatId,
-      text: `✅ <b>Замовлення #${orderId} успішно підтверджено!</b>\nПокупця сповіщено в Telegram, статус оновлено до «Підтверджено».`,
+      text: `✅ <b>Замовлення #${orderId} успішно підтверджено!</b>\nПокупця сповіщено в Telegram про зміну статусу.`,
       parse_mode: 'HTML',
       reply_markup: {
         inline_keyboard: [
@@ -1376,35 +1349,14 @@ export class TelegramBotService {
             { text: '🔍 До замовлення', callback_data: `admin_view:${orderId}` }
           ],
           [
-            { text: '📋 До списку замовлень', callback_data: 'view_orders' }
+            { text: '⚡ До списку замовлень', callback_data: 'admin_list:ACTIVE' }
           ]
         ]
       }
     });
 
-    // Notify customer in Telegram with payment button if online and unpaid
-    if (order.customer?.telegram_id) {
-      let custMsg = `📦 <b>Ваше замовлення #${order.order_id} підтверджено менеджером!</b>\n\nМи вже розпочали комплектацію та підготовку до відправлення.`;
-      const custButtons = [];
-
-      if (order.payment?.method === 'online' && order.payment?.status !== 'PAID') {
-        custMsg += `\n\n💳 <b>Оплата замовлення:</b>\nСума до сплати: <b>${order.total} ₴</b>.\nНатисніть кнопку нижче, щоб безпечно оплатити замовлення онлайн у боті:`;
-        custButtons.push([
-          { text: `💳 Оплатити ${order.total} ₴ онлайн`, callback_data: `pay_test:${order.order_id}` }
-        ]);
-      }
-
-      custButtons.push([
-        { text: '🔍 Переглянути замовлення', callback_data: `view_order:${order.order_id}` }
-      ]);
-
-      await this.callApi('sendMessage', {
-        chat_id: order.customer.telegram_id,
-        text: custMsg,
-        parse_mode: 'HTML',
-        reply_markup: { inline_keyboard: custButtons }
-      });
-    }
+    // Notify customer
+    await this.notifyCustomerStatusChange(updated, 'CONFIRMED');
   }
 
   async processAdminSaveTtn(chatId, orderId, ttn) {
@@ -1416,34 +1368,24 @@ export class TelegramBotService {
 
     db.updateOrderTtn(orderId, ttn, 'Admin');
     db.updateOrderStatus(orderId, 'SHIPPED', 'Admin', `Додано ТТН ${ttn} та переведено у статус Відправлено`);
+    const updated = db.getOrderById(orderId);
 
     await this.callApi('sendMessage', {
       chat_id: chatId,
-      text: `✅ <b>ТТН збережено для #${orderId}!</b>\n\nНомер ТТН: <code>${ttn}</code>\nСтатус змінено на: <b>Відправлено (SHIPPED)</b>\nПокупцю надіслано повідомлення з номером накладної.`,
+      text: `✅ <b>ТТН збережено для #${orderId}!</b>\n\nНомер ТТН: <code>${ttn}</code>\nСтатус змінено на: <b>🚚 Відправлено (SHIPPED)</b>\nПокупцю надіслано повідомлення з номером накладної.`,
       parse_mode: 'HTML',
       reply_markup: {
         inline_keyboard: [
           [
             { text: '🔍 До замовлення', callback_data: `admin_view:${orderId}` },
-            { text: '📋 До списку замовлень', callback_data: 'view_orders' }
+            { text: '⚡ До активних замовлень', callback_data: 'admin_list:ACTIVE' }
           ]
         ]
       }
     });
 
-    // Notify customer in Telegram with TTN
-    if (order.customer?.telegram_id) {
-      await this.callApi('sendMessage', {
-        chat_id: order.customer.telegram_id,
-        text: `🚚 <b>Ваше замовлення #${order.order_id} вже відправлено!</b>\n\nНомер ТТН: <code>${ttn}</code>\nПеревізник: <b>${order.delivery?.provider_name || 'Нова Пошта'}</b>\n\nВи можете відстежувати рух посилки у додатку перевізника або на сайті. Дякуємо за довіру до MILIPSTORE!`,
-        parse_mode: 'HTML',
-        reply_markup: {
-          inline_keyboard: [
-            [{ text: '🔍 Деталі замовлення', callback_data: `view_order:${order.order_id}` }]
-          ]
-        }
-      });
-    }
+    // Notify customer with TTN
+    await this.notifyCustomerStatusChange(updated, 'SHIPPED', ttn);
   }
 
   async processAdminStatusChange(chatId, orderId, newStatus) {
@@ -1467,16 +1409,17 @@ export class TelegramBotService {
 
     const updated = db.getOrderById(orderId);
     const statusName = ORDER_STATUSES[updated.status]?.name || updated.status;
+    const isArchived = ['DELIVERED', 'COMPLETED', 'CANCELLED'].includes(updated.status);
 
     await this.callApi('sendMessage', {
       chat_id: chatId,
-      text: `✅ <b>Статус замовлення #${orderId} успішно змінено на:</b> <b>${statusName}</b>` + (newStatus === 'PAID' ? ' (Оплату зафіксовано)' : ''),
+      text: `✅ <b>Статус замовлення #${orderId} успішно змінено на:</b> <b>${statusName}</b>` + (newStatus === 'PAID' ? ' (Оплату зафіксовано)' : '') + (isArchived ? '\n\n📁 Замовлення переміщено в <b>Архів</b>.' : ''),
       parse_mode: 'HTML',
       reply_markup: {
         inline_keyboard: [
           [
             { text: '🔍 До замовлення', callback_data: `admin_view:${orderId}` },
-            { text: '📋 До списку замовлень', callback_data: 'view_orders' }
+            { text: isArchived ? '🗄 До архіву' : '⚡ До активних', callback_data: isArchived ? 'admin_list:ARCHIVE' : 'admin_list:ACTIVE' }
           ]
         ]
       }
@@ -1484,6 +1427,90 @@ export class TelegramBotService {
 
     // Notify customer
     await this.notifyCustomerStatusChange(updated, updated.status);
+  }
+
+  async notifyCustomerStatusChange(order, newStatus, ttn = null) {
+    if (!order) return;
+
+    db.addNotification({
+      type: 'STATUS_CHANGED',
+      order_id: order.order_id,
+      status: newStatus,
+      status_name: ORDER_STATUSES[newStatus]?.name || newStatus,
+      ttn: ttn || order.tracking_number
+    });
+
+    const targetChatId = db.getTelegramIdForOrder(order);
+    if (!targetChatId) {
+      console.log(`[TelegramBot] No Telegram chat ID linked for customer in order #${order.order_id}`);
+      return;
+    }
+
+    const orderNum = `#${order.order_id}`;
+    let messageText = '';
+    const track = ttn || order.tracking_number;
+    const provName = order.delivery?.provider === 'ukrposhta' ? 'Укрпошта' : (order.delivery?.provider_name || 'Нова Пошта');
+
+    switch (newStatus) {
+      case 'CONFIRMED':
+        messageText = `✅ <b>Ваше замовлення ${orderNum} підтверджено менеджером!</b>\n\nМи вже прийняли замовлення в роботу та розпочали комплектацію на складі.`;
+        if (order.payment?.method === 'online' && order.payment?.status !== 'PAID') {
+          messageText += `\n\n💳 <b>Очікується онлайн-оплата:</b> ${order.total} ₴`;
+        }
+        break;
+      case 'PAID':
+        messageText = `💳 <b>Оплату за замовлення ${orderNum} успішно зараховано!</b>\n\nСума: <b>${order.total} ₴</b>.\nДякуємо! Ваше замовлення передано на склад для пакування.`;
+        break;
+      case 'PACKING_PREP':
+      case 'PACKED':
+        messageText = `📦 <b>Ваше замовлення ${orderNum} зараз упаковується на складі!</b>\n\nМи дбайливо перевіряємо та пакуємо ваші девайси перед відправкою.`;
+        break;
+      case 'DISPATCH_PREP':
+        messageText = `🚚 <b>Ваше замовлення ${orderNum} зібрано та готується до відправки!</b>\n\nНевдовзі посилка буде передана поштовій службі.`;
+        break;
+      case 'SHIPPED':
+        messageText = `🚚 <b>Ваше замовлення ${orderNum} вже відправлено!</b>\n\n`;
+        if (track) {
+          messageText += `Номер ТТН: <code>${track}</code>\n`;
+        }
+        messageText += `Служба доставки: <b>${provName}</b>\n\nВи можете відстежувати рух посилки за номером ТТН у додатку перевізника або на сайті.`;
+        break;
+      case 'DELIVERED':
+        messageText = `🏢 <b>Ваше замовлення ${orderNum} прибуло у відділення / поштомат!</b>\n\nПосилка вже чекає на вас. Будь ласка, отримайте ваше замовлення!`;
+        break;
+      case 'COMPLETED':
+        messageText = `🎉 <b>Ваше замовлення ${orderNum} успішно виконано!</b>\n\nДякуємо за покупку в MILIPSTORE! Приємного користування девайсами!`;
+        break;
+      case 'CANCELLED':
+        messageText = `❌ <b>Ваше замовлення ${orderNum} було скасовано.</b>\n\nЯкщо у вас виникли будь-які запитання, звертайтеся до нашої служби підтримки @milipmanager.`;
+        break;
+      default:
+        messageText = `📦 <b>Оновлено статус вашого замовлення ${orderNum}:</b> <b>${ORDER_STATUSES[newStatus]?.name || newStatus}</b>`;
+        break;
+    }
+
+    const custButtons = [];
+    if (order.payment?.method === 'online' && order.payment?.status !== 'PAID' && (newStatus === 'CONFIRMED' || newStatus === 'NEW')) {
+      custButtons.push([
+        { text: `💳 Оплатити ${order.total} ₴ онлайн`, callback_data: `pay_test:${order.order_id}` }
+      ]);
+    }
+    custButtons.push([
+      { text: '🔍 Переглянути замовлення', callback_data: `view_order:${order.order_id}` },
+      { text: '🛍 Мої замовлення', callback_data: `orders_list:${targetChatId}` }
+    ]);
+
+    try {
+      await this.callApi('sendMessage', {
+        chat_id: targetChatId,
+        text: messageText,
+        parse_mode: 'HTML',
+        reply_markup: { inline_keyboard: custButtons }
+      });
+      console.log(`[TelegramBot] Sent status notification to customer (${targetChatId}) for order #${order.order_id}`);
+    } catch (e) {
+      console.error(`[TelegramBot] Failed to send status notification to customer:`, e);
+    }
   }
 
   // ----------------------------------------------------

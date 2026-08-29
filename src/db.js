@@ -824,6 +824,25 @@ class Database {
     }).sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
   }
 
+  getTelegramIdForOrder(order) {
+    if (!order) return null;
+    if (order.customer?.telegram_id) return String(order.customer.telegram_id);
+    const orderId = order.order_id || order.id;
+
+    // Search by linked telegram_users map
+    for (const [tid, u] of Object.entries(this.data.telegram_users || {})) {
+      if (u.order_ids && (u.order_ids.includes(orderId) || u.order_ids.includes(`#${orderId}`))) {
+        return String(tid);
+      }
+      if (order.customer?.phone && u.phone) {
+        const p1 = order.customer.phone.replace(/\D/g, '').slice(-9);
+        const p2 = u.phone.replace(/\D/g, '').slice(-9);
+        if (p1 && p2 && p1 === p2) return String(tid);
+      }
+    }
+    return null;
+  }
+
   // Analytics & Stats
   getStats() {
     const all = this.data.orders;
