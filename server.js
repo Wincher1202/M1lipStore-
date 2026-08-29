@@ -110,6 +110,82 @@ let products = [
     created_at: new Date().toISOString()
   },
   {
+    id: 'prod-ajazz-ak820-pro',
+    brand: 'Ajazz',
+    title: 'Ajazz AK820 Pro Wireless Gasket Keyboard (TFT Screen)',
+    price: 2799,
+    old_price: 3299,
+    tag: 'ТОП ПРОДАЖІВ',
+    category: 'Клавіатури',
+    quantity: 16,
+    colors: 'Grey, Purple, White',
+    description: '75% механічна клавіатура з повноколірним TFT-дисплеєм, металевим енкодером, структурою Gasket Mount та бездротовим підключенням 2.4G/BT5.1.',
+    img: '/photo_2026-08-25_15-31-22.jpg',
+    gallery: [
+      '/photo_2026-08-25_15-31-22.jpg',
+      '/photo_2026-08-25_15-31-28.jpg',
+      '/aula копия.png'
+    ],
+    specs: [
+      { key: 'Формат', value: '75% (81 клавіша + 0.85" TFT екран)' },
+      { key: 'Свічі', value: 'Ajazz Flying Fish Linear (Hot-swap 5-pin)' },
+      { key: 'Шумоізоляція', value: '5 шарів (Poron, IXPE, PET, силікон)' },
+      { key: 'Підключення', value: 'Tri-Mode: 2.4GHz / Bluetooth 5.1 / Type-C' },
+      { key: 'Акумулятор', value: '4000 mAh' }
+    ],
+    color_images: {
+      Grey: { main: '/photo_2026-08-25_15-31-22.jpg', gallery: [] },
+      Purple: { main: '/photo_2026-08-25_15-31-28.jpg', gallery: [] },
+      White: { main: '/aula копия.png', gallery: [] }
+    },
+    color_quantities: {
+      Grey: 8,
+      Purple: 5,
+      White: 3
+    },
+    sku: 'AJAZZ-AK820-PRO',
+    featured: true,
+    popular: true,
+    hidden: false,
+    created_at: new Date().toISOString()
+  },
+  {
+    id: 'prod-ajazz-aj199',
+    brand: 'Ajazz',
+    title: 'Ajazz AJ199 4K Wireless Gaming Mouse',
+    price: 1799,
+    old_price: 2199,
+    tag: 'ХІТ',
+    category: 'Мишки',
+    quantity: 20,
+    colors: 'Black, White',
+    description: 'Надлегка бездротова симетрична мишка вагою 59г на топовому сенсорі PAW3395 та підтримкою високої частоти опитування.',
+    img: '/attack-shark-x3-black.jpg',
+    gallery: [
+      '/attack-shark-x3-black.jpg',
+      '/attack-shark-x3-white.jpg'
+    ],
+    specs: [
+      { key: 'Сенсор', value: 'PixArt PAW3395 (до 26 000 DPI)' },
+      { key: 'Вага', value: '59 грамів' },
+      { key: 'Мікрики', value: 'Huano Blue Shell Pink Dot (80M)' },
+      { key: 'Підключення', value: '2.4GHz Wireless / Type-C' }
+    ],
+    color_images: {
+      Black: { main: '/attack-shark-x3-black.jpg', gallery: [] },
+      White: { main: '/attack-shark-x3-white.jpg', gallery: [] }
+    },
+    color_quantities: {
+      Black: 12,
+      White: 8
+    },
+    sku: 'AJAZZ-AJ199-4K',
+    featured: false,
+    popular: true,
+    hidden: false,
+    created_at: new Date().toISOString()
+  },
+  {
     id: 'prod-aula-f75',
     brand: 'AULA',
     title: 'AULA F75 Wireless Mechanical Keyboard',
@@ -144,6 +220,82 @@ let products = [
       Green: 2
     },
     sku: 'AULA-F75-WHT',
+    featured: true,
+    popular: true,
+    hidden: false,
+    created_at: new Date().toISOString()
+  },
+  {
+    id: 'prod-mchose-ax5',
+    brand: 'Mchose',
+    title: 'Mchose AX5 Magnesium 8K Wireless Mouse',
+    price: 3499,
+    old_price: 3999,
+    tag: 'ФЛАГМАН',
+    category: 'Мишки',
+    quantity: 14,
+    colors: 'Silver, Black',
+    description: 'Флагманська мишка з алюмінієво-магнієвого сплаву з ЧПК-обробкою, 8KHz Dongle у комплекті та сенсором PAW3395.',
+    img: '/attack-shark-r5-ultra-top-angle.jpg',
+    gallery: [
+      '/attack-shark-r5-ultra-top-angle.jpg',
+      '/attack-shark-r5-ultra-back-grip.jpg',
+      '/attack-shark-r5-ultra-colors-price.jpg'
+    ],
+    specs: [
+      { key: 'Сенсор', value: 'PixArt PAW3395 (26 000 DPI)' },
+      { key: 'Корпус', value: 'Магнієвий сплав Exoskeleton' },
+      { key: 'Вага', value: '49 грамів' },
+      { key: 'Частота опитування', value: 'До 8000 Hz Wireless' },
+      { key: 'Свічі', value: 'TTC Optical Switches (100M натискань)' }
+    ],
+    color_images: {
+      Silver: { main: '/attack-shark-r5-ultra-top-angle.jpg', gallery: [] },
+      Black: { main: '/attack-shark-r5-ultra-back-grip.jpg', gallery: [] }
+    },
+    color_quantities: {
+      Silver: 8,
+      Black: 6
+    },
+    sku: 'MCHOSE-AX5-MAG',
+    featured: true,
+    popular: true,
+    hidden: false,
+    created_at: new Date().toISOString()
+  },
+  {
+    id: 'prod-vgn-f1-promax',
+    brand: 'VGN',
+    title: 'VGN Dragonfly F1 Pro Max Wireless Mouse',
+    price: 2199,
+    old_price: 2599,
+    tag: 'ТОП ПРОДАЖІВ',
+    category: 'Мишки',
+    quantity: 22,
+    colors: 'Black, White',
+    description: 'Еталонна ультралегка кіберспортивна мишка вагою 55 грамів на чіпі Nordic 52840 та сенсорі PAW3395 з ресурсом батареї до 130 годин.',
+    img: '/attack-shark-x3-white.jpg',
+    gallery: [
+      '/attack-shark-x3-white.jpg',
+      '/attack-shark-x3-black.jpg',
+      '/attack-shark-x3-box.jpg'
+    ],
+    specs: [
+      { key: 'Сенсор', value: 'PixArt PAW3395 (26 000 DPI)' },
+      { key: 'Чіпсет', value: 'Nordic 52840 Flagship MCU' },
+      { key: 'Вага', value: '55 грам' },
+      { key: 'Свічі', value: 'Kailh Golden Black Mamba (90M)' },
+      { key: 'Акумулятор', value: '500 mAh (до 130 годин безперервної гри)' }
+    ],
+    color_images: {
+      Black: { main: '/attack-shark-x3-black.jpg', gallery: [] },
+      White: { main: '/attack-shark-x3-white.jpg', gallery: [] }
+    },
+    color_quantities: {
+      Black: 12,
+      White: 10
+    },
+    sku: 'VGN-F1-PROMAX',
     featured: true,
     popular: true,
     hidden: false,
@@ -306,16 +458,19 @@ app.get('/api/brands', async (req, res) => {
 // Orders API
 // ----------------------------------------------------
 
-app.post('/api/orders', (req, res) => {
+app.post('/api/orders', async (req, res) => {
   const { customer, delivery, payment, comment, items } = req.body || {};
-  if (!customer || !customer.firstName || !customer.phone) {
-    return res.status(400).json({ detail: "Будь ласка, заповніть ім'я та телефон" });
+  const firstName = (customer?.first_name || customer?.firstName || '').trim();
+  const phone = (customer?.phone || '').trim();
+
+  if (!firstName || !phone) {
+    return res.status(400).json({ detail: "Будь ласка, заповніть ім'я та контактний телефон" });
   }
   if (!items || !items.length) {
     return res.status(400).json({ detail: 'Кошик порожній' });
   }
 
-  let total = 0;
+  let subtotal = 0;
   const pricedItems = [];
 
   for (const item of items) {
@@ -323,10 +478,10 @@ app.post('/api/orders', (req, res) => {
     if (!p) {
       return res.status(400).json({ detail: `Товар не знайдено` });
     }
-    const qty = Number(item.qty) || 1;
+    const qty = Math.max(1, Number(item.qty) || 1);
     const color = item.color || '';
     const lineTotal = p.price * qty;
-    total += lineTotal;
+    subtotal += lineTotal;
 
     // Deduct stock
     if (p.color_quantities && p.color_quantities[color] !== undefined) {
@@ -343,35 +498,62 @@ app.post('/api/orders', (req, res) => {
       color,
       qty,
       price: p.price,
-      lineTotal
+      lineTotal,
+      img: (p.color_images && p.color_images[color] && p.color_images[color].main) || p.img
     });
   }
+
+  const paymentMethod = payment?.method || 'online';
+  const isCod = paymentMethod === 'cod';
+  const codFee = isCod ? Math.round(20 + subtotal * 0.02) : 0;
+  const total = subtotal + codFee;
 
   const orderId = `MLP-${Math.floor(100000 + Math.random() * 900000)}`;
   const orderRecord = {
     order_id: orderId,
+    id: orderId,
     status: 'NEW',
     tracking_number: null,
+    subtotal,
+    cod_fee: codFee,
     total,
+    dispatch_timeline: '1-2 дні',
+    shipping_note: 'Відправлення замовлення протягом 1-2 робочих днів з моменту оформлення',
     created_at: new Date().toISOString(),
-    customer,
-    delivery,
-    payment,
-    comment: comment || '',
+    customer: {
+      first_name: firstName,
+      last_name: (customer?.last_name || customer?.lastName || '').trim(),
+      email: (customer?.email || '').trim(),
+      phone: phone
+    },
+    delivery: delivery || {},
+    payment: {
+      method: paymentMethod,
+      is_cod: isCod,
+      cod_fee: codFee,
+      comment: (payment?.comment || comment || '').trim()
+    },
+    comment: (payment?.comment || comment || '').trim(),
     items: pricedItems
   };
 
   orders.unshift(orderRecord);
   res.json({
     status: 'success',
+    order_id: orderId,
+    id: orderId,
     orderId,
+    subtotal,
+    codFee,
     total,
+    dispatch_timeline: '1-2 дні',
+    shipping_note: 'Відправлення замовлення протягом 1-2 робочих днів',
     orderStatus: 'NEW'
   });
 });
 
 app.get('/api/orders/:order_id', (req, res) => {
-  const order = orders.find(o => o.order_id === req.params.order_id);
+  const order = orders.find(o => o.order_id === req.params.order_id || o.id === req.params.order_id);
   if (!order) {
     return res.status(404).json({ detail: 'Замовлення не знайдено' });
   }
@@ -385,12 +567,11 @@ app.get('/api/orders/:order_id', (req, res) => {
 app.get('/api/delivery/providers', (req, res) => {
   res.json([
     { id: 'nova_poshta', name: 'Нова Пошта', configured: true },
-    { id: 'ukrposhta', name: 'Укрпошта', configured: true },
-    { id: 'mist', name: 'MIST', configured: true }
+    { id: 'ukrposhta', name: 'Укрпошта', configured: true }
   ]);
 });
 
-app.get('/api/delivery/:provider_id/cities', (req, res) => {
+function handleCitySearch(req, res) {
   const q = (req.query.query || '').toString().trim().toLowerCase();
   if (q.length < 2) {
     return res.json([]);
@@ -399,22 +580,37 @@ app.get('/api/delivery/:provider_id/cities', (req, res) => {
     c.name.toLowerCase().includes(q) || c.region.toLowerCase().includes(q)
   );
   res.json(matched);
-});
+}
 
-app.get('/api/delivery/:provider_id/warehouses', (req, res) => {
-  const cityRef = (req.query.city_ref || '').toString();
+app.get('/api/delivery/cities', handleCitySearch);
+app.get('/api/delivery/:provider_id/cities', handleCitySearch);
+
+function handleWarehouseSearch(req, res) {
+  const cityRef = (req.query.city_ref || req.query.cityRef || '').toString();
   const q = (req.query.query || '').toString().trim().toLowerCase();
+  const provider = req.params.provider_id || req.query.provider || 'nova_poshta';
 
-  const city = UKRAINE_CITIES.find(c => c.ref === cityRef) || { name: 'Місто' };
+  const city = UKRAINE_CITIES.find(c => c.ref === cityRef) || { name: cityRef || 'Місто' };
   let warehouses = getMockWarehouses(city.name);
+
+  if (provider === 'ukrposhta') {
+    warehouses = [
+      { ref: `up-1-${city.name}`, name: `Головне відділення Укрпошта: вул. Головна, 1`, address: 'вул. Головна, 1' },
+      { ref: `up-2-${city.name}`, name: `Відділення Укрпошта №2: вул. Соборності, 12`, address: 'вул. Соборності, 12' },
+      { ref: `up-3-${city.name}`, name: `Відділення Укрпошта №3: вул. Шевченка, 45`, address: 'вул. Шевченка, 45' }
+    ];
+  }
 
   if (q) {
     warehouses = warehouses.filter(w =>
-      w.name.toLowerCase().includes(q) || w.address.toLowerCase().includes(q)
+      w.name.toLowerCase().includes(q) || (w.address && w.address.toLowerCase().includes(q))
     );
   }
   res.json(warehouses);
-});
+}
+
+app.get('/api/delivery/warehouses', handleWarehouseSearch);
+app.get('/api/delivery/:provider_id/warehouses', handleWarehouseSearch);
 
 // ----------------------------------------------------
 // User Profile & Addresses
