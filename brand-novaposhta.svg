@@ -1,19 +1,14 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
-  <defs>
-    <linearGradient id="np-red" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#FF2424" />
-      <stop offset="100%" stop-color="#DA1818" />
-    </linearGradient>
-  </defs>
-  <rect width="120" height="120" rx="26" fill="url(#np-red)" />
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <rect width="100" height="100" rx="22" fill="#E31E24" />
   <g fill="#FFFFFF">
-    <!-- Top Arrow -->
-    <path d="M60 21 L43 38 H52 V51 H68 V38 H77 Z" />
-    <!-- Bottom Arrow -->
-    <path d="M60 99 L77 82 H68 V69 H52 V82 H43 Z" />
-    <!-- Left Arrow -->
-    <path d="M21 60 L38 77 V68 H51 V52 H38 V43 Z" />
-    <!-- Right Arrow -->
-    <path d="M99 60 L82 43 V52 H69 V68 H82 V77 Z" />
+    <!-- Top arrow -->
+    <path d="M50 16 L34 32 H44 V44 H56 V32 H66 Z" />
+    <!-- Bottom arrow -->
+    <path d="M50 84 L66 68 H56 V56 H44 V68 H34 Z" />
+    <!-- Left arrow -->
+    <path d="M16 50 L32 66 V56 H44 V44 H32 V34 Z" />
+    <!-- Right arrow -->
+    <path d="M84 50 L68 34 V44 H56 V56 H68 V66 Z" />
+    <!-- Center diamond gap is formed naturally by the 4 inner corners -->
   </g>
 </svg>

@@ -1462,6 +1462,16 @@
         @media (max-width: 480px) {
             .provider-cards-grid { grid-template-columns: 1fr; }
         }
+        /* Delivery & Checkout Styles */
+        .provider-cards-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-top: 6px;
+        }
+        @media (max-width: 520px) {
+            .provider-cards-grid { grid-template-columns: 1fr; }
+        }
         .delivery-provider-card {
             display: flex;
             align-items: center;
@@ -1471,7 +1481,7 @@
             border: 2px solid var(--border-light);
             background: var(--bg-primary);
             cursor: pointer;
-            transition: var(--transition-smooth);
+            transition: all 0.2s ease;
             position: relative;
         }
         .delivery-provider-card:hover {
@@ -1481,18 +1491,19 @@
         .delivery-provider-card.active {
             border-color: var(--accent);
             background: var(--accent-light);
+            box-shadow: 0 0 0 1px var(--accent);
         }
         .delivery-provider-icon {
-            width: 38px;
-            height: 38px;
-            border-radius: 10px;
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
             background: var(--card-bg);
             border: 1px solid var(--border-light);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.2rem;
             flex-shrink: 0;
+            overflow: hidden;
         }
         .delivery-provider-info {
             flex: 1;
@@ -1500,7 +1511,7 @@
         }
         .delivery-provider-title {
             font-weight: 800;
-            font-size: 0.92rem;
+            font-size: 0.88rem;
             color: var(--text-primary);
             display: flex;
             align-items: center;
@@ -1510,17 +1521,19 @@
             font-size: 0.72rem;
             color: var(--text-muted);
             margin-top: 2px;
+            line-height: 1.25;
         }
         .provider-check-mark {
-            width: 18px;
-            height: 18px;
+            width: 20px;
+            height: 20px;
             border-radius: 50%;
             border: 2px solid var(--border-light);
             display: flex;
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
-            transition: var(--transition-smooth);
+            font-size: 0.75rem;
+            transition: all 0.2s ease;
         }
         .delivery-provider-card.active .provider-check-mark {
             border-color: var(--accent);
@@ -1528,22 +1541,57 @@
             color: #fff;
         }
 
+        .delivery-input-wrap {
+            position: relative;
+            display: flex;
+            align-items: center;
+            width: 100%;
+        }
+        .delivery-input-wrap .delivery-input-icon {
+            position: absolute;
+            left: 12px;
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            pointer-events: none;
+        }
+        .delivery-input-wrap input {
+            width: 100%;
+            padding-left: 36px !important;
+            padding-right: 36px !important;
+        }
+        .delivery-input-wrap .delivery-input-clear {
+            position: absolute;
+            right: 10px;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            cursor: pointer;
+            padding: 4px 6px;
+            border-radius: 50%;
+            display: none;
+        }
+        .delivery-input-wrap .delivery-input-clear:hover {
+            color: var(--text-primary);
+            background: rgba(0,0,0,0.06);
+        }
+
         .quick-cities-container {
             display: flex;
             flex-wrap: wrap;
             gap: 6px;
-            margin-top: 6px;
+            margin-top: 8px;
         }
         .quick-city-chip {
-            padding: 5px 10px;
-            border-radius: 14px;
+            padding: 6px 12px;
+            border-radius: 16px;
             font-size: 0.76rem;
             font-weight: 700;
             background: var(--bg-primary);
             border: 1px solid var(--border-light);
             color: var(--text-secondary);
             cursor: pointer;
-            transition: var(--transition-smooth);
+            transition: all 0.15s ease;
         }
         .quick-city-chip:hover {
             border-color: var(--accent);
@@ -1556,58 +1604,149 @@
             background: var(--accent);
         }
 
+        .delivery-type-filters {
+            display: flex;
+            gap: 6px;
+            margin-top: 6px;
+            margin-bottom: 6px;
+        }
+        .delivery-filter-btn {
+            padding: 5px 10px;
+            border-radius: 8px;
+            font-size: 0.74rem;
+            font-weight: 700;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-light);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        .delivery-filter-btn:hover {
+            border-color: var(--border-hover);
+            color: var(--text-primary);
+        }
+        .delivery-filter-btn.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #fff;
+        }
+
         .delivery-search-results {
             display: flex;
             flex-direction: column;
             gap: 2px;
-            max-height: 240px;
+            max-height: 250px;
             overflow-y: auto;
-            border: 1px solid var(--border-light);
+            border: 1.5px solid var(--border-light);
             border-radius: var(--radius-sm);
             background: var(--card-bg);
-            margin-top: 4px;
+            margin-top: 6px;
             box-shadow: var(--shadow-subtle);
         }
         .delivery-search-result-item {
-            padding: 10px 14px;
+            padding: 11px 14px;
             cursor: pointer;
             font-size: 0.85rem;
             border-bottom: 1px solid var(--border-light);
             display: flex;
             flex-direction: column;
-            gap: 2px;
+            gap: 3px;
             transition: background 0.15s ease;
         }
         .delivery-search-result-item:last-child { border-bottom: none; }
         .delivery-search-result-item:hover { background: var(--bg-primary); }
-        .delivery-search-result-item .item-title { font-weight: 700; color: var(--text-primary); }
-        .delivery-search-result-item .item-sub { font-size: 0.72rem; color: var(--text-muted); }
-        .delivery-search-result-item.selected { background: var(--accent-light); border-left: 3px solid var(--accent); }
-        .delivery-search-empty { padding: 14px; font-size: 0.82rem; color: var(--text-muted); text-align: center; }
+        .delivery-search-result-item .item-title {
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+        .delivery-search-result-item .item-sub {
+            font-size: 0.74rem;
+            color: var(--text-muted);
+        }
+        .delivery-search-result-item .wh-badge {
+            font-size: 0.68rem;
+            font-weight: 800;
+            padding: 2px 7px;
+            border-radius: 6px;
+            background: rgba(87,100,226,0.1);
+            color: var(--accent);
+            white-space: nowrap;
+        }
+        .delivery-search-result-item.selected {
+            background: var(--accent-light);
+            border-left: 3px solid var(--accent);
+        }
+        .delivery-search-empty {
+            padding: 16px;
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            text-align: center;
+        }
 
         .selected-pill {
             display: flex;
             align-items: center;
             justify-content: space-between;
             gap: 10px;
-            padding: 10px 14px;
+            padding: 12px 14px;
             border-radius: var(--radius-sm);
             border: 1.5px solid var(--accent);
             background: var(--accent-light);
-            font-size: 0.85rem;
+            font-size: 0.88rem;
             font-weight: 700;
             margin-top: 4px;
+            animation: fadeIn 0.2s ease;
+        }
+        .selected-pill-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            min-width: 0;
+        }
+        .selected-pill-title {
+            color: var(--text-primary);
+            font-weight: 800;
+        }
+        .selected-pill-sub {
+            font-size: 0.74rem;
+            color: var(--text-secondary);
+            font-weight: 500;
         }
         .selected-pill button {
-            background: none;
-            border: none;
+            background: var(--card-bg);
+            border: 1px solid var(--accent);
             color: var(--accent);
             font-weight: 800;
+            font-size: 0.78rem;
             cursor: pointer;
-            padding: 4px 8px;
+            padding: 6px 10px;
             border-radius: 6px;
+            flex-shrink: 0;
+            transition: all 0.15s ease;
         }
-        .selected-pill button:hover { background: rgba(87,100,226,0.15); }
+        .selected-pill button:hover {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        .courier-address-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 8px;
+            margin-top: 4px;
+        }
+        @media (max-width: 480px) {
+            .courier-address-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            .courier-address-grid .street-col {
+                grid-column: span 2;
+            }
+        }
 
         .delivery-fallback-note {
             font-size: 0.78rem;
@@ -2120,27 +2259,58 @@
                     <div id="saved-deliveries-block"></div>
 
                     <div class="checkout-group">
-                        <label>Служба доставки</label>
+                        <label>Спосіб доставки</label>
                         <div class="provider-cards-grid" id="provider-chip-group"></div>
                     </div>
 
                     <div id="delivery-configured-flow" style="display: flex; flex-direction: column; gap: 14px; margin-top: 6px;">
+                        <!-- CITY SELECTION -->
                         <div class="checkout-group" id="delivery-city-group">
                             <label>Місто отримання</label>
                             <div id="city-selected-pill"></div>
                             <div id="city-search-box-wrap">
-                                <input type="text" id="chk-city-search" placeholder="Почніть вводити назву міста..." autocomplete="off" oninput="searchDeliveryCities(this.value)">
+                                <div class="delivery-input-wrap">
+                                    <span class="delivery-input-icon">🔍</span>
+                                    <input type="text" id="chk-city-search" placeholder="Почніть вводити назву міста..." autocomplete="off" oninput="searchDeliveryCities(this.value)">
+                                    <button type="button" class="delivery-input-clear" id="chk-city-clear-btn" onclick="clearCityInput()">✕</button>
+                                </div>
                                 <div class="quick-cities-container" id="quick-cities-container"></div>
                                 <div class="delivery-search-results" id="city-search-results" style="display:none;"></div>
                             </div>
                         </div>
 
+                        <!-- WAREHOUSE / POSTOMAT SELECTION -->
                         <div class="checkout-group" id="delivery-warehouse-group" style="display:none;">
-                            <label id="warehouse-group-label">Відділення / Поштомат</label>
+                            <label id="warehouse-group-label">Пункт отримання</label>
+                            <div id="warehouse-type-filter-row" class="delivery-type-filters" style="display:none;">
+                                <button type="button" class="delivery-filter-btn active" id="wh-filter-all" onclick="setWarehouseFilter('all')">Усі відділення</button>
+                                <button type="button" class="delivery-filter-btn" id="wh-filter-branch30" onclick="setWarehouseFilter('30')">До 30 кг</button>
+                                <button type="button" class="delivery-filter-btn" id="wh-filter-cargo" onclick="setWarehouseFilter('cargo')">Вантажні</button>
+                            </div>
                             <div id="warehouse-selected-pill"></div>
                             <div id="warehouse-search-box-wrap">
-                                <input type="text" id="chk-warehouse-search" placeholder="Пошук за номером або вулицею..." autocomplete="off" oninput="searchDeliveryWarehouses(this.value)">
+                                <div class="delivery-input-wrap">
+                                    <span class="delivery-input-icon">🔍</span>
+                                    <input type="text" id="chk-warehouse-search" placeholder="Пошук за номером або вулицею..." autocomplete="off" oninput="searchDeliveryWarehouses(this.value)">
+                                    <button type="button" class="delivery-input-clear" id="chk-warehouse-clear-btn" onclick="clearWarehouseInput()">✕</button>
+                                </div>
                                 <div class="delivery-search-results" id="warehouse-search-results" style="display:none;"></div>
+                            </div>
+                        </div>
+
+                        <!-- COURIER ADDRESS FORM -->
+                        <div class="checkout-group" id="delivery-courier-group" style="display:none;">
+                            <label>Адреса доставки кур'єром</label>
+                            <div class="courier-address-grid">
+                                <div class="street-col">
+                                    <input type="text" id="chk-courier-street" placeholder="Вулиця / Проспект / Бульвар" autocomplete="address-line1">
+                                </div>
+                                <div>
+                                    <input type="text" id="chk-courier-building" placeholder="Будинок" autocomplete="address-line2">
+                                </div>
+                                <div>
+                                    <input type="text" id="chk-courier-apt" placeholder="Кв. / Офіс">
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -3523,15 +3693,30 @@
             }
             if (step === 2) {
                 if (!checkoutDelivery.provider) {
-                    alert("Будь ласка, оберіть службу доставки (Нова Пошта або Укрпошта).");
+                    alert("Будь ласка, оберіть спосіб доставки.");
                     return false;
                 }
                 if (!checkoutDelivery.city) {
                     alert("Будь ласка, оберіть місто доставки зі списку.");
                     return false;
                 }
+                if (checkoutDelivery.method === 'courier') {
+                    const street = (document.getElementById('chk-courier-street')?.value || '').trim();
+                    const building = (document.getElementById('chk-courier-building')?.value || '').trim();
+                    const apt = (document.getElementById('chk-courier-apt')?.value || '').trim();
+                    if (!street || !building) {
+                        alert("Будь ласка, вкажіть вулицю та номер будинку для кур'єрської доставки.");
+                        return false;
+                    }
+                    checkoutDelivery.courierStreet = street;
+                    checkoutDelivery.courierBuilding = building;
+                    checkoutDelivery.courierApt = apt;
+                    checkoutDelivery.department = `вул. ${street}, буд. ${building}${apt ? ', кв./оф. ' + apt : ''}`;
+                    return true;
+                }
                 if (!checkoutDelivery.department && !checkoutDelivery.warehouseRef) {
-                    alert("Будь ласка, оберіть відділення або поштомат доставки.");
+                    const label = checkoutDelivery.method === 'postomat' ? 'поштомат' : 'відділення';
+                    alert(`Будь ласка, оберіть ${label} доставки.`);
                     return false;
                 }
                 return true;
@@ -3550,9 +3735,39 @@
             renderCheckoutStep();
         }
 
-        const DEFAULT_DELIVERY_PROVIDERS = [
-            { id: 'nova_poshta', name: 'Нова Пошта', icon: '📦', note: 'Відділення та поштомати (1-2 дні)', configured: true },
-            { id: 'ukrposhta', name: 'Укрпошта', icon: '📬', note: 'Відділення Експрес / Стандарт', configured: true }
+        const DELIVERY_METHODS = [
+            {
+                id: 'nova_poshta_branch',
+                provider: 'nova_poshta',
+                method: 'branch',
+                name: 'Відділення Нової Пошти',
+                sub: 'До 30 кг та вантажні • 1–2 дні',
+                icon: '<img src="brand-novaposhta.svg" alt="Нова Пошта" style="width: 26px; height: 26px; object-fit: contain;">'
+            },
+            {
+                id: 'nova_poshta_postomat',
+                provider: 'nova_poshta',
+                method: 'postomat',
+                name: 'Поштомат Нової Пошти',
+                sub: 'Швидко 24/7 біля дому • до 20 кг',
+                icon: '<img src="brand-novaposhta.svg" alt="Нова Пошта" style="width: 26px; height: 26px; object-fit: contain;">'
+            },
+            {
+                id: 'nova_poshta_courier',
+                provider: 'nova_poshta',
+                method: 'courier',
+                name: "Кур'єр Нової Пошти",
+                sub: 'Адресна доставка до дверей',
+                icon: '<img src="brand-novaposhta.svg" alt="Нова Пошта" style="width: 26px; height: 26px; object-fit: contain;">'
+            },
+            {
+                id: 'ukrposhta_branch',
+                provider: 'ukrposhta',
+                method: 'branch',
+                name: 'Відділення Укрпошти',
+                sub: 'Експрес / Стандарт по Україні',
+                icon: '<img src="brand-ukrposhta.svg" alt="Укрпошта" style="width: 26px; height: 26px; object-fit: contain;">'
+            }
         ];
 
         const POPULAR_CITIES = [
@@ -3563,22 +3778,20 @@
             { name: 'Дніпро', ref: 'db5c88f0-391c-11dd-90d9-001a92567626', region: 'Дніпропетровська обл.' },
             { name: 'Запоріжжя', ref: 'db5c88c6-391c-11dd-90d9-001a92567626', region: 'Запорізька обл.' },
             { name: 'Вінниця', ref: 'db5c8892-391c-11dd-90d9-001a92567626', region: 'Вінницька обл.' },
-            { name: 'Івано-Франківськ', ref: 'db5c88ec-391c-11dd-90d9-001a92567626', region: 'Івано-Франківська обл.' }
+            { name: 'Івано-Франківськ', ref: 'db5c88ec-391c-11dd-90d9-001a92567626', region: 'Івано-Франківська обл.' },
+            { name: 'Полтава', ref: 'db5c88f9-391c-11dd-90d9-001a92567626', region: 'Полтавська обл.' },
+            { name: 'Кривий Ріг', ref: 'db5c88b9-391c-11dd-90d9-001a92567626', region: 'Дніпропетровська обл.' },
+            { name: 'Черкаси', ref: 'db5c8914-391c-11dd-90d9-001a92567626', region: 'Черкаська обл.' }
         ];
 
-        let deliveryCitiesCache = {};
-        let deliveryWarehousesCache = {};
+        let warehouseFilterState = 'all';
+        let currentWarehousesList = [];
 
         async function loadDeliveryProviders() {
-            try {
-                const res = await fetch(DELIVERY_PROVIDERS_URL);
-                const data = res.ok ? await res.json() : [];
-                deliveryProviders = Array.isArray(data) && data.length > 0 ? data : DEFAULT_DELIVERY_PROVIDERS;
-            } catch (err) {
-                deliveryProviders = DEFAULT_DELIVERY_PROVIDERS;
-            }
-            if (!checkoutDelivery.provider) {
+            if (!checkoutDelivery.selectedMethodId) {
+                checkoutDelivery.selectedMethodId = 'nova_poshta_branch';
                 checkoutDelivery.provider = 'nova_poshta';
+                checkoutDelivery.method = 'branch';
             }
             renderProviderChips();
             renderQuickCities();
@@ -3587,70 +3800,109 @@
         function renderProviderChips() {
             const group = document.getElementById('provider-chip-group');
             if (!group) return;
-            const providers = deliveryProviders && deliveryProviders.length > 0 ? deliveryProviders : DEFAULT_DELIVERY_PROVIDERS;
             
-            group.innerHTML = providers.map(p => {
-                const isActive = checkoutDelivery.provider === p.id;
-                const iconImg = p.id === 'nova_poshta' 
-                    ? '<img src="brand-novaposhta.svg" alt="Нова Пошта" style="width: 28px; height: 28px; border-radius: 6px; object-fit: contain;">' 
-                    : (p.id === 'ukrposhta' 
-                        ? '<img src="brand-ukrposhta.svg" alt="Укрпошта" style="width: 28px; height: 28px; border-radius: 6px; object-fit: contain;">' 
-                        : '<span style="font-size:1.3rem;">🚚</span>');
-                const sub = p.note || (p.id === 'nova_poshta' ? 'Відділення та поштомати (1-2 дні)' : 'Відділення Експрес / Стандарт');
+            group.innerHTML = DELIVERY_METHODS.map(m => {
+                const isActive = checkoutDelivery.selectedMethodId === m.id;
                 return `
-                    <div class="delivery-provider-card ${isActive ? 'active' : ''}" onclick="selectDeliveryProvider('${p.id}')">
-                        <div class="delivery-provider-icon">${iconImg}</div>
+                    <div class="delivery-provider-card ${isActive ? 'active' : ''}" onclick="selectDeliveryMethod('${m.id}')">
+                        <div class="delivery-provider-icon">${m.icon}</div>
                         <div class="delivery-provider-info">
                             <div class="delivery-provider-title">
-                                <span>${p.name}</span>
+                                <span>${m.name}</span>
                                 <div class="provider-check-mark">${isActive ? '✓' : ''}</div>
                             </div>
-                            <div class="delivery-provider-sub">${sub}</div>
+                            <div class="delivery-provider-sub">${m.sub}</div>
                         </div>
                     </div>
                 `;
             }).join('');
         }
 
-        function selectDeliveryProvider(providerId) {
-            checkoutDelivery.provider = providerId;
+        function selectDeliveryMethod(methodId) {
+            const m = DELIVERY_METHODS.find(item => item.id === methodId) || DELIVERY_METHODS[0];
+            checkoutDelivery.selectedMethodId = m.id;
+            checkoutDelivery.provider = m.provider;
+            checkoutDelivery.method = m.method;
             renderProviderChips();
 
             const flow = document.getElementById('delivery-configured-flow');
             if (flow) flow.style.display = 'flex';
 
+            const whGroup = document.getElementById('delivery-warehouse-group');
+            const courierGroup = document.getElementById('delivery-courier-group');
+            const filterRow = document.getElementById('warehouse-type-filter-row');
             const whGroupLabel = document.getElementById('warehouse-group-label');
-            if (whGroupLabel) {
-                whGroupLabel.innerText = providerId === 'ukrposhta' ? 'Відділення Укрпошти' : 'Відділення / Поштомат Нової Пошти';
-            }
+            const whInput = document.getElementById('chk-warehouse-search');
 
-            // If a city is already selected, re-fetch warehouses for the new provider
-            if (checkoutDelivery.city || checkoutDelivery.cityRef) {
-                checkoutDelivery.warehouseRef = '';
-                checkoutDelivery.department = '';
-                const whPill = document.getElementById('warehouse-selected-pill');
-                if (whPill) whPill.innerHTML = '';
-                const whWrap = document.getElementById('warehouse-search-box-wrap');
-                if (whWrap) whWrap.style.display = 'block';
-                loadDeliveryWarehouses('');
+            if (m.method === 'courier') {
+                if (whGroup) whGroup.style.display = 'none';
+                if (courierGroup) courierGroup.style.display = 'block';
+            } else {
+                if (courierGroup) courierGroup.style.display = 'none';
+                if (checkoutDelivery.city || checkoutDelivery.cityRef) {
+                    if (whGroup) whGroup.style.display = 'flex';
+                }
+
+                if (m.id === 'nova_poshta_branch') {
+                    if (whGroupLabel) whGroupLabel.innerText = 'Відділення Нової Пошти';
+                    if (whInput) whInput.placeholder = 'Пошук за номером (напр. 315) або вулицею...';
+                    if (filterRow) filterRow.style.display = 'flex';
+                } else if (m.id === 'nova_poshta_postomat') {
+                    if (whGroupLabel) whGroupLabel.innerText = 'Поштомат Нової Пошти';
+                    if (whInput) whInput.placeholder = 'Пошук за номером поштомату (напр. 3154) або вулицею...';
+                    if (filterRow) filterRow.style.display = 'none';
+                } else {
+                    if (whGroupLabel) whGroupLabel.innerText = 'Відділення Укрпошти';
+                    if (whInput) whInput.placeholder = 'Введіть номер відділення або індекс (напр. 01001)...';
+                    if (filterRow) filterRow.style.display = 'none';
+                }
+
+                // If city is already selected, re-fetch warehouses
+                if (checkoutDelivery.city || checkoutDelivery.cityRef) {
+                    checkoutDelivery.warehouseRef = '';
+                    checkoutDelivery.department = '';
+                    const whPill = document.getElementById('warehouse-selected-pill');
+                    if (whPill) whPill.innerHTML = '';
+                    const whWrap = document.getElementById('warehouse-search-box-wrap');
+                    if (whWrap) whWrap.style.display = 'block';
+                    loadDeliveryWarehouses('');
+                }
             }
+        }
+
+        // Backward compatible alias
+        function selectDeliveryProvider(providerId) {
+            if (providerId === 'ukrposhta') selectDeliveryMethod('ukrposhta_branch');
+            else selectDeliveryMethod('nova_poshta_branch');
+        }
+
+        function setWarehouseFilter(filterType) {
+            warehouseFilterState = filterType;
+            document.querySelectorAll('#warehouse-type-filter-row .delivery-filter-btn').forEach(btn => btn.classList.remove('active'));
+            if (filterType === 'all') document.getElementById('wh-filter-all')?.classList.add('active');
+            else if (filterType === '30') document.getElementById('wh-filter-branch30')?.classList.add('active');
+            else if (filterType === 'cargo') document.getElementById('wh-filter-cargo')?.classList.add('active');
+            renderWarehousesResults(currentWarehousesList);
         }
 
         function renderQuickCities() {
             const container = document.getElementById('quick-cities-container');
             if (!container) return;
             container.innerHTML = POPULAR_CITIES.map(c => `
-                <div class="quick-city-chip ${checkoutDelivery.city === c.name ? 'active' : ''}" onclick="selectQuickCity('${c.ref}', '${c.name.replace(/'/g, "\\'")}')">${c.name}</div>
+                <div class="quick-city-chip ${checkoutDelivery.city === c.name ? 'active' : ''}" onclick="selectQuickCity('${c.ref}', '${c.name.replace(/'/g, "\\'")}', '${c.region.replace(/'/g, "\\'")}')">${c.name}</div>
             `).join('');
         }
 
-        function selectQuickCity(ref, name) {
-            selectCity(ref, name);
+        function selectQuickCity(ref, name, region) {
+            selectCity(ref, name, region);
         }
 
         let citySearchDebounce = null;
         async function searchDeliveryCities(query) {
             clearTimeout(citySearchDebounce);
+            const clearBtn = document.getElementById('chk-city-clear-btn');
+            if (clearBtn) clearBtn.style.display = query && query.length > 0 ? 'block' : 'none';
+
             const resultsBox = document.getElementById('city-search-results');
             if (!query || query.trim().length < 2) {
                 if (resultsBox) resultsBox.style.display = 'none';
@@ -3666,20 +3918,36 @@
                         resultsBox.style.display = 'flex';
                         return;
                     }
-                    resultsBox.innerHTML = data.map(item => `
-                        <div class="delivery-search-result-item" onclick="selectCity('${item.ref || item.id}', '${(item.name || item.fullName).replace(/'/g, "\\'")}')">
-                            <div class="item-title">${item.fullName || item.name}</div>
-                            ${item.region && !item.fullName?.includes(item.region) ? `<div class="item-sub">${item.region}</div>` : ''}
-                        </div>
-                    `).join('');
+                    resultsBox.innerHTML = data.map(item => {
+                        const displayName = item.fullName || item.name;
+                        const regionText = item.region && !displayName.includes(item.region) ? item.region : '';
+                        return `
+                            <div class="delivery-search-result-item" onclick="selectCity('${item.ref || item.id}', '${(item.name || item.fullName).replace(/'/g, "\\'")}', '${(item.region || '').replace(/'/g, "\\'")}')">
+                                <div class="item-title"><span>🏙️ ${displayName}</span></div>
+                                ${regionText ? `<div class="item-sub">${regionText}</div>` : ''}
+                            </div>
+                        `;
+                    }).join('');
                     resultsBox.style.display = 'flex';
                 } catch (err) {
                     if (resultsBox) resultsBox.style.display = 'none';
                 }
-            }, 250);
+            }, 200);
         }
 
-        function selectCity(ref, name) {
+        function clearCityInput() {
+            const input = document.getElementById('chk-city-search');
+            if (input) {
+                input.value = '';
+                input.focus();
+            }
+            const clearBtn = document.getElementById('chk-city-clear-btn');
+            if (clearBtn) clearBtn.style.display = 'none';
+            const resultsBox = document.getElementById('city-search-results');
+            if (resultsBox) resultsBox.style.display = 'none';
+        }
+
+        function selectCity(ref, name, region = '') {
             checkoutDelivery.cityRef = ref;
             checkoutDelivery.city = name;
             checkoutDelivery.warehouseRef = '';
@@ -3691,6 +3959,9 @@
             const cityInput = document.getElementById('chk-city-search');
             if (cityInput) cityInput.value = '';
 
+            const clearBtn = document.getElementById('chk-city-clear-btn');
+            if (clearBtn) clearBtn.style.display = 'none';
+
             const cityBoxWrap = document.getElementById('city-search-box-wrap');
             if (cityBoxWrap) cityBoxWrap.style.display = 'none';
 
@@ -3698,28 +3969,34 @@
             if (pill) {
                 pill.innerHTML = `
                     <div class="selected-pill">
-                        <span>📍 Місто: <strong>${name}</strong></span>
+                        <div class="selected-pill-info">
+                            <span class="selected-pill-title">📍 ${name}</span>
+                            ${region ? `<span class="selected-pill-sub">${region}</span>` : ''}
+                        </div>
                         <button type="button" onclick="clearCitySelection()">✕ Змінити</button>
                     </div>
                 `;
             }
 
-            const whGroup = document.getElementById('delivery-warehouse-group');
-            if (whGroup) whGroup.style.display = 'flex';
+            if (checkoutDelivery.method === 'courier') {
+                const whGroup = document.getElementById('delivery-warehouse-group');
+                if (whGroup) whGroup.style.display = 'none';
+                const courierGroup = document.getElementById('delivery-courier-group');
+                if (courierGroup) courierGroup.style.display = 'block';
+            } else {
+                const whGroup = document.getElementById('delivery-warehouse-group');
+                if (whGroup) whGroup.style.display = 'flex';
 
-            const whSearchWrap = document.getElementById('warehouse-search-box-wrap');
-            if (whSearchWrap) whSearchWrap.style.display = 'block';
+                const whSearchWrap = document.getElementById('warehouse-search-box-wrap');
+                if (whSearchWrap) whSearchWrap.style.display = 'block';
 
-            const whPill = document.getElementById('warehouse-selected-pill');
-            if (whPill) whPill.innerHTML = '';
+                const whPill = document.getElementById('warehouse-selected-pill');
+                if (whPill) whPill.innerHTML = '';
 
-            const whGroupLabel = document.getElementById('warehouse-group-label');
-            if (whGroupLabel) {
-                whGroupLabel.innerText = checkoutDelivery.provider === 'ukrposhta' ? 'Відділення Укрпошти' : 'Відділення / Поштомат Нової Пошти';
+                loadDeliveryWarehouses('');
             }
 
             renderQuickCities();
-            loadDeliveryWarehouses('');
         }
 
         function clearCitySelection() {
@@ -3740,7 +4017,6 @@
             renderQuickCities();
         }
 
-        let currentWarehousesList = [];
         let whSearchDebounce = null;
 
         async function loadDeliveryWarehouses(query = '') {
@@ -3749,10 +4025,11 @@
             if (!checkoutDelivery.cityRef && !checkoutDelivery.city) return;
 
             resultsBox.style.display = 'flex';
-            resultsBox.innerHTML = '<div class="delivery-search-empty">🔍 Завантаження відділень...</div>';
+            resultsBox.innerHTML = '<div class="delivery-search-empty">🔍 Завантаження пунктів видачі...</div>';
 
             try {
-                const url = `${API_BASE}/delivery/warehouses?provider=${encodeURIComponent(checkoutDelivery.provider || 'nova_poshta')}&city_ref=${encodeURIComponent(checkoutDelivery.cityRef || '')}&city_name=${encodeURIComponent(checkoutDelivery.city || '')}&query=${encodeURIComponent(query || '')}`;
+                const typeParam = checkoutDelivery.method === 'postomat' ? 'postomat' : (checkoutDelivery.method === 'branch' ? 'branch' : '');
+                const url = `${API_BASE}/delivery/warehouses?provider=${encodeURIComponent(checkoutDelivery.provider || 'nova_poshta')}&city_ref=${encodeURIComponent(checkoutDelivery.cityRef || '')}&city_name=${encodeURIComponent(checkoutDelivery.city || '')}&type=${encodeURIComponent(typeParam)}&query=${encodeURIComponent(query || '')}`;
                 const res = await fetch(url);
                 const data = res.ok ? await res.json() : [];
                 currentWarehousesList = Array.isArray(data) ? data : [];
@@ -3766,20 +4043,39 @@
             const resultsBox = document.getElementById('warehouse-search-results');
             if (!resultsBox) return;
 
-            if (!list || list.length === 0) {
-                resultsBox.innerHTML = '<div class="delivery-search-empty">Відділень за цим запитом не знайдено</div>';
+            let filtered = list || [];
+            if (warehouseFilterState === '30') {
+                filtered = filtered.filter(item => {
+                    const n = (item.name || '').toLowerCase();
+                    return n.includes('30') || n.includes('поштомат') || !n.includes('вантажне');
+                });
+            } else if (warehouseFilterState === 'cargo') {
+                filtered = filtered.filter(item => {
+                    const n = (item.name || '').toLowerCase();
+                    return n.includes('вантажне') || n.includes('1100') || n.includes('без обмежень');
+                });
+            }
+
+            if (!filtered || filtered.length === 0) {
+                resultsBox.innerHTML = '<div class="delivery-search-empty">Пунктів за цим запитом не знайдено</div>';
                 resultsBox.style.display = 'flex';
                 return;
             }
 
-            resultsBox.innerHTML = list.map(item => {
+            resultsBox.innerHTML = filtered.map(item => {
                 const isSelected = checkoutDelivery.warehouseRef === (item.ref || item.id);
                 const isPostomat = item.type === 'postomat' || (item.name && item.name.toLowerCase().includes('поштомат'));
-                const icon = isPostomat ? '📮' : '🏬';
+                const isCargo = (item.name && item.name.toLowerCase().includes('вантажне'));
+                const icon = isPostomat ? '📮' : (isCargo ? '🚛' : '🏢');
+                const badge = isPostomat ? 'Поштомат 24/7' : (isCargo ? 'Вантажне' : 'До 30 кг');
+
                 return `
-                    <div class="delivery-search-result-item ${isSelected ? 'selected' : ''}" onclick="selectWarehouse('${item.ref || item.id}', '${item.name.replace(/'/g, "\\'")}')">
-                        <div class="item-title">${icon} ${item.name}</div>
-                        ${item.address && item.address !== item.name ? `<div class="item-sub">${item.address}</div>` : ''}
+                    <div class="delivery-search-result-item ${isSelected ? 'selected' : ''}" onclick="selectWarehouse('${item.ref || item.id}', '${item.name.replace(/'/g, "\\'")}', '${(item.address || '').replace(/'/g, "\\'")}')">
+                        <div class="item-title">
+                            <span>${icon} ${item.name}</span>
+                            <span class="wh-badge">${badge}</span>
+                        </div>
+                        ${item.address && item.address !== item.name ? `<div class="item-sub">📍 ${item.address}</div>` : ''}
                     </div>
                 `;
             }).join('');
@@ -3788,12 +4084,26 @@
 
         function searchDeliveryWarehouses(query) {
             clearTimeout(whSearchDebounce);
+            const clearBtn = document.getElementById('chk-warehouse-clear-btn');
+            if (clearBtn) clearBtn.style.display = query && query.length > 0 ? 'block' : 'none';
+
             whSearchDebounce = setTimeout(() => {
                 loadDeliveryWarehouses(query);
-            }, 250);
+            }, 200);
         }
 
-        function selectWarehouse(ref, name) {
+        function clearWarehouseInput() {
+            const input = document.getElementById('chk-warehouse-search');
+            if (input) {
+                input.value = '';
+                input.focus();
+            }
+            const clearBtn = document.getElementById('chk-warehouse-clear-btn');
+            if (clearBtn) clearBtn.style.display = 'none';
+            loadDeliveryWarehouses('');
+        }
+
+        function selectWarehouse(ref, name, address = '') {
             checkoutDelivery.warehouseRef = ref;
             checkoutDelivery.department = name;
 
@@ -3803,11 +4113,20 @@
             const whInput = document.getElementById('chk-warehouse-search');
             if (whInput) whInput.value = '';
 
+            const clearBtn = document.getElementById('chk-warehouse-clear-btn');
+            if (clearBtn) clearBtn.style.display = 'none';
+
+            const isPostomat = checkoutDelivery.method === 'postomat' || name.toLowerCase().includes('поштомат');
+            const icon = isPostomat ? '📮' : '🏢';
+
             const whPill = document.getElementById('warehouse-selected-pill');
             if (whPill) {
                 whPill.innerHTML = `
                     <div class="selected-pill">
-                        <span>🏢 ${name}</span>
+                        <div class="selected-pill-info">
+                            <span class="selected-pill-title">${icon} ${name}</span>
+                            ${address && address !== name ? `<span class="selected-pill-sub">📍 ${address}</span>` : ''}
+                        </div>
                         <button type="button" onclick="clearWarehouseSelection()">✕ Змінити</button>
                     </div>
                 `;
@@ -3825,157 +4144,6 @@
             if (whSearchWrap) whSearchWrap.style.display = 'block';
 
             loadDeliveryWarehouses('');
-        }
-
-        async function loadMyProfile() {
-            try {
-                const res = await fetch(PROFILE_API_URL, {
-                    headers: { 'X-Telegram-Init-Data': tg.initData }
-                });
-                if (res.ok) {
-                    myProfile = await res.json();
-                    prefillContactsFromProfile();
-                    renderSavedDeliveriesBlock();
-                }
-            } catch (err) {
-                myProfile = null;
-            }
-        }
-
-        function prefillContactsFromProfile() {
-            if (!myProfile) return;
-            const nameEl = document.getElementById('chk-name');
-            const surnameEl = document.getElementById('chk-surname');
-            const phoneEl = document.getElementById('chk-phone');
-            if (nameEl && !nameEl.value && myProfile.first_name) nameEl.value = myProfile.first_name;
-            if (surnameEl && !surnameEl.value && myProfile.last_name) surnameEl.value = myProfile.last_name;
-            if (phoneEl && (!phoneEl.value || phoneEl.value === '+380') && myProfile.phone) {
-                phoneEl.value = normalizePhoneDisplay(myProfile.phone);
-            }
-        }
-
-        function renderSavedDeliveriesBlock() {
-            const block = document.getElementById('saved-deliveries-block');
-            if (!block || !myProfile || !Array.isArray(myProfile.saved_deliveries) || myProfile.saved_deliveries.length === 0) {
-                if (block) block.innerHTML = '';
-                return;
-            }
-            block.innerHTML = `
-                <div class="checkout-group" style="margin-bottom: 12px;">
-                    <label>Збережені адреси доставки</label>
-                    <div style="display:flex; flex-direction:column; gap:6px;">
-                        ${myProfile.saved_deliveries.map((sd, i) => `
-                            <div class="saved-delivery-chip">
-                                <div><strong>${PROVIDER_LABELS[sd.provider] || sd.provider}</strong>: ${sd.city}, ${sd.department}</div>
-                                <button class="btn-secondary" onclick="useSavedDelivery(${i})">Обрати</button>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            `;
-        }
-
-        function useSavedDelivery(idx) {
-            const sd = myProfile.saved_deliveries[idx];
-            if (!sd) return;
-            selectDeliveryProvider(sd.provider);
-            selectCity(sd.city_ref, sd.city);
-            selectWarehouse(sd.warehouse_ref, sd.department);
-        }
-
-        function selectPaymentMethod(method) {
-            const hiddenInput = document.getElementById('chk-payment');
-            if (hiddenInput) hiddenInput.value = method;
-
-            const cardOnline = document.getElementById('pay-card-online');
-            const cardCod = document.getElementById('pay-card-cod');
-            const optOnline = document.getElementById('pay-opt-online');
-            const optCod = document.getElementById('pay-opt-cod');
-
-            if (method === 'online') {
-                if (cardOnline) {
-                    cardOnline.classList.add('active');
-                    cardOnline.style.borderColor = 'var(--accent)';
-                }
-                if (cardCod) {
-                    cardCod.classList.remove('active');
-                    cardCod.style.borderColor = 'var(--border-light)';
-                }
-                if (optOnline) optOnline.checked = true;
-            } else {
-                if (cardCod) {
-                    cardCod.classList.add('active');
-                    cardCod.style.borderColor = 'var(--accent)';
-                }
-                if (cardOnline) {
-                    cardOnline.classList.remove('active');
-                    cardOnline.style.borderColor = 'var(--border-light)';
-                }
-                if (optCod) optCod.checked = true;
-            }
-        }
-
-        function renderReviewStep() {
-            const name = document.getElementById('chk-name').value.trim();
-            const surname = document.getElementById('chk-surname').value.trim();
-            const email = document.getElementById('chk-email').value.trim();
-            const phone = document.getElementById('chk-phone').value.trim();
-            const payment = document.getElementById('chk-payment').value;
-            const comment = document.getElementById('chk-comment').value.trim();
-
-            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-            const isCod = payment === 'cod';
-            const codFee = isCod ? Math.round(20 + subtotal * 0.02) : 0;
-            const total = subtotal + codFee;
-
-            document.getElementById('review-items-block').innerHTML = `
-                <h5>Товари у замовленні (${cart.reduce((s, i) => s + i.qty, 0)})</h5>
-                ${cart.map(item => `
-                    <div class="review-line" style="display: flex; justify-content: space-between; align-items: center; padding: 4px 0;">
-                        <span style="font-size: 0.85rem;">${item.title} <strong style="color:var(--accent);">(${item.color})</strong> × ${item.qty}</span>
-                        <span style="font-weight: 700; font-size: 0.85rem;">${formatPrice(item.price * item.qty)}</span>
-                    </div>
-                `).join('')}
-                <div class="review-line" style="display: flex; justify-content: space-between; margin-top: 6px; padding-top: 6px; border-top: 1px dashed var(--border-light); font-size: 0.85rem; color: var(--text-secondary);">
-                    <span>Вартість товарів:</span>
-                    <span>${formatPrice(subtotal)}</span>
-                </div>
-                ${isCod ? `
-                <div class="review-line" style="display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--text-secondary);">
-                    <span>Комісія накладеного платежу (20 ₴ + 2%):</span>
-                    <span>+${formatPrice(codFee)}</span>
-                </div>
-                ` : ''}
-                <div class="review-line" style="display: flex; justify-content: space-between; border-top: 1px solid var(--border-light); margin-top: 6px; padding-top: 8px; font-weight: 800; font-size: 1rem; color: var(--accent);">
-                    <span>Разом до сплати:</span>
-                    <span>${formatPrice(total)}</span>
-                </div>
-            `;
-
-            document.getElementById('review-contact-block').innerHTML = `
-                <h5>Отримувач</h5>
-                <div class="review-line"><span>ПІБ:</span> <span>${name} ${surname}</span></div>
-                <div class="review-line"><span>Телефон:</span> <span>${phone}</span></div>
-                ${email ? `<div class="review-line"><span>E-mail:</span> <span>${email}</span></div>` : ''}
-            `;
-
-            const provName = PROVIDER_LABELS[checkoutDelivery.provider] || (checkoutDelivery.provider === 'nova_poshta' ? 'Нова Пошта' : 'Укрпошта');
-            document.getElementById('review-delivery-block').innerHTML = `
-                <h5>Доставка та терміни</h5>
-                <div class="review-line"><span>Служба:</span> <span>${provName}</span></div>
-                <div class="review-line"><span>Місто:</span> <span>${checkoutDelivery.city}</span></div>
-                <div class="review-line"><span>Відділення:</span> <span>${checkoutDelivery.department}</span></div>
-                <div class="review-line" style="margin-top: 4px; padding-top: 4px; border-top: 1px dashed var(--border-light); color: var(--accent); font-weight: 700;">
-                    <span>⚡ Термін відправки:</span> <span>1–2 робочих дні</span>
-                </div>
-            `;
-
-            const payName = payment === 'online' ? '💳 Онлайн-оплата (Telegram / Картка)' : '📦 Накладений платіж при отриманні';
-            document.getElementById('review-payment-block').innerHTML = `
-                <h5>Спосіб оплати</h5>
-                <div class="review-line"><span>Тип:</span> <span>${payName}</span></div>
-                ${comment ? `<div class="review-line"><span>Коментар:</span> <span>${comment}</span></div>` : ''}
-            `;
         }
 
         async function submitOrder() {

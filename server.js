@@ -590,9 +590,11 @@ app.get('/api/orders/:order_id', (req, res) => {
 // Delivery Service APIs
 // ----------------------------------------------------
 
+const NOVA_POSHTA_DEFAULT_KEY = '38993fae866d85598bf3e851cb919a6a';
+
 app.get('/api/delivery/providers', (req, res) => {
   res.json([
-    { id: 'nova_poshta', name: 'Нова Пошта', note: 'Відділення та поштомати', configured: true },
+    { id: 'nova_poshta', name: 'Нова Пошта', note: 'Відділення, поштомати та курʼєр', configured: true },
     { id: 'ukrposhta', name: 'Укрпошта', note: 'Відділення Експрес / Стандарт', configured: true }
   ]);
 });
@@ -600,7 +602,7 @@ app.get('/api/delivery/providers', (req, res) => {
 async function handleCitySearch(req, res) {
   const q = (req.query.query || '').toString().trim();
   const provider = req.params.provider_id || req.query.provider || 'nova_poshta';
-  const npApiKey = process.env.NOVA_POSHTA_API_KEY || '';
+  const npApiKey = process.env.NOVA_POSHTA_API_KEY || NOVA_POSHTA_DEFAULT_KEY;
 
   if (q.length >= 2) {
     try {
@@ -613,7 +615,7 @@ async function handleCitySearch(req, res) {
           calledMethod: 'searchSettlements',
           methodProperties: {
             CityName: q,
-            Limit: '25',
+            Limit: '30',
             Page: '1'
           }
         })
@@ -651,7 +653,8 @@ async function handleWarehouseSearch(req, res) {
   const cityNameReq = (req.query.city_name || req.query.cityName || '').toString().trim();
   const rawQ = (req.query.query || '').toString().trim();
   const provider = req.params.provider_id || req.query.provider || 'nova_poshta';
-  const npApiKey = process.env.NOVA_POSHTA_API_KEY || '';
+  const typeFilter = (req.query.type || '').toString().trim(); // 'branch', 'postomat', 'all'
+  const npApiKey = process.env.NOVA_POSHTA_API_KEY || NOVA_POSHTA_DEFAULT_KEY;
 
   // Clean query string (strip symbols like №, #, and common words so "№315" -> "315")
   const cleanQ = rawQ.replace(/[№#]/g, '').replace(/відділення|поштомат|отделение/gi, '').trim();
@@ -659,11 +662,11 @@ async function handleWarehouseSearch(req, res) {
   let matchedCity = UKRAINE_CITIES.find(c => c.ref === cityRef || c.name.toLowerCase() === cityNameReq.toLowerCase());
   const cityName = cityNameReq || (matchedCity ? matchedCity.name : 'Київ');
 
-  if (provider === 'nova_poshta') {
+  if (provider === 'nova_poshta' || provider.startsWith('nova_poshta')) {
     try {
       const methodProperties = {
         CityName: cityName,
-        Limit: '50',
+        Limit: '100',
         Page: '1'
       };
       if (cityRef && cityRef.length > 20) {
@@ -685,13 +688,26 @@ async function handleWarehouseSearch(req, res) {
       });
       const data = await response.json();
       if (data.success && Array.isArray(data.data) && data.data.length > 0) {
-        let liveWh = data.data.map(w => ({
-          ref: w.Ref,
-          number: w.Number,
-          name: w.Description,
-          address: w.ShortAddress || w.Description,
-          type: w.CategoryOfWarehouse === 'Postomat' ? 'postomat' : 'branch'
-        }));
+        let liveWh = data.data.map(w => {
+          const isPostomat = w.CategoryOfWarehouse === 'Postomat' || (w.Description && w.Description.toLowerCase().includes('поштомат'));
+          const maxWeight = w.TotalMaxWeightAllowed ? `${w.TotalMaxWeightAllowed} кг` : (w.PlaceMaxWeightAllowed ? `${w.PlaceMaxWeightAllowed} кг` : '');
+          return {
+            ref: w.Ref,
+            number: w.Number,
+            name: w.Description,
+            address: w.ShortAddress || w.Description,
+            type: isPostomat ? 'postomat' : 'branch',
+            maxWeight: maxWeight,
+            schedule: w.Schedule || null
+          };
+        });
+
+        // Filter by type if requested
+        if (typeFilter === 'postomat') {
+          liveWh = liveWh.filter(w => w.type === 'postomat');
+        } else if (typeFilter === 'branch') {
+          liveWh = liveWh.filter(w => w.type === 'branch');
+        }
 
         // If user searched for a specific number (e.g. 315), sort exact match to the very top
         if (cleanQ && /^\d+$/.test(cleanQ)) {
@@ -713,6 +729,12 @@ async function handleWarehouseSearch(req, res) {
     ? getMockUkrposhtaWarehouses(cityName)
     : getMockNovaPoshtaWarehouses(cityName);
 
+  if (typeFilter === 'postomat') {
+    warehouses = warehouses.filter(w => w.type === 'postomat');
+  } else if (typeFilter === 'branch') {
+    warehouses = warehouses.filter(w => w.type === 'branch');
+  }
+
   if (cleanQ) {
     const qLower = cleanQ.toLowerCase();
     let filtered = warehouses.filter(w =>
@@ -722,12 +744,14 @@ async function handleWarehouseSearch(req, res) {
     if (filtered.length === 0 && /^\d+$/.test(cleanQ)) {
       if (provider === 'ukrposhta') {
         filtered = [
-          { ref: `up-custom-${cleanQ}`, name: `Відділення Укрпошти №${cleanQ} (${cleanQ.length === 5 ? cleanQ : '0' + cleanQ}): вул. Головна, ${cleanQ}`, address: `вул. Головна, ${cleanQ}`, type: 'standard' }
+          { ref: `up-custom-${cleanQ}`, name: `Відділення Укрпошти №${cleanQ} (${cleanQ.length === 5 ? cleanQ : '0' + cleanQ}): вул. Головна, ${cleanQ}`, address: `вул. Головна, ${cleanQ}`, type: 'branch' }
         ];
       } else {
+        const isPostomat = typeFilter === 'postomat';
         filtered = [
-          { ref: `np-wh-custom-${cleanQ}`, name: `Відділення №${cleanQ} (до 30 кг): вул. Центральна, ${cleanQ}`, address: `вул. Центральна, ${cleanQ}`, type: 'branch' },
-          { ref: `np-pm-custom-${cleanQ}`, name: `Поштомат №${cleanQ}: просп. Перемоги, ${cleanQ}`, address: `просп. Перемоги, ${cleanQ}`, type: 'postomat' }
+          isPostomat
+            ? { ref: `np-pm-custom-${cleanQ}`, name: `Поштомат №${cleanQ}: просп. Перемоги, ${cleanQ}`, address: `просп. Перемоги, ${cleanQ}`, type: 'postomat' }
+            : { ref: `np-wh-custom-${cleanQ}`, name: `Відділення №${cleanQ} (до 30 кг): вул. Центральна, ${cleanQ}`, address: `вул. Центральна, ${cleanQ}`, type: 'branch' }
         ];
       }
     }
