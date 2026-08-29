@@ -456,6 +456,17 @@ const handleCommentUpdate = (req, res) => {
 app.patch('/api/admin/orders/:order_id/comment', handleCommentUpdate);
 app.patch('/api/orders/:order_id/comment', handleCommentUpdate);
 
+const handleDeleteOrder = (req, res) => {
+  const deleted = db.deleteOrder(req.params.order_id);
+  if (!deleted) {
+    return res.status(404).json({ detail: 'Замовлення не знайдено' });
+  }
+  res.json({ status: 'success', detail: 'Замовлення успішно видалено' });
+};
+
+app.delete('/api/admin/orders/:order_id', handleDeleteOrder);
+app.delete('/api/orders/:order_id', handleDeleteOrder);
+
 app.get('/api/admin/stats', (req, res) => {
   const stats = db.getStats();
   res.json(stats);

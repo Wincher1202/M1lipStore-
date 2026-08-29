@@ -748,6 +748,23 @@ class Database {
     return order;
   }
 
+  deleteOrder(orderId) {
+    if (!orderId) return false;
+    const cleanId = orderId.toString().replace(/^#/, '').trim();
+    const initLen = this.data.orders.length;
+    this.data.orders = this.data.orders.filter(o => 
+      o.order_id !== cleanId && 
+      o.id !== cleanId && 
+      o.order_id !== `#${cleanId}` &&
+      o.order_id !== orderId
+    );
+    const deleted = this.data.orders.length < initLen;
+    if (deleted) {
+      this.save();
+    }
+    return deleted;
+  }
+
   // Telegram User Linkage
   linkOrderToTelegramUser(telegramId, orderId, customerData = {}) {
     const tid = String(telegramId);
