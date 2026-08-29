@@ -5,68 +5,11 @@ export const PAYMENT_PROVIDER_TOKEN = process.env.PAYMENT_PROVIDER_TOKEN || 'TES
 
 class TelegramBotService {
   constructor() {
-    this.token = (process.env.BOT_TOKEN || '').trim();
+    this.token = process.env.BOT_TOKEN || '8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA';
     this.botInfo = { first_name: 'M1lipStore Bot' };
     this.username = process.env.BOT_USERNAME || 'm1lipstore_bot';
     // Store wizard sessions in memory or db
     this.wizardSessions = {};
-    this.processedUpdates = new Set();
-
-    if (this.token) {
-      console.log(`[TelegramBot] BOT_TOKEN configured (${this.token.substring(0, 6)}...${this.token.substring(this.token.length - 4)})`);
-      this.initBot();
-    } else {
-      console.warn('[TelegramBot] WARNING: BOT_TOKEN is not set in environment variables. Telegram bot commands like /start will not respond until BOT_TOKEN is configured.');
-    }
-  }
-
-  async initBot() {
-    try {
-      const me = await this.callApi('getMe', {});
-      if (me && me.username) {
-        this.username = me.username;
-        this.botInfo = me;
-        console.log(`[TelegramBot] Successfully connected to Telegram as @${this.username} (${me.first_name})`);
-      }
-    } catch (e) {
-      console.warn('[TelegramBot] getMe error:', e.message);
-    }
-    this.startPolling();
-  }
-
-  startPolling() {
-    console.log('[TelegramBot] Starting Telegram bot long polling...');
-    let offset = 0;
-
-    // Delete webhook to ensure getUpdates works
-    this.callApi('deleteWebhook', { drop_pending_updates: false }).catch(() => {});
-
-    const poll = async () => {
-      try {
-        const res = await fetch(`https://api.telegram.org/bot${this.token}/getUpdates?offset=${offset}&timeout=25`, {
-          method: 'GET'
-        });
-        const data = await res.json();
-        if (data.ok && Array.isArray(data.result)) {
-          for (const update of data.result) {
-            offset = update.update_id + 1;
-            if (!this.processedUpdates.has(update.update_id)) {
-              this.processedUpdates.add(update.update_id);
-              if (this.processedUpdates.size > 1000) {
-                const firstItem = this.processedUpdates.values().next().value;
-                this.processedUpdates.delete(firstItem);
-              }
-              await this.handleUpdate(update);
-            }
-          }
-        }
-      } catch (e) {
-        // silent or warning on network hiccup
-      }
-      setTimeout(poll, 1500);
-    };
-
-    poll();
   }
 
   getBotUsername() {
@@ -75,11 +18,6 @@ class TelegramBotService {
 
   async handleUpdate(body) {
     if (!body) return true;
-
-    if (body.update_id) {
-      if (this.processedUpdates.has(body.update_id)) return true;
-      this.processedUpdates.add(body.update_id);
-    }
 
     if (body.message) {
       await this.handleMessage(body.message);
@@ -181,13 +119,12 @@ class TelegramBotService {
 
     await this.callApi('answerCallbackQuery', { callback_query_id: cq.id });
 
-    // Clean up current message to avoid clutter ("очисчялось как и с другими чтобы не засирать чат")
+    // Clean up current message to avoid clutter
     await this.deleteMessage(chatId, messageId);
 
     const session = this.wizardSessions[userId] || { step: 8, colors: ['Black', 'Red'], colorQuantities: { 'Black': 5, 'Red': 0 } };
 
     if (data === 'wizard_confirm') {
-      // Finalize product creation
       delete this.wizardSessions[userId];
       await this.sendMessage(chatId, `✅ <b>Товар успішно створено та додано до каталогу M1lipStore!</b>`);
       return;
@@ -219,31 +156,22 @@ class TelegramBotService {
     const quantities = session.colorQuantities || {};
     const currentColor = session.currentColor || colors[0];
 
-    // Build text without quick stock hint line:
-    // "Удали из текста подсказки строку: • Або натисніть кнопку швидкого залишку вище."
     let text = `📦 <b>Крок 8/8: Склад та наявність для кольорів</b>\n\n` +
       `Поточний колір: <b>${currentColor}</b> (Кількість: <b>${quantities[currentColor] || 0} шт.</b>)\n\n` +
       `Введіть кількість товарів для обраного кольору в чат або оберіть колір нижче:`;
 
-    // Keyboard layout:
-    // 1. Color selection buttons (Black (5), ⚪ Red)
-    // 2. Navigation buttons: ⏩ Пропустити..., ✅ Підтвердити..., ❌ Скасувати...
-    // NO quick stock row (+5, +10, +20, +50)
     const inlineKeyboard = [];
 
-    // Color buttons row
     const colorRow = colors.map(c => {
       const q = quantities[c] || 0;
       const isSelected = c === currentColor;
       const label = `${isSelected ? '🔘 ' : '⚪ '}${c} (${q})`;
       return { text: label, callback_data: `color_select_${c}` };
     });
-    // Chunk color buttons into rows of 2
     for (let i = 0; i < colorRow.length; i += 2) {
       inlineKeyboard.push(colorRow.slice(i, i + 2));
     }
 
-    // Action buttons row
     inlineKeyboard.push([
       { text: '⏩ Пропустити...', callback_data: 'wizard_skip' },
       { text: '✅ Підтвердити...', callback_data: 'wizard_confirm' }
