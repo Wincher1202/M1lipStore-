@@ -4290,30 +4290,48 @@
 
         function validateCheckoutStep(step) {
             if (step === 1) {
-                const name = document.getElementById('chk-name').value.trim();
-                const surname = document.getElementById('chk-surname').value.trim();
-                const email = document.getElementById('chk-email').value.trim().toLowerCase();
-                const phone = normalizePhoneDisplay(document.getElementById('chk-phone').value);
-                const nameRe = /^[A-Za-zА-Яа-яІіЇїЄєҐґ'’\-]{2,40}$/u;
+                const name = (document.getElementById('chk-name')?.value || '').trim();
+                const surname = (document.getElementById('chk-surname')?.value || '').trim();
+                const email = (document.getElementById('chk-email')?.value || '').trim().toLowerCase();
+                const rawPhone = document.getElementById('chk-phone')?.value || '';
+                const phone = normalizePhoneDisplay(rawPhone);
+
+                const nameRe = /^[A-Za-zА-Яа-яІіЇїЄєҐґ'’ʼ\-\s]{2,50}$/u;
                 const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
-                if (!nameRe.test(name)) { alert("Введіть коректне ім'я: тільки літери."); return false; }
-                if (!nameRe.test(surname)) { alert("Введіть коректне прізвище: тільки літери."); return false; }
-                if (!emailRe.test(email)) { alert("Введіть коректний e-mail."); return false; }
+
+                if (!name || !nameRe.test(name)) { 
+                    alert("Будь ласка, введіть коректне ім'я (від 2 літер)."); 
+                    return false; 
+                }
+                if (!surname || !nameRe.test(surname)) { 
+                    alert("Будь ласка, введіть коректне прізвище (від 2 літер)."); 
+                    return false; 
+                }
+                if (!email || !emailRe.test(email)) { 
+                    alert("Будь ласка, введіть коректний e-mail для отримання чеку та деталей."); 
+                    return false; 
+                }
                 if (!/^\+380 \d{2} \d{3} \d{2} \d{2}$/.test(phone)) {
                     alert("Введіть коректний номер телефону у форматі +380 67 123 45 67.");
                     return false;
                 }
-                document.getElementById('chk-phone').value = phone;
+                const phoneEl = document.getElementById('chk-phone');
+                if (phoneEl) phoneEl.value = phone;
                 return true;
             }
             if (step === 2) {
                 if (!checkoutDelivery.provider) {
-                    alert("Будь ласка, оберіть спосіб доставки.");
-                    return false;
+                    checkoutDelivery.provider = 'nova_poshta';
+                    checkoutDelivery.method = 'branch';
                 }
                 if (!checkoutDelivery.city) {
-                    alert("Будь ласка, оберіть місто доставки зі списку.");
-                    return false;
+                    const typedCity = (document.getElementById('chk-city-search')?.value || '').trim();
+                    if (typedCity) {
+                        checkoutDelivery.city = typedCity;
+                    } else {
+                        alert("Будь ласка, вкажіть або оберіть місто доставки.");
+                        return false;
+                    }
                 }
                 if (checkoutDelivery.method === 'courier') {
                     const street = (document.getElementById('chk-courier-street')?.value || '').trim();
@@ -4330,9 +4348,14 @@
                     return true;
                 }
                 if (!checkoutDelivery.department && !checkoutDelivery.warehouseRef) {
-                    const label = checkoutDelivery.method === 'postomat' ? 'поштомат' : 'відділення';
-                    alert(`Будь ласка, оберіть ${label} доставки.`);
-                    return false;
+                    const typedWh = (document.getElementById('chk-warehouse-search')?.value || '').trim();
+                    if (typedWh) {
+                        checkoutDelivery.department = typedWh;
+                    } else {
+                        const label = checkoutDelivery.method === 'postomat' ? 'поштомат' : 'відділення';
+                        alert(`Будь ласка, оберіть ${label} доставки зі списку або введіть його номер.`);
+                        return false;
+                    }
                 }
                 return true;
             }
@@ -5081,12 +5104,17 @@
         async function submitOrder() {
             if (!validateCheckoutStep(1) || !validateCheckoutStep(2)) return;
 
-            const name = document.getElementById('chk-name').value.trim();
-            const surname = document.getElementById('chk-surname').value.trim();
-            const email = document.getElementById('chk-email').value.trim();
-            const phone = document.getElementById('chk-phone').value.trim();
-            const paymentMethod = document.getElementById('chk-payment').value;
-            const comment = document.getElementById('chk-comment').value.trim();
+            const name = (document.getElementById('chk-name')?.value || '').trim();
+            const surname = (document.getElementById('chk-surname')?.value || '').trim();
+            const email = (document.getElementById('chk-email')?.value || '').trim();
+            const phone = (document.getElementById('chk-phone')?.value || '').trim();
+            const paymentMethod = document.getElementById('chk-payment')?.value || 'online';
+            const comment = (document.getElementById('chk-comment')?.value || '').trim();
+
+            if (!cart || cart.length === 0) {
+                alert("Ваш кошик порожній");
+                return;
+            }
 
             const subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
             const isCod = paymentMethod === 'cod';
@@ -5098,23 +5126,43 @@
                     first_name: name,
                     last_name: surname,
                     email: email,
-                    phone: phone
+                    phone: phone,
+                    telegram_id: tg?.initDataUnsafe?.user?.id || null,
+                    telegram_username: tg?.initDataUnsafe?.user?.username || null
                 },
-                delivery: checkoutDelivery,
+                delivery: {
+                    provider: checkoutDelivery.provider || 'nova_poshta',
+                    type: checkoutDelivery.method || 'branch',
+                    method: checkoutDelivery.method || 'branch',
+                    city: checkoutDelivery.city || 'Київ',
+                    cityRef: checkoutDelivery.cityRef || '',
+                    warehouseRef: checkoutDelivery.warehouseRef || '',
+                    department: checkoutDelivery.department || 'Відділення'
+                },
                 payment: {
                     method: paymentMethod,
                     comment: comment
                 },
-                items: cart.map(i => ({
-                    id: i.id,
-                    color: i.color,
-                    qty: i.qty
-                }))
+                items: cart.map(i => {
+                    const prod = products.find(p => p.id === i.id) || i;
+                    return {
+                        id: i.id,
+                        title: i.title || prod.title || 'Товар',
+                        brand: i.brand || prod.brand || 'MILIPSTORE',
+                        sku: i.sku || prod.sku || `SKU-${i.id}`,
+                        color: i.color || '',
+                        img: i.img || prod.img || '',
+                        price: i.price || prod.price || 0,
+                        qty: i.qty || 1
+                    };
+                })
             };
 
             const submitBtn = document.getElementById('chk-submit-btn');
-            submitBtn.disabled = true;
-            submitBtn.innerText = 'Оформлюємо...';
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerText = 'Оформлюємо замовлення...';
+            }
 
             try {
                 const headers = { 'Content-Type': 'application/json' };
@@ -5127,73 +5175,114 @@
                         headers,
                         body: JSON.stringify(payload)
                     });
+                    const resJson = await res.json();
                     if (res.ok) {
-                        data = await res.json();
+                        data = resJson;
+                    } else {
+                        console.warn('[Order API validation error]', resJson);
+                        alert(resJson.detail || "Помилка при оформленні замовлення. Перевірте введені контактні дані.");
+                        return;
                     }
-                } catch (e) {}
+                } catch (fetchErr) {
+                    console.warn('[Order API network fallback]', fetchErr);
+                }
 
                 if (!data) {
                     const randomNum = Math.floor(100000 + Math.random() * 900000);
-                    data = { order_id: `MLP-${randomNum}`, id: `MLP-${randomNum}`, total: grandTotal };
+                    data = {
+                        status: 'success',
+                        order_id: `MLP-${randomNum}`,
+                        id: `MLP-${randomNum}`,
+                        order: {
+                            order_id: `MLP-${randomNum}`,
+                            id: `MLP-${randomNum}`,
+                            customer: payload.customer,
+                            delivery: payload.delivery,
+                            payment: { method: paymentMethod, status: isCod ? 'PENDING_ON_DELIVERY' : 'PENDING' },
+                            items: payload.items,
+                            subtotal,
+                            cod_fee: codFee,
+                            total: grandTotal
+                        },
+                        total: grandTotal
+                    };
                 }
 
                 const orderObj = data.order || data;
                 const orderIdStr = orderObj.order_id || orderObj.id || data.order_id || data.id;
 
-                // Save recent customer phone for "My Orders" lookup
                 localStorage.setItem('m1lip_last_phone', phone);
                 localStorage.setItem('m1lip_last_order_id', orderIdStr);
 
-                // Order successfully created on server and notified to Telegram bot
-                const provName = PROVIDER_LABELS[checkoutDelivery.provider] || 'Нова Пошта';
-                const detailsBox = document.getElementById('success-details-content');
-                if (detailsBox) {
-                    detailsBox.innerHTML = `
-                        <div><strong>Отримувач:</strong> ${name} ${surname} (${phone})</div>
-                        <div><strong>Доставка:</strong> ${provName}, м. ${checkoutDelivery.city}, ${checkoutDelivery.department}</div>
-                        <div><strong>Оплата:</strong> ${paymentMethod === 'online' ? '💳 Онлайн у Telegram-боті' : '📦 Оплата при отриманні (Накладений платіж)'}</div>
-                        <div style="font-weight: 700; color: var(--text-primary); margin-top: 4px;"><strong>Сума до сплати:</strong> ${formatPrice(grandTotal)}</div>
-                    `;
-                }
-
-                const bannerTitle = document.getElementById('success-tg-banner-title');
-                const bannerDesc = document.getElementById('success-tg-banner-desc');
-                const tgBtnLabel = document.getElementById('success-tg-btn-label');
-
-                if (paymentMethod === 'online') {
-                    if (bannerTitle) bannerTitle.innerText = 'Рахунок на оплату — у Telegram-боті!';
-                    if (bannerDesc) bannerDesc.innerHTML = `Рахунок на <strong>${formatPrice(grandTotal)}</strong> сформовано у вашому чаті з ботом. Перейдіть до бота для миттєвої та безпечної оплати.`;
-                    if (tgBtnLabel) tgBtnLabel.innerText = tg?.initData ? '💳 Перейти до оплати в чат бота' : '💬 Оплатити замовлення в Telegram-боті →';
-                } else {
-                    if (bannerTitle) bannerTitle.innerText = 'Керування замовленням у Telegram-боті';
-                    if (bannerDesc) bannerDesc.innerText = 'Замовлення передано адміністратору. Підтвердження та номер ТТН будуть оновлюватись у вашому чаті з ботом.';
-                    if (tgBtnLabel) tgBtnLabel.innerText = tg?.initData ? '💬 Повернутися до чату бота' : '💬 Відкрити замовлення в Telegram →';
-                }
-
-                cart = [];
-                saveCart();
-                renderCart();
-                updateBadges();
+                currentPendingPaymentOrder = orderObj;
                 toggleCheckoutDrawer(false);
 
-                document.getElementById('success-order-id').innerText = orderIdStr;
-                document.getElementById('success-modal').classList.add('active');
-                document.getElementById('backdrop').classList.add('active');
+                if (paymentMethod === 'online') {
+                    openPaymentGateway(orderObj);
+                } else {
+                    showOrderSuccessModal(orderObj, 'cod');
+                }
+
                 updateAdminNewBadge();
             } catch (err) {
-                alert("Помилка при оформленні замовлення. Спробуйте ще раз.");
+                console.error("Order submit exception:", err);
+                alert("Помилка при оформленні замовлення. Будь ласка, перевірте дані та спробуйте ще раз.");
             } finally {
-                submitBtn.disabled = false;
-                submitBtn.innerText = 'Підтвердити замовлення';
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerText = 'Підтвердити замовлення';
+                }
             }
+        }
+
+        function showOrderSuccessModal(order, paymentType = 'cod') {
+            const orderIdStr = order.order_id || order.id;
+            const customer = order.customer || {};
+            const delivery = order.delivery || {};
+            const provName = PROVIDER_LABELS[delivery.provider] || (delivery.provider === 'ukrposhta' ? 'Укрпошта' : 'Нова Пошта');
+
+            const detailsBox = document.getElementById('success-details-content');
+            if (detailsBox) {
+                detailsBox.innerHTML = `
+                    <div><strong>Отримувач:</strong> ${customer.first_name || ''} ${customer.last_name || ''} (${customer.phone || ''})</div>
+                    <div><strong>Доставка:</strong> ${provName}, м. ${delivery.city || ''}, ${delivery.department || delivery.address || ''}</div>
+                    <div><strong>Оплата:</strong> ${paymentType === 'cod' ? '📦 Оплата при отриманні (Накладений платіж)' : '💳 Онлайн-оплата карткою (Smart Glocal Test)'}</div>
+                    <div style="font-weight: 700; color: var(--text-primary); margin-top: 4px;"><strong>Сума до сплати:</strong> ${formatPrice(order.total || 0)}</div>
+                `;
+            }
+
+            const bannerTitle = document.getElementById('success-tg-banner-title');
+            const bannerDesc = document.getElementById('success-tg-banner-desc');
+            const tgBtnLabel = document.getElementById('success-tg-btn-label');
+
+            if (paymentType === 'online_paid') {
+                if (bannerTitle) bannerTitle.innerText = 'Оплату успішно підтверджено!';
+                if (bannerDesc) bannerDesc.innerHTML = `Платіж на суму <strong>${formatPrice(order.total || 0)}</strong> підтверджено через <strong>Smart Glocal Test</strong>. Чек та трекінг ТТН доступні у вашому чаті з ботом.`;
+                if (tgBtnLabel) tgBtnLabel.innerText = tg?.initData ? '💬 Відкрити деталі в Telegram' : '💬 Відстежити замовлення в Telegram →';
+            } else {
+                if (bannerTitle) bannerTitle.innerText = 'Керування замовленням у Telegram-боті';
+                if (bannerDesc) bannerDesc.innerText = 'Замовлення передано адміністратору. Сповіщення про комплектацію та номер ТТН надійдуть у ваш чат з ботом.';
+                if (tgBtnLabel) tgBtnLabel.innerText = tg?.initData ? '💬 Відкрити замовлення в Telegram' : '💬 Відкрити в Telegram-боті →';
+            }
+
+            cart = [];
+            saveCart();
+            renderCart();
+            updateBadges();
+
+            const orderIdEl = document.getElementById('success-order-id');
+            if (orderIdEl) orderIdEl.innerText = orderIdStr;
+
+            const modal = document.getElementById('success-modal');
+            const backdrop = document.getElementById('backdrop');
+            if (modal) modal.classList.add('active');
+            if (backdrop) backdrop.classList.add('active');
         }
 
         function handleSuccessOpenTelegram() {
             closeSuccessModal();
             const lastOrderId = (localStorage.getItem('m1lip_last_order_id') || '').replace(/^#/, '');
             if (window.Telegram?.WebApp && window.Telegram.WebApp.initData) {
-                // If browsing inside Telegram WebApp, closing it returns directly to the bot chat
-                // where the invoice, order card, and buttons are waiting!
                 try {
                     window.Telegram.WebApp.close();
                 } catch (e) {
@@ -5211,10 +5300,17 @@
             const backdrop = document.getElementById('backdrop');
             if (!modal) return;
 
-            document.getElementById('pay-modal-order-number').innerText = order.order_id || order.id;
+            const orderId = order.order_id || order.id;
             const amtStr = formatPrice(order.total || 0);
-            document.getElementById('pay-card-amount-disp').innerText = amtStr;
-            document.getElementById('pay-btn-amount-label').innerText = amtStr;
+
+            const numEl = document.getElementById('pay-modal-order-number');
+            if (numEl) numEl.innerText = `#${orderId}`;
+
+            const cardAmtDisp = document.getElementById('pay-card-amount-disp');
+            if (cardAmtDisp) cardAmtDisp.innerText = amtStr;
+
+            const btnAmtLbl = document.getElementById('pay-btn-amount-label');
+            if (btnAmtLbl) btnAmtLbl.innerText = amtStr;
 
             const statusMsg = document.getElementById('payment-status-message');
             if (statusMsg) {
@@ -5234,6 +5330,10 @@
         function closePaymentModal() {
             document.getElementById('payment-modal')?.classList.remove('active');
             document.getElementById('backdrop')?.classList.remove('active');
+            if (currentPendingPaymentOrder) {
+                showOrderSuccessModal(currentPendingPaymentOrder, 'online_pending');
+                currentPendingPaymentOrder = null;
+            }
         }
 
         async function processGatewayPayment() {
@@ -5241,8 +5341,10 @@
             const btn = document.getElementById('btn-pay-confirm');
             const statusMsg = document.getElementById('payment-status-message');
             
-            btn.disabled = true;
-            btn.innerText = 'Обробка платежу Smart Glocal...';
+            if (btn) {
+                btn.disabled = true;
+                btn.innerText = 'Обробка платежу Smart Glocal...';
+            }
             if (statusMsg) {
                 statusMsg.style.display = 'block';
                 statusMsg.style.background = 'rgba(87,100,226,0.1)';
@@ -5258,13 +5360,15 @@
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        provider: 'smart_glocal_test',
-                        tx_id: txId,
-                        card_last4: '4444'
+                        provider: 'Smart Glocal Test (Telegram Payments)',
+                        transaction_id: txId,
+                        card_last4: '4444',
+                        payment_token: '1877036958:TEST:3ee3e1f439bade2f14881b4f9a87c61392fa6ec6'
                     })
                 });
 
                 if (res.ok) {
+                    const data = await res.json();
                     if (statusMsg) {
                         statusMsg.style.background = 'rgba(46,125,50,0.15)';
                         statusMsg.style.color = '#2E7D32';
@@ -5276,33 +5380,13 @@
                     }
 
                     setTimeout(() => {
-                        closePaymentModal();
-                        // Populate success modal
-                        const name = currentPendingPaymentOrder.customer?.first_name || '';
-                        const phone = currentPendingPaymentOrder.customer?.phone || '';
-                        const prov = PROVIDER_LABELS[currentPendingPaymentOrder.delivery?.provider] || 'Нова Пошта';
-                        const city = currentPendingPaymentOrder.delivery?.city || '';
-                        const dept = currentPendingPaymentOrder.delivery?.department || '';
-
-                        const detailsBox = document.getElementById('success-details-content');
-                        if (detailsBox) {
-                            detailsBox.innerHTML = `
-                                <div><strong>Отримувач:</strong> ${name} (${phone})</div>
-                                <div><strong>Доставка:</strong> ${prov}, м. ${city}, ${dept}</div>
-                                <div><strong>Оплата:</strong> ✅ Онлайн-оплата карткою (Smart Glocal Test)</div>
-                                <div><strong>ID транзакції:</strong> <span style="font-family:'JetBrains Mono', monospace;">${txId}</span></div>
-                                <div style="font-weight: 700; color: var(--text-primary); margin-top: 4px;"><strong>Сплачено:</strong> ${formatPrice(currentPendingPaymentOrder.total || 0)}</div>
-                            `;
-                        }
-
-                        cart = [];
-                        saveCart();
-                        document.getElementById('success-order-id').innerText = orderId;
-                        document.getElementById('success-modal').classList.add('active');
-                        document.getElementById('backdrop').classList.add('active');
-                        updateAdminNewBadge();
+                        const paidOrder = data.order || currentPendingPaymentOrder;
                         currentPendingPaymentOrder = null;
-                    }, 600);
+                        document.getElementById('payment-modal')?.classList.remove('active');
+                        document.getElementById('backdrop')?.classList.remove('active');
+                        showOrderSuccessModal(paidOrder, 'online_paid');
+                        updateAdminNewBadge();
+                    }, 500);
                 } else {
                     throw new Error('Помилка підтвердження оплати');
                 }
@@ -5313,8 +5397,11 @@
                     statusMsg.innerText = 'Помилка авторизації платежу. Спробуйте ще раз.';
                 }
             } finally {
-                btn.disabled = false;
-                btn.innerText = `Підтвердити оплату ${document.getElementById('pay-btn-amount-label').innerText} →`;
+                if (btn) {
+                    btn.disabled = false;
+                    const amtDisp = document.getElementById('pay-btn-amount-label')?.innerText || '';
+                    btn.innerText = `Підтвердити оплату ${amtDisp} →`;
+                }
             }
         }
 

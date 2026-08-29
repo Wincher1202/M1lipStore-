@@ -8,7 +8,7 @@
       "old_price": 3899,
       "tag": "ТОП ПРОДАЖІВ",
       "category": "Мишки",
-      "quantity": 16,
+      "quantity": 15,
       "colors": "Black, White, Red",
       "description": "Ультралегка бездротова мишка з магнієвого сплаву з підтримкою 8000Hz опитування, сенсором PAW3395 та вагою лише 39 грамів.",
       "img": "/attack-shark-r5-ultra-top-angle.jpg",
@@ -66,7 +66,7 @@
         }
       },
       "color_quantities": {
-        "Black": 6,
+        "Black": 5,
         "White": 6,
         "Red": 4
       },
@@ -567,6 +567,149 @@
   ],
   "orders": [
     {
+      "order_id": "MLP-714986",
+      "id": "MLP-714986",
+      "status": "NEW",
+      "status_name": "Нові",
+      "tracking_number": null,
+      "subtotal": 1899,
+      "delivery_fee": 0,
+      "cod_fee": 0,
+      "total": 1899,
+      "dispatch_timeline": "1-2 дні",
+      "shipping_note": "Відправлення замовлення протягом 1-2 робочих днів з моменту оформлення",
+      "created_at": "2026-08-29T11:36:43.360Z",
+      "updated_at": "2026-08-29T11:36:46.067Z",
+      "customer": {
+        "first_name": "Тарас",
+        "last_name": "Шевченко",
+        "phone": "+380 99 123 45 67",
+        "email": "taras@test.ua",
+        "telegram_id": null,
+        "telegram_username": null
+      },
+      "delivery": {
+        "provider": "nova_poshta",
+        "provider_name": "Нова Пошта",
+        "type": "branch",
+        "type_name": "Відділення",
+        "city": "Київ",
+        "city_ref": "",
+        "warehouse_ref": "",
+        "warehouse_number": "Відділення №1",
+        "department": "Відділення №1",
+        "address": "Відділення №1"
+      },
+      "payment": {
+        "method": "online",
+        "provider": "Smart Glocal Test",
+        "status": "PAID",
+        "transaction_id": "SG_TX_123456",
+        "paid_at": "2026-08-29T11:36:46.067Z",
+        "is_cod": false,
+        "cod_fee": 0,
+        "comment": "Тестове замовлення"
+      },
+      "items": [
+        {
+          "id": 1,
+          "title": "Attack Shark X3",
+          "brand": "MILIPSTORE",
+          "sku": "SKU-1",
+          "color": "",
+          "img": "/images.png",
+          "price": 1899,
+          "qty": 1,
+          "total": 1899
+        }
+      ],
+      "history": [
+        {
+          "status": "PENDING_PAYMENT",
+          "status_name": "Очікує оплати",
+          "timestamp": "2026-08-29T11:36:43.360Z",
+          "note": "Замовлення створено (очікує оплати)",
+          "actor": "Customer"
+        },
+        {
+          "status": "PAID",
+          "status_name": "Оплата підтверджена",
+          "timestamp": "2026-08-29T11:36:46.067Z",
+          "note": "Оплату успішно отримано (Smart Glocal Test, сума: 1899 ₴)",
+          "actor": "PaymentSystem"
+        }
+      ],
+      "admin_comment": ""
+    },
+    {
+      "order_id": "MLP-179494",
+      "id": "MLP-179494",
+      "status": "PENDING_PAYMENT",
+      "status_name": "Очікує оплати",
+      "tracking_number": null,
+      "subtotal": 3299,
+      "delivery_fee": 0,
+      "cod_fee": 0,
+      "total": 3299,
+      "dispatch_timeline": "1-2 дні",
+      "shipping_note": "Відправлення замовлення протягом 1-2 робочих днів з моменту оформлення",
+      "created_at": "2026-08-29T11:34:46.844Z",
+      "updated_at": "2026-08-29T11:34:46.844Z",
+      "customer": {
+        "first_name": "Тест",
+        "last_name": "Користувач",
+        "phone": "+380 99 123 45 67",
+        "email": "test@gmail.com",
+        "telegram_id": null,
+        "telegram_username": null
+      },
+      "delivery": {
+        "provider": "nova_poshta",
+        "provider_name": "Нова Пошта",
+        "type": "branch",
+        "type_name": "Відділення",
+        "city": "Київ",
+        "city_ref": "",
+        "warehouse_ref": "",
+        "warehouse_number": "Відділення №1",
+        "department": "Відділення №1",
+        "address": "Відділення №1"
+      },
+      "payment": {
+        "method": "online",
+        "provider": "Smart Glocal Test (Telegram Payments)",
+        "status": "PENDING",
+        "transaction_id": null,
+        "paid_at": null,
+        "is_cod": false,
+        "cod_fee": 0,
+        "comment": ""
+      },
+      "items": [
+        {
+          "id": "prod-as-r5-ultra",
+          "title": "Attack Shark R5 Ultra Magnesium Wireless",
+          "brand": "Attack Shark",
+          "sku": "AS-R5-MAG",
+          "color": "Black",
+          "img": "/attack-shark-r5-ultra-top-angle.jpg",
+          "price": 3299,
+          "qty": 1,
+          "total": 3299
+        }
+      ],
+      "history": [
+        {
+          "status": "PENDING_PAYMENT",
+          "status_name": "Очікує оплати",
+          "timestamp": "2026-08-29T11:34:46.844Z",
+          "note": "Замовлення створено (очікує оплати)",
+          "actor": "Customer"
+        }
+      ],
+      "admin_comment": ""
+    },
+    {
       "order_id": "MLP-363245",
       "id": "MLP-363245",
       "status": "CONFIRMED",
@@ -744,6 +887,32 @@
     "1248134309"
   ],
   "notifications": [
+    {
+      "id": "notif-1788003406067-219",
+      "timestamp": "2026-08-29T11:36:46.067Z",
+      "type": "PAYMENT_SUCCESS",
+      "order_id": "MLP-714986",
+      "total": 1899,
+      "transaction_id": "SG_TX_123456"
+    },
+    {
+      "id": "notif-1788003403360-5",
+      "timestamp": "2026-08-29T11:36:43.360Z",
+      "type": "ORDER_CREATED",
+      "order_id": "MLP-714986",
+      "total": 1899,
+      "customer": "Тарас Шевченко",
+      "status": "PENDING_PAYMENT"
+    },
+    {
+      "id": "notif-1788003286846-550",
+      "timestamp": "2026-08-29T11:34:46.846Z",
+      "type": "ORDER_CREATED",
+      "order_id": "MLP-179494",
+      "total": 3299,
+      "customer": "Тест Користувач",
+      "status": "PENDING_PAYMENT"
+    },
     {
       "id": "notif-1788000650265-995",
       "timestamp": "2026-08-29T10:50:50.265Z",
