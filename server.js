@@ -599,6 +599,27 @@ app.get('/api/delivery/providers', (req, res) => {
   ]);
 });
 
+function parseDeliveryQuery(q) {
+  if (!q) return { raw: '', clean: '', tokens: [], words: [], numbers: [], primaryWord: '', primaryNumber: '' };
+  const raw = q.toString().trim();
+  const normalized = raw.replace(/вулиця|вул\.?|проспект|просп\.?|бульвар|бул\.?|провулок|пров\.?|площа|шосе|набережна|тупик|№|#|\bд\.\b|\bбуд\.\b|\bкв\.\b|\bоф\.\b/gi, ' ')
+                        .replace(/[,\.:;!?'"()]/g, ' ')
+                        .replace(/\s+/g, ' ')
+                        .trim();
+  const tokens = normalized.toLowerCase().split(/\s+/).filter(t => t.length > 0);
+  const words = tokens.filter(t => !/^\d+[\wа-яіїєґ]*$/i.test(t));
+  const numbers = tokens.filter(t => /^\d+[\wа-яіїєґ]*$/i.test(t));
+  return {
+    raw,
+    clean: normalized,
+    tokens,
+    words,
+    numbers,
+    primaryWord: words[0] || '',
+    primaryNumber: numbers[0] || ''
+  };
+}
+
 async function handleCitySearch(req, res) {
   const q = (req.query.query || '').toString().trim();
   const provider = req.params.provider_id || req.query.provider || 'nova_poshta';
@@ -656,27 +677,24 @@ async function handleWarehouseSearch(req, res) {
   const typeFilter = (req.query.type || '').toString().trim(); // 'branch', 'postomat', 'all'
   const npApiKey = process.env.NOVA_POSHTA_API_KEY || NOVA_POSHTA_DEFAULT_KEY;
 
-  // Clean query string (strip symbols like №, #, and common words so "№315" -> "315")
-  const cleanQ = rawQ.replace(/[№#]/g, '').replace(/відділення|поштомат|отделение/gi, '').trim();
+  const qInfo = parseDeliveryQuery(rawQ);
 
   let matchedCity = UKRAINE_CITIES.find(c => c.ref === cityRef || c.name.toLowerCase() === cityNameReq.toLowerCase());
   const cityName = cityNameReq || (matchedCity ? matchedCity.name : 'Київ');
 
   if (provider === 'nova_poshta' || provider.startsWith('nova_poshta')) {
     try {
+      const npSearchTerm = qInfo.primaryWord || qInfo.primaryNumber || qInfo.clean;
       const methodProperties = {
         CityName: cityName,
         Limit: '100',
         Page: '1'
       };
-      if (cityRef && cityRef.length > 20) {
-        methodProperties.CityRef = cityRef;
-      }
-      if (cleanQ) {
-        methodProperties.FindByString = cleanQ;
+      if (npSearchTerm) {
+        methodProperties.FindByString = npSearchTerm;
       }
 
-      const response = await fetch('https://api.novaposhta.ua/v2.0/json/', {
+      let response = await fetch('https://api.novaposhta.ua/v2.0/json/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -686,9 +704,33 @@ async function handleWarehouseSearch(req, res) {
           methodProperties
         })
       });
-      const data = await response.json();
-      if (data.success && Array.isArray(data.data) && data.data.length > 0) {
-        let liveWh = data.data.map(w => {
+      let data = await response.json();
+      let rawList = (data.success && Array.isArray(data.data)) ? data.data : [];
+
+      // If nothing returned and we had a search term, try fetching base city list
+      if (rawList.length === 0 && npSearchTerm) {
+        const fallbackResp = await fetch('https://api.novaposhta.ua/v2.0/json/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            apiKey: npApiKey,
+            modelName: 'Address',
+            calledMethod: 'getWarehouses',
+            methodProperties: {
+              CityName: cityName,
+              Limit: '150',
+              Page: '1'
+            }
+          })
+        });
+        const fallbackData = await fallbackResp.json();
+        if (fallbackData.success && Array.isArray(fallbackData.data)) {
+          rawList = fallbackData.data;
+        }
+      }
+
+      if (rawList.length > 0) {
+        let liveWh = rawList.map(w => {
           const isPostomat = w.CategoryOfWarehouse === 'Postomat' || (w.Description && w.Description.toLowerCase().includes('поштомат'));
           const maxWeight = w.TotalMaxWeightAllowed ? `${w.TotalMaxWeightAllowed} кг` : (w.PlaceMaxWeightAllowed ? `${w.PlaceMaxWeightAllowed} кг` : '');
           return {
@@ -709,14 +751,27 @@ async function handleWarehouseSearch(req, res) {
           liveWh = liveWh.filter(w => w.type === 'branch');
         }
 
-        // If user searched for a specific number (e.g. 315), sort exact match to the very top
-        if (cleanQ && /^\d+$/.test(cleanQ)) {
-          liveWh.sort((a, b) => {
-            if (a.number === cleanQ) return -1;
-            if (b.number === cleanQ) return 1;
-            return 0;
+        // Token scoring & ranking
+        if (qInfo.tokens.length > 0) {
+          liveWh.forEach(item => {
+            const fullText = (item.name + ' ' + item.address + ' ' + item.number).toLowerCase();
+            let matchCount = 0;
+            qInfo.tokens.forEach(tok => {
+              if (fullText.includes(tok)) matchCount++;
+            });
+            item._matchScore = matchCount;
+            if (qInfo.primaryNumber && (item.number === qInfo.primaryNumber || item.address.includes(qInfo.primaryNumber))) {
+              item._matchScore += 2;
+            }
           });
+
+          const matching = liveWh.filter(item => item._matchScore > 0);
+          if (matching.length > 0) {
+            matching.sort((a, b) => b._matchScore - a._matchScore);
+            liveWh = matching;
+          }
         }
+
         return res.json(liveWh);
       }
     } catch (e) {
@@ -735,27 +790,36 @@ async function handleWarehouseSearch(req, res) {
     warehouses = warehouses.filter(w => w.type === 'branch');
   }
 
-  if (cleanQ) {
-    const qLower = cleanQ.toLowerCase();
-    let filtered = warehouses.filter(w =>
-      w.name.toLowerCase().includes(qLower) || (w.address && w.address.toLowerCase().includes(qLower))
-    );
-    // If not found in static list and query is a number, create synthetic valid warehouse entry for smooth UX
-    if (filtered.length === 0 && /^\d+$/.test(cleanQ)) {
+  if (qInfo.tokens.length > 0) {
+    warehouses.forEach(w => {
+      const fullText = (w.name + ' ' + (w.address || '')).toLowerCase();
+      let matchCount = 0;
+      qInfo.tokens.forEach(tok => {
+        if (fullText.includes(tok)) matchCount++;
+      });
+      w._matchScore = matchCount;
+    });
+
+    let filtered = warehouses.filter(w => w._matchScore > 0);
+    if (filtered.length > 0) {
+      filtered.sort((a, b) => b._matchScore - a._matchScore);
+      return res.json(filtered);
+    }
+
+    if (qInfo.primaryNumber) {
       if (provider === 'ukrposhta') {
-        filtered = [
-          { ref: `up-custom-${cleanQ}`, name: `Відділення Укрпошти №${cleanQ} (${cleanQ.length === 5 ? cleanQ : '0' + cleanQ}): вул. Головна, ${cleanQ}`, address: `вул. Головна, ${cleanQ}`, type: 'branch' }
-        ];
+        return res.json([
+          { ref: `up-custom-${qInfo.primaryNumber}`, name: `Відділення Укрпошти №${qInfo.primaryNumber}: вул. Головна, ${qInfo.primaryNumber}`, address: `вул. Головна, ${qInfo.primaryNumber}`, type: 'branch' }
+        ]);
       } else {
         const isPostomat = typeFilter === 'postomat';
-        filtered = [
+        return res.json([
           isPostomat
-            ? { ref: `np-pm-custom-${cleanQ}`, name: `Поштомат №${cleanQ}: просп. Перемоги, ${cleanQ}`, address: `просп. Перемоги, ${cleanQ}`, type: 'postomat' }
-            : { ref: `np-wh-custom-${cleanQ}`, name: `Відділення №${cleanQ} (до 30 кг): вул. Центральна, ${cleanQ}`, address: `вул. Центральна, ${cleanQ}`, type: 'branch' }
-        ];
+            ? { ref: `np-pm-custom-${qInfo.primaryNumber}`, name: `Поштомат №${qInfo.primaryNumber}: вул. ${qInfo.primaryWord || 'Центральна'}, ${qInfo.primaryNumber}`, address: `вул. ${qInfo.primaryWord || 'Центральна'}, ${qInfo.primaryNumber}`, type: 'postomat' }
+            : { ref: `np-wh-custom-${qInfo.primaryNumber}`, name: `Відділення №${qInfo.primaryNumber} (до 30 кг): вул. ${qInfo.primaryWord || 'Центральна'}, ${qInfo.primaryNumber}`, address: `вул. ${qInfo.primaryWord || 'Центральна'}, ${qInfo.primaryNumber}`, type: 'branch' }
+        ]);
       }
     }
-    return res.json(filtered);
   }
 
   res.json(warehouses);
