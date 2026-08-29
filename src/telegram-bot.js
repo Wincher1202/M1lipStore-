@@ -214,18 +214,25 @@ export class TelegramBotService {
 
   getReplyKeyboard(from) {
     const isAdminUser = this.isAdmin(from);
-    const storeUrl = process.env.PUBLIC_APP_URL || 'https://wincher1202.github.io/M1lipStore-/';
+    const storeUrl = (process.env.APP_URL || process.env.PUBLIC_APP_URL || 'https://wincher1202.github.io/M1lipStore-/').replace(/\/$/, '');
     const keyboard = [];
 
     if (isAdminUser) {
-      keyboard.push([{ text: '👑 Панель адміністратора' }, { text: '📦 Переглянути замовлення' }]);
+      keyboard.push([
+        { text: '👑 Панель адміністратора' },
+        { text: '📦 Каталог товарів' },
+        { text: '📥 Вхідні' }
+      ]);
     }
 
     keyboard.push([
-      { text: '🛍 Мої замовлення' },
-      { text: '🌐 Відкрити магазин', web_app: { url: storeUrl } }
+      { text: '🚀 Відкрити каталог', web_app: { url: storeUrl } },
+      { text: '🛍 Мої замовлення' }
     ]);
-    keyboard.push([{ text: '📦 Відстежити замовлення' }, { text: '💬 Підтримка' }]);
+    keyboard.push([
+      { text: '📦 Відстежити замовлення' },
+      { text: '💬 Підтримка' }
+    ]);
 
     return {
       keyboard,
@@ -266,8 +273,7 @@ export class TelegramBotService {
         }
         db.linkOrderToTelegramUser(from.id, order.order_id, order.customer);
 
-        await this.notifyAdminsNewOrder(order);
-        await this.sendCustomerOrderWithPayment(chatId, order);
+        await this.sendOrderCreatedNotifications(order);
         return;
       } catch (err) {
         console.error('[TelegramBot] Failed to parse web_app_data:', err);
@@ -285,6 +291,12 @@ export class TelegramBotService {
         });
         return;
       }
+    }
+
+    // Check if admin is currently in Product Field Edit session
+    if (this.adminSessions[chatId]?.action === 'edit_product_field') {
+      await this.handleEditProductFieldMessage(chatId, from, msg);
+      return;
     }
 
     // Check if admin is currently in Add Product Wizard session
@@ -339,7 +351,7 @@ export class TelegramBotService {
       return;
     }
 
-    // START / WELCOME / DEEP LINK
+    // START / WELCOME / DEEP LINK - Clean Single Message
     if (text.startsWith('/start')) {
       const parts = text.split(' ');
       const startParam = parts[1] || '';
@@ -371,7 +383,7 @@ export class TelegramBotService {
 
       const welcomeText = `👋 <b>Вітаємо в офіційному боті MILIPSTORE!</b>\n\n` +
         `🎮 <b>MILIPSTORE</b> — преміальні ігрові девайси та техніка для сетапу:\n` +
-        `• Ультралегкі мишки (Attack Shark, Ajazz, Mchose, VGN)\n` +
+        `• Ультралегкі бездротові мишки\n` +
         `• Кастомні механічні клавіатури з Gasket Mount\n` +
         `• Професійні ігрові поверхні Cordura Control\n\n` +
         `У цьому боті ви можете:\n` +
@@ -379,36 +391,48 @@ export class TelegramBotService {
         `📦 Відстежувати статус замовлення та номер ТТН\n` +
         `🛍 Переглядати історію покупок`;
 
-      const appUrl = process.env.PUBLIC_APP_URL || 'https://wincher1202.github.io/M1lipStore-/';
+      const appUrl = (process.env.APP_URL || process.env.PUBLIC_APP_URL || 'https://wincher1202.github.io/M1lipStore-/').replace(/\/$/, '');
       await this.callApi('sendMessage', {
         chat_id: chatId,
         text: welcomeText,
         parse_mode: 'HTML',
-        reply_markup: this.getReplyKeyboard(from)
-      });
-      await this.callApi('sendMessage', {
-        chat_id: chatId,
-        text: `✨ Оберіть потрібну дію або відкрийте вітрину магазину:`,
-        parse_mode: 'HTML',
         reply_markup: {
           inline_keyboard: [
-            [{ text: '🚀 Відкрити каталог MILIPSTORE', web_app: { url: appUrl } }],
-            [{ text: '🛍 Мої замовлення', callback_data: `orders_list:${chatId}` }, { text: '💬 Підтримка', callback_data: 'customer_support' }]
+            [{ text: '🚀 Відкрити каталог MILIPSTORE', web_app: { url: appUrl } }]
           ]
         }
       });
       return;
     }
 
-    // OPEN WEB STORE
+    // INBOX NOTIFICATIONS FOR ADMIN
+    if (text === '📥 Вхідні' || text === '📥 Вхідні повідомлення' || text === '/inbox') {
+      if (this.isAdmin(from)) {
+        await this.sendAdminInbox(chatId);
+      } else {
+        await this.callApi('sendMessage', { chat_id: chatId, text: '⛔ У вас немає прав адміністратора.' });
+      }
+      return;
+    }
+
+    // OPEN WEB STORE / CATALOG MANAGEMENT
     if (
+      text === '📦 Каталог товарів' ||
+      text === 'Каталог товарів' ||
       text === '🌐 Відкрити магазин' || 
       text === '🌐 Відкрити каталог' || 
+      text === '🚀 Відкрити каталог' ||
       text === '/shop' || 
       text === '/store' ||
-      text === '/catalog'
+      text === '/catalog' ||
+      text === '/products'
     ) {
-      const appUrl = process.env.PUBLIC_APP_URL || 'https://wincher1202.github.io/M1lipStore-/';
+      if (this.isAdmin(from) && (text === '📦 Каталог товарів' || text === 'Каталог товарів' || text === '/catalog' || text === '/products')) {
+        await this.sendAdminCatalog(chatId);
+        return;
+      }
+
+      const appUrl = (process.env.APP_URL || process.env.PUBLIC_APP_URL || 'https://wincher1202.github.io/M1lipStore-/').replace(/\/$/, '');
       await this.callApi('sendMessage', {
         chat_id: chatId,
         text: `🛒 <b>Каталог MILIPSTORE</b>\n\nОбирайте найкращі ігрові девайси зі швидкою доставкою по всій Україні:\n👉 <a href="${appUrl}">${appUrl}</a>`,
@@ -897,30 +921,103 @@ export class TelegramBotService {
       return;
     }
 
+    // Admin Catalog List
+    if (data === 'admin_catalog' || data === 'manage_catalog') {
+      await this.sendAdminCatalog(chatId, 0, msgId);
+      return;
+    }
+
+    if (data.startsWith('admin_catalog_page:')) {
+      const page = parseInt(data.replace('admin_catalog_page:', ''), 10) || 0;
+      await this.sendAdminCatalog(chatId, page, msgId);
+      return;
+    }
+
+    // Admin View Single Product Details & Edit Menu
+    if (data.startsWith('admin_prod_view:')) {
+      const prodId = data.replace('admin_prod_view:', '').trim();
+      await this.sendAdminProductView(chatId, prodId, msgId);
+      return;
+    }
+
+    // Admin Edit Specific Product Field
+    if (data.startsWith('edit_prod_field:')) {
+      const parts = data.split(':');
+      const prodId = parts[1];
+      const field = parts[2];
+      await this.startEditProductField(chatId, prodId, field, msgId);
+      return;
+    }
+
+    // Admin Edit Product Field Callbacks
+    if (data.startsWith('edit_prod_cb:')) {
+      await this.handleEditProductFieldCallback(chatId, from, data, msgId);
+      return;
+    }
+
+    // Admin Delete Product Prompt
+    if (data.startsWith('admin_delete_prod_prompt:')) {
+      const prodId = data.replace('admin_delete_prod_prompt:', '').trim();
+      const prod = db.getProductById(prodId);
+      if (!prod) {
+        await this.safeEditOrSend(chatId, msgId, '❌ Товар не знайдено.');
+        return;
+      }
+      await this.safeEditOrSend(chatId, msgId, `⚠️ <b>Підтвердження видалення товару</b>\n\n` +
+        `🏷 Товар: <b>${prod.brand} ${prod.title}</b>\n` +
+        `💰 Ціна: <b>${prod.price} ₴</b> | Залишок: <b>${prod.quantity} шт.</b>\n\n` +
+        `Ви дійсно бажаєте видалити цей товар з каталогу назавжди?`, {
+        reply_markup: {
+          inline_keyboard: [
+            [{ text: '🗑 Так, видалити з каталогу', callback_data: `admin_delete_prod_confirm:${prodId}` }],
+            [{ text: '❌ Скасувати (Повернутися)', callback_data: `admin_prod_view:${prodId}` }]
+          ]
+        }
+      });
+      return;
+    }
+
+    // Admin Delete Product Confirm
+    if (data.startsWith('admin_delete_prod_confirm:')) {
+      const prodId = data.replace('admin_delete_prod_confirm:', '').trim();
+      db.deleteProduct(prodId);
+      await this.safeEditOrSend(chatId, msgId, '🗑 <b>Товар успішно видалено з каталогу.</b>', {
+        reply_markup: {
+          inline_keyboard: [
+            [{ text: '📦 До каталогу товарів', callback_data: 'admin_catalog' }],
+            [{ text: '👑 До адмін-панелі', callback_data: 'admin_dashboard' }]
+          ]
+        }
+      });
+      return;
+    }
+
+    // Admin Inbox / Notification Logs
+    if (data === 'admin_inbox' || data === 'inbox') {
+      await this.sendAdminInbox(chatId, msgId);
+      return;
+    }
+
+    if (data === 'admin_inbox_clear') {
+      db.clearNotifications();
+      await this.sendAdminInbox(chatId, msgId);
+      return;
+    }
+
     // Admin Product Wizard Callbacks
     if (data.startsWith('wiz_')) {
       await this.handleWizardCallback(chatId, from, data, msgId);
       return;
     }
 
-    // Admin Manage Product
+    // Admin Manage Product (Legacy compatibility)
     if (data.startsWith('manage_')) {
       const prodId = data.replace('manage_', '').trim();
-      const prod = db.getProductById(prodId);
-      if (prod) {
-        await this.safeEditOrSend(chatId, msgId, `🏷 <b>${prod.brand} ${prod.title}</b>\n💰 Ціна: <b>${prod.price} ₴</b>\n📦 Залишок: <b>${prod.quantity} шт.</b>\nКатегорія: ${prod.category}`, {
-          reply_markup: {
-            inline_keyboard: [
-              [{ text: '🗑 Видалити товар', callback_data: `delete_prod_${prod.id}` }],
-              [{ text: '🔙 До адмін-панелі', callback_data: 'admin_dashboard' }]
-            ]
-          }
-        });
-      }
+      await this.sendAdminProductView(chatId, prodId, msgId);
       return;
     }
 
-    // Admin Delete Product
+    // Admin Delete Product (Legacy compatibility)
     if (data.startsWith('delete_prod_')) {
       const prodId = data.replace('delete_prod_', '').trim();
       db.deleteProduct(prodId);
@@ -1177,14 +1274,15 @@ export class TelegramBotService {
 
     const buttons = [
       [
-        { text: `⚡ Активні замовлення (${activeOrders.length})`, callback_data: 'admin_list:ACTIVE' }
-      ],
-      [
+        { text: `⚡ Активні замовлення (${activeOrders.length})`, callback_data: 'admin_list:ACTIVE' },
         { text: `🗄 Архів (${archiveOrders.length})`, callback_data: 'admin_list:ARCHIVE' }
       ],
       [
-        { text: '➕ Додати новий товар', callback_data: 'add_new_product' },
-        { text: '🔄 Оновити', callback_data: 'admin_dashboard' }
+        { text: '📦 Каталог товарів', callback_data: 'admin_catalog' },
+        { text: '➕ Додати новий товар', callback_data: 'add_new_product' }
+      ],
+      [
+        { text: '📥 Вхідні повідомлення', callback_data: 'admin_inbox' }
       ]
     ];
 
@@ -1584,42 +1682,56 @@ export class TelegramBotService {
       type: 'ORDER_CREATED',
       order_id: order.order_id,
       total: order.total,
-      customer: `${order.customer?.first_name} ${order.customer?.last_name || ''}`,
+      customer: this.formatCustomerFullName(order.customer),
       status: order.status
     });
 
-    // 1. Notify Customer in Telegram
+    // 1. Notify Customer in Telegram (Send order invoice card)
     if (order.customer?.telegram_id) {
       await this.sendCustomerOrderWithPayment(order.customer.telegram_id, order);
     }
 
-    // 2. Notify Admins
-    await this.notifyAdminsNewOrder(order);
+    // 2. Anti-Spam Admin Notification:
+    // Only notify admins immediately if order is Cash-On-Delivery (COD) or already PAID.
+    // For unpaid online orders, admin will only receive notification once payment is completed.
+    const isPaid = order.payment?.status === 'PAID';
+    const isCod = order.payment?.is_cod || order.payment?.method === 'cod';
+
+    if (isPaid || isCod) {
+      if (!order._admin_notified) {
+        order._admin_notified = true;
+        db.save();
+        await this.notifyAdminsNewOrder(order);
+      }
+    }
   }
 
   async notifyAdminsNewOrder(order) {
     const cust = order.customer || {};
     const deliv = order.delivery || {};
     const itemsList = (order.items || []).map(i => `• ${i.title}${i.color ? ` (${i.color})` : ''} — ${i.qty} шт. × ${i.price} ₴`).join('\n');
-    const payStatus = order.payment?.status === 'PAID' ? '✅ Оплачено онлайн' : (order.payment?.is_cod ? '📦 Накладений платіж' : '⏳ Очікує оплати');
-    const fullName = [cust.first_name, cust.last_name, cust.middle_name].filter(Boolean).join(' ') || [cust.first_name, cust.last_name].filter(Boolean).join(' ') || 'Клієнт';
+    const isPaid = order.payment?.status === 'PAID';
+    const isCod = order.payment?.is_cod || order.payment?.method === 'cod';
+    const payStatus = isPaid ? '✅ Оплачено онлайн' : (isCod ? '📦 Накладений платіж' : '⏳ Очікує оплати');
+    const fullName = this.formatCustomerFullName(cust);
     const provName = deliv.provider === 'ukrposhta' ? 'Укрпошта' : 'Нова пошта';
 
     const adminMsg = `🔔 <b>НОВЕ ЗАМОВЛЕННЯ #${order.order_id}</b>\n\n` +
       `🛍 <b>Товари:</b>\n${itemsList}\n\n` +
       `💰 <b>Разом:</b> <b>${order.total} ₴</b> • ${payStatus}\n\n` +
-      `👤 <b>Покупець:</b>\n${fullName}\n` +
-      `📞 <code>${cust.phone || 'не вказано'}</code>\n` +
-      (cust.email ? `📧 ${cust.email}\n` : '') +
-      (cust.telegram_username ? `✈️ @${cust.telegram_username}\n` : '') +
+      `👤 <b>Покупець:</b>\n` +
+      `• ПІБ: <b>${fullName}</b>\n` +
+      `• Телефон: <code>${cust.phone || 'не вказано'}</code>\n` +
+      (cust.telegram_username ? `• Telegram: @${cust.telegram_username}\n` : '') +
+      (cust.email ? `• Email: ${cust.email}\n` : '') +
       `\n` +
       `📦 <b>Доставка:</b>\n` +
-      `${provName}\n` +
-      `м. ${deliv.city || ''}\n` +
-      `${deliv.department || deliv.address || ''}\n\n` +
+      `• Перевізник: <b>${provName}</b>\n` +
+      `• Місто: <b>${deliv.city || ''}</b>\n` +
+      `• Адреса / відділення: ${deliv.department || deliv.address || ''}\n\n` +
       `💳 <b>Оплата:</b>\n` +
-      `${order.payment?.provider || 'Smart Glocal Test'}\n` +
-      `${payStatus}`;
+      `• Спосіб: ${order.payment?.provider || (isCod ? 'Накладений платіж' : 'Онлайн')}\n` +
+      `• Статус: <b>${payStatus}</b>`;
 
     const adminButtons = [
       [
@@ -1676,29 +1788,32 @@ export class TelegramBotService {
   }
 
   async sendAdminPaymentSuccess(order) {
+    if (order._admin_paid_notified) return;
+    order._admin_paid_notified = true;
+    db.save();
+
     const cust = order.customer || {};
     const deliv = order.delivery || {};
     const itemsList = (order.items || []).map(i => `• ${i.title}${i.color ? ` (${i.color})` : ''} — ${i.qty} шт. × ${i.price} ₴`).join('\n');
-    const fullName = [cust.first_name, cust.last_name, cust.middle_name].filter(Boolean).join(' ') || [cust.first_name, cust.last_name].filter(Boolean).join(' ') || 'Клієнт';
+    const fullName = this.formatCustomerFullName(cust);
     const provName = deliv.provider === 'ukrposhta' ? 'Укрпошта' : 'Нова пошта';
 
-    const adminMsg = `🔔 <b>НОВЕ ОПЛАЧЕНЕ ЗАМОВЛЕННЯ</b>\n\n` +
-      `<b>#${order.order_id}</b>\n\n` +
+    const adminMsg = `🎉 <b>НОВЕ ОПЛАЧЕНЕ ЗАМОВЛЕННЯ #${order.order_id}</b>\n\n` +
       `🛍 <b>Товари:</b>\n${itemsList}\n\n` +
-      `💰 <b>Разом:</b> <b>${order.total} ₴</b>\n\n` +
+      `💰 <b>Оплачено:</b> <b>${order.total} ₴</b> ✅\n\n` +
       `👤 <b>Покупець:</b>\n` +
-      `${fullName}\n` +
-      `📞 <code>${cust.phone || 'не вказано'}</code>\n` +
-      (cust.email ? `📧 ${cust.email}\n` : '') +
-      (cust.telegram_username ? `✈️ @${cust.telegram_username}\n` : '') +
+      `• ПІБ: <b>${fullName}</b>\n` +
+      `• Телефон: <code>${cust.phone || 'не вказано'}</code>\n` +
+      (cust.telegram_username ? `• Telegram: @${cust.telegram_username}\n` : '') +
+      (cust.email ? `• Email: ${cust.email}\n` : '') +
       `\n` +
       `📦 <b>Доставка:</b>\n` +
-      `${provName}\n` +
-      `м. ${deliv.city || ''}\n` +
-      `${deliv.department || deliv.address || ''}\n\n` +
+      `• Перевізник: <b>${provName}</b>\n` +
+      `• Місто: <b>${deliv.city || ''}</b>\n` +
+      `• Відділення / адреса: ${deliv.department || deliv.address || ''}\n\n` +
       `💳 <b>Оплата:</b>\n` +
-      `Smart Glocal Test\n` +
-      `✅ <b>Оплачено</b>`;
+      `• Система: Smart Glocal Test\n` +
+      `• Статус: <b>Оплачено ✅</b>`;
 
     const adminButtons = [
       [
@@ -2730,6 +2845,721 @@ export class TelegramBotService {
       { key: 'Тип', value: 'Оригінальний геймерський аксесуар' },
       { key: 'Гарантія', value: 'Офіційна гарантія від виробника' }
     ];
+  }
+
+  // ----------------------------------------------------
+  // Admin Catalog Management & Detailed Product Editing
+  // ----------------------------------------------------
+  async sendAdminCatalog(chatId, page = 0, messageId = null) {
+    const products = db.getProducts();
+    const pageSize = 6;
+    const totalPages = Math.ceil(products.length / pageSize) || 1;
+    const currentPage = Math.max(0, Math.min(page, totalPages - 1));
+
+    const startIdx = currentPage * pageSize;
+    const pageProducts = products.slice(startIdx, startIdx + pageSize);
+
+    let text = `📦 <b>КАТАЛОГ ТОВАРІВ MILIPSTORE (${products.length} шт.)</b>\n\n`;
+    text += `<i>Сторінка ${currentPage + 1} з ${totalPages}</i>\n`;
+    text += `<i>Оберіть товар нижче, щоб переглянути деталі, редагувати бренд, назву, опис, ціну, кольори, характеристики або фото:</i>\n\n`;
+
+    const buttons = [];
+
+    pageProducts.forEach(p => {
+      const colorCount = (p.colors || '').split(',').filter(Boolean).length || 1;
+      const specCount = (p.specs || []).length;
+      text += `🏷 <b>${p.brand} ${p.title}</b>\n`;
+      text += `• Ціна: <b>${p.price} ₴</b> | Залишок: <b>${p.quantity} шт.</b> | Кольорів: ${colorCount} | Хар-к: ${specCount}\n\n`;
+
+      buttons.push([
+        { text: `✏️ ${p.brand} ${p.title} (${p.price} ₴)`, callback_data: `admin_prod_view:${p.id}` }
+      ]);
+    });
+
+    // Pagination row
+    const navRow = [];
+    if (currentPage > 0) {
+      navRow.push({ text: '⬅️ Попередня', callback_data: `admin_catalog_page:${currentPage - 1}` });
+    }
+    navRow.push({ text: `📄 ${currentPage + 1}/${totalPages}`, callback_data: `admin_catalog_page:${currentPage}` });
+    if (currentPage < totalPages - 1) {
+      navRow.push({ text: 'Наступна ➡️', callback_data: `admin_catalog_page:${currentPage + 1}` });
+    }
+    buttons.push(navRow);
+
+    // Actions
+    buttons.push([
+      { text: '➕ Додати новий товар', callback_data: 'add_new_product' },
+      { text: '👑 Адмін-панель', callback_data: 'admin_dashboard' }
+    ]);
+
+    await this.safeEditOrSend(chatId, messageId, text, {
+      reply_markup: { inline_keyboard: buttons }
+    });
+  }
+
+  async sendAdminProductView(chatId, prodId, messageId = null) {
+    const prod = db.getProductById(prodId);
+    if (!prod) {
+      await this.safeEditOrSend(chatId, messageId, `❌ Товар не знайдено в базі даних.`, {
+        reply_markup: {
+          inline_keyboard: [
+            [{ text: '📦 До списку товарів', callback_data: 'admin_catalog' }],
+            [{ text: '👑 До адмін-панелі', callback_data: 'admin_dashboard' }]
+          ]
+        }
+      });
+      return;
+    }
+
+    const colorsList = (prod.colors || 'Black').split(',').map(s => s.trim()).filter(Boolean);
+    const specsList = prod.specs || [];
+
+    let specsFormatted = '<i>Не вказано</i>';
+    if (specsList.length > 0) {
+      specsFormatted = specsList.map((s, idx) => `  ${idx + 1}. <b>${s.key}:</b> ${s.value}`).join('\n');
+    }
+
+    let colorsFormatted = '';
+    colorsList.forEach(c => {
+      const q = prod.color_quantities?.[c] ?? Math.round(prod.quantity / (colorsList.length || 1));
+      const photos = prod.color_images?.[c]?.gallery?.length || (prod.color_images?.[c]?.main ? 1 : 0);
+      colorsFormatted += `  • <b>${c}</b>: ${q} шт. (📷 ${photos} фото)\n`;
+    });
+
+    let text = `🎮 <b>КЕРУВАННЯ ТОВАРОМ</b>\n\n`;
+    text += `🏷 <b>1. Бренд:</b> <b>${prod.brand || '—'}</b>\n`;
+    text += `🎮 <b>2. Назва / модель:</b> <b>${prod.title || '—'}</b>\n`;
+    text += `📝 <b>3. Опис:</b> <i>${(prod.description || '').slice(0, 120)}${(prod.description || '').length > 120 ? '...' : ''}</i>\n`;
+    text += `💰 <b>4. Ціна:</b> <b>${prod.price} ₴</b> (стара: ${prod.old_price || Math.round(prod.price * 1.15)} ₴)\n`;
+    text += `🗂 <b>Категорія:</b> <b>${prod.category || '—'}</b> | Артикул: <code>${prod.sku || '—'}</code>\n\n`;
+    text += `🎨 <b>5. Кольори та склад (${colorsList.length}):</b>\n${colorsFormatted || '  • Black'}\n`;
+    text += `📦 <b>Загальний залишок:</b> <b>${prod.quantity} шт.</b>\n\n`;
+    text += `📋 <b>6. Характеристики (${specsList.length}/10):</b>\n${specsFormatted}\n\n`;
+    text += `📸 <b>7. Головне фото каталогу:</b> ${prod.img ? '✅ Встановлено (1 фото)' : '⚙️ Стандартне'}\n`;
+    text += `🖼 <b>8. Фото кольорів:</b> Налаштовано окремо для кожного кольору\n\n`;
+    text += `<i>Натисніть на параметр нижче, щоб швидко відредагувати його:</i>`;
+
+    const buttons = [
+      [
+        { text: '🏷 1. Бренд', callback_data: `edit_prod_field:${prod.id}:brand` },
+        { text: '🎮 2. Назва / модель', callback_data: `edit_prod_field:${prod.id}:title` }
+      ],
+      [
+        { text: '📝 3. Опис', callback_data: `edit_prod_field:${prod.id}:description` },
+        { text: '💰 4. Ціна', callback_data: `edit_prod_field:${prod.id}:price` }
+      ],
+      [
+        { text: '🎨 5. Кольори', callback_data: `edit_prod_field:${prod.id}:colors` },
+        { text: '📋 6. Характеристики', callback_data: `edit_prod_field:${prod.id}:specs` }
+      ],
+      [
+        { text: '📸 7. Головне фото', callback_data: `edit_prod_field:${prod.id}:main_photo` },
+        { text: '🖼 8. Фото кольорів', callback_data: `edit_prod_field:${prod.id}:color_photos` }
+      ],
+      [
+        { text: '🗑 Видалити товар з каталогу', callback_data: `admin_delete_prod_prompt:${prod.id}` }
+      ],
+      [
+        { text: '📦 До каталогу', callback_data: 'admin_catalog' },
+        { text: '👑 Адмін-панель', callback_data: 'admin_dashboard' }
+      ]
+    ];
+
+    await this.safeEditOrSend(chatId, messageId, text, {
+      reply_markup: { inline_keyboard: buttons }
+    });
+  }
+
+  async startEditProductField(chatId, prodId, field, messageId = null) {
+    const prod = db.getProductById(prodId);
+    if (!prod) return;
+
+    this.adminSessions[chatId] = {
+      action: 'edit_product_field',
+      prodId,
+      field,
+      cardMsgId: messageId,
+      data: {
+        tempColors: (prod.colors || 'Black').split(',').map(s => s.trim()).filter(Boolean),
+        tempSpecs: prod.specs ? JSON.parse(JSON.stringify(prod.specs)) : [],
+        activeColorForPhotos: null
+      }
+    };
+
+    const cardId = messageId;
+
+    // 1. BRAND
+    if (field === 'brand') {
+      const brandButtons = [
+        [{ text: '🦈 Attack Shark', callback_data: `edit_prod_cb:${prodId}:brand:Attack Shark` }, { text: '⚡ AULA', callback_data: `edit_prod_cb:${prodId}:brand:AULA` }],
+        [{ text: '🚀 VXE / VGN', callback_data: `edit_prod_cb:${prodId}:brand:VXE` }, { text: '🎮 Ajazz', callback_data: `edit_prod_cb:${prodId}:brand:Ajazz` }],
+        [{ text: '⚡ Darmoshark', callback_data: `edit_prod_cb:${prodId}:brand:Darmoshark` }, { text: '💎 Mchose', callback_data: `edit_prod_cb:${prodId}:brand:Mchose` }],
+        [{ text: '🔙 Назад до товару', callback_data: `admin_prod_view:${prodId}` }]
+      ];
+
+      await this.safeEditOrSend(chatId, cardId, `🏷 <b>Редагування бренду для товару:</b>\n` +
+        `Поточний бренд: <b>${prod.brand}</b>\n\n` +
+        `<i>Оберіть бренд кнопкою або надішліть назву текстом у чат:</i>`, {
+        reply_markup: { inline_keyboard: brandButtons }
+      });
+      return;
+    }
+
+    // 2. TITLE
+    if (field === 'title') {
+      await this.safeEditOrSend(chatId, cardId, `🎮 <b>Редагування назви / моделі товару:</b>\n` +
+        `Поточна назва: <b>${prod.title}</b>\n\n` +
+        `<i>Надішліть нову назву товару наступним повідомленням у чат:</i>`, {
+        reply_markup: {
+          inline_keyboard: [
+            [{ text: '🔙 Скасувати та повернутися', callback_data: `admin_prod_view:${prodId}` }]
+          ]
+        }
+      });
+      return;
+    }
+
+    // 3. DESCRIPTION
+    if (field === 'description') {
+      await this.safeEditOrSend(chatId, cardId, `📝 <b>Редагування опису товару:</b>\n\n` +
+        `Поточний опис:\n<i>${prod.description || 'Не вказано'}</i>\n\n` +
+        `<i>Надішліть новий опис текстом або натисніть кнопку авто-генерації:</i>`, {
+        reply_markup: {
+          inline_keyboard: [
+            [{ text: '✨ Згенерувати стандартний опис', callback_data: `edit_prod_cb:${prodId}:desc_auto` }],
+            [{ text: '🔙 Скасувати та повернутися', callback_data: `admin_prod_view:${prodId}` }]
+          ]
+        }
+      });
+      return;
+    }
+
+    // 4. PRICE
+    if (field === 'price') {
+      await this.safeEditOrSend(chatId, cardId, `💰 <b>Редагування ціни товару:</b>\n` +
+        `Поточна ціна: <b>${prod.price} ₴</b>\n\n` +
+        `<i>Введіть нову ціну (лише число, наприклад: <code>1899</code>):</i>`, {
+        reply_markup: {
+          inline_keyboard: [
+            [{ text: '🔙 Скасувати та повернутися', callback_data: `admin_prod_view:${prodId}` }]
+          ]
+        }
+      });
+      return;
+    }
+
+    // 5. COLORS
+    if (field === 'colors') {
+      await this.renderEditColorsPlate(chatId, prodId, cardId);
+      return;
+    }
+
+    // 6. SPECS
+    if (field === 'specs') {
+      await this.renderEditSpecsPlate(chatId, prodId, cardId);
+      return;
+    }
+
+    // 7. MAIN PHOTO
+    if (field === 'main_photo') {
+      await this.safeEditOrSend(chatId, cardId, `📸 <b>Головне фото для каталогу (1 фото):</b>\n\n` +
+        `Поточне фото: <code>${prod.img || 'немає'}</code>\n\n` +
+        `<i>Надішліть нове фото файлом зображення або посиланням на картинку:</i>`, {
+        reply_markup: {
+          inline_keyboard: [
+            [{ text: '🖼 Встановити авто-фото', callback_data: `edit_prod_cb:${prodId}:main_photo_auto` }],
+            [{ text: '🔙 Скасувати та повернутися', callback_data: `admin_prod_view:${prodId}` }]
+          ]
+        }
+      });
+      return;
+    }
+
+    // 8. COLOR PHOTOS
+    if (field === 'color_photos') {
+      await this.renderEditColorPhotosMenu(chatId, prodId, cardId);
+      return;
+    }
+  }
+
+  async renderEditColorsPlate(chatId, prodId, messageId) {
+    const session = this.adminSessions[chatId];
+    const selected = session?.data?.tempColors || ['Black'];
+
+    const colorPresets = [
+      { id: 'White', name: '⚪ Білий' },
+      { id: 'Black', name: '⚫ Чорний' },
+      { id: 'Red', name: '🔴 Червоний' },
+      { id: 'Blue', name: '🔵 Синій' },
+      { id: 'Purple', name: '🟣 Фіолетовий' },
+      { id: 'Green', name: '🟢 Зелений / М\'ятний' },
+      { id: 'Pink', name: '💖 Рожевий' },
+      { id: 'Grey', name: '🔘 Сірий / Графіт' }
+    ];
+
+    const keyboard = [];
+    for (let i = 0; i < colorPresets.length; i += 2) {
+      const row = [];
+      const c1 = colorPresets[i];
+      const isC1 = selected.includes(c1.id);
+      row.push({
+        text: isC1 ? `✅ ${c1.name}` : c1.name,
+        callback_data: `edit_prod_cb:${prodId}:color_toggle:${c1.id}`
+      });
+
+      if (i + 1 < colorPresets.length) {
+        const c2 = colorPresets[i + 1];
+        const isC2 = selected.includes(c2.id);
+        row.push({
+          text: isC2 ? `✅ ${c2.name}` : c2.name,
+          callback_data: `edit_prod_cb:${prodId}:color_toggle:${c2.id}`
+        });
+      }
+      keyboard.push(row);
+    }
+
+    keyboard.push([{ text: '➕ Ввести свій колір текстом', callback_data: `edit_prod_cb:${prodId}:color_custom_prompt` }]);
+    keyboard.push([{ text: `💾 ✅ Зберегти кольори (${selected.length})`, callback_data: `edit_prod_cb:${prodId}:colors_save` }]);
+    keyboard.push([{ text: '🔙 Скасувати зміни', callback_data: `admin_prod_view:${prodId}` }]);
+
+    const text = `🎨 <b>Редагування кольорів товару (одна плашка з галочками):</b>\n\n` +
+      `Обрані кольори: <b>${selected.join(', ') || 'не обрано'}</b>\n\n` +
+      `<i>Натискайте кнопки кольорів, щоб увімкнути/вимкнути [✅], після чого натисніть «💾 Зберегти кольори»:</i>`;
+
+    await this.safeEditOrSend(chatId, messageId, text, {
+      reply_markup: { inline_keyboard: keyboard }
+    });
+  }
+
+  async renderEditSpecsPlate(chatId, prodId, messageId) {
+    const session = this.adminSessions[chatId];
+    const specs = session?.data?.tempSpecs || [];
+
+    let specsListFormatted = '<i>Поки що список порожній</i>\n';
+    if (specs.length > 0) {
+      specsListFormatted = specs.map((s, idx) => `  ${idx + 1}. <b>${s.key}:</b> ${s.value}`).join('\n') + '\n';
+    }
+
+    const text = `📋 <b>Редагування характеристик товару (${specs.length}/10):</b>\n\n` +
+      `${specsListFormatted}\n` +
+      `<i>Формат введення нових характеристик (надішліть текстом у чат):</i>\n` +
+      `<code>Сенсор (Paw3395)</code>\n` +
+      `<code>Вага (49г)</code>\n` +
+      `<code>Перемикачі (Huano Blue Shell Pink Dot)</code>\n\n` +
+      `<i>Можна надіслати одразу кілька з нового рядка. Для збереження натисніть кнопку:</i>`;
+
+    const buttons = [
+      [{ text: `💾 ✅ Зберегти характеристики (${specs.length})`, callback_data: `edit_prod_cb:${prodId}:specs_save` }],
+      [{ text: '🗑 Очистити характеристики', callback_data: `edit_prod_cb:${prodId}:specs_clear` }],
+      [{ text: '🔙 Скасувати та повернутися', callback_data: `admin_prod_view:${prodId}` }]
+    ];
+
+    await this.safeEditOrSend(chatId, messageId, text, {
+      reply_markup: { inline_keyboard: buttons }
+    });
+  }
+
+  async renderEditColorPhotosMenu(chatId, prodId, messageId) {
+    const prod = db.getProductById(prodId);
+    if (!prod) return;
+
+    const colors = (prod.colors || 'Black').split(',').map(s => s.trim()).filter(Boolean);
+    const buttons = [];
+
+    colors.forEach(c => {
+      const count = prod.color_images?.[c]?.gallery?.length || (prod.color_images?.[c]?.main ? 1 : 0);
+      buttons.push([
+        { text: `🎨 ${c} (📷 ${count} фото) →`, callback_data: `edit_prod_cb:${prodId}:color_photo_select:${c}` }
+      ]);
+    });
+
+    buttons.push([{ text: '🔙 Назад до товару', callback_data: `admin_prod_view:${prodId}` }]);
+
+    const text = `🖼 <b>Фотографії для окремих кольорів:</b>\n\n` +
+      `Оберіть колір товару нижче, щоб додати, переглянути або оновити фотографії для нього:\n\n` +
+      `• <b>1-ше фото</b> автоматично стає головним фото цього кольору.\n` +
+      `• <b>Всі наступні</b> — додаються до галереї цього кольору.`;
+
+    await this.safeEditOrSend(chatId, messageId, text, {
+      reply_markup: { inline_keyboard: buttons }
+    });
+  }
+
+  async handleEditProductFieldCallback(chatId, from, data, messageId = null) {
+    const session = this.adminSessions[chatId];
+    const parts = data.split(':');
+    const prodId = parts[1];
+    const action = parts[2];
+    const param = parts[3];
+
+    const prod = db.getProductById(prodId);
+    if (!prod) return;
+
+    // 1. Brand preset chosen
+    if (action === 'brand') {
+      const newBrand = param;
+      prod.brand = newBrand;
+      db.save();
+      delete this.adminSessions[chatId];
+      await this.sendAdminProductView(chatId, prodId, messageId);
+      return;
+    }
+
+    // 3. Description auto
+    if (action === 'desc_auto') {
+      prod.description = `${prod.brand} ${prod.title} — якісний ігровий девайс з офіційною гарантією від MILIPSTORE.`;
+      db.save();
+      delete this.adminSessions[chatId];
+      await this.sendAdminProductView(chatId, prodId, messageId);
+      return;
+    }
+
+    // 5. Colors plate toggle
+    if (action === 'color_toggle') {
+      const col = param;
+      if (!session.data.tempColors) session.data.tempColors = [];
+      const idx = session.data.tempColors.indexOf(col);
+      if (idx !== -1) {
+        session.data.tempColors.splice(idx, 1);
+      } else {
+        session.data.tempColors.push(col);
+      }
+      await this.renderEditColorsPlate(chatId, prodId, messageId);
+      return;
+    }
+
+    if (action === 'color_custom_prompt') {
+      session.customColorPrompt = true;
+      await this.safeEditOrSend(chatId, messageId, `🎨 <b>Введіть назву нового кольору текстом у чат:</b>\n\n<i>Наприклад: Gradient Purple, Matt White, Cyberpunk:</i>`, {
+        reply_markup: {
+          inline_keyboard: [[{ text: '🔙 Назад до кольорів', callback_data: `edit_prod_cb:${prodId}:color_cancel_custom` }]]
+        }
+      });
+      return;
+    }
+
+    if (action === 'color_cancel_custom') {
+      session.customColorPrompt = false;
+      await this.renderEditColorsPlate(chatId, prodId, messageId);
+      return;
+    }
+
+    if (action === 'colors_save') {
+      const newColors = (session.data.tempColors && session.data.tempColors.length > 0) ? session.data.tempColors : ['Black'];
+      prod.colors = newColors.join(', ');
+      
+      // Ensure missing color images exist
+      if (!prod.color_images) prod.color_images = {};
+      newColors.forEach(c => {
+        if (!prod.color_images[c]) {
+          const autoImg = this.getDefaultColorImage(c, prod.brand, prod.category);
+          prod.color_images[c] = { main: autoImg, gallery: [autoImg] };
+        }
+      });
+
+      // Ensure missing color quantities exist
+      if (!prod.color_quantities) prod.color_quantities = {};
+      const perColorQty = Math.max(1, Math.round(prod.quantity / newColors.length));
+      newColors.forEach(c => {
+        if (prod.color_quantities[c] === undefined) {
+          prod.color_quantities[c] = perColorQty;
+        }
+      });
+
+      db.save();
+      delete this.adminSessions[chatId];
+      await this.sendAdminProductView(chatId, prodId, messageId);
+      return;
+    }
+
+    // 6. Specs actions
+    if (action === 'specs_save') {
+      prod.specs = session.data.tempSpecs || [];
+      db.save();
+      delete this.adminSessions[chatId];
+      await this.sendAdminProductView(chatId, prodId, messageId);
+      return;
+    }
+
+    if (action === 'specs_clear') {
+      session.data.tempSpecs = [];
+      await this.renderEditSpecsPlate(chatId, prodId, messageId);
+      return;
+    }
+
+    // 7. Main Photo Auto
+    if (action === 'main_photo_auto') {
+      const autoImg = this.getDefaultProductImage(prod.brand, prod.category);
+      prod.img = autoImg;
+      if (!prod.gallery) prod.gallery = [];
+      if (!prod.gallery.includes(autoImg)) prod.gallery.unshift(autoImg);
+      db.save();
+      delete this.adminSessions[chatId];
+      await this.sendAdminProductView(chatId, prodId, messageId);
+      return;
+    }
+
+    // 8. Color Photos Selection
+    if (action === 'color_photo_select') {
+      const colorName = param;
+      session.data.activeColorForPhotos = colorName;
+
+      const curCount = prod.color_images?.[colorName]?.gallery?.length || (prod.color_images?.[colorName]?.main ? 1 : 0);
+
+      const buttons = [
+        [{ text: '🖼 Встановити авто-фото для кольору', callback_data: `edit_prod_cb:${prodId}:color_photo_auto:${colorName}` }],
+        [{ text: '🗑 Очистити фото цього кольору', callback_data: `edit_prod_cb:${prodId}:color_photo_clear:${colorName}` }],
+        [{ text: '🔙 Назад до списку кольорів', callback_data: `edit_prod_cb:${prodId}:color_photos_back` }]
+      ];
+
+      const text = `🎨 <b>Фотографії для кольору «${colorName}»</b>\n\n` +
+        `📷 Завантажено: <b>${curCount} фото</b>\n\n` +
+        `<i>Надсилайте нові фото файлом або посиланням у цей чат:</i>\n` +
+        `• 1-ше фото — головне фото кольору.\n` +
+        `• Наступні — галерея кольору.\n\n` +
+        `Після додавання поверніться назад:`;
+
+      await this.safeEditOrSend(chatId, messageId, text, {
+        reply_markup: { inline_keyboard: buttons }
+      });
+      return;
+    }
+
+    if (action === 'color_photo_auto') {
+      const colorName = param;
+      const autoImg = this.getDefaultColorImage(colorName, prod.brand, prod.category);
+      if (!prod.color_images) prod.color_images = {};
+      prod.color_images[colorName] = { main: autoImg, gallery: [autoImg] };
+      db.save();
+      await this.handleEditProductFieldCallback(chatId, from, `edit_prod_cb:${prodId}:color_photo_select:${colorName}`, messageId);
+      return;
+    }
+
+    if (action === 'color_photo_clear') {
+      const colorName = param;
+      if (prod.color_images && prod.color_images[colorName]) {
+        delete prod.color_images[colorName];
+        db.save();
+      }
+      await this.handleEditProductFieldCallback(chatId, from, `edit_prod_cb:${prodId}:color_photo_select:${colorName}`, messageId);
+      return;
+    }
+
+    if (action === 'color_photos_back') {
+      session.data.activeColorForPhotos = null;
+      await this.renderEditColorPhotosMenu(chatId, prodId, messageId);
+      return;
+    }
+  }
+
+  async handleEditProductFieldMessage(chatId, from, msg) {
+    const session = this.adminSessions[chatId];
+    if (!session || session.action !== 'edit_product_field') return;
+
+    const prodId = session.prodId;
+    const field = session.field;
+    const cardId = session.cardMsgId;
+    const text = (msg.text || '').trim();
+
+    // Clean user message immediately
+    if (msg.message_id) {
+      await this.safeDeleteMessage(chatId, msg.message_id);
+    }
+
+    const prod = db.getProductById(prodId);
+    if (!prod) return;
+
+    // 1. BRAND
+    if (field === 'brand') {
+      if (text) {
+        prod.brand = text;
+        db.save();
+        delete this.adminSessions[chatId];
+        await this.sendAdminProductView(chatId, prodId, cardId);
+      }
+      return;
+    }
+
+    // 2. TITLE
+    if (field === 'title') {
+      if (text) {
+        prod.title = text;
+        db.save();
+        delete this.adminSessions[chatId];
+        await this.sendAdminProductView(chatId, prodId, cardId);
+      }
+      return;
+    }
+
+    // 3. DESCRIPTION
+    if (field === 'description') {
+      if (text) {
+        prod.description = text;
+        db.save();
+        delete this.adminSessions[chatId];
+        await this.sendAdminProductView(chatId, prodId, cardId);
+      }
+      return;
+    }
+
+    // 4. PRICE
+    if (field === 'price') {
+      const num = parseInt(text.replace(/[^\d]/g, ''), 10);
+      if (!isNaN(num) && num > 0) {
+        prod.price = num;
+        prod.old_price = Math.round(num * 1.15);
+        db.save();
+        delete this.adminSessions[chatId];
+        await this.sendAdminProductView(chatId, prodId, cardId);
+      } else {
+        await this.safeEditOrSend(chatId, cardId, `⚠️ Введіть коректну ціну числом (наприклад: <code>1899</code>):`);
+      }
+      return;
+    }
+
+    // 5. COLORS - Custom text input
+    if (field === 'colors' && session.customColorPrompt) {
+      if (text) {
+        if (!session.data.tempColors) session.data.tempColors = [];
+        if (!session.data.tempColors.includes(text)) {
+          session.data.tempColors.push(text);
+        }
+        session.customColorPrompt = false;
+        await this.renderEditColorsPlate(chatId, prodId, cardId);
+      }
+      return;
+    }
+
+    // 6. SPECS - Text input format: Key (Value)
+    if (field === 'specs') {
+      if (text === '/done' || text.toLowerCase() === 'готово' || text.toLowerCase() === 'зберегти') {
+        prod.specs = session.data.tempSpecs || [];
+        db.save();
+        delete this.adminSessions[chatId];
+        await this.sendAdminProductView(chatId, prodId, cardId);
+        return;
+      }
+
+      if (!session.data.tempSpecs) session.data.tempSpecs = [];
+
+      const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+      for (const line of lines) {
+        if (session.data.tempSpecs.length >= 10) break;
+        const parsed = this.parseSpecLine(line);
+        if (parsed && parsed.key && parsed.value) {
+          const existingIdx = session.data.tempSpecs.findIndex(s => s.key.toLowerCase() === parsed.key.toLowerCase());
+          if (existingIdx !== -1) {
+            session.data.tempSpecs[existingIdx] = parsed;
+          } else {
+            session.data.tempSpecs.push(parsed);
+          }
+        }
+      }
+
+      await this.renderEditSpecsPlate(chatId, prodId, cardId);
+      return;
+    }
+
+    // 7. MAIN PHOTO - Single photo upload or URL
+    if (field === 'main_photo') {
+      let photoUrl = '';
+      if (msg.photo && msg.photo.length > 0) {
+        const largest = msg.photo[msg.photo.length - 1];
+        const fileRes = await this.callApi('getFile', { file_id: largest.file_id });
+        if (fileRes.ok && fileRes.result?.file_path) {
+          photoUrl = `https://api.telegram.org/file/bot${BOT_TOKEN}/${fileRes.result.file_path}`;
+        }
+      } else if (/^https?:\/\/.+/i.test(text)) {
+        photoUrl = text;
+      }
+
+      if (photoUrl) {
+        prod.img = photoUrl;
+        if (!prod.gallery) prod.gallery = [];
+        if (!prod.gallery.includes(photoUrl)) prod.gallery.unshift(photoUrl);
+        db.save();
+        delete this.adminSessions[chatId];
+        await this.sendAdminProductView(chatId, prodId, cardId);
+      }
+      return;
+    }
+
+    // 8. COLOR PHOTOS - Unlimited photo upload for specific color
+    if (field === 'color_photos' && session.data.activeColorForPhotos) {
+      const colorName = session.data.activeColorForPhotos;
+      let photoUrl = '';
+      if (msg.photo && msg.photo.length > 0) {
+        const largest = msg.photo[msg.photo.length - 1];
+        const fileRes = await this.callApi('getFile', { file_id: largest.file_id });
+        if (fileRes.ok && fileRes.result?.file_path) {
+          photoUrl = `https://api.telegram.org/file/bot${BOT_TOKEN}/${fileRes.result.file_path}`;
+        }
+      } else if (/^https?:\/\/.+/i.test(text)) {
+        photoUrl = text;
+      }
+
+      if (photoUrl) {
+        if (!prod.color_images) prod.color_images = {};
+        if (!prod.color_images[colorName]) {
+          prod.color_images[colorName] = { main: photoUrl, gallery: [photoUrl] };
+        } else {
+          if (!prod.color_images[colorName].main) prod.color_images[colorName].main = photoUrl;
+          if (!prod.color_images[colorName].gallery) prod.color_images[colorName].gallery = [];
+          if (!prod.color_images[colorName].gallery.includes(photoUrl)) {
+            prod.color_images[colorName].gallery.push(photoUrl);
+          }
+        }
+        db.save();
+        await this.handleEditProductFieldCallback(chatId, from, `edit_prod_cb:${prodId}:color_photo_select:${colorName}`, cardId);
+      }
+      return;
+    }
+  }
+
+  // ----------------------------------------------------
+  // Admin Inbox & Notifications Log
+  // ----------------------------------------------------
+  async sendAdminInbox(chatId, messageId = null) {
+    const notifs = db.getNotifications() || [];
+
+    let text = `📥 <b>ВХІДНІ ПОВІДОМЛЕННЯ ТА ЖУРНАЛ ПОДІЙ (${notifs.length})</b>\n\n`;
+
+    if (notifs.length === 0) {
+      text += `<i>Журнал сповіщень порожній. Тут автоматично фіксуються нові замовлення, оплати та зміни статусів.</i>`;
+    } else {
+      notifs.slice(0, 10).forEach((n, idx) => {
+        const time = new Date(n.timestamp || Date.now()).toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' });
+        let icon = '🔔';
+        let desc = '';
+        if (n.type === 'ORDER_CREATED') {
+          icon = '🆕';
+          desc = `Нове замовлення #${n.order_id} (${n.total} ₴) від ${n.customer || 'клієнта'}`;
+        } else if (n.type === 'PAYMENT_SUCCESS') {
+          icon = '💳';
+          desc = `Оплата замовлення #${n.order_id} (${n.total} ₴) успішна!`;
+        } else if (n.type === 'STATUS_CHANGED') {
+          icon = '📦';
+          desc = `Статус замовлення #${n.order_id} змінено на «${n.status_name || n.status}»`;
+        } else {
+          desc = n.message || n.text || JSON.stringify(n);
+        }
+
+        text += `${idx + 1}. ${icon} <b>[${time}]</b> ${desc}\n`;
+      });
+    }
+
+    const buttons = [];
+    if (notifs.length > 0) {
+      buttons.push([{ text: '🗑 Очистити журнал сповіщень', callback_data: 'admin_inbox_clear' }]);
+    }
+    buttons.push([
+      { text: '👑 До адмін-панелі', callback_data: 'admin_dashboard' }
+    ]);
+
+    await this.safeEditOrSend(chatId, messageId, text, {
+      reply_markup: { inline_keyboard: buttons }
+    });
   }
 
   async createInvoiceLink(order) {

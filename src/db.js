@@ -890,6 +890,12 @@ class Database {
     return this.data.notifications.slice(0, 50);
   }
 
+  clearNotifications() {
+    this.data.notifications = [];
+    this.save();
+    return true;
+  }
+
   // Admin Management
   addAdmin(idOrTag) {
     if (!idOrTag) return false;
