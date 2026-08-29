@@ -1,19 +1,16 @@
-"""Entrypoint for Render and direct execution.
-Imports and runs the application from the main folder.
-"""
 import os
 import sys
+import runpy
 
-current_dir = os.path.dirname(os.path.abspath(__file__))
-main_folder = os.path.join(current_dir, "main")
+# Ensure main directory is in sys.path so relative imports work seamlessly
+root_dir = os.path.dirname(os.path.abspath(__file__))
+main_dir = os.path.join(root_dir, "main")
 
-if main_folder not in sys.path:
-    sys.path.insert(0, main_folder)
-if current_dir not in sys.path:
-    sys.path.insert(0, current_dir)
-
-import asyncio
-from main.main import app, main
+if main_dir not in sys.path:
+    sys.path.insert(0, main_dir)
+if root_dir not in sys.path:
+    sys.path.insert(0, root_dir)
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    target_script = os.path.join(main_dir, "main.py")
+    runpy.run_path(target_script, run_name="__main__")
