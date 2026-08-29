@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+aiogram
+python-multipart
+psycopg2-binary
+requests
+httpx
