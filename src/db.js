@@ -339,11 +339,13 @@ export const INITIAL_CATEGORIES = [
 
 export const INITIAL_BRANDS = [
   { id: 'attack-shark', name: 'Attack Shark', logo: '/brand-attack-shark.svg', position: 0, hidden: false },
-  { id: 'ajazz', name: 'Ajazz', logo: '/brand-ajazz.svg', position: 1, hidden: false },
-  { id: 'aula', name: 'AULA', logo: '/brand-aula.svg', position: 2, hidden: false },
-  { id: 'mchose', name: 'Mchose', logo: '/brand-mchose.svg', position: 3, hidden: false },
-  { id: 'vgn', name: 'VGN', logo: '/brand-vgn.svg', position: 4, hidden: false },
-  { id: 'm1lip', name: 'M1LIP Custom', logo: '/logo-milipstore.png', position: 5, hidden: false }
+  { id: 'aula', name: 'AULA', logo: '/brand-aula.svg', position: 1, hidden: false },
+  { id: 'vxe', name: 'VXE', logo: '/brand-vgn.svg', position: 2, hidden: false },
+  { id: 'ajazz', name: 'Ajazz', logo: '/brand-ajazz.svg', position: 3, hidden: false },
+  { id: 'darmoshark', name: 'Darmoshark', logo: '', position: 4, hidden: false },
+  { id: 'mchose', name: 'Mchose', logo: '/brand-mchose.svg', position: 5, hidden: false },
+  { id: 'vgn', name: 'VGN', logo: '/brand-vgn.svg', position: 6, hidden: false },
+  { id: 'm1lip', name: 'M1LIP Custom', logo: '/logo-milipstore.png', position: 7, hidden: false }
 ];
 
 class Database {
@@ -475,8 +477,46 @@ class Database {
     return this.data.categories.filter(c => !c.hidden).sort((a, b) => a.position - b.position);
   }
 
+  addCategory(category) {
+    if (!category) return null;
+    const name = (typeof category === 'string' ? category : category.name || '').trim();
+    if (!name) return null;
+    const existing = this.data.categories.find(c => c.name.toLowerCase() === name.toLowerCase());
+    if (existing) return existing;
+    const id = (typeof category === 'object' && category.id) ? category.id : name.toLowerCase().replace(/[^a-z0-9а-яіїє]/gi, '-');
+    const newCat = {
+      id: id || `cat-${Date.now()}`,
+      name: name,
+      image: (typeof category === 'object' && category.image) ? category.image : '',
+      position: this.data.categories.length,
+      hidden: false
+    };
+    this.data.categories.push(newCat);
+    this.save();
+    return newCat;
+  }
+
   getBrands() {
     return this.data.brands.filter(b => !b.hidden).sort((a, b) => a.position - b.position);
+  }
+
+  addBrand(brand) {
+    if (!brand) return null;
+    const name = (typeof brand === 'string' ? brand : brand.name || '').trim();
+    if (!name) return null;
+    const existing = this.data.brands.find(b => b.name.toLowerCase() === name.toLowerCase());
+    if (existing) return existing;
+    const id = (typeof brand === 'object' && brand.id) ? brand.id : name.toLowerCase().replace(/[^a-z0-9а-яіїє]/gi, '-');
+    const newBrand = {
+      id: id || `brand-${Date.now()}`,
+      name: name,
+      logo: (typeof brand === 'object' && brand.logo) ? brand.logo : '',
+      position: this.data.brands.length,
+      hidden: false
+    };
+    this.data.brands.push(newBrand);
+    this.save();
+    return newBrand;
   }
 
   // Orders

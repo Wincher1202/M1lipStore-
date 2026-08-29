@@ -190,6 +190,25 @@ export class TelegramBotService {
       }
     }
 
+    // Cancel wizard or action on /cancel
+    if (text === '/cancel' || text === '❌ Скасувати' || text === 'Скасувати') {
+      if (this.adminSessions[chatId]) {
+        delete this.adminSessions[chatId];
+        await this.callApi('sendMessage', {
+          chat_id: chatId,
+          text: '❌ Дію скасовано. Повернення до головного меню.',
+          reply_markup: this.getReplyKeyboard(from)
+        });
+        return;
+      }
+    }
+
+    // Check if admin is currently in Add Product Wizard session
+    if (this.adminSessions[chatId]?.action === 'wizard_add_product') {
+      await this.handleWizardMessage(chatId, from, msg);
+      return;
+    }
+
     // Check if admin is currently awaiting TTN input for an order
     if (this.adminSessions[chatId]?.action === 'awaiting_ttn') {
       const orderId = this.adminSessions[chatId].orderId;
@@ -440,6 +459,72 @@ export class TelegramBotService {
       return;
     }
 
+    // ADMIN COMMAND: /add_product [Brand | Model | Price | Category | Description]
+    if (text.startsWith('/add_product')) {
+      if (!this.isAdmin(from)) {
+        await this.callApi('sendMessage', { chat_id: chatId, text: '⛔ У вас немає прав адміністратора.' });
+        return;
+      }
+      const rawParams = text.replace('/add_product', '').trim();
+      if (rawParams.includes('|')) {
+        const parts = rawParams.split('|').map(s => s.trim());
+        const brand = parts[0] || 'MILIP';
+        const model = parts[1] || 'Новий девайс';
+        const price = parseInt(parts[2] || '999', 10) || 999;
+        const category = parts[3] || 'Аксесуари';
+        const description = parts[4] || `${brand} ${model} — якісний ігровий девайс від MILIPSTORE.`;
+
+        const newProd = {
+          id: `prod-${brand.toLowerCase().replace(/[^a-z0-9]/g, '')}-${model.toLowerCase().replace(/[^a-z0-9]/g, '')}-${Date.now().toString().slice(-4)}`,
+          brand,
+          title: `${brand} ${model}`,
+          price,
+          old_price: Math.round(price * 1.15),
+          tag: 'НОВИНКА',
+          category,
+          quantity: 15,
+          colors: 'Black, White',
+          description,
+          img: this.getDefaultProductImage(brand, category),
+          gallery: [this.getDefaultProductImage(brand, category)],
+          specs: this.getDefaultSpecs(category),
+          color_images: {
+            Black: { main: '/attack-shark-x3-black.jpg', gallery: [] },
+            White: { main: '/attack-shark-x3-white.jpg', gallery: [] }
+          },
+          color_quantities: { Black: 10, White: 5 },
+          sku: `${brand.toUpperCase().slice(0, 3)}-${model.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8)}`,
+          featured: true,
+          popular: true,
+          hidden: false,
+          created_at: new Date().toISOString()
+        };
+
+        db.addProduct(newProd);
+        db.addCategory(category);
+        db.addBrand(brand);
+
+        const appUrl = (process.env.APP_URL || 'https://m1lipstore.onrender.com').replace(/\/$/, '');
+        await this.callApi('sendMessage', {
+          chat_id: chatId,
+          text: `✅ <b>Товар «${newProd.title}» успішно додано до каталогу!</b>\n\n💰 Ціна: <b>${newProd.price} ₴</b>\n🗂 Категорія: <b>${newProd.category}</b>\n📦 Залишок: <b>${newProd.quantity} шт.</b>\n🆔 Артикул: <code>${newProd.sku}</code>`,
+          parse_mode: 'HTML',
+          reply_markup: {
+            inline_keyboard: [
+              [{ text: '🚀 Відкрити каталог', web_app: { url: appUrl } }],
+              [{ text: '➕ Додати ще один товар', callback_data: 'add_new_product' }],
+              [{ text: '👑 До адмін-панелі', callback_data: 'admin_dashboard' }]
+            ]
+          }
+        });
+        return;
+      }
+
+      // No pipe parameters -> Start interactive step-by-step wizard
+      await this.startAddProductWizard(chatId);
+      return;
+    }
+
     // ADMIN COMMAND: /add_admin <id_or_username>
     if (text.startsWith('/add_admin')) {
       if (!this.isAdmin(from)) {
@@ -675,16 +760,15 @@ export class TelegramBotService {
       return;
     }
 
-    // Admin Add Product Prompt
-    if (data === 'add_new_product') {
-      await this.callApi('sendMessage', {
-        chat_id: chatId,
-        text: `➕ <b>Додавання товару до каталогу:</b>\n\nВи можете додати товар за допомогою команди:\n<code>/add_product Бренд | Модель | Ціна | Категорія | Опис</code>\n\nАбо керувати товарами безпосередньо в каталозі магазину.`,
-        parse_mode: 'HTML',
-        reply_markup: {
-          inline_keyboard: [[{ text: '🔙 До адмін-панелі', callback_data: 'admin_dashboard' }]]
-        }
-      });
+    // Admin Add Product Prompt & Wizard
+    if (data === 'add_new_product' || data === 'admin_add_product') {
+      await this.startAddProductWizard(chatId);
+      return;
+    }
+
+    // Admin Product Wizard Callbacks
+    if (data.startsWith('wiz_')) {
+      await this.handleWizardCallback(chatId, from, data);
       return;
     }
 
@@ -1528,6 +1612,737 @@ export class TelegramBotService {
         ]
       }
     });
+  }
+
+  // ----------------------------------------------------
+  // Interactive Product Creation Wizard (Admin)
+  // ----------------------------------------------------
+  async startAddProductWizard(chatId) {
+    this.adminSessions[chatId] = {
+      action: 'wizard_add_product',
+      step: 'brand',
+      data: {
+        brand: '',
+        title: '',
+        price: 0,
+        category: '',
+        colors: [],
+        color_images: {},
+        color_quantities: {},
+        quantity: 10,
+        img: '',
+        gallery: [],
+        description: '',
+        currentColorIndex: 0,
+        currentQtyIndex: 0
+      }
+    };
+
+    const brands = [
+      [{ text: '🦈 Attack Shark', callback_data: 'wiz_brand:Attack Shark' }, { text: '⚡ AULA', callback_data: 'wiz_brand:AULA' }],
+      [{ text: '🚀 VXE / VGN', callback_data: 'wiz_brand:VXE' }, { text: '🎮 Ajazz', callback_data: 'wiz_brand:Ajazz' }],
+      [{ text: '⚡ Darmoshark', callback_data: 'wiz_brand:Darmoshark' }, { text: '💎 Mchose', callback_data: 'wiz_brand:Mchose' }],
+      [{ text: '➕ Ввести інший бренд вручну', callback_data: 'wiz_brand:CUSTOM' }],
+      [{ text: '❌ Скасувати', callback_data: 'wiz_cancel' }]
+    ];
+
+    await this.callApi('sendMessage', {
+      chat_id: chatId,
+      text: `➕ <b>Майстер додавання товару MILIPSTORE</b>\n\n` +
+        `<b>Крок 1/6: Оберіть бренд товару:</b>\n` +
+        `<i>Натисніть на один із популярних брендів нижче або введіть свій бренд:</i>`,
+      parse_mode: 'HTML',
+      reply_markup: { inline_keyboard: brands }
+    });
+  }
+
+  async handleWizardCallback(chatId, from, data) {
+    const session = this.adminSessions[chatId];
+    if (!session || session.action !== 'wizard_add_product') {
+      await this.callApi('sendMessage', {
+        chat_id: chatId,
+        text: 'ℹ️ Сесію додавання товару завершено або скасовано. Щоб розпочати заново, натисніть /add_product або оберіть «➕ Додати новий товар» в адмін-панелі.',
+        reply_markup: this.getReplyKeyboard(from)
+      });
+      return;
+    }
+
+    if (data === 'wiz_cancel') {
+      delete this.adminSessions[chatId];
+      await this.callApi('sendMessage', {
+        chat_id: chatId,
+        text: '❌ Додавання товару скасовано.',
+        reply_markup: {
+          inline_keyboard: [[{ text: '🔙 До адмін-панелі', callback_data: 'admin_dashboard' }]]
+        }
+      });
+      return;
+    }
+
+    // STEP 1: BRAND
+    if (data.startsWith('wiz_brand:')) {
+      const brandVal = data.replace('wiz_brand:', '').trim();
+      if (brandVal === 'CUSTOM') {
+        session.step = 'custom_brand';
+        await this.callApi('sendMessage', {
+          chat_id: chatId,
+          text: `🏷 <b>Введіть назву бренду текстом</b>\n\n<i>Наприклад: Razer, Logitech, ATK, Keychron, Lamzu:</i>`,
+          parse_mode: 'HTML',
+          reply_markup: {
+            inline_keyboard: [[{ text: '❌ Скасувати', callback_data: 'wiz_cancel' }]]
+          }
+        });
+        return;
+      }
+
+      session.data.brand = brandVal;
+      await this.promptWizardTitle(chatId);
+      return;
+    }
+
+    // STEP 3: PRICE BUTTONS
+    if (data.startsWith('wiz_price:')) {
+      const priceVal = parseInt(data.replace('wiz_price:', '').trim(), 10) || 999;
+      session.data.price = priceVal;
+      await this.promptWizardCategory(chatId);
+      return;
+    }
+
+    // STEP 4: CATEGORY
+    if (data.startsWith('wiz_cat:')) {
+      const catVal = data.replace('wiz_cat:', '').trim();
+      if (catVal === 'CUSTOM') {
+        session.step = 'custom_category';
+        await this.callApi('sendMessage', {
+          chat_id: chatId,
+          text: `🗂 <b>Введіть назву нової категорії текстом</b>\n\n<i>Наприклад: Світчі, Кейкапи, Мікрофони, Кронштейни:</i>`,
+          parse_mode: 'HTML',
+          reply_markup: {
+            inline_keyboard: [[{ text: '❌ Скасувати', callback_data: 'wiz_cancel' }]]
+          }
+        });
+        return;
+      }
+
+      session.data.category = catVal;
+      db.addCategory(catVal);
+      await this.promptWizardColors(chatId);
+      return;
+    }
+
+    // STEP 5: COLOR TOGGLES
+    if (data.startsWith('wiz_color_toggle:')) {
+      const colName = data.replace('wiz_color_toggle:', '').trim();
+      if (!session.data.colors) session.data.colors = [];
+      const idx = session.data.colors.indexOf(colName);
+      if (idx !== -1) {
+        session.data.colors.splice(idx, 1);
+      } else {
+        session.data.colors.push(colName);
+      }
+      await this.promptWizardColors(chatId);
+      return;
+    }
+
+    if (data === 'wiz_color:CUSTOM') {
+      session.step = 'custom_color';
+      await this.callApi('sendMessage', {
+        chat_id: chatId,
+        text: `🎨 <b>Введіть назву кольору / варіації текстом</b>\n\n<i>Наприклад: Gradient Purple, Matt White, Retro Grey, Cyberpunk:</i>`,
+        parse_mode: 'HTML',
+        reply_markup: {
+          inline_keyboard: [[{ text: '❌ Скасувати', callback_data: 'wiz_cancel' }]]
+        }
+      });
+      return;
+    }
+
+    if (data === 'wiz_colors_done') {
+      if (!session.data.colors || session.data.colors.length === 0) {
+        session.data.colors = ['Black'];
+      }
+      session.data.currentColorIndex = 0;
+      await this.promptWizardColorPhoto(chatId);
+      return;
+    }
+
+    if (data === 'wiz_colors_skip') {
+      session.data.colors = ['Black'];
+      session.data.currentColorIndex = 0;
+      await this.promptWizardColorPhoto(chatId);
+      return;
+    }
+
+    // STEP 6: PHOTO ACTIONS
+    if (data === 'wiz_photo_auto') {
+      const colors = session.data.colors || ['Black'];
+      const curColor = colors[session.data.currentColorIndex] || 'Black';
+      const autoImg = this.getDefaultColorImage(curColor, session.data.brand, session.data.category);
+      if (!session.data.color_images) session.data.color_images = {};
+      session.data.color_images[curColor] = { main: autoImg, gallery: [autoImg] };
+      if (!session.data.img) session.data.img = autoImg;
+
+      session.data.currentColorIndex++;
+      if (session.data.currentColorIndex < colors.length) {
+        await this.promptWizardColorPhoto(chatId);
+      } else {
+        session.data.currentQtyIndex = 0;
+        await this.promptWizardColorQuantity(chatId);
+      }
+      return;
+    }
+
+    if (data === 'wiz_photo_skip_one') {
+      session.data.currentColorIndex++;
+      const colors = session.data.colors || ['Black'];
+      if (session.data.currentColorIndex < colors.length) {
+        await this.promptWizardColorPhoto(chatId);
+      } else {
+        session.data.currentQtyIndex = 0;
+        await this.promptWizardColorQuantity(chatId);
+      }
+      return;
+    }
+
+    if (data === 'wiz_photo_skip_all') {
+      session.data.currentQtyIndex = 0;
+      await this.promptWizardColorQuantity(chatId);
+      return;
+    }
+
+    // STEP 7: QUANTITIES
+    if (data.startsWith('wiz_qty:')) {
+      const qtyVal = parseInt(data.replace('wiz_qty:', '').trim(), 10) || 10;
+      const colors = session.data.colors || ['Black'];
+      const curColor = colors[session.data.currentQtyIndex] || 'Black';
+      if (!session.data.color_quantities) session.data.color_quantities = {};
+      session.data.color_quantities[curColor] = qtyVal;
+
+      session.data.currentQtyIndex++;
+      if (session.data.currentQtyIndex < colors.length) {
+        await this.promptWizardColorQuantity(chatId);
+      } else {
+        await this.showWizardConfirm(chatId);
+      }
+      return;
+    }
+
+    if (data.startsWith('wiz_qty_all:')) {
+      const qtyVal = parseInt(data.replace('wiz_qty_all:', '').trim(), 10) || 10;
+      const colors = session.data.colors || ['Black'];
+      if (!session.data.color_quantities) session.data.color_quantities = {};
+      colors.forEach(c => {
+        session.data.color_quantities[c] = qtyVal;
+      });
+      await this.showWizardConfirm(chatId);
+      return;
+    }
+
+    // STEP 8: CONFIRM & PUBLISH
+    if (data === 'wiz_save_publish') {
+      await this.saveWizardProduct(chatId);
+      return;
+    }
+  }
+
+  async handleWizardMessage(chatId, from, msg) {
+    const session = this.adminSessions[chatId];
+    if (!session || session.action !== 'wizard_add_product') return;
+
+    const text = (msg.text || '').trim();
+
+    // 1. Custom Brand Input
+    if (session.step === 'custom_brand') {
+      if (!text) {
+        await this.callApi('sendMessage', { chat_id: chatId, text: '⚠️ Будь ласка, введіть коректну назву бренду:' });
+        return;
+      }
+      session.data.brand = text;
+      db.addBrand(text);
+      await this.promptWizardTitle(chatId);
+      return;
+    }
+
+    // 2. Title / Model Input
+    if (session.step === 'title') {
+      if (!text) {
+        await this.callApi('sendMessage', { chat_id: chatId, text: '⚠️ Будь ласка, надішліть назву моделі товару:' });
+        return;
+      }
+      session.data.title = text;
+      await this.promptWizardPrice(chatId);
+      return;
+    }
+
+    // 3. Price Input
+    if (session.step === 'price') {
+      const num = parseInt(text.replace(/[^\d]/g, ''), 10);
+      if (isNaN(num) || num <= 0) {
+        await this.callApi('sendMessage', {
+          chat_id: chatId,
+          text: '⚠️ Вкажіть коректне число для ціни (наприклад: <code>1899</code>):',
+          parse_mode: 'HTML'
+        });
+        return;
+      }
+      session.data.price = num;
+      await this.promptWizardCategory(chatId);
+      return;
+    }
+
+    // 4. Custom Category Input
+    if (session.step === 'custom_category') {
+      if (!text) {
+        await this.callApi('sendMessage', { chat_id: chatId, text: '⚠️ Будь ласка, введіть назву категорії:' });
+        return;
+      }
+      session.data.category = text;
+      db.addCategory(text);
+      await this.promptWizardColors(chatId);
+      return;
+    }
+
+    // 5. Custom Color Input
+    if (session.step === 'custom_color') {
+      if (!text) {
+        await this.callApi('sendMessage', { chat_id: chatId, text: '⚠️ Будь ласка, введіть назву кольору:' });
+        return;
+      }
+      if (!session.data.colors) session.data.colors = [];
+      if (!session.data.colors.includes(text)) {
+        session.data.colors.push(text);
+      }
+      await this.promptWizardColors(chatId);
+      return;
+    }
+
+    // 6. Color Photo Input (Image upload or Image URL)
+    if (session.step === 'color_photos') {
+      let photoUrl = '';
+
+      if (msg.photo && msg.photo.length > 0) {
+        const largest = msg.photo[msg.photo.length - 1];
+        const fileRes = await this.callApi('getFile', { file_id: largest.file_id });
+        if (fileRes.ok && fileRes.result?.file_path) {
+          photoUrl = `https://api.telegram.org/file/bot${BOT_TOKEN}/${fileRes.result.file_path}`;
+        }
+      } else if (/^https?:\/\/.+\.(jpg|jpeg|png|webp|gif|svg)/i.test(text) || /^https?:\/\//i.test(text)) {
+        photoUrl = text;
+      }
+
+      if (photoUrl) {
+        const colors = session.data.colors || ['Black'];
+        const curColor = colors[session.data.currentColorIndex] || 'Black';
+        if (!session.data.color_images) session.data.color_images = {};
+        session.data.color_images[curColor] = { main: photoUrl, gallery: [photoUrl] };
+        if (!session.data.img) session.data.img = photoUrl;
+
+        await this.callApi('sendMessage', {
+          chat_id: chatId,
+          text: `✅ Фото для кольору <b>${curColor}</b> успішно збережено!`,
+          parse_mode: 'HTML'
+        });
+
+        session.data.currentColorIndex++;
+        if (session.data.currentColorIndex < colors.length) {
+          await this.promptWizardColorPhoto(chatId);
+        } else {
+          session.data.currentQtyIndex = 0;
+          await this.promptWizardColorQuantity(chatId);
+        }
+        return;
+      }
+
+      await this.callApi('sendMessage', {
+        chat_id: chatId,
+        text: `⚠️ Будь ласка, завантажте фото або надішліть посилання на картинку (або скористайтеся кнопками «Використати авто-фото» / «Пропустити»).`
+      });
+      return;
+    }
+
+    // 7. Quantity Input
+    if (session.step === 'color_quantities') {
+      const num = parseInt(text.replace(/[^\d]/g, ''), 10);
+      if (isNaN(num) || num < 0) {
+        await this.callApi('sendMessage', {
+          chat_id: chatId,
+          text: '⚠️ Будь ласка, введіть число залишку (наприклад: <code>10</code>):',
+          parse_mode: 'HTML'
+        });
+        return;
+      }
+
+      const colors = session.data.colors || ['Black'];
+      const curColor = colors[session.data.currentQtyIndex] || 'Black';
+      if (!session.data.color_quantities) session.data.color_quantities = {};
+      session.data.color_quantities[curColor] = num;
+
+      session.data.currentQtyIndex++;
+      if (session.data.currentQtyIndex < colors.length) {
+        await this.promptWizardColorQuantity(chatId);
+      } else {
+        await this.showWizardConfirm(chatId);
+      }
+      return;
+    }
+  }
+
+  async promptWizardTitle(chatId) {
+    const session = this.adminSessions[chatId];
+    if (!session) return;
+    session.step = 'title';
+
+    await this.callApi('sendMessage', {
+      chat_id: chatId,
+      text: `🏷 <b>Бренд:</b> ${session.data.brand}\n\n` +
+        `<b>Крок 2/6: Введіть назву / модель товару:</b>\n\n` +
+        `<i>Приклад: R1 Pro Max Wireless, F75 Tri-Mode Gasket, Mad Major 8K</i>\n\n` +
+        `Надішліть назву наступним повідомленням у чат:`,
+      parse_mode: 'HTML',
+      reply_markup: {
+        inline_keyboard: [[{ text: '❌ Скасувати', callback_data: 'wiz_cancel' }]]
+      }
+    });
+  }
+
+  async promptWizardPrice(chatId) {
+    const session = this.adminSessions[chatId];
+    if (!session) return;
+    session.step = 'price';
+
+    const priceButtons = [
+      [{ text: '899 ₴', callback_data: 'wiz_price:899' }, { text: '1299 ₴', callback_data: 'wiz_price:1299' }, { text: '1599 ₴', callback_data: 'wiz_price:1599' }],
+      [{ text: '1999 ₴', callback_data: 'wiz_price:1999' }, { text: '2499 ₴', callback_data: 'wiz_price:2499' }, { text: '2899 ₴', callback_data: 'wiz_price:2899' }],
+      [{ text: '3299 ₴', callback_data: 'wiz_price:3299' }, { text: '3899 ₴', callback_data: 'wiz_price:3899' }, { text: '4499 ₴', callback_data: 'wiz_price:4499' }],
+      [{ text: '❌ Скасувати', callback_data: 'wiz_cancel' }]
+    ];
+
+    await this.callApi('sendMessage', {
+      chat_id: chatId,
+      text: `🏷 <b>Товар:</b> ${session.data.brand} ${session.data.title}\n\n` +
+        `<b>Крок 3/6: Вкажіть ціну товару (у гривнях):</b>\n\n` +
+        `<i>Оберіть швидку кнопку або введіть число текстом (наприклад: <code>1750</code>):</i>`,
+      parse_mode: 'HTML',
+      reply_markup: { inline_keyboard: priceButtons }
+    });
+  }
+
+  async promptWizardCategory(chatId) {
+    const session = this.adminSessions[chatId];
+    if (!session) return;
+    session.step = 'category';
+
+    const catButtons = [
+      [{ text: '🖱 Мишки', callback_data: 'wiz_cat:Мишки' }, { text: '⌨️ Клавіатури', callback_data: 'wiz_cat:Клавіатури' }],
+      [{ text: '🎧 Навушники', callback_data: 'wiz_cat:Навушники' }, { text: '⬛ Килимки', callback_data: 'wiz_cat:Килимки' }],
+      [{ text: '🎮 Геймпади', callback_data: 'wiz_cat:Геймпади' }, { text: '🔌 Аксесуари', callback_data: 'wiz_cat:Аксесуари' }],
+      [{ text: '➕ + Ввести нову категорію', callback_data: 'wiz_cat:CUSTOM' }],
+      [{ text: '❌ Скасувати', callback_data: 'wiz_cancel' }]
+    ];
+
+    await this.callApi('sendMessage', {
+      chat_id: chatId,
+      text: `💰 <b>Ціна:</b> ${session.data.price} ₴\n\n` +
+        `<b>Крок 4/6: Оберіть категорію для каталогу:</b>\n` +
+        `<i>Категорія одразу з'явиться на сайті та у фільтрах вітрини магазину:</i>`,
+      parse_mode: 'HTML',
+      reply_markup: { inline_keyboard: catButtons }
+    });
+  }
+
+  async promptWizardColors(chatId) {
+    const session = this.adminSessions[chatId];
+    if (!session) return;
+    session.step = 'colors';
+
+    const selected = session.data.colors || [];
+    const colorPresets = [
+      { id: 'White', name: '⚪ Білий (White)' },
+      { id: 'Black', name: '⚫ Чорний (Black)' },
+      { id: 'Red', name: '🔴 Червоний (Red)' },
+      { id: 'Blue', name: '🔵 Синій (Blue)' },
+      { id: 'Purple', name: '🟣 Фіолетовий (Purple)' },
+      { id: 'Green', name: '🟢 Зелений / М\'ятний' },
+      { id: 'Pink', name: '💖 Рожевий (Pink)' },
+      { id: 'Grey', name: '🔘 Сірий (Grey)' }
+    ];
+
+    const keyboard = [];
+    for (let i = 0; i < colorPresets.length; i += 2) {
+      const row = [];
+      const c1 = colorPresets[i];
+      const isC1 = selected.includes(c1.id);
+      row.push({
+        text: isC1 ? `✅ ${c1.name}` : c1.name,
+        callback_data: `wiz_color_toggle:${c1.id}`
+      });
+
+      if (i + 1 < colorPresets.length) {
+        const c2 = colorPresets[i + 1];
+        const isC2 = selected.includes(c2.id);
+        row.push({
+          text: isC2 ? `✅ ${c2.name}` : c2.name,
+          callback_data: `wiz_color_toggle:${c2.id}`
+        });
+      }
+      keyboard.push(row);
+    }
+
+    keyboard.push([{ text: '➕ Ввести свій колір вручну', callback_data: 'wiz_color:CUSTOM' }]);
+
+    const doneText = selected.length > 0
+      ? `➡️ ✅ Завершити вибір кольорів (${selected.length}) →`
+      : `⏩ Пропустити (Один стандартний колір)`;
+
+    keyboard.push([{ text: doneText, callback_data: selected.length > 0 ? 'wiz_colors_done' : 'wiz_colors_skip' }]);
+    keyboard.push([{ text: '❌ Скасувати', callback_data: 'wiz_cancel' }]);
+
+    const selectedText = selected.length > 0 ? selected.join(', ') : 'Поки не обрано';
+
+    await this.callApi('sendMessage', {
+      chat_id: chatId,
+      text: `🗂 <b>Категорія:</b> ${session.data.category}\n\n` +
+        `<b>Крок 5/6: Оберіть доступні кольори товару:</b>\n` +
+        `Обрані: <b>${selectedText}</b>\n\n` +
+        `<i>Натискайте на кнопки кольорів нижче (можна вибрати декілька):</i>`,
+      parse_mode: 'HTML',
+      reply_markup: { inline_keyboard: keyboard }
+    });
+  }
+
+  async promptWizardColorPhoto(chatId) {
+    const session = this.adminSessions[chatId];
+    if (!session) return;
+    session.step = 'color_photos';
+
+    const colors = session.data.colors || ['Black'];
+    if (colors.length === 0 || session.data.currentColorIndex >= colors.length) {
+      session.data.currentQtyIndex = 0;
+      await this.promptWizardColorQuantity(chatId);
+      return;
+    }
+
+    const curColor = colors[session.data.currentColorIndex];
+    const colorIndexHuman = session.data.currentColorIndex + 1;
+
+    const buttons = [
+      [{ text: `🖼 Використати авто-фото для ${curColor}`, callback_data: 'wiz_photo_auto' }],
+      [{ text: `⏩ Пропустити фото для ${curColor}`, callback_data: 'wiz_photo_skip_one' }],
+      [{ text: `⏭ Пропустити всі фото кольорів →`, callback_data: 'wiz_photo_skip_all' }],
+      [{ text: '❌ Скасувати', callback_data: 'wiz_cancel' }]
+    ];
+
+    await this.callApi('sendMessage', {
+      chat_id: chatId,
+      text: `📸 <b>Крок 6/6 (Фото ${colorIndexHuman}/${colors.length}): Фото для кольору «${curColor}»</b>\n\n` +
+        `Надішліть фотографію товару у кольорі <b>${curColor}</b> (як фото або посилання на зображення):\n\n` +
+        `<i>Або оберіть дію нижче:</i>`,
+      parse_mode: 'HTML',
+      reply_markup: { inline_keyboard: buttons }
+    });
+  }
+
+  async promptWizardColorQuantity(chatId) {
+    const session = this.adminSessions[chatId];
+    if (!session) return;
+    session.step = 'color_quantities';
+
+    const colors = session.data.colors || ['Black'];
+    if (colors.length === 0 || session.data.currentQtyIndex >= colors.length) {
+      await this.showWizardConfirm(chatId);
+      return;
+    }
+
+    const curColor = colors[session.data.currentQtyIndex];
+    const qtyIndexHuman = session.data.currentQtyIndex + 1;
+
+    const buttons = [
+      [{ text: '5 шт.', callback_data: 'wiz_qty:5' }, { text: '10 шт.', callback_data: 'wiz_qty:10' }, { text: '15 шт.', callback_data: 'wiz_qty:15' }],
+      [{ text: '20 шт.', callback_data: 'wiz_qty:20' }, { text: '30 шт.', callback_data: 'wiz_qty:30' }, { text: '50 шт.', callback_data: 'wiz_qty:50' }],
+      [{ text: '⏩ Встановити 10 шт. для всіх кольорів', callback_data: 'wiz_qty_all:10' }],
+      [{ text: '❌ Скасувати', callback_data: 'wiz_cancel' }]
+    ];
+
+    await this.callApi('sendMessage', {
+      chat_id: chatId,
+      text: `📦 <b>Залишок на складі (${qtyIndexHuman}/${colors.length}): «${curColor}»</b>\n\n` +
+        `Оберіть кількість на складі для кольору <b>${curColor}</b> або надішліть число у чат:`,
+      parse_mode: 'HTML',
+      reply_markup: { inline_keyboard: buttons }
+    });
+  }
+
+  async showWizardConfirm(chatId) {
+    const session = this.adminSessions[chatId];
+    if (!session) return;
+    session.step = 'confirm';
+
+    const d = session.data;
+    const colorsList = (d.colors && d.colors.length) ? d.colors : ['Black'];
+    const totalQty = Object.values(d.color_quantities || {}).reduce((a, b) => a + b, 0) || d.quantity || 10;
+    
+    let colorSummary = '';
+    colorsList.forEach(c => {
+      const q = d.color_quantities?.[c] ?? Math.round(totalQty / colorsList.length);
+      const hasPhoto = d.color_images?.[c]?.main ? '📷 Є фото' : '⚙️ Авто-фото';
+      colorSummary += `  • <b>${c}</b>: ${q} шт. (${hasPhoto})\n`;
+    });
+
+    const text = `✨ <b>ПЕРЕВІРКА НОВОГО ТОВАРУ</b> ✨\n\n` +
+      `🏷 <b>Бренд:</b> ${d.brand}\n` +
+      `🎮 <b>Назва:</b> <b>${d.title}</b>\n` +
+      `💰 <b>Ціна:</b> <b>${d.price} ₴</b> (стара ціна: ${Math.round(d.price * 1.15)} ₴)\n` +
+      `🗂 <b>Категорія:</b> ${d.category}\n` +
+      `🎨 <b>Варіанти кольорів та склад:</b>\n${colorSummary}\n` +
+      `📦 <b>Загальний залишок:</b> <b>${totalQty} шт.</b>\n\n` +
+      `<i>Після підтвердження товар миттєво з'явиться на сайті MILIPSTORE та у Telegram-боті!</i>`;
+
+    const buttons = [
+      [{ text: '🚀 ✅ Опублікувати на сайті та в боті', callback_data: 'wiz_save_publish' }],
+      [{ text: '❌ Скасувати створення', callback_data: 'wiz_cancel' }]
+    ];
+
+    await this.callApi('sendMessage', {
+      chat_id: chatId,
+      text,
+      parse_mode: 'HTML',
+      reply_markup: { inline_keyboard: buttons }
+    });
+  }
+
+  async saveWizardProduct(chatId) {
+    const session = this.adminSessions[chatId];
+    if (!session) return;
+    const d = session.data;
+    delete this.adminSessions[chatId];
+
+    const brand = d.brand || 'MILIP';
+    const title = d.title || 'Ігровий девайс';
+    const price = Number(d.price) || 999;
+    const category = d.category || 'Аксесуари';
+    const colors = (d.colors && d.colors.length) ? d.colors : ['Black'];
+    
+    // Fill color quantities
+    const color_quantities = {};
+    let totalQuantity = 0;
+    colors.forEach(c => {
+      const q = d.color_quantities?.[c] !== undefined ? Number(d.color_quantities[c]) : 10;
+      color_quantities[c] = q;
+      totalQuantity += q;
+    });
+
+    // Fill default images if empty
+    const color_images = {};
+    const defaultImg = this.getDefaultProductImage(brand, category);
+    colors.forEach(c => {
+      if (d.color_images?.[c]?.main) {
+        color_images[c] = d.color_images[c];
+      } else {
+        const cImg = this.getDefaultColorImage(c, brand, category);
+        color_images[c] = { main: cImg, gallery: [cImg] };
+      }
+    });
+
+    const mainImg = d.img || color_images[colors[0]]?.main || defaultImg;
+    const gallery = Object.values(color_images).map(ci => ci.main).filter(Boolean);
+    if (!gallery.includes(mainImg)) gallery.unshift(mainImg);
+
+    const fullTitle = `${brand} ${title}`;
+    const slugId = `prod-${brand.toLowerCase().replace(/[^a-z0-9]/g, '')}-${title.toLowerCase().replace(/[^a-z0-9]/g, '')}-${Date.now().toString().slice(-4)}`;
+
+    const newProduct = {
+      id: slugId,
+      brand,
+      title: fullTitle,
+      price,
+      old_price: Math.round(price * 1.15),
+      tag: 'НОВИНКА',
+      category,
+      quantity: totalQuantity,
+      colors: colors.join(', '),
+      description: `${fullTitle} — якісний ігровий девайс з офіційною гарантією від MILIPSTORE.`,
+      img: mainImg,
+      gallery: gallery.length ? gallery : [mainImg],
+      specs: this.getDefaultSpecs(category),
+      color_images,
+      color_quantities,
+      sku: `${brand.toUpperCase().slice(0, 3)}-${title.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8)}`,
+      featured: true,
+      popular: true,
+      hidden: false,
+      created_at: new Date().toISOString()
+    };
+
+    db.addProduct(newProduct);
+    db.addCategory(category);
+    db.addBrand(brand);
+
+    const appUrl = (process.env.APP_URL || 'https://m1lipstore.onrender.com').replace(/\/$/, '');
+
+    await this.callApi('sendMessage', {
+      chat_id: chatId,
+      text: `🎉 <b>Товар успішно створено та опубліковано!</b>\n\n` +
+        `🏷 <b>${newProduct.title}</b>\n` +
+        `💰 Ціна: <b>${newProduct.price} ₴</b>\n` +
+        `🗂 Категорія: <b>${newProduct.category}</b>\n` +
+        `📦 Залишок: <b>${newProduct.quantity} шт.</b> (${colors.join(', ')})\n` +
+        `🆔 Артикул: <code>${newProduct.sku}</code>\n\n` +
+        `Товар уже доступний у каталозі магазину та готовий до замовлень!`,
+      parse_mode: 'HTML',
+      reply_markup: {
+        inline_keyboard: [
+          [{ text: '🚀 Відкрити вітрину магазину', web_app: { url: appUrl } }],
+          [{ text: '➕ Додати ще один товар', callback_data: 'add_new_product' }],
+          [{ text: '👑 До адмін-панелі', callback_data: 'admin_dashboard' }]
+        ]
+      }
+    });
+  }
+
+  getDefaultProductImage(brand, category) {
+    const cat = (category || '').toLowerCase();
+    const br = (brand || '').toLowerCase();
+    if (cat.includes('клавіатур')) return '/aula копия.png';
+    if (cat.includes('килим') || cat.includes('аксесуар')) return '/images.png';
+    if (br.includes('attack shark')) return '/attack-shark-r5-ultra-top-angle.jpg';
+    if (br.includes('aula')) return '/aula копия.png';
+    if (br.includes('ajazz')) return '/photo_2026-08-25_15-31-22.jpg';
+    return '/attack-shark-x3-black.jpg';
+  }
+
+  getDefaultColorImage(color, brand, category) {
+    const c = (color || '').toLowerCase();
+    if (c.includes('біл') || c.includes('white')) return '/attack-shark-x3-white.jpg';
+    if (c.includes('чорн') || c.includes('black')) return '/attack-shark-x3-black.jpg';
+    if (c.includes('червон') || c.includes('red')) return '/attack-shark-r5-ultra-colors-price.jpg';
+    if (c.includes('фіолет') || c.includes('purple')) return '/photo_2026-08-25_15-31-28.jpg';
+    if (c.includes('сір') || c.includes('grey') || c.includes('gray')) return '/photo_2026-08-25_15-31-22.jpg';
+    if (c.includes('зелен') || c.includes('green') || c.includes('м\'ят')) return '/aula копия.png';
+    return this.getDefaultProductImage(brand, category);
+  }
+
+  getDefaultSpecs(category) {
+    const cat = (category || '').toLowerCase();
+    if (cat.includes('мишк')) {
+      return [
+        { key: 'Сенсор', value: 'PixArt PAW3395 (до 26 000 DPI)' },
+        { key: 'Підключення', value: '2.4GHz Wireless / Bluetooth / Type-C' },
+        { key: 'Частота опитування', value: 'До 1000-8000 Hz' },
+        { key: 'Вага', value: 'Ультралегка конструкція' }
+      ];
+    }
+    if (cat.includes('клавіатур')) {
+      return [
+        { key: 'Формат', value: '75% Mechanical Gaming' },
+        { key: 'Конструкція', value: 'Gasket Mount з шумоізоляцією' },
+        { key: 'Підключення', value: 'Tri-Mode: 2.4G / Bluetooth / Type-C' },
+        { key: 'Hot-Swap', value: 'Підтримка 3-pin / 5-pin перемикачів' }
+      ];
+    }
+    return [
+      { key: 'Тип', value: 'Оригінальний геймерський аксесуар' },
+      { key: 'Гарантія', value: 'Офіційна гарантія від виробника' }
+    ];
   }
 
   async createInvoiceLink(order) {
