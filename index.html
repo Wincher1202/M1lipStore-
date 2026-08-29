@@ -2590,13 +2590,18 @@
                         <div class="field-hint">Тільки літери, без цифр та символів.</div>
                     </div>
                     <div class="checkout-group">
-                        <label>E-mail</label>
-                        <input type="email" id="chk-email" autocomplete="email" maxlength="120" placeholder="you@example.com">
+                        <label>По батькові</label>
+                        <input type="text" id="chk-patronymic" autocomplete="additional-name" maxlength="40" placeholder="Наприклад: Григорович">
+                        <div class="field-hint">Тільки літери, без цифр та символів.</div>
                     </div>
                     <div class="checkout-group">
                         <label>Номер телефону</label>
                         <input type="tel" id="chk-phone" autocomplete="tel" inputmode="tel" value="+380" maxlength="17" placeholder="+380 67 123 45 67">
                         <div class="phone-hint">+380 встановлюється автоматично. Введіть 9 цифр номера.</div>
+                    </div>
+                    <div class="checkout-group">
+                        <label>E-mail</label>
+                        <input type="email" id="chk-email" autocomplete="email" maxlength="120" placeholder="you@example.com">
                     </div>
                 </div>
 
@@ -2761,76 +2766,6 @@
                 </button>
                 <button class="btn-secondary" style="width: 100%; justify-content: center;" onclick="closeSuccessModal()">Продовжити покупки</button>
             </div>
-        </div>
-    </div>
-
-    <!-- SMART GLOCAL TEST PAYMENT GATEWAY MODAL -->
-    <div class="payment-modal" id="payment-modal">
-        <button class="close-drawer" style="position: absolute; top: 14px; right: 14px; z-index: 10;" onclick="closePaymentModal()">✕</button>
-        <div style="padding: 24px 20px;">
-            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
-                <span style="font-size: 1.6rem;">💳</span>
-                <div>
-                    <h3 style="font-size: 1.15rem; font-weight: 800; margin: 0; line-height: 1.2;">Оплата замовлення</h3>
-                    <div id="pay-modal-order-number" style="font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: var(--accent); font-weight: 700; margin-top: 2px;">#MLP-XXXXXX</div>
-                </div>
-            </div>
-
-            <!-- Smart Glocal Test Card Representation -->
-            <div class="smart-card-chip">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
-                    <span style="font-size: 0.72rem; font-weight: 800; letter-spacing: 0.1em; opacity: 0.85;">SMART GLOCAL • TEST</span>
-                    <span style="font-size: 0.75rem; background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 6px; font-weight: 700;">TEST GATEWAY</span>
-                </div>
-                <div style="font-family: 'JetBrains Mono', monospace; font-size: 1.15rem; letter-spacing: 2px; font-weight: 700; margin-bottom: 14px;">
-                    •••• •••• •••• 4444
-                </div>
-                <div style="display: flex; justify-content: space-between; align-items: flex-end; font-size: 0.75rem;">
-                    <div>
-                        <div style="font-size: 0.62rem; opacity: 0.65; text-transform: uppercase;">Сума до сплати</div>
-                        <div id="pay-card-amount-disp" style="font-size: 1.1rem; font-weight: 800; font-family: 'JetBrains Mono', monospace;">0 ₴</div>
-                    </div>
-                    <div>
-                        <div style="font-size: 0.62rem; opacity: 0.65; text-transform: uppercase;">Термін дії</div>
-                        <div style="font-family: 'JetBrains Mono', monospace; font-weight: 700;">12/28</div>
-                    </div>
-                </div>
-            </div>
-
-            <div style="background: rgba(87,100,226,0.06); border: 1px dashed rgba(87,100,226,0.25); border-radius: var(--radius-sm); padding: 10px 12px; margin-bottom: 16px; font-size: 0.78rem; color: var(--text-secondary); line-height: 1.4;">
-                🔒 <strong>Безпечний тестовий платіж:</strong> Інтеграція зі <strong>Smart Glocal Test</strong> (Telegram Payments). Реальні кошти не списуються. Оплата перевіряється сервером.
-            </div>
-
-            <!-- Card Inputs Form -->
-            <form id="payment-test-form" onsubmit="event.preventDefault(); processGatewayPayment();" style="display: flex; flex-direction: column; gap: 12px;">
-                <div class="checkout-group" style="margin: 0;">
-                    <label style="font-size: 0.75rem;">Номер картки</label>
-                    <input type="text" id="pay-input-card" value="4111 2222 3333 4444" maxlength="19" style="font-family: 'JetBrains Mono', monospace;" required>
-                </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                    <div class="checkout-group" style="margin: 0;">
-                        <label style="font-size: 0.75rem;">Термін (ММ/РР)</label>
-                        <input type="text" id="pay-input-exp" value="12/28" maxlength="5" style="font-family: 'JetBrains Mono', monospace;" required>
-                    </div>
-                    <div class="checkout-group" style="margin: 0;">
-                        <label style="font-size: 0.75rem;">CVC / CVV</label>
-                        <input type="password" id="pay-input-cvc" value="123" maxlength="3" style="font-family: 'JetBrains Mono', monospace;" required>
-                    </div>
-                </div>
-
-                <div id="payment-status-message" style="display:none; font-size: 0.8rem; padding: 8px 10px; border-radius: 6px;"></div>
-
-                <button type="submit" id="btn-pay-confirm" class="btn-primary" style="width: 100%; justify-content: center; padding: 14px; font-size: 0.95rem;">
-                    Підтвердити оплату <span id="pay-btn-amount-label">0 ₴</span> →
-                </button>
-
-                <div id="tg-open-invoice-wrap" style="display:none; text-align: center; margin-top: 4px;">
-                    <button type="button" class="btn-secondary" style="width: 100%; justify-content: center; font-size: 0.84rem;" onclick="openNativeTgInvoice()">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
-                        Відкрити оплату в Telegram WebApp
-                    </button>
-                </div>
-            </form>
         </div>
     </div>
 
@@ -4296,6 +4231,7 @@
             if (step === 1) {
                 const name = (document.getElementById('chk-name')?.value || '').trim();
                 const surname = (document.getElementById('chk-surname')?.value || '').trim();
+                const patronymic = (document.getElementById('chk-patronymic')?.value || '').trim();
                 const email = (document.getElementById('chk-email')?.value || '').trim().toLowerCase();
                 const rawPhone = document.getElementById('chk-phone')?.value || '';
                 const phone = normalizePhoneDisplay(rawPhone);
@@ -4311,8 +4247,12 @@
                     alert("Будь ласка, введіть коректне прізвище (від 2 літер)."); 
                     return false; 
                 }
+                if (patronymic && !nameRe.test(patronymic)) {
+                    alert("Будь ласка, введіть коректне по батькові (тільки літери).");
+                    return false;
+                }
                 if (!email || !emailRe.test(email)) { 
-                    alert("Будь ласка, введіть коректний e-mail для отримання чеку та деталей."); 
+                    alert("Будь ласка, введіть коректний e-mail для отримання деталей замовлення."); 
                     return false; 
                 }
                 if (!/^\+380 \d{2} \d{3} \d{2} \d{2}$/.test(phone)) {
@@ -4961,6 +4901,7 @@
 
             const name = (document.getElementById('chk-name')?.value || '').trim();
             const surname = (document.getElementById('chk-surname')?.value || '').trim();
+            const patronymic = (document.getElementById('chk-patronymic')?.value || '').trim();
             const email = (document.getElementById('chk-email')?.value || '').trim();
             const phone = (document.getElementById('chk-phone')?.value || '').trim();
             const paymentMethod = document.getElementById('chk-payment')?.value || 'online';
@@ -4971,19 +4912,21 @@
             const codFee = isCod ? Math.round(20 + subtotal * 0.02) : 0;
             const grandTotal = subtotal + codFee;
 
-            const provLabel = PROVIDER_LABELS[checkoutDelivery.provider] || (checkoutDelivery.provider === 'nova_poshta' ? 'Нова Пошта' : 'Укрпошта');
-            const methodLabel = checkoutDelivery.method === 'postomat' ? 'Поштомат' : 'Відділення';
+            const provLabel = checkoutDelivery.provider === 'ukrposhta' ? 'Укрпошта' : 'Нова пошта';
+            const methodLabel = (checkoutDelivery.method === 'postomat' || checkoutDelivery.type === 'postomat') ? 'Поштомат' : 'Відділення';
+
+            const fullName = [surname, name, patronymic].filter(Boolean).join(' ') || [name, surname].filter(Boolean).join(' ') || 'Покупець';
 
             const submitBtn = document.getElementById('chk-submit-btn');
             if (submitBtn) {
-                submitBtn.innerText = isCod ? 'Підтвердити замовлення' : 'Підтвердити замовлення (Оплата в боті) →';
+                submitBtn.innerText = '💳 Оплатити в Telegram →';
             }
 
             container.innerHTML = `
                 <!-- 1. Ordered Products -->
                 <div class="review-card">
                     <div class="review-card-title">
-                        <span>Товари в замовленні (${cart.reduce((c, i) => c + i.qty, 0)} шт.)</span>
+                        <span>🛍 Товари (${cart.reduce((c, i) => c + i.qty, 0)} шт.)</span>
                         <button type="button" onclick="toggleCheckoutDrawer(false); toggleCart(true);" style="background:none; border:none; color: var(--accent); font-size: 0.72rem; font-weight:700; cursor:pointer;">Змінити</button>
                     </div>
                     <div>
@@ -5001,7 +4944,7 @@
                                             <span>Колір: <strong>${item.color || 'Базовий'}</strong></span>
                                             ${prod.sku ? `<span>• Арт: ${prod.sku}</span>` : ''}
                                         </div>
-                                        <div class="review-item-calc">${item.qty} × ${formatPrice(item.price)}</div>
+                                        <div class="review-item-calc">${item.qty} шт. × ${formatPrice(item.price)}</div>
                                     </div>
                                     <div class="review-item-pricing">
                                         <div class="review-item-price">${formatPrice(lineTotal)}</div>
@@ -5015,12 +4958,12 @@
                 <!-- 2. Customer Info -->
                 <div class="review-card">
                     <div class="review-card-title">
-                        <span>Отримувач</span>
+                        <span>👤 Покупець</span>
                         <button type="button" onclick="checkoutStepIndex = 1; renderCheckoutStep();" style="background:none; border:none; color: var(--accent); font-size: 0.72rem; font-weight:700; cursor:pointer;">Змінити</button>
                     </div>
                     <div class="review-info-row">
                         <span class="review-info-label">ПІБ:</span>
-                        <span class="review-info-val">${name} ${surname}</span>
+                        <span class="review-info-val"><strong>${fullName}</strong></span>
                     </div>
                     <div class="review-info-row">
                         <span class="review-info-label">Телефон:</span>
@@ -5035,12 +4978,12 @@
                 <!-- 3. Delivery Info -->
                 <div class="review-card">
                     <div class="review-card-title">
-                        <span>Доставка</span>
+                        <span>📦 Доставка</span>
                         <button type="button" onclick="checkoutStepIndex = 2; renderCheckoutStep();" style="background:none; border:none; color: var(--accent); font-size: 0.72rem; font-weight:700; cursor:pointer;">Змінити</button>
                     </div>
                     <div class="review-info-row">
                         <span class="review-info-label">Служба:</span>
-                        <span class="review-info-val">${provLabel} (${methodLabel})</span>
+                        <span class="review-info-val"><strong>${provLabel} — ${methodLabel.toLowerCase()}</strong></span>
                     </div>
                     <div class="review-info-row">
                         <span class="review-info-label">Місто:</span>
@@ -5052,19 +4995,23 @@
                     </div>
                     <div class="review-info-row" style="margin-top: 4px;">
                         <span class="review-info-label">Термін:</span>
-                        <span class="review-info-val" style="color: var(--accent);">⚡ Відправка 1–2 робочих дні</span>
+                        <span class="review-info-val" style="color: var(--accent);">⚡ Комплектація та відправка 1–2 робочих дні</span>
                     </div>
                 </div>
 
                 <!-- 4. Payment Info -->
                 <div class="review-card">
                     <div class="review-card-title">
-                        <span>Оплата</span>
+                        <span>💳 Оплата</span>
                         <button type="button" onclick="checkoutStepIndex = 3; renderCheckoutStep();" style="background:none; border:none; color: var(--accent); font-size: 0.72rem; font-weight:700; cursor:pointer;">Змінити</button>
                     </div>
                     <div class="review-info-row">
                         <span class="review-info-label">Спосіб:</span>
-                        <span class="review-info-val">${isCod ? '📦 Оплата при отриманні (Накладений)' : '💳 Онлайн-оплата (Smart Glocal / Telegram)'}</span>
+                        <span class="review-info-val">💳 Онлайн-оплата в Telegram-боті</span>
+                    </div>
+                    <div class="review-info-row" style="margin-top: 4px;">
+                        <span class="review-info-label">Провайдер:</span>
+                        <span class="review-info-val" style="color: var(--accent); font-weight: 600;">Smart Glocal Test (Картка / Apple Pay / Google Pay)</span>
                     </div>
                     ${comment ? `
                     <div class="review-info-row" style="margin-top: 4px;">
@@ -5082,34 +5029,26 @@
                     </div>
                     <div class="review-info-row">
                         <span class="review-info-label">Доставка:</span>
-                        <span class="review-info-val" style="color: var(--text-muted);">За тарифами перевізника (~70–90 ₴)</span>
+                        <span class="review-info-val" style="color: var(--text-muted);">За тарифами перевізника</span>
                     </div>
-                    ${isCod ? `
-                    <div class="review-info-row">
-                        <span class="review-info-label">Комісія накладеного:</span>
-                        <span class="review-info-val">+${codFee} ₴</span>
-                    </div>
-                    ` : `
                     <div class="review-info-row">
                         <span class="review-info-label">Комісія за оплату:</span>
-                        <span class="review-info-val" style="color: #2E7D32;">0 ₴ (Без комісії)</span>
+                        <span class="review-info-val" style="color: #2E7D32; font-weight: 700;">0 ₴ (0% комісії)</span>
                     </div>
-                    `}
                     <div class="review-info-row" style="border-top: 1px solid var(--border-light); margin-top: 8px; padding-top: 8px; font-size: 1.05rem;">
-                        <span style="font-weight: 800; color: var(--text-primary);">Разом до сплати:</span>
-                        <span style="font-family: 'JetBrains Mono', monospace; font-weight: 900; color: var(--accent);">${formatPrice(grandTotal)}</span>
+                        <span style="font-weight: 800; color: var(--text-primary);">Разом:</span>
+                        <span style="font-family: 'JetBrains Mono', monospace; font-weight: 900; color: var(--accent); font-size: 1.25rem;">${formatPrice(grandTotal)}</span>
                     </div>
                 </div>
             `;
         }
-
-        let currentPendingPaymentOrder = null;
 
         async function submitOrder() {
             if (!validateCheckoutStep(1) || !validateCheckoutStep(2)) return;
 
             const name = (document.getElementById('chk-name')?.value || '').trim();
             const surname = (document.getElementById('chk-surname')?.value || '').trim();
+            const patronymic = (document.getElementById('chk-patronymic')?.value || '').trim();
             const email = (document.getElementById('chk-email')?.value || '').trim();
             const phone = (document.getElementById('chk-phone')?.value || '').trim();
             const paymentMethod = document.getElementById('chk-payment')?.value || 'online';
@@ -5129,6 +5068,7 @@
                 customer: {
                     first_name: name,
                     last_name: surname,
+                    middle_name: patronymic,
                     email: email,
                     phone: phone,
                     telegram_id: tg?.initDataUnsafe?.user?.id || null,
@@ -5184,7 +5124,7 @@
                         data = resJson;
                     } else {
                         console.warn('[Order API validation error]', resJson);
-                        alert(resJson.detail || "Помилка при оформленні замовлення. Перевірте введені контактні дані.");
+                        alert(resJson.detail || "Помилка при оформленні замовлення. Перевірте контактні дані.");
                         return;
                     }
                 } catch (fetchErr) {
@@ -5202,7 +5142,7 @@
                             id: `MLP-${randomNum}`,
                             customer: payload.customer,
                             delivery: payload.delivery,
-                            payment: { method: paymentMethod, status: isCod ? 'PENDING_ON_DELIVERY' : 'PENDING' },
+                            payment: { method: paymentMethod, status: 'PENDING' },
                             items: payload.items,
                             subtotal,
                             cod_fee: codFee,
@@ -5218,40 +5158,40 @@
                 localStorage.setItem('m1lip_last_phone', phone);
                 localStorage.setItem('m1lip_last_order_id', orderIdStr);
 
-                currentPendingPaymentOrder = orderObj;
                 toggleCheckoutDrawer(false);
 
-                if (paymentMethod === 'online') {
-                    openPaymentGateway(orderObj);
-                } else {
-                    showOrderSuccessModal(orderObj, 'cod');
-                }
+                // Show success modal with direct Telegram bot action
+                showOrderSuccessModal(orderObj, paymentMethod);
 
                 updateAdminNewBadge();
             } catch (err) {
                 console.error("Order submit exception:", err);
-                alert("Помилка при оформленні замовлення. Будь ласка, перевірте дані та спробуйте ще раз.");
+                alert("Помилка при оформленні замовлення. Будь ласка, спробуйте ще раз.");
             } finally {
                 if (submitBtn) {
                     submitBtn.disabled = false;
-                    submitBtn.innerText = 'Підтвердити замовлення';
+                    submitBtn.innerText = '💳 Оплатити в Telegram →';
                 }
             }
         }
 
-        function showOrderSuccessModal(order, paymentType = 'cod') {
+        function showOrderSuccessModal(order, paymentType = 'online') {
             const orderIdStr = order.order_id || order.id;
             const customer = order.customer || {};
             const delivery = order.delivery || {};
-            const provName = PROVIDER_LABELS[delivery.provider] || (delivery.provider === 'ukrposhta' ? 'Укрпошта' : 'Нова Пошта');
+            const provName = delivery.provider === 'ukrposhta' ? 'Укрпошта' : 'Нова пошта';
+            const methodType = (delivery.type === 'postomat' || delivery.method === 'postomat') ? 'поштомат' : 'відділення';
+            const fullName = [customer.last_name, customer.first_name, customer.middle_name].filter(Boolean).join(' ') ||
+                [customer.first_name, customer.last_name].filter(Boolean).join(' ') || 'Покупець';
 
             const detailsBox = document.getElementById('success-details-content');
             if (detailsBox) {
                 detailsBox.innerHTML = `
-                    <div><strong>Отримувач:</strong> ${customer.first_name || ''} ${customer.last_name || ''} (${customer.phone || ''})</div>
-                    <div><strong>Доставка:</strong> ${provName}, м. ${delivery.city || ''}, ${delivery.department || delivery.address || ''}</div>
-                    <div><strong>Оплата:</strong> ${paymentType === 'cod' ? '📦 Оплата при отриманні (Накладений платіж)' : '💳 Онлайн-оплата карткою (Smart Glocal Test)'}</div>
-                    <div style="font-weight: 700; color: var(--text-primary); margin-top: 4px;"><strong>Сума до сплати:</strong> ${formatPrice(order.total || 0)}</div>
+                    <div><strong>Отримувач (ПІБ):</strong> ${fullName}</div>
+                    <div><strong>Телефон:</strong> ${customer.phone || ''}</div>
+                    <div><strong>Доставка:</strong> ${provName} (${methodType}), м. ${delivery.city || ''}, ${delivery.department || delivery.address || ''}</div>
+                    <div><strong>Оплата:</strong> 💳 Онлайн-оплата в Telegram-боті (Smart Glocal Test)</div>
+                    <div style="font-weight: 800; color: var(--accent); margin-top: 4px; font-size: 0.95rem;"><strong>Сума до сплати:</strong> ${formatPrice(order.total || 0)}</div>
                 `;
             }
 
@@ -5259,15 +5199,9 @@
             const bannerDesc = document.getElementById('success-tg-banner-desc');
             const tgBtnLabel = document.getElementById('success-tg-btn-label');
 
-            if (paymentType === 'online_paid') {
-                if (bannerTitle) bannerTitle.innerText = 'Оплату успішно підтверджено!';
-                if (bannerDesc) bannerDesc.innerHTML = `Платіж на суму <strong>${formatPrice(order.total || 0)}</strong> підтверджено через <strong>Smart Glocal Test</strong>. Чек та трекінг ТТН доступні у вашому чаті з ботом.`;
-                if (tgBtnLabel) tgBtnLabel.innerText = tg?.initData ? '💬 Відкрити деталі в Telegram' : '💬 Відстежити замовлення в Telegram →';
-            } else {
-                if (bannerTitle) bannerTitle.innerText = 'Керування замовленням у Telegram-боті';
-                if (bannerDesc) bannerDesc.innerText = 'Замовлення передано адміністратору. Сповіщення про комплектацію та номер ТТН надійдуть у ваш чат з ботом.';
-                if (tgBtnLabel) tgBtnLabel.innerText = tg?.initData ? '💬 Відкрити замовлення в Telegram' : '💬 Відкрити в Telegram-боті →';
-            }
+            if (bannerTitle) bannerTitle.innerText = 'Оплата та підтвердження — у Telegram-боті!';
+            if (bannerDesc) bannerDesc.innerHTML = `Рахунок на оплату <strong>${formatPrice(order.total || 0)}</strong> надіслано вам у чат з ботом. Відкрийте бот для безпечної оплати та відстеження ТТН.`;
+            if (tgBtnLabel) tgBtnLabel.innerText = '💬 Відкрити та оплатити в Telegram →';
 
             cart = [];
             saveCart();
@@ -5275,7 +5209,7 @@
             updateBadges();
 
             const orderIdEl = document.getElementById('success-order-id');
-            if (orderIdEl) orderIdEl.innerText = orderIdStr;
+            if (orderIdEl) orderIdEl.innerText = `#${orderIdStr}`;
 
             const modal = document.getElementById('success-modal');
             const backdrop = document.getElementById('backdrop');
@@ -5286,139 +5220,19 @@
         function handleSuccessOpenTelegram() {
             closeSuccessModal();
             const lastOrderId = (localStorage.getItem('m1lip_last_order_id') || '').replace(/^#/, '');
+            const targetUrl = `https://t.me/${botUsername}?start=order_${lastOrderId}`;
+
             if (window.Telegram?.WebApp && window.Telegram.WebApp.initData) {
                 try {
+                    if (window.Telegram.WebApp.openTelegramLink) {
+                        window.Telegram.WebApp.openTelegramLink(targetUrl);
+                    }
                     window.Telegram.WebApp.close();
                 } catch (e) {
-                    window.location.href = `https://t.me/${botUsername}?start=order_${lastOrderId}`;
+                    window.location.href = targetUrl;
                 }
             } else {
-                const targetUrl = `https://t.me/${botUsername}?start=order_${lastOrderId}`;
                 window.open(targetUrl, '_blank');
-            }
-        }
-
-        /* ---- SMART GLOCAL TEST PAYMENT GATEWAY FLOW ---- */
-        function openPaymentGateway(order) {
-            const modal = document.getElementById('payment-modal');
-            const backdrop = document.getElementById('backdrop');
-            if (!modal) return;
-
-            const orderId = order.order_id || order.id;
-            const amtHtml = formatPrice(order.total || 0);
-            const amtText = formatPriceText(order.total || 0);
-
-            const numEl = document.getElementById('pay-modal-order-number');
-            if (numEl) numEl.innerText = `#${orderId}`;
-
-            const cardAmtDisp = document.getElementById('pay-card-amount-disp');
-            if (cardAmtDisp) cardAmtDisp.innerHTML = amtHtml;
-
-            const btnAmtLbl = document.getElementById('pay-btn-amount-label');
-            if (btnAmtLbl) btnAmtLbl.innerText = amtText;
-
-            const statusMsg = document.getElementById('payment-status-message');
-            if (statusMsg) {
-                statusMsg.style.display = 'none';
-                statusMsg.className = '';
-            }
-
-            const tgBtnWrap = document.getElementById('tg-open-invoice-wrap');
-            if (tgBtnWrap) {
-                tgBtnWrap.style.display = 'block';
-            }
-
-            modal.classList.add('active');
-            backdrop.classList.add('active');
-        }
-
-        function closePaymentModal() {
-            document.getElementById('payment-modal')?.classList.remove('active');
-            document.getElementById('backdrop')?.classList.remove('active');
-            if (currentPendingPaymentOrder) {
-                showOrderSuccessModal(currentPendingPaymentOrder, 'online_pending');
-                currentPendingPaymentOrder = null;
-            }
-        }
-
-        async function processGatewayPayment() {
-            if (!currentPendingPaymentOrder) return;
-            const btn = document.getElementById('btn-pay-confirm');
-            const statusMsg = document.getElementById('payment-status-message');
-            
-            if (btn) {
-                btn.disabled = true;
-                btn.innerText = 'Обробка платежу Smart Glocal...';
-            }
-            if (statusMsg) {
-                statusMsg.style.display = 'block';
-                statusMsg.style.background = 'rgba(87,100,226,0.1)';
-                statusMsg.style.color = 'var(--accent)';
-                statusMsg.innerText = '🔒 Перевірка тестової картки та підтвердження транзакції...';
-            }
-
-            try {
-                const orderId = currentPendingPaymentOrder.id || currentPendingPaymentOrder.order_id;
-                const txId = 'tx_sg_' + Math.floor(100000 + Math.random() * 900000);
-                
-                const res = await fetch(`${API_BASE}/orders/${orderId}/confirm-payment`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        provider: 'Smart Glocal Test (Telegram Payments)',
-                        transaction_id: txId,
-                        card_last4: '4444',
-                        payment_token: '1877036958:TEST:3ee3e1f439bade2f14881b4f9a87c61392fa6ec6'
-                    })
-                });
-
-                if (res.ok) {
-                    const data = await res.json();
-                    if (statusMsg) {
-                        statusMsg.style.background = 'rgba(46,125,50,0.15)';
-                        statusMsg.style.color = '#2E7D32';
-                        statusMsg.innerText = '✅ Оплата успішно підтверджена!';
-                    }
-
-                    if (tg?.HapticFeedback) {
-                        try { tg.HapticFeedback.notificationOccurred('success'); } catch(e) {}
-                    }
-
-                    setTimeout(() => {
-                        const paidOrder = data.order || currentPendingPaymentOrder;
-                        currentPendingPaymentOrder = null;
-                        document.getElementById('payment-modal')?.classList.remove('active');
-                        document.getElementById('backdrop')?.classList.remove('active');
-                        showOrderSuccessModal(paidOrder, 'online_paid');
-                        updateAdminNewBadge();
-                    }, 500);
-                } else {
-                    throw new Error('Помилка підтвердження оплати');
-                }
-            } catch (err) {
-                if (statusMsg) {
-                    statusMsg.style.background = 'rgba(211,47,47,0.15)';
-                    statusMsg.style.color = '#d32f2f';
-                    statusMsg.innerText = 'Помилка авторизації платежу. Спробуйте ще раз.';
-                }
-            } finally {
-                if (btn) {
-                    btn.disabled = false;
-                    const amtDisp = document.getElementById('pay-btn-amount-label')?.innerText || '';
-                    btn.innerText = `Підтвердити оплату ${amtDisp} →`;
-                }
-            }
-        }
-
-        function openNativeTgInvoice() {
-            if (currentPendingPaymentOrder?.invoice_link && tg?.openInvoice) {
-                tg.openInvoice(currentPendingPaymentOrder.invoice_link, (status) => {
-                    if (status === 'paid') {
-                        processGatewayPayment();
-                    }
-                });
-            } else {
-                processGatewayPayment();
             }
         }
 

@@ -745,48 +745,56 @@ export class TelegramBotService {
     if (order.status === 'CANCELLED') statusEmoji = '❌';
 
     const itemsSummary = (order.items || []).map(i => {
-      const color = i.color ? ` (${i.color})` : '';
-      return `• <b>${i.title}</b>${color}\n  ${i.qty} шт. × ${i.price} ₴ = <b>${i.price * i.qty} ₴</b>`;
-    }).join('\n');
+      const color = i.color ? `\nКолір: ${i.color}` : '';
+      return `🕹 <b>${i.title}</b>${color}\nКількість: ${i.qty} шт.\nЦіна: <b>${i.price * i.qty} ₴</b>`;
+    }).join('\n\n');
 
-    let text = `🛍 <b>Замовлення #${order.order_id}</b>\n\n`;
-    text += `<b>Статус:</b> ${statusEmoji} <b>${statusName}</b>\n`;
-    if (order.tracking_number) {
-      text += `<b>Номер ТТН:</b> <code>${order.tracking_number}</code>\n`;
+    const fullName = [customer.first_name, customer.last_name, customer.middle_name].filter(Boolean).join(' ') ||
+      [customer.first_name, customer.last_name].filter(Boolean).join(' ') || 'Клієнт';
+
+    const provName = delivery.provider === 'ukrposhta' ? 'Укрпошта' : 'Нова пошта';
+    const methodType = (delivery.type === 'postomat' || delivery.method === 'postomat') ? 'поштомат' : 'відділення';
+
+    let text = `🛍 <b>ОПЛАТА ЗАМОВЛЕННЯ</b>\n\n`;
+    text += `<b>Замовлення:</b> <code>#${order.order_id}</code>\n\n`;
+    text += `🛒 <b>Товари:</b>\n\n${itemsSummary}\n\n`;
+    text += `💰 <b>Разом за товари:</b> <b>${order.subtotal || order.total} ₴</b>\n\n`;
+
+    text += `👤 <b>Покупець:</b>\n`;
+    text += `<b>ПІБ:</b> ${fullName}\n`;
+    text += `📞 <b>Телефон:</b> <code>${customer.phone || 'не вказано'}</code>\n`;
+    if (customer.email) text += `📧 <b>Email:</b> ${customer.email}\n`;
+    text += `\n`;
+
+    text += `📦 <b>Доставка:</b>\n`;
+    text += `${provName} — ${methodType}\n`;
+    text += `📍 <b>Місто:</b> ${delivery.city || 'Україна'}\n`;
+    text += `🏤 <b>Пункт:</b> ${delivery.department || delivery.address || 'Відділення'}\n\n`;
+
+    text += `💳 <b>Оплата:</b>\n`;
+    text += `Спосіб: ${isOnline ? 'Онлайн-оплата (Smart Glocal Test)' : 'Оплата при отриманні'}\n`;
+    text += `Стан: ${isPaid ? '✅ <b>Оплачено</b>' : '⏳ <b>Очікує оплати</b>'}\n`;
+    text += `Сума: <b>${order.total} ₴</b>\n\n`;
+
+    if (isOnline && !isPaid) {
+      text += `🔒 <i>Перевірте дані замовлення перед оплатою.</i>`;
     }
-
-    text += `\n<b>Товари:</b>\n${itemsSummary}\n\n`;
-    text += `<b>Доставка:</b>\n`;
-    text += `• ${delivery.provider_name || 'Нова Пошта'}, м. ${delivery.city}\n`;
-    text += `• ${delivery.department || delivery.address}\n\n`;
-
-    text += `<b>Оплата:</b>\n`;
-    if (isOnline) {
-      text += `• Спосіб: Онлайн (Smart Glocal Test)\n`;
-      text += `• Стан: ${isPaid ? '✅ <b>Оплачено</b>' : '⏳ <b>Очікує оплати</b>'}\n`;
-    } else {
-      text += `• Спосіб: Оплата при отриманні (Накладений платіж)\n`;
-      text += `• Стан: 📦 Оплата у відділенні\n`;
-    }
-
-    text += `\n💰 <b>Разом до сплати: ${order.total} ₴</b>\n`;
 
     const buttons = [];
 
     // If online and unpaid: Show payment action buttons in chat!
     if (isOnline && !isPaid) {
-      text += `\n💳 <b>Оплата замовлення:</b>\nНатисніть кнопку нижче для миттєвої оплати прямо в чаті:`;
       buttons.push([
-        { text: `💳 Оплатити замовлення (${order.total} ₴)`, callback_data: `send_invoice:${order.order_id}` }
+        { text: `💳 Оплатити ${order.total} ₴`, callback_data: `send_invoice:${order.order_id}` }
       ]);
       buttons.push([
-        { text: `⚡ Швидка оплата (Smart Glocal Test)`, callback_data: `pay_test:${order.order_id}` }
+        { text: `⚡ Сплатити (Smart Glocal Test)`, callback_data: `pay_test:${order.order_id}` }
       ]);
     }
 
     buttons.push([
       { text: '🔄 Оновити статус', callback_data: `view_order:${order.order_id}` },
-      { text: '📋 Всі мої замовлення', callback_data: `orders_list:${chatId}` }
+      { text: '📦 Мої замовлення', callback_data: `orders_list:${chatId}` }
     ]);
 
     await this.callApi('sendMessage', {
@@ -817,7 +825,7 @@ export class TelegramBotService {
     const invoiceParams = {
       chat_id: chatId,
       title: `Замовлення #${order.order_id}`,
-      description: `Оплата замовлення в інтернет-магазині MILIPSTORE (${order.items.length} поз.)`,
+      description: `Оплата ігрових девайсів у магазині MILIPSTORE (${order.items.length} поз.)`,
       payload,
       provider_token: PAYMENT_PROVIDER_TOKEN,
       currency: 'UAH',
@@ -864,35 +872,39 @@ export class TelegramBotService {
     let text = `🛍 <b>Ваші замовлення (${orders.length}):</b>\n\n`;
     const buttons = [];
 
-    orders.slice(0, 6).forEach(o => {
+    orders.slice(0, 8).forEach(o => {
       let emoji = '📦';
       if (o.status === 'PENDING_PAYMENT') emoji = '⏳';
-      if (o.status === 'NEW') emoji = '🆕';
+      if (o.status === 'NEW') emoji = '🟡';
       if (o.status === 'CONFIRMED') emoji = '✅';
       if (o.status === 'SHIPPED') emoji = '🚚';
+      if (o.status === 'DELIVERED') emoji = '🏢';
       if (o.status === 'COMPLETED') emoji = '🎉';
       if (o.status === 'CANCELLED') emoji = '❌';
 
-      const isUnpaid = o.payment?.method === 'online' && o.payment?.status !== 'PAID';
-      const itemsBrief = o.items.map(i => `${i.qty}× ${i.title}`).join(', ');
+      const isPaid = o.payment?.status === 'PAID';
+      const isUnpaid = o.payment?.method === 'online' && !isPaid;
+      const itemsBrief = o.items.map(i => `${i.title} × ${i.qty}`).join(', ');
+      const provName = o.delivery?.provider === 'ukrposhta' ? 'Укрпошта' : 'Нова пошта';
 
-      text += `<b>#${o.order_id}</b> — <b>${o.total} ₴</b>\n`;
+      text += `<b>#${o.order_id}</b>\n`;
       text += `• ${itemsBrief}\n`;
-      text += `• Статус: ${emoji} <b>${ORDER_STATUSES[o.status]?.name || o.status}</b>`;
-      if (isUnpaid) text += ` • ⚠️ <i>Очікує оплати</i>`;
-      if (o.tracking_number) text += `\n• ТТН: <code>${o.tracking_number}</code>`;
-      text += `\n\n`;
+      text += `💰 <b>${o.total} ₴</b>\n`;
+      text += `💳 ${isPaid ? 'Оплачено ✅' : (isUnpaid ? 'Очікує оплати ⏳' : 'Оплата при отриманні 📦')}\n`;
+      text += `📦 ${provName} — ${o.delivery?.department || o.delivery?.city || ''}\n`;
+      text += `Статус: ${emoji} <b>${ORDER_STATUSES[o.status]?.name || o.status}</b>\n`;
+      if (o.tracking_number) text += `ТТН: <code>${o.tracking_number}</code>\n`;
+      text += `\n`;
 
       if (isUnpaid) {
-        buttons.push([{
-          text: `💳 Оплатити #${o.order_id} (${o.total} ₴)`,
-          callback_data: `view_order:${o.order_id}`
-        }]);
+        buttons.push([
+          { text: `💳 Оплатити #${o.order_id} (${o.total} ₴)`, callback_data: `send_invoice:${o.order_id}` },
+          { text: `🔍 Деталі`, callback_data: `view_order:${o.order_id}` }
+        ]);
       } else {
-        buttons.push([{
-          text: `🔍 Деталі #${o.order_id} (${o.total} ₴)`,
-          callback_data: `view_order:${o.order_id}`
-        }]);
+        buttons.push([
+          { text: `🔍 Переглянути #${o.order_id}`, callback_data: `view_order:${o.order_id}` }
+        ]);
       }
     });
 
@@ -1323,25 +1335,39 @@ export class TelegramBotService {
   }
 
   async notifyAdminsNewOrder(order) {
-    const itemsList = (order.items || []).map(i => `${i.title} (${i.qty} шт.)`).join(', ');
+    const cust = order.customer || {};
+    const deliv = order.delivery || {};
+    const itemsList = (order.items || []).map(i => `• ${i.title}${i.color ? ` (${i.color})` : ''} — ${i.qty} шт. × ${i.price} ₴`).join('\n');
     const payStatus = order.payment?.status === 'PAID' ? '✅ Оплачено онлайн' : (order.payment?.is_cod ? '📦 Накладений платіж' : '⏳ Очікує оплати');
+    const fullName = [cust.first_name, cust.last_name, cust.middle_name].filter(Boolean).join(' ') || [cust.first_name, cust.last_name].filter(Boolean).join(' ') || 'Клієнт';
+    const provName = deliv.provider === 'ukrposhta' ? 'Укрпошта' : 'Нова пошта';
 
     const adminMsg = `🔔 <b>НОВЕ ЗАМОВЛЕННЯ #${order.order_id}</b>\n\n` +
-      `<b>Сума:</b> <b>${order.total} ₴</b> • ${payStatus}\n` +
-      `<b>Покупець:</b> ${order.customer?.first_name} ${order.customer?.last_name || ''} (<code>${order.customer?.phone}</code>)` +
-      (order.customer?.telegram_username ? ` @${order.customer.telegram_username}` : '') + `\n` +
-      `<b>Доставка:</b> ${order.delivery?.provider_name || 'Нова Пошта'}, ${order.delivery?.city}, ${order.delivery?.department}\n` +
-      `<b>Товари (${order.items?.length || 0}):</b> ${itemsList}\n` +
-      `<b>Оплата:</b> ${order.payment?.provider || 'Smart Glocal Test'}`;
+      `🛍 <b>Товари:</b>\n${itemsList}\n\n` +
+      `💰 <b>Разом:</b> <b>${order.total} ₴</b> • ${payStatus}\n\n` +
+      `👤 <b>Покупець:</b>\n${fullName}\n` +
+      `📞 <code>${cust.phone || 'не вказано'}</code>\n` +
+      (cust.email ? `📧 ${cust.email}\n` : '') +
+      (cust.telegram_username ? `✈️ @${cust.telegram_username}\n` : '') +
+      `\n` +
+      `📦 <b>Доставка:</b>\n` +
+      `${provName}\n` +
+      `м. ${deliv.city || ''}\n` +
+      `${deliv.department || deliv.address || ''}\n\n` +
+      `💳 <b>Оплата:</b>\n` +
+      `${order.payment?.provider || 'Smart Glocal Test'}\n` +
+      `${payStatus}`;
 
     const adminButtons = [
       [
-        { text: '✅ Підтвердити', callback_data: `admin_confirm:${order.order_id}` },
-        { text: '📦 До пакування', callback_data: `admin_set_status:PACKING_PREP:${order.order_id}` }
+        { text: '📋 Переглянути замовлення', callback_data: `admin_view:${order.order_id}` }
       ],
       [
-        { text: '🚚 Вказати ТТН', callback_data: `admin_ttn_prompt:${order.order_id}` },
-        { text: '🔍 Всі деталі', callback_data: `admin_view:${order.order_id}` }
+        { text: '✅ Підтвердити', callback_data: `admin_confirm:${order.order_id}` },
+        { text: '❌ Скасувати', callback_data: `setstatus_${order.order_id}_CANCELLED` }
+      ],
+      [
+        { text: '🚚 Вказати ТТН', callback_data: `admin_ttn_prompt:${order.order_id}` }
       ]
     ];
 
@@ -1365,11 +1391,12 @@ export class TelegramBotService {
     });
 
     if (order.customer?.telegram_id) {
-      const text = `✅ <b>Оплату замовлення #${order.order_id} успішно зараховано!</b>\n\n` +
-        `Сума: <b>${order.total} ₴</b>\n` +
-        `Провайдер: <b>${order.payment?.provider || 'Smart Glocal Test (Telegram)'}</b>\n` +
-        `Транзакція: <code>${order.payment?.transaction_id || 'SG-PAY-OK'}</code>\n\n` +
-        `Статус замовлення оновлено: <b>Нові</b>. Менеджер вже готує девайси до пакування та відправки!`;
+      const text = `🎉 <b>ОПЛАТА УСПІШНА!</b>\n\n` +
+        `Ваше замовлення <b>#${order.order_id}</b> успішно оплачено.\n\n` +
+        `💰 <b>Сума:</b> <b>${order.total} ₴</b>\n\n` +
+        `📦 <b>Статус:</b>\n🟡 <b>Очікує підтвердження</b>\n\n` +
+        `Ми отримали оплату та передали замовлення менеджеру.\n` +
+        `Очікуйте подальших повідомлень щодо вашого замовлення.`;
 
       await this.callApi('sendMessage', {
         chat_id: order.customer.telegram_id,
@@ -1377,7 +1404,8 @@ export class TelegramBotService {
         parse_mode: 'HTML',
         reply_markup: {
           inline_keyboard: [
-            [{ text: '🔍 Переглянути замовлення', callback_data: `view_order:${order.order_id}` }]
+            [{ text: '📦 Мої замовлення', callback_data: `orders_list:${order.customer.telegram_id}` }],
+            [{ text: '🔍 Деталі замовлення', callback_data: `view_order:${order.order_id}` }]
           ]
         }
       });
@@ -1385,23 +1413,50 @@ export class TelegramBotService {
   }
 
   async sendAdminPaymentSuccess(order) {
+    const cust = order.customer || {};
+    const deliv = order.delivery || {};
+    const itemsList = (order.items || []).map(i => `• ${i.title}${i.color ? ` (${i.color})` : ''} — ${i.qty} шт. × ${i.price} ₴`).join('\n');
+    const fullName = [cust.first_name, cust.last_name, cust.middle_name].filter(Boolean).join(' ') || [cust.first_name, cust.last_name].filter(Boolean).join(' ') || 'Клієнт';
+    const provName = deliv.provider === 'ukrposhta' ? 'Укрпошта' : 'Нова пошта';
+
+    const adminMsg = `🔔 <b>НОВЕ ОПЛАЧЕНЕ ЗАМОВЛЕННЯ</b>\n\n` +
+      `<b>#${order.order_id}</b>\n\n` +
+      `🛍 <b>Товари:</b>\n${itemsList}\n\n` +
+      `💰 <b>Разом:</b> <b>${order.total} ₴</b>\n\n` +
+      `👤 <b>Покупець:</b>\n` +
+      `${fullName}\n` +
+      `📞 <code>${cust.phone || 'не вказано'}</code>\n` +
+      (cust.email ? `📧 ${cust.email}\n` : '') +
+      (cust.telegram_username ? `✈️ @${cust.telegram_username}\n` : '') +
+      `\n` +
+      `📦 <b>Доставка:</b>\n` +
+      `${provName}\n` +
+      `м. ${deliv.city || ''}\n` +
+      `${deliv.department || deliv.address || ''}\n\n` +
+      `💳 <b>Оплата:</b>\n` +
+      `Smart Glocal Test\n` +
+      `✅ <b>Оплачено</b>`;
+
+    const adminButtons = [
+      [
+        { text: '📋 Переглянути замовлення', callback_data: `admin_view:${order.order_id}` }
+      ],
+      [
+        { text: '✅ Підтвердити', callback_data: `admin_confirm:${order.order_id}` },
+        { text: '❌ Скасувати', callback_data: `setstatus_${order.order_id}_CANCELLED` }
+      ],
+      [
+        { text: '🚚 Вказати ТТН', callback_data: `admin_ttn_prompt:${order.order_id}` }
+      ]
+    ];
+
     const adminChatIds = this.getAllAdminChatIds();
     for (const adminId of adminChatIds) {
       await this.callApi('sendMessage', {
         chat_id: adminId,
-        text: `💰 <b>ОПЛАТА ОТРИМАНА!</b>\n\nЗамовлення: <b>#${order.order_id}</b>\nСума: <b>${order.total} ₴</b>\nПокупець: ${order.customer?.first_name} ${order.customer?.last_name || ''} (<code>${order.customer?.phone}</code>)\nСтатус: ✅ Успішно сплачено онлайн через Smart Glocal Test`,
+        text: adminMsg,
         parse_mode: 'HTML',
-        reply_markup: {
-          inline_keyboard: [
-            [
-              { text: '✅ Підтвердити', callback_data: `admin_confirm:${order.order_id}` },
-              { text: '🚚 Вказати ТТН', callback_data: `admin_ttn_prompt:${order.order_id}` }
-            ],
-            [
-              { text: '🔍 Відкрити замовлення', callback_data: `admin_view:${order.order_id}` }
-            ]
-          ]
-        }
+        reply_markup: { inline_keyboard: adminButtons }
       });
     }
   }
@@ -1422,33 +1477,34 @@ export class TelegramBotService {
 
     switch (newStatus) {
       case 'CONFIRMED':
-        messageText = `📦 <b>Ваше замовлення ${orderNum} підтверджено менеджером!</b>\n\nМи вже розпочали підготовку до пакування.`;
+        messageText = `✅ <b>Ваше замовлення ${orderNum} підтверджено менеджером.</b>\n\nМи вже розпочали комплектацію та підготовку до пакування.`;
         break;
       case 'PACKING_PREP':
-        messageText = `📦 <b>Ваше замовлення ${orderNum} передано на склад і готується до пакування.</b>`;
+        messageText = `📦 <b>Ваше замовлення ${orderNum} готується до пакування.</b>`;
         break;
       case 'PACKED':
-        messageText = `✅ <b>Ваше замовлення ${orderNum} надійно упаковано</b> та очікує передачі перевізнику.`;
+        messageText = `📦 <b>Ваше замовлення ${orderNum} упаковано.</b>`;
         break;
       case 'DISPATCH_PREP':
-        messageText = `🚚 <b>Ваше замовлення ${orderNum} підготовлено до відправлення.</b>`;
+        messageText = `🚚 <b>Ваше замовлення ${orderNum} готується до відправки.</b>`;
         break;
       case 'SHIPPED': {
         const track = ttn || order.tracking_number;
-        messageText = `🚚 <b>Ваше замовлення ${orderNum} вже відправлено!</b>`;
+        const provName = order.delivery?.provider === 'ukrposhta' ? 'Укрпошта' : (order.delivery?.provider_name || 'Нова Пошта');
+        messageText = `🚚 <b>Ваше замовлення ${orderNum} відправлено!</b>`;
         if (track) {
-          messageText += `\n\nНомер ТТН: <code>${track}</code>\nСлужба доставки: <b>${order.delivery?.provider_name || 'Нова Пошта'}</b>\nВи можете відстежувати посилку в додатку перевізника.`;
+          messageText += `\n\nНомер ТТН: <code>${track}</code>\nСлужба доставки: <b>${provName}</b>\n\nВи можете відстежувати рух посилки у застосунку перевізника або на сайті.`;
         }
         break;
       }
       case 'DELIVERED':
-        messageText = `📦 <b>Ваше замовлення ${orderNum} прибуло до пункту видачі!</b>\nБудь ласка, заберіть вашу посилку.`;
+        messageText = `📍 <b>Ваше замовлення ${orderNum} прибуло до відділення / поштомату.</b>\nБудь ласка, отримайте вашу посилку.`;
         break;
       case 'COMPLETED':
-        messageText = `🎉 <b>Ваше замовлення ${orderNum} успішно виконано!</b>\nДякуємо за покупку в MILIPSTORE. Бажаємо приємного користування та яскравих перемог!`;
+        messageText = `🎉 <b>Ваше замовлення ${orderNum} успішно виконано!</b>\nДякуємо за покупку в MILIPSTORE!`;
         break;
       case 'CANCELLED':
-        messageText = `❌ <b>Ваше замовлення ${orderNum} було скасовано.</b>\nЯкщо у вас виникли запитання, зверніться до нашої служби підтримки @milipmanager.`;
+        messageText = `❌ <b>Ваше замовлення ${orderNum} скасовано.</b>\nЯкщо у вас виникли запитання, зверніться до нашої служби підтримки @milipmanager.`;
         break;
       default:
         messageText = `📦 <b>Оновлено статус замовлення ${orderNum}:</b> <b>${ORDER_STATUSES[newStatus]?.name || newStatus}</b>`;

@@ -131,6 +131,7 @@ app.post('/api/orders', async (req, res) => {
 
   const firstName = (customer?.first_name || customer?.firstName || '').trim();
   const lastName = (customer?.last_name || customer?.lastName || '').trim();
+  const middleName = (customer?.middle_name || customer?.patronymic || customer?.middleName || '').trim();
   const phone = (customer?.phone || '').trim();
   const email = (customer?.email || '').trim().toLowerCase();
 
@@ -187,6 +188,7 @@ app.post('/api/orders', async (req, res) => {
       customer: {
         first_name: firstName,
         last_name: lastName,
+        middle_name: middleName,
         phone,
         email,
         telegram_id: telegramId,

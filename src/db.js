@@ -558,6 +558,7 @@ class Database {
       customer: {
         first_name: orderData.customer?.first_name || '',
         last_name: orderData.customer?.last_name || '',
+        middle_name: orderData.customer?.middle_name || orderData.customer?.patronymic || '',
         phone: orderData.customer?.phone || '',
         email: orderData.customer?.email || '',
         telegram_id: orderData.customer?.telegram_id || null,
