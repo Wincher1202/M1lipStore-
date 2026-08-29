@@ -340,36 +340,62 @@ let products = [
 let orders = [];
 let userProfiles = new Map();
 
-// Delivery mock data for realistic UX in Ukraine
+// Delivery mock data and live Nova Poshta integration for Ukraine
 const UKRAINE_CITIES = [
-  { ref: 'city-kyiv', name: 'Київ', region: 'Київська' },
-  { ref: 'city-kharkiv', name: 'Харків', region: 'Харківська' },
-  { ref: 'city-odesa', name: 'Одеса', region: 'Одеська' },
-  { ref: 'city-dnipro', name: 'Дніпро', region: 'Дніпропетровська' },
-  { ref: 'city-lviv', name: 'Львів', region: 'Львівська' },
-  { ref: 'city-zaporizhzhia', name: 'Запоріжжя', region: 'Запорізька' },
-  { ref: 'city-vinnytsia', name: 'Вінниця', region: 'Вінницька' },
-  { ref: 'city-poltava', name: 'Полтава', region: 'Полтавська' },
-  { ref: 'city-chernihiv', name: 'Чернігів', region: 'Чернігівська' },
-  { ref: 'city-cherkasy', name: 'Черкаси', region: 'Черкаська' },
-  { ref: 'city-zhytomyr', name: 'Житомир', region: 'Житомирська' },
-  { ref: 'city-sumy', name: 'Суми', region: 'Сумська' },
-  { ref: 'city-khmelnytskyi', name: 'Хмельницький', region: 'Хмельницька' },
-  { ref: 'city-chernivtsi', name: 'Чернівці', region: 'Чернівецька' },
-  { ref: 'city-rivne', name: 'Рівне', region: 'Рівненська' },
-  { ref: 'city-ivano-frankivsk', name: 'Івано-Франківськ', region: 'Івано-Франківська' },
-  { ref: 'city-ternopil', name: 'Тернопіль', region: 'Тернопільська' },
-  { ref: 'city-lutsk', name: 'Луцьк', region: 'Волинська' },
-  { ref: 'city-uzhhorod', name: 'Ужгород', region: 'Закарпатська' }
+  { ref: '8d5a980d-391c-11dd-90d9-001a92567626', name: 'Київ', region: 'Київська обл.' },
+  { ref: 'db5c88e0-391c-11dd-90d9-001a92567626', name: 'Харків', region: 'Харківська обл.' },
+  { ref: 'db5c88d0-391c-11dd-90d9-001a92567626', name: 'Одеса', region: 'Одеська обл.' },
+  { ref: 'db5c88f0-391c-11dd-90d9-001a92567626', name: 'Дніпро', region: 'Дніпропетровська обл.' },
+  { ref: 'db5c88f5-391c-11dd-90d9-001a92567626', name: 'Львів', region: 'Львівська обл.' },
+  { ref: 'db5c88c6-391c-11dd-90d9-001a92567626', name: 'Запоріжжя', region: 'Запорізька обл.' },
+  { ref: 'db5c88c7-391c-11dd-90d9-001a92567626', name: 'Кривий Ріг', region: 'Дніпропетровська обл.' },
+  { ref: 'db5c88c8-391c-11dd-90d9-001a92567626', name: 'Миколаїв', region: 'Миколаївська обл.' },
+  { ref: 'db5c88c9-391c-11dd-90d9-001a92567626', name: 'Вінниця', region: 'Вінницька обл.' },
+  { ref: 'db5c88ca-391c-11dd-90d9-001a92567626', name: 'Полтава', region: 'Полтавська обл.' },
+  { ref: 'db5c88cb-391c-11dd-90d9-001a92567626', name: 'Чернігів', region: 'Чернігівська обл.' },
+  { ref: 'db5c88cc-391c-11dd-90d9-001a92567626', name: 'Черкаси', region: 'Черкаська обл.' },
+  { ref: 'db5c88cd-391c-11dd-90d9-001a92567626', name: 'Житомир', region: 'Житомирська обл.' },
+  { ref: 'db5c88ce-391c-11dd-90d9-001a92567626', name: 'Суми', region: 'Сумська обл.' },
+  { ref: 'db5c88cf-391c-11dd-90d9-001a92567626', name: 'Хмельницький', region: 'Хмельницька обл.' },
+  { ref: 'db5c88d1-391c-11dd-90d9-001a92567626', name: 'Чернівці', region: 'Чернівецька обл.' },
+  { ref: 'db5c88d2-391c-11dd-90d9-001a92567626', name: 'Рівне', region: 'Рівненська обл.' },
+  { ref: 'db5c88d3-391c-11dd-90d9-001a92567626', name: 'Івано-Франківськ', region: 'Івано-Франківська обл.' },
+  { ref: 'db5c88d4-391c-11dd-90d9-001a92567626', name: "Кам'янське", region: 'Дніпропетровська обл.' },
+  { ref: 'db5c88d5-391c-11dd-90d9-001a92567626', name: 'Тернопіль', region: 'Тернопільська обл.' },
+  { ref: 'db5c88d6-391c-11dd-90d9-001a92567626', name: 'Кропивницький', region: 'Кіровоградська обл.' },
+  { ref: 'db5c88d7-391c-11dd-90d9-001a92567626', name: 'Кременчук', region: 'Полтавська обл.' },
+  { ref: 'db5c88d8-391c-11dd-90d9-001a92567626', name: 'Луцьк', region: 'Волинська обл.' },
+  { ref: 'db5c88d9-391c-11dd-90d9-001a92567626', name: 'Біла Церква', region: 'Київська обл.' },
+  { ref: 'db5c88da-391c-11dd-90d9-001a92567626', name: 'Ужгород', region: 'Закарпатська обл.' },
+  { ref: 'db5c88db-391c-11dd-90d9-001a92567626', name: 'Бровари', region: 'Київська обл.' },
+  { ref: 'db5c88dc-391c-11dd-90d9-001a92567626', name: 'Ірпінь', region: 'Київська обл.' },
+  { ref: 'db5c88dd-391c-11dd-90d9-001a92567626', name: 'Буча', region: 'Київська обл.' }
 ];
 
-function getMockWarehouses(cityName) {
+function getMockNovaPoshtaWarehouses(cityName) {
   return [
-    { ref: `wh-1-${cityName}`, name: `Відділення №1: вул. Центральна, 1`, address: `вул. Центральна, 1`, type: 'branch' },
-    { ref: `wh-2-${cityName}`, name: `Відділення №2: просп. Перемоги, 15`, address: `просп. Перемоги, 15`, type: 'branch' },
-    { ref: `wh-3-${cityName}`, name: `Відділення №3: вул. Соборна, 42`, address: `вул. Соборна, 42`, type: 'branch' },
-    { ref: `pm-1-${cityName}`, name: `Поштомат №1050: вул. Шевченка, 20 (ТРЦ)`, address: `вул. Шевченка, 20`, type: 'postomat' },
-    { ref: `pm-2-${cityName}`, name: `Поштомат №2140: просп. Миру, 8`, address: `просп. Миру, 8`, type: 'postomat' }
+    { ref: `np-wh-1-${cityName}`, name: `Відділення №1 (до 1100 кг): вул. Центральна, 1`, address: `вул. Центральна, 1`, type: 'branch' },
+    { ref: `np-wh-2-${cityName}`, name: `Відділення №2 (до 30 кг): просп. Перемоги, 15`, address: `просп. Перемоги, 15`, type: 'branch' },
+    { ref: `np-wh-3-${cityName}`, name: `Відділення №3 (до 30 кг): вул. Соборна, 42`, address: `вул. Соборна, 42`, type: 'branch' },
+    { ref: `np-wh-4-${cityName}`, name: `Відділення №4 (до 30 кг): вул. Незалежності, 8`, address: `вул. Незалежності, 8`, type: 'branch' },
+    { ref: `np-wh-5-${cityName}`, name: `Відділення №5 (до 30 кг): просп. Миру, 23`, address: `просп. Миру, 23`, type: 'branch' },
+    { ref: `np-wh-6-${cityName}`, name: `Відділення №6 (до 30 кг): вул. Лесі Українки, 17`, address: `вул. Лесі Українки, 17`, type: 'branch' },
+    { ref: `np-wh-7-${cityName}`, name: `Відділення №7 (до 30 кг): вул. Героїв Майдану, 50`, address: `вул. Героїв Майдану, 50`, type: 'branch' },
+    { ref: `np-pm-1-${cityName}`, name: `Поштомат №1050: вул. Шевченка, 20 (ТРЦ)`, address: `вул. Шевченка, 20`, type: 'postomat' },
+    { ref: `np-pm-2-${cityName}`, name: `Поштомат №2140: вул. Франка, 14`, address: `вул. Франка, 14`, type: 'postomat' },
+    { ref: `np-pm-3-${cityName}`, name: `Поштомат №3305: просп. Свободи, 5`, address: `просп. Свободи, 5`, type: 'postomat' }
+  ];
+}
+
+function getMockUkrposhtaWarehouses(cityName) {
+  return [
+    { ref: `up-main-${cityName}`, name: `Головне відділення (Головпоштамт): вул. Головна, 1`, address: `вул. Головна, 1`, type: 'main' },
+    { ref: `up-1-${cityName}`, name: `Відділення Укрпошта №1: вул. Соборності, 12`, address: `вул. Соборності, 12`, type: 'standard' },
+    { ref: `up-2-${cityName}`, name: `Відділення Укрпошта №2: вул. Шевченка, 45`, address: `вул. Шевченка, 45`, type: 'standard' },
+    { ref: `up-3-${cityName}`, name: `Відділення Укрпошта №3: просп. Незалежності, 88`, address: `просп. Незалежності, 88`, type: 'standard' },
+    { ref: `up-4-${cityName}`, name: `Відділення Укрпошта №4: вул. Франка, 21`, address: `вул. Франка, 21`, type: 'standard' },
+    { ref: `up-5-${cityName}`, name: `Відділення Укрпошта №5: вул. Миру, 10`, address: `вул. Миру, 10`, type: 'standard' },
+    { ref: `up-6-${cityName}`, name: `Відділення Укрпошта №6: вул. Богдана Хмельницького, 3`, address: `вул. Богдана Хмельницького, 3`, type: 'standard' }
   ];
 }
 
@@ -566,15 +592,48 @@ app.get('/api/orders/:order_id', (req, res) => {
 
 app.get('/api/delivery/providers', (req, res) => {
   res.json([
-    { id: 'nova_poshta', name: 'Нова Пошта', configured: true },
-    { id: 'ukrposhta', name: 'Укрпошта', configured: true }
+    { id: 'nova_poshta', name: 'Нова Пошта', note: 'Відділення та поштомати', configured: true },
+    { id: 'ukrposhta', name: 'Укрпошта', note: 'Відділення Експрес / Стандарт', configured: true }
   ]);
 });
 
-function handleCitySearch(req, res) {
+async function handleCitySearch(req, res) {
   const q = (req.query.query || '').toString().trim().toLowerCase();
+  const provider = req.params.provider_id || req.query.provider || 'nova_poshta';
+  const npApiKey = process.env.NOVA_POSHTA_API_KEY;
+
+  if (provider === 'nova_poshta' && npApiKey && q.length >= 2) {
+    try {
+      const response = await fetch('https://api.novaposhta.ua/v2.0/json/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          apiKey: npApiKey,
+          modelName: 'Address',
+          calledMethod: 'searchSettlements',
+          methodProperties: {
+            CityName: q,
+            Limit: '20',
+            Page: '1'
+          }
+        })
+      });
+      const data = await response.json();
+      if (data.success && data.data && data.data[0]?.Addresses) {
+        const liveCities = data.data[0].Addresses.map(addr => ({
+          ref: addr.DeliveryCity || addr.Ref,
+          name: addr.Present || addr.MainDescription,
+          region: addr.Area || addr.Region || ''
+        }));
+        if (liveCities.length > 0) return res.json(liveCities);
+      }
+    } catch (e) {
+      // fallback on error
+    }
+  }
+
   if (q.length < 2) {
-    return res.json([]);
+    return res.json(UKRAINE_CITIES.slice(0, 10));
   }
   const matched = UKRAINE_CITIES.filter(c =>
     c.name.toLowerCase().includes(q) || c.region.toLowerCase().includes(q)
@@ -585,21 +644,50 @@ function handleCitySearch(req, res) {
 app.get('/api/delivery/cities', handleCitySearch);
 app.get('/api/delivery/:provider_id/cities', handleCitySearch);
 
-function handleWarehouseSearch(req, res) {
+async function handleWarehouseSearch(req, res) {
   const cityRef = (req.query.city_ref || req.query.cityRef || '').toString();
   const q = (req.query.query || '').toString().trim().toLowerCase();
   const provider = req.params.provider_id || req.query.provider || 'nova_poshta';
+  const npApiKey = process.env.NOVA_POSHTA_API_KEY;
 
-  const city = UKRAINE_CITIES.find(c => c.ref === cityRef) || { name: cityRef || 'Місто' };
-  let warehouses = getMockWarehouses(city.name);
+  const city = UKRAINE_CITIES.find(c => c.ref === cityRef) || { name: cityRef || 'Київ' };
 
-  if (provider === 'ukrposhta') {
-    warehouses = [
-      { ref: `up-1-${city.name}`, name: `Головне відділення Укрпошта: вул. Головна, 1`, address: 'вул. Головна, 1' },
-      { ref: `up-2-${city.name}`, name: `Відділення Укрпошта №2: вул. Соборності, 12`, address: 'вул. Соборності, 12' },
-      { ref: `up-3-${city.name}`, name: `Відділення Укрпошта №3: вул. Шевченка, 45`, address: 'вул. Шевченка, 45' }
-    ];
+  if (provider === 'nova_poshta' && npApiKey) {
+    try {
+      const response = await fetch('https://api.novaposhta.ua/v2.0/json/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          apiKey: npApiKey,
+          modelName: 'Address',
+          calledMethod: 'getWarehouses',
+          methodProperties: {
+            CityRef: cityRef,
+            CityName: city.name,
+            FindByString: q,
+            Limit: '50',
+            Page: '1'
+          }
+        })
+      });
+      const data = await response.json();
+      if (data.success && Array.isArray(data.data) && data.data.length > 0) {
+        const liveWh = data.data.map(w => ({
+          ref: w.Ref,
+          name: w.Description,
+          address: w.ShortAddress || w.Description,
+          type: w.CategoryOfWarehouse === 'Postomat' ? 'postomat' : 'branch'
+        }));
+        return res.json(liveWh);
+      }
+    } catch (e) {
+      // fallback on error
+    }
   }
+
+  let warehouses = provider === 'ukrposhta'
+    ? getMockUkrposhtaWarehouses(city.name)
+    : getMockNovaPoshtaWarehouses(city.name);
 
   if (q) {
     warehouses = warehouses.filter(w =>

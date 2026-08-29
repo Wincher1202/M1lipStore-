@@ -1452,55 +1452,162 @@
         }
         .btn-secondary:hover { border-color: var(--border-hover); }
 
-        /* ---- delivery provider chips ---- */
-        .provider-chip-group { display: flex; flex-wrap: wrap; gap: 8px; }
-        .provider-chip {
-            padding: 10px 14px;
-            border-radius: 999px;
-            border: 1px solid var(--border-light);
+        /* ---- delivery provider cards & chips ---- */
+        .provider-cards-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 4px;
+        }
+        @media (max-width: 480px) {
+            .provider-cards-grid { grid-template-columns: 1fr; }
+        }
+        .delivery-provider-card {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 14px;
+            border-radius: var(--radius-sm);
+            border: 2px solid var(--border-light);
             background: var(--bg-primary);
-            font-size: 0.82rem;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            position: relative;
+        }
+        .delivery-provider-card:hover {
+            border-color: var(--border-hover);
+            transform: translateY(-1px);
+        }
+        .delivery-provider-card.active {
+            border-color: var(--accent);
+            background: var(--accent-light);
+        }
+        .delivery-provider-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+        .delivery-provider-info {
+            flex: 1;
+            min-width: 0;
+        }
+        .delivery-provider-title {
+            font-weight: 800;
+            font-size: 0.92rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .delivery-provider-sub {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+        .provider-check-mark {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            border: 2px solid var(--border-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: var(--transition-smooth);
+        }
+        .delivery-provider-card.active .provider-check-mark {
+            border-color: var(--accent);
+            background: var(--accent);
+            color: #fff;
+        }
+
+        .quick-cities-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 6px;
+        }
+        .quick-city-chip {
+            padding: 5px 10px;
+            border-radius: 14px;
+            font-size: 0.76rem;
             font-weight: 700;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-light);
+            color: var(--text-secondary);
             cursor: pointer;
             transition: var(--transition-smooth);
         }
-        .provider-chip.active { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
-        .provider-chip .badge-soon { display: block; font-size: 0.6rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); }
-        .provider-chip.active .badge-soon { color: var(--accent); }
+        .quick-city-chip:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: var(--accent-light);
+        }
+        .quick-city-chip.active {
+            border-color: var(--accent);
+            color: #fff;
+            background: var(--accent);
+        }
 
         .delivery-search-results {
             display: flex;
             flex-direction: column;
-            gap: 4px;
-            max-height: 220px;
+            gap: 2px;
+            max-height: 240px;
             overflow-y: auto;
             border: 1px solid var(--border-light);
             border-radius: var(--radius-sm);
+            background: var(--card-bg);
+            margin-top: 4px;
+            box-shadow: var(--shadow-subtle);
         }
         .delivery-search-result-item {
-            padding: 10px 12px;
+            padding: 10px 14px;
             cursor: pointer;
             font-size: 0.85rem;
             border-bottom: 1px solid var(--border-light);
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            transition: background 0.15s ease;
         }
         .delivery-search-result-item:last-child { border-bottom: none; }
         .delivery-search-result-item:hover { background: var(--bg-primary); }
-        .delivery-search-result-item .item-sub { font-size: 0.7rem; color: var(--text-muted); }
-        .delivery-search-empty { padding: 12px; font-size: 0.8rem; color: var(--text-muted); text-align: center; }
+        .delivery-search-result-item .item-title { font-weight: 700; color: var(--text-primary); }
+        .delivery-search-result-item .item-sub { font-size: 0.72rem; color: var(--text-muted); }
+        .delivery-search-result-item.selected { background: var(--accent-light); border-left: 3px solid var(--accent); }
+        .delivery-search-empty { padding: 14px; font-size: 0.82rem; color: var(--text-muted); text-align: center; }
 
         .selected-pill {
             display: flex;
             align-items: center;
             justify-content: space-between;
             gap: 10px;
-            padding: 10px 12px;
+            padding: 10px 14px;
             border-radius: var(--radius-sm);
-            border: 1px solid var(--accent);
+            border: 1.5px solid var(--accent);
             background: var(--accent-light);
             font-size: 0.85rem;
             font-weight: 700;
+            margin-top: 4px;
         }
-        .selected-pill button { background: none; border: none; color: var(--accent); font-weight: 800; cursor: pointer; }
+        .selected-pill button {
+            background: none;
+            border: none;
+            color: var(--accent);
+            font-weight: 800;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 6px;
+        }
+        .selected-pill button:hover { background: rgba(87,100,226,0.15); }
 
         .delivery-fallback-note {
             font-size: 0.78rem;
@@ -1830,32 +1937,32 @@
         <div class="partner-brands-marquee">
             <div class="partner-brands-track">
                 <!-- Set 1 -->
-                <div class="partner-brand-tile" onclick="filterByBrand('Attack Shark', this)"><img src="/brand-attack-shark.svg" alt="Attack Shark"><span class="brand-text-fallback">Attack Shark</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('Ajazz', this)"><img src="/brand-ajazz.svg" alt="Ajazz"><span class="brand-text-fallback">Ajazz</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('AULA', this)"><img src="/brand-aula.svg" alt="AULA"><span class="brand-text-fallback">AULA</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('Mchose', this)"><img src="/brand-mchose.svg" alt="Mchose"><span class="brand-text-fallback">Mchose</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('VGN', this)"><img src="/brand-vgn.svg" alt="VGN"><span class="brand-text-fallback">VGN</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Attack Shark', this)"><img src="attack-shark.jpg" alt="Attack Shark" loading="lazy" onerror="this.src='brand-attack-shark.svg'"><span class="brand-text-fallback">Attack Shark</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Ajazz', this)"><img src="ajazz.webp" alt="Ajazz" loading="lazy" onerror="this.src='brand-ajazz.svg'"><span class="brand-text-fallback">Ajazz</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('AULA', this)"><img src="aula.png" alt="AULA" loading="lazy" onerror="this.src='brand-aula.svg'"><span class="brand-text-fallback">AULA</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Mchose', this)"><img src="mchose.png" alt="Mchose" loading="lazy" onerror="this.src='brand-mchose.svg'"><span class="brand-text-fallback">Mchose</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('VGN', this)"><img src="vgn.jpg" alt="VGN" loading="lazy" onerror="this.src='brand-vgn.svg'"><span class="brand-text-fallback">VGN</span></div>
 
                 <!-- Set 2 -->
-                <div class="partner-brand-tile" onclick="filterByBrand('Attack Shark', this)"><img src="/brand-attack-shark.svg" alt="Attack Shark"><span class="brand-text-fallback">Attack Shark</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('Ajazz', this)"><img src="/brand-ajazz.svg" alt="Ajazz"><span class="brand-text-fallback">Ajazz</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('AULA', this)"><img src="/brand-aula.svg" alt="AULA"><span class="brand-text-fallback">AULA</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('Mchose', this)"><img src="/brand-mchose.svg" alt="Mchose"><span class="brand-text-fallback">Mchose</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('VGN', this)"><img src="/brand-vgn.svg" alt="VGN"><span class="brand-text-fallback">VGN</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Attack Shark', this)"><img src="attack-shark.jpg" alt="Attack Shark" loading="lazy" onerror="this.src='brand-attack-shark.svg'"><span class="brand-text-fallback">Attack Shark</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Ajazz', this)"><img src="ajazz.webp" alt="Ajazz" loading="lazy" onerror="this.src='brand-ajazz.svg'"><span class="brand-text-fallback">Ajazz</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('AULA', this)"><img src="aula.png" alt="AULA" loading="lazy" onerror="this.src='brand-aula.svg'"><span class="brand-text-fallback">AULA</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Mchose', this)"><img src="mchose.png" alt="Mchose" loading="lazy" onerror="this.src='brand-mchose.svg'"><span class="brand-text-fallback">Mchose</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('VGN', this)"><img src="vgn.jpg" alt="VGN" loading="lazy" onerror="this.src='brand-vgn.svg'"><span class="brand-text-fallback">VGN</span></div>
 
                 <!-- Set 3 -->
-                <div class="partner-brand-tile" onclick="filterByBrand('Attack Shark', this)"><img src="/brand-attack-shark.svg" alt="Attack Shark"><span class="brand-text-fallback">Attack Shark</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('Ajazz', this)"><img src="/brand-ajazz.svg" alt="Ajazz"><span class="brand-text-fallback">Ajazz</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('AULA', this)"><img src="/brand-aula.svg" alt="AULA"><span class="brand-text-fallback">AULA</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('Mchose', this)"><img src="/brand-mchose.svg" alt="Mchose"><span class="brand-text-fallback">Mchose</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('VGN', this)"><img src="/brand-vgn.svg" alt="VGN"><span class="brand-text-fallback">VGN</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Attack Shark', this)"><img src="attack-shark.jpg" alt="Attack Shark" loading="lazy" onerror="this.src='brand-attack-shark.svg'"><span class="brand-text-fallback">Attack Shark</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Ajazz', this)"><img src="ajazz.webp" alt="Ajazz" loading="lazy" onerror="this.src='brand-ajazz.svg'"><span class="brand-text-fallback">Ajazz</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('AULA', this)"><img src="aula.png" alt="AULA" loading="lazy" onerror="this.src='brand-aula.svg'"><span class="brand-text-fallback">AULA</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Mchose', this)"><img src="mchose.png" alt="Mchose" loading="lazy" onerror="this.src='brand-mchose.svg'"><span class="brand-text-fallback">Mchose</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('VGN', this)"><img src="vgn.jpg" alt="VGN" loading="lazy" onerror="this.src='brand-vgn.svg'"><span class="brand-text-fallback">VGN</span></div>
 
-                <!-- Set 4 (Duplicated for 100% seamless infinite marquee) -->
-                <div class="partner-brand-tile" onclick="filterByBrand('Attack Shark', this)"><img src="/brand-attack-shark.svg" alt="Attack Shark"><span class="brand-text-fallback">Attack Shark</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('Ajazz', this)"><img src="/brand-ajazz.svg" alt="Ajazz"><span class="brand-text-fallback">Ajazz</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('AULA', this)"><img src="/brand-aula.svg" alt="AULA"><span class="brand-text-fallback">AULA</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('Mchose', this)"><img src="/brand-mchose.svg" alt="Mchose"><span class="brand-text-fallback">Mchose</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('VGN', this)"><img src="/brand-vgn.svg" alt="VGN"><span class="brand-text-fallback">VGN</span></div>
+                <!-- Set 4 -->
+                <div class="partner-brand-tile" onclick="filterByBrand('Attack Shark', this)"><img src="attack-shark.jpg" alt="Attack Shark" loading="lazy" onerror="this.src='brand-attack-shark.svg'"><span class="brand-text-fallback">Attack Shark</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Ajazz', this)"><img src="ajazz.webp" alt="Ajazz" loading="lazy" onerror="this.src='brand-ajazz.svg'"><span class="brand-text-fallback">Ajazz</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('AULA', this)"><img src="aula.png" alt="AULA" loading="lazy" onerror="this.src='brand-aula.svg'"><span class="brand-text-fallback">AULA</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Mchose', this)"><img src="mchose.png" alt="Mchose" loading="lazy" onerror="this.src='brand-mchose.svg'"><span class="brand-text-fallback">Mchose</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('VGN', this)"><img src="vgn.jpg" alt="VGN" loading="lazy" onerror="this.src='brand-vgn.svg'"><span class="brand-text-fallback">VGN</span></div>
             </div>
         </div>
     </section>
@@ -2014,26 +2121,29 @@
 
                     <div class="checkout-group">
                         <label>Служба доставки</label>
-                        <div class="provider-chip-group" id="provider-chip-group"></div>
+                        <div class="provider-cards-grid" id="provider-chip-group"></div>
                     </div>
 
-                    <div id="delivery-configured-flow" style="display:none; flex-direction: column; gap: 16px;">
+                    <div id="delivery-configured-flow" style="display: flex; flex-direction: column; gap: 14px; margin-top: 6px;">
                         <div class="checkout-group" id="delivery-city-group">
-                            <label>Місто</label>
-                            <input type="text" id="chk-city-search" placeholder="Почніть вводити назву міста...">
-                            <div class="delivery-search-results" id="city-search-results" style="display:none;"></div>
+                            <label>Місто отримання</label>
                             <div id="city-selected-pill"></div>
+                            <div id="city-search-box-wrap">
+                                <input type="text" id="chk-city-search" placeholder="Почніть вводити назву міста..." autocomplete="off" oninput="searchDeliveryCities(this.value)">
+                                <div class="quick-cities-container" id="quick-cities-container"></div>
+                                <div class="delivery-search-results" id="city-search-results" style="display:none;"></div>
+                            </div>
                         </div>
+
                         <div class="checkout-group" id="delivery-warehouse-group" style="display:none;">
-                            <label>Відділення / Поштомат</label>
-                            <input type="text" id="chk-warehouse-search" placeholder="Пошук відділення...">
-                            <div class="delivery-search-results" id="warehouse-search-results" style="display:none;"></div>
+                            <label id="warehouse-group-label">Відділення / Поштомат</label>
                             <div id="warehouse-selected-pill"></div>
+                            <div id="warehouse-search-box-wrap">
+                                <input type="text" id="chk-warehouse-search" placeholder="Пошук за номером або вулицею..." autocomplete="off" oninput="searchDeliveryWarehouses(this.value)">
+                                <div class="delivery-search-results" id="warehouse-search-results" style="display:none;"></div>
+                            </div>
                         </div>
-                        <div id="delivery-api-error-block"></div>
                     </div>
-
-
                 </div>
 
                 <!-- STEP 3: payment -->
@@ -2182,7 +2292,7 @@
 
                 <div class="modal-options-row">
                     <div class="option-group">
-                        <label>Колір <span id="modal-color-name">не вибрано</span> <small style="color:var(--text-muted); font-size:0.75rem; font-weight:500;">(натисніть двічі для фото)</small></label>
+                        <label>Колір <span id="modal-color-name">не вибрано</span></label>
                         <div class="color-selector-large" id="modal-color-selector"></div>
                         <div id="modal-stock-status" class="stock-status"></div>
                     </div>
@@ -3114,13 +3224,12 @@
             const colors = currentModalProduct?.colors || [];
             if (colors[idx] && colors[idx].isOut) return;
 
-            // If the user taps the ALREADY selected color, open its photo gallery!
+            // If the user clicks the ALREADY selected color circle, toggle off and revert to general product gallery
             if (selectedColorIndex === idx) {
-                openColorGalleryLightbox();
-                return;
+                selectedColorIndex = null;
+            } else {
+                selectedColorIndex = idx;
             }
-
-            selectedColorIndex = idx;
             updateModalGalleryAndColor();
         }
 
@@ -3339,14 +3448,13 @@
         async function openCheckoutModal() {
             if (cart.length === 0) return;
             checkoutStepIndex = 1;
-            checkoutDelivery = { provider: '', city: '', cityRef: '', department: '', warehouseRef: '' };
+            checkoutDelivery = { provider: 'nova_poshta', city: '', cityRef: '', department: '', warehouseRef: '' };
             renderCheckoutStep();
             toggleCheckoutDrawer(true);
 
+            loadDeliveryProviders();
             if (tg?.initData) {
-                await Promise.all([loadDeliveryProviders(), loadMyProfile()]);
-            } else {
-                renderProviderChips();
+                await loadMyProfile();
             }
             prefillContactsFromProfile();
             renderSavedDeliveriesBlock();
@@ -3414,13 +3522,16 @@
                 return true;
             }
             if (step === 2) {
-                const configuredProvider = deliveryProviders.find(p => p.id === checkoutDelivery.provider && p.configured);
-                if (!configuredProvider) {
-                    alert("Оберіть службу доставки з доступним автоматичним пошуком.");
+                if (!checkoutDelivery.provider) {
+                    alert("Будь ласка, оберіть службу доставки (Нова Пошта або Укрпошта).");
                     return false;
                 }
-                if (!checkoutDelivery.cityRef || !checkoutDelivery.warehouseRef) {
-                    alert("Оберіть місто та відділення зі списку.");
+                if (!checkoutDelivery.city) {
+                    alert("Будь ласка, оберіть місто доставки зі списку.");
+                    return false;
+                }
+                if (!checkoutDelivery.department && !checkoutDelivery.warehouseRef) {
+                    alert("Будь ласка, оберіть відділення або поштомат доставки.");
                     return false;
                 }
                 return true;
@@ -3439,65 +3550,127 @@
             renderCheckoutStep();
         }
 
+        const DEFAULT_DELIVERY_PROVIDERS = [
+            { id: 'nova_poshta', name: 'Нова Пошта', icon: '📦', note: 'Відділення та поштомати (1-2 дні)', configured: true },
+            { id: 'ukrposhta', name: 'Укрпошта', icon: '📬', note: 'Відділення Експрес / Стандарт', configured: true }
+        ];
+
+        const POPULAR_CITIES = [
+            { name: 'Київ', ref: 'e718a680-4b33-11e4-ab6d-005056801329', region: 'Київська обл.' },
+            { name: 'Львів', ref: 'db5c88f5-391c-11dd-90d9-001a92567626', region: 'Львівська обл.' },
+            { name: 'Одеса', ref: 'db5c88d0-391c-11dd-90d9-001a92567626', region: 'Одеська обл.' },
+            { name: 'Харків', ref: 'db5c88e0-391c-11dd-90d9-001a92567626', region: 'Харківська обл.' },
+            { name: 'Дніпро', ref: 'db5c88f0-391c-11dd-90d9-001a92567626', region: 'Дніпропетровська обл.' },
+            { name: 'Запоріжжя', ref: 'db5c88c6-391c-11dd-90d9-001a92567626', region: 'Запорізька обл.' },
+            { name: 'Вінниця', ref: 'db5c8892-391c-11dd-90d9-001a92567626', region: 'Вінницька обл.' },
+            { name: 'Івано-Франківськ', ref: 'db5c88ec-391c-11dd-90d9-001a92567626', region: 'Івано-Франківська обл.' }
+        ];
+
+        let deliveryCitiesCache = {};
+        let deliveryWarehousesCache = {};
+
         async function loadDeliveryProviders() {
             try {
                 const res = await fetch(DELIVERY_PROVIDERS_URL);
-                deliveryProviders = res.ok ? await res.json() : [];
+                const data = res.ok ? await res.json() : [];
+                deliveryProviders = Array.isArray(data) && data.length > 0 ? data : DEFAULT_DELIVERY_PROVIDERS;
             } catch (err) {
-                deliveryProviders = [];
+                deliveryProviders = DEFAULT_DELIVERY_PROVIDERS;
+            }
+            if (!checkoutDelivery.provider) {
+                checkoutDelivery.provider = 'nova_poshta';
             }
             renderProviderChips();
+            renderQuickCities();
         }
 
         function renderProviderChips() {
             const group = document.getElementById('provider-chip-group');
-            const known = ['nova_poshta', 'ukrposhta', 'mist'];
-            const byId = Object.fromEntries(deliveryProviders.map(p => [p.id, p]));
-            const available = known.filter(id => byId[id]?.configured);
-            group.innerHTML = available.map(id => {
-                const p = byId[id];
-                return `<div class="provider-chip ${checkoutDelivery.provider === id ? 'active' : ''}" onclick="selectDeliveryProvider('${id}')">${p.name}</div>`;
-            }).join('') || '<div class="delivery-api-error">Автоматичний пошук служб доставки ще не налаштований на сервері.</div>';
+            if (!group) return;
+            const providers = deliveryProviders && deliveryProviders.length > 0 ? deliveryProviders : DEFAULT_DELIVERY_PROVIDERS;
+            
+            group.innerHTML = providers.map(p => {
+                const isActive = checkoutDelivery.provider === p.id;
+                const icon = p.id === 'nova_poshta' ? '📦' : (p.id === 'ukrposhta' ? '📬' : '🚚');
+                const sub = p.note || (p.id === 'nova_poshta' ? 'Відділення та поштомати (1-2 дні)' : 'Відділення Експрес / Стандарт');
+                return `
+                    <div class="delivery-provider-card ${isActive ? 'active' : ''}" onclick="selectDeliveryProvider('${p.id}')">
+                        <div class="delivery-provider-icon">${icon}</div>
+                        <div class="delivery-provider-info">
+                            <div class="delivery-provider-title">
+                                <span>${p.name}</span>
+                                <div class="provider-check-mark">${isActive ? '✓' : ''}</div>
+                            </div>
+                            <div class="delivery-provider-sub">${sub}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
         }
 
         function selectDeliveryProvider(providerId) {
-            checkoutDelivery = { provider: providerId, city: '', cityRef: '', department: '', warehouseRef: '' };
+            checkoutDelivery.provider = providerId;
             renderProviderChips();
 
-            const configuredFlow = document.getElementById('delivery-configured-flow');
-            configuredFlow.style.display = 'flex';
-            document.getElementById('city-search-results').style.display = 'none';
-            document.getElementById('city-selected-pill').innerHTML = '';
-            document.getElementById('warehouse-selected-pill').innerHTML = '';
-            document.getElementById('warehouse-search-results').innerHTML = '';
-            document.getElementById('delivery-warehouse-group').style.display = 'none';
+            const flow = document.getElementById('delivery-configured-flow');
+            if (flow) flow.style.display = 'flex';
+
+            const whGroupLabel = document.getElementById('warehouse-group-label');
+            if (whGroupLabel) {
+                whGroupLabel.innerText = providerId === 'ukrposhta' ? 'Відділення Укрпошти' : 'Відділення / Поштомат Нової Пошти';
+            }
+
+            // If a city is already selected, re-fetch warehouses for the new provider
+            if (checkoutDelivery.cityRef) {
+                checkoutDelivery.warehouseRef = '';
+                checkoutDelivery.department = '';
+                document.getElementById('warehouse-selected-pill').innerHTML = '';
+                document.getElementById('warehouse-search-box-wrap').style.display = 'block';
+                loadDeliveryWarehouses('');
+            }
         }
 
+        function renderQuickCities() {
+            const container = document.getElementById('quick-cities-container');
+            if (!container) return;
+            container.innerHTML = POPULAR_CITIES.map(c => `
+                <div class="quick-city-chip ${checkoutDelivery.city === c.name ? 'active' : ''}" onclick="selectQuickCity('${c.ref}', '${c.name.replace(/'/g, "\\'")}')">${c.name}</div>
+            `).join('');
+        }
+
+        function selectQuickCity(ref, name) {
+            selectCity(ref, name);
+        }
+
+        let citySearchDebounce = null;
         async function searchDeliveryCities(query) {
+            clearTimeout(citySearchDebounce);
             const resultsBox = document.getElementById('city-search-results');
-            if (!query || query.length < 2) {
-                resultsBox.style.display = 'none';
+            if (!query || query.trim().length < 2) {
+                if (resultsBox) resultsBox.style.display = 'none';
                 return;
             }
-            try {
-                const url = `${API_BASE}/delivery/cities?provider=${encodeURIComponent(checkoutDelivery.provider)}&query=${encodeURIComponent(query)}`;
-                const res = await fetch(url);
-                const data = res.ok ? await res.json() : [];
-                if (!Array.isArray(data) || data.length === 0) {
-                    resultsBox.innerHTML = '<div class="delivery-search-empty">Міст не знайдено</div>';
-                    resultsBox.style.display = 'block';
-                    return;
+            citySearchDebounce = setTimeout(async () => {
+                try {
+                    const url = `${API_BASE}/delivery/cities?provider=${encodeURIComponent(checkoutDelivery.provider || 'nova_poshta')}&query=${encodeURIComponent(query.trim())}`;
+                    const res = await fetch(url);
+                    const data = res.ok ? await res.json() : [];
+                    if (!Array.isArray(data) || data.length === 0) {
+                        resultsBox.innerHTML = '<div class="delivery-search-empty">Міст за запитом не знайдено</div>';
+                        resultsBox.style.display = 'flex';
+                        return;
+                    }
+                    resultsBox.innerHTML = data.map(item => `
+                        <div class="delivery-search-result-item" onclick="selectCity('${item.ref || item.id}', '${item.name.replace(/'/g, "\\'")}')">
+                            <div class="item-title">${item.name}</div>
+                            ${item.region ? `<div class="item-sub">${item.region}</div>` : ''}
+                        </div>
+                    `).join('');
+                    resultsBox.style.display = 'flex';
+                } catch (err) {
+                    if (resultsBox) resultsBox.style.display = 'none';
                 }
-                resultsBox.innerHTML = data.map(item => `
-                    <div class="delivery-search-result-item" onclick="selectCity('${item.ref || item.id}', '${item.name.replace(/'/g, "\\'")}')">
-                        <div>${item.name}</div>
-                        ${item.region ? `<div class="item-sub">${item.region}</div>` : ''}
-                    </div>
-                `).join('');
-                resultsBox.style.display = 'block';
-            } catch (err) {
-                resultsBox.style.display = 'none';
-            }
+            }, 250);
         }
 
         function selectCity(ref, name) {
@@ -3505,17 +3678,42 @@
             checkoutDelivery.city = name;
             checkoutDelivery.warehouseRef = '';
             checkoutDelivery.department = '';
-            document.getElementById('city-search-results').style.display = 'none';
-            document.getElementById('chk-city-search').value = '';
-            document.getElementById('city-selected-pill').innerHTML = `
-                <div class="selected-pill">
-                    <span>Місто: ${name}</span>
-                    <button onclick="clearCitySelection()">Змінити</button>
-                </div>
-            `;
-            document.getElementById('delivery-warehouse-group').style.display = 'flex';
-            document.getElementById('warehouse-search-results').innerHTML = '';
-            document.getElementById('warehouse-selected-pill').innerHTML = '';
+
+            const resultsBox = document.getElementById('city-search-results');
+            if (resultsBox) resultsBox.style.display = 'none';
+
+            const cityInput = document.getElementById('chk-city-search');
+            if (cityInput) cityInput.value = '';
+
+            const cityBoxWrap = document.getElementById('city-search-box-wrap');
+            if (cityBoxWrap) cityBoxWrap.style.display = 'none';
+
+            const pill = document.getElementById('city-selected-pill');
+            if (pill) {
+                pill.innerHTML = `
+                    <div class="selected-pill">
+                        <span>📍 Місто: <strong>${name}</strong></span>
+                        <button type="button" onclick="clearCitySelection()">✕ Змінити</button>
+                    </div>
+                `;
+            }
+
+            const whGroup = document.getElementById('delivery-warehouse-group');
+            if (whGroup) whGroup.style.display = 'flex';
+
+            const whSearchWrap = document.getElementById('warehouse-search-box-wrap');
+            if (whSearchWrap) whSearchWrap.style.display = 'block';
+
+            const whPill = document.getElementById('warehouse-selected-pill');
+            if (whPill) whPill.innerHTML = '';
+
+            const whGroupLabel = document.getElementById('warehouse-group-label');
+            if (whGroupLabel) {
+                whGroupLabel.innerText = checkoutDelivery.provider === 'ukrposhta' ? 'Відділення Укрпошти' : 'Відділення / Поштомат Нової Пошти';
+            }
+
+            renderQuickCities();
+            loadDeliveryWarehouses('');
         }
 
         function clearCitySelection() {
@@ -3523,50 +3721,108 @@
             checkoutDelivery.city = '';
             checkoutDelivery.warehouseRef = '';
             checkoutDelivery.department = '';
-            document.getElementById('city-selected-pill').innerHTML = '';
-            document.getElementById('delivery-warehouse-group').style.display = 'none';
+
+            const pill = document.getElementById('city-selected-pill');
+            if (pill) pill.innerHTML = '';
+
+            const cityBoxWrap = document.getElementById('city-search-box-wrap');
+            if (cityBoxWrap) cityBoxWrap.style.display = 'block';
+
+            const whGroup = document.getElementById('delivery-warehouse-group');
+            if (whGroup) whGroup.style.display = 'none';
+
+            renderQuickCities();
         }
 
-        async function searchDeliveryWarehouses(query) {
+        let currentWarehousesList = [];
+        let whSearchDebounce = null;
+
+        async function loadDeliveryWarehouses(query = '') {
             const resultsBox = document.getElementById('warehouse-search-results');
-            if (!checkoutDelivery.cityRef) return;
+            if (!resultsBox) return;
+            if (!checkoutDelivery.cityRef && !checkoutDelivery.city) return;
+
+            resultsBox.style.display = 'flex';
+            resultsBox.innerHTML = '<div class="delivery-search-empty">Завантаження відділень...</div>';
+
             try {
-                const url = `${API_BASE}/delivery/warehouses?provider=${encodeURIComponent(checkoutDelivery.provider)}&city_ref=${encodeURIComponent(checkoutDelivery.cityRef)}&query=${encodeURIComponent(query || '')}`;
+                const url = `${API_BASE}/delivery/warehouses?provider=${encodeURIComponent(checkoutDelivery.provider || 'nova_poshta')}&city_ref=${encodeURIComponent(checkoutDelivery.cityRef || checkoutDelivery.city)}&query=${encodeURIComponent(query || '')}`;
                 const res = await fetch(url);
                 const data = res.ok ? await res.json() : [];
-                if (!Array.isArray(data) || data.length === 0) {
-                    resultsBox.innerHTML = '<div class="delivery-search-empty">Відділень не знайдено</div>';
-                    resultsBox.style.display = 'block';
-                    return;
-                }
-                resultsBox.innerHTML = data.map(item => `
-                    <div class="delivery-search-result-item" onclick="selectWarehouse('${item.ref || item.id}', '${item.name.replace(/'/g, "\\'")}')">
-                        <div>${item.name}</div>
-                    </div>
-                `).join('');
-                resultsBox.style.display = 'block';
+                currentWarehousesList = Array.isArray(data) ? data : [];
+                renderWarehousesResults(currentWarehousesList);
             } catch (err) {
-                resultsBox.style.display = 'none';
+                resultsBox.innerHTML = '<div class="delivery-search-empty">Не вдалося завантажити відділення. Спробуйте ще раз.</div>';
             }
+        }
+
+        function renderWarehousesResults(list) {
+            const resultsBox = document.getElementById('warehouse-search-results');
+            if (!resultsBox) return;
+
+            if (!list || list.length === 0) {
+                resultsBox.innerHTML = '<div class="delivery-search-empty">Відділень за запитом не знайдено</div>';
+                resultsBox.style.display = 'flex';
+                return;
+            }
+
+            resultsBox.innerHTML = list.map(item => {
+                const isSelected = checkoutDelivery.warehouseRef === (item.ref || item.id);
+                return `
+                    <div class="delivery-search-result-item ${isSelected ? 'selected' : ''}" onclick="selectWarehouse('${item.ref || item.id}', '${item.name.replace(/'/g, "\\'")}')">
+                        <div class="item-title">${item.name}</div>
+                        ${item.address ? `<div class="item-sub">${item.address}</div>` : ''}
+                    </div>
+                `;
+            }).join('');
+            resultsBox.style.display = 'flex';
+        }
+
+        function searchDeliveryWarehouses(query) {
+            clearTimeout(whSearchDebounce);
+            whSearchDebounce = setTimeout(() => {
+                if (currentWarehousesList && currentWarehousesList.length > 0 && query && query.trim().length > 0) {
+                    const q = query.trim().toLowerCase();
+                    const filtered = currentWarehousesList.filter(w => (w.name && w.name.toLowerCase().includes(q)) || (w.address && w.address.toLowerCase().includes(q)));
+                    renderWarehousesResults(filtered);
+                } else {
+                    loadDeliveryWarehouses(query);
+                }
+            }, 200);
         }
 
         function selectWarehouse(ref, name) {
             checkoutDelivery.warehouseRef = ref;
             checkoutDelivery.department = name;
-            document.getElementById('warehouse-search-results').style.display = 'none';
-            document.getElementById('chk-warehouse-search').value = '';
-            document.getElementById('warehouse-selected-pill').innerHTML = `
-                <div class="selected-pill">
-                    <span>Відділення: ${name}</span>
-                    <button onclick="clearWarehouseSelection()">Змінити</button>
-                </div>
-            `;
+
+            const whSearchWrap = document.getElementById('warehouse-search-box-wrap');
+            if (whSearchWrap) whSearchWrap.style.display = 'none';
+
+            const whInput = document.getElementById('chk-warehouse-search');
+            if (whInput) whInput.value = '';
+
+            const whPill = document.getElementById('warehouse-selected-pill');
+            if (whPill) {
+                whPill.innerHTML = `
+                    <div class="selected-pill">
+                        <span>🏢 ${name}</span>
+                        <button type="button" onclick="clearWarehouseSelection()">✕ Змінити</button>
+                    </div>
+                `;
+            }
         }
 
         function clearWarehouseSelection() {
             checkoutDelivery.warehouseRef = '';
             checkoutDelivery.department = '';
-            document.getElementById('warehouse-selected-pill').innerHTML = '';
+
+            const whPill = document.getElementById('warehouse-selected-pill');
+            if (whPill) whPill.innerHTML = '';
+
+            const whSearchWrap = document.getElementById('warehouse-search-box-wrap');
+            if (whSearchWrap) whSearchWrap.style.display = 'block';
+
+            loadDeliveryWarehouses('');
         }
 
         async function loadMyProfile() {
