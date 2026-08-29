@@ -1535,6 +1535,11 @@ class AddProductStates(StatesGroup):
 
 class AdminEditStates(StatesGroup):
     waiting_for_new_value = State()
+    waiting_for_color_main_photo = State()
+    waiting_for_color_gallery_photo = State()
+    waiting_for_new_color_name = State()
+    waiting_for_general_gallery_photo = State()
+    waiting_for_specs = State()
 
 
 def get_active_categories():
@@ -1799,9 +1804,12 @@ async def process_manage_product(callback: CallbackQuery):
          InlineKeyboardButton(text="💰 Змінити ціну", callback_data=f"edit_field_{product_id}_price")],
         [InlineKeyboardButton(text="🏷 Змінити бренд", callback_data=f"edit_field_{product_id}_brand"),
          InlineKeyboardButton(text="📁 Змінити категорію", callback_data=f"edit_field_{product_id}_category")],
-        [InlineKeyboardButton(text="📝 Змінити опис", callback_data=f"edit_field_{product_id}_description")],
-        [InlineKeyboardButton(text="🖼 Змінити головне фото", callback_data=f"edit_field_{product_id}_img")],
-        [InlineKeyboardButton(text="🎨 Редагувати залишки кольорів", callback_data=f"edit_colors_{product_id}")],
+        [InlineKeyboardButton(text="🔖 Змінити тег (акція/топ)", callback_data=f"edit_field_{product_id}_tag"),
+         InlineKeyboardButton(text="📝 Змінити опис", callback_data=f"edit_field_{product_id}_description")],
+        [InlineKeyboardButton(text="🖼 Змінити головне фото", callback_data=f"edit_field_{product_id}_img"),
+         InlineKeyboardButton(text="📸 Загальна галерея", callback_data=f"edit_gallery_{product_id}")],
+        [InlineKeyboardButton(text="🎨 Редагувати кольори та фото", callback_data=f"edit_colors_{product_id}")],
+        [InlineKeyboardButton(text="⚙️ Змінити характеристики", callback_data=f"edit_specs_{product_id}")],
         [InlineKeyboardButton(text="❌ Видалити товар", callback_data=f"delete_prod_{product_id}")],
         [InlineKeyboardButton(text="🔙 Назад до списку", callback_data="back_to_admin")]
     ])
@@ -1838,6 +1846,7 @@ async def process_edit_field_start(callback: CallbackQuery, state: FSMContext):
         "price": "ціну (тільки число в грн)",
         "brand": "бренд",
         "category": "категорію",
+        "tag": "тег товару (наприклад: ХІТ, ТОП, НОВИНКА, ЗНИЖКА або напишіть «-» щоб очистити)",
         "description": "опис товару",
         "img": "посилання на нове головне фото або надішліть картинку"
     }
@@ -1865,8 +1874,10 @@ async def process_edit_field_save(message: Message, state: FSMContext):
             return
     elif field == "img" and message.photo:
         new_value = await get_file_url(message.bot, message.photo[-1].file_id)
+    elif field == "tag" and (new_value == "-" or new_value.lower() == "немає"):
+        new_value = ""
 
-    allowed_fields = {"title", "price", "brand", "category", "description", "img"}
+    allowed_fields = {"title", "price", "brand", "category", "tag", "description", "img"}
     if field not in allowed_fields:
         await message.answer("❌ Непідтримуване поле.")
         return
@@ -1894,6 +1905,114 @@ async def process_edit_field_save(message: Message, state: FSMContext):
     await message.answer("✅ Успішно оновлено! Напишіть /admin для повернення в панель.")
 
 
+# ============================================================================
+# РЕДАГУВАННЯ ХАРАКТЕРИСТИК ТА ГАЛЕРЕЇ
+# ============================================================================
+
+@router.callback_query(F.data.startswith("edit_gallery_"))
+async def process_edit_gallery(callback: CallbackQuery, state: FSMContext):
+    if callback.from_user.id not in ADMIN_IDS: return
+    product_id = callback.data.replace("edit_gallery_", "")
+    await state.update_data(editing_product_id=product_id)
+    await state.set_state(AdminEditStates.waiting_for_general_gallery_photo)
+    
+    markup = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="🗑 Очистити галерею", callback_data=f"clear_gal_{product_id}")],
+        [InlineKeyboardButton(text="🔙 Назад до товару", callback_data=f"manage_{product_id}")]
+    ])
+    await callback.message.answer(
+        "📸 **Редагування загальної галереї товару**\n\nНадішліть нові фото по одному чи альбомом для додавання в галерею (або натисніть «Очистити галерею»):",
+        reply_markup=markup, parse_mode="Markdown"
+    )
+    await callback.answer()
+
+
+@router.callback_query(F.data.startswith("clear_gal_"))
+async def process_clear_gallery(callback: CallbackQuery):
+    if callback.from_user.id not in ADMIN_IDS: return
+    prod_id = callback.data.replace("clear_gal_", "")
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("UPDATE products SET gallery = '[]' WHERE id = %s", (prod_id,))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    await callback.answer("Галерею очищено!", show_alert=True)
+    await process_manage_product(callback)
+
+
+@router.message(AdminEditStates.waiting_for_general_gallery_photo, F.photo)
+async def process_add_gallery_photo_edit(message: Message, state: FSMContext):
+    if message.from_user.id not in ADMIN_IDS: return
+    data = await state.get_data()
+    prod_id = data.get("editing_product_id")
+    photo_url = await get_file_url(message.bot, message.photo[-1].file_id)
+
+    products = get_db_products(include_hidden=True)
+    product = next((p for p in products if p["id"] == prod_id), None)
+    if product:
+        gal = product.get("gallery", [])
+        if photo_url not in gal:
+            gal.append(photo_url)
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("UPDATE products SET gallery = %s WHERE id = %s", (json.dumps(gal, ensure_ascii=False), prod_id))
+        conn.commit()
+        cursor.close()
+        conn.close()
+        await message.answer(f"✅ Фото додано в галерею товару! (Всього фото: {len(gal)})\nНадішліть ще фото або напишіть /admin.")
+
+
+@router.callback_query(F.data.startswith("edit_specs_"))
+async def process_edit_specs_start(callback: CallbackQuery, state: FSMContext):
+    if callback.from_user.id not in ADMIN_IDS: return
+    prod_id = callback.data.replace("edit_specs_", "")
+    await state.update_data(editing_product_id=prod_id, temp_specs=[], current_spec_index=1)
+    await state.set_state(AdminEditStates.waiting_for_specs)
+    await callback.message.answer(
+        "⚙️ **Введіть нові характеристики товару**:\n\nВводьте блоками, наприклад:\n`Сенсор (PixArt PAW3395)`\nабо просто значення.\n\nКоли закінчите, надішліть `/done`:",
+        parse_mode="Markdown"
+    )
+    await callback.answer()
+
+
+@router.message(AdminEditStates.waiting_for_specs)
+async def process_edit_specs_input(message: Message, state: FSMContext):
+    if message.from_user.id not in ADMIN_IDS: return
+    text = message.text.strip()
+    data = await state.get_data()
+    prod_id = data.get("editing_product_id")
+    specs = data.get("temp_specs", [])
+    spec_index = data.get("current_spec_index", 1)
+
+    if text.lower() == "/done":
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("UPDATE products SET specs = %s WHERE id = %s", (json.dumps(specs, ensure_ascii=False), prod_id))
+        conn.commit()
+        cursor.close()
+        conn.close()
+        await state.clear()
+        await message.answer("✅ Характеристики товару успішно оновлено! Напишіть /admin.", parse_mode="Markdown")
+        return
+
+    cleaned_text = re.sub(r'^\d+[\.\)]\s*', '', text)
+    if "(" in cleaned_text and ")" in cleaned_text:
+        parts = cleaned_text.split("(", 1)
+        label = parts[0].strip().upper()
+        value = parts[1].replace(")", "").strip()
+    else:
+        label = f"БЛОК {spec_index}"
+        value = cleaned_text
+    specs.append({"label": label, "value": value})
+    await state.update_data(temp_specs=specs, current_spec_index=spec_index + 1)
+    await message.answer(f"⚙️ Блок характеристик №{spec_index + 1} (або надішліть /done):")
+
+
+# ============================================================================
+# РЕДАГУВАННЯ КОЛЬОРІВ ТА ФОТО КОЛЬОРІВ
+# ============================================================================
+
 @router.callback_query(F.data.startswith("edit_colors_"))
 async def process_edit_colors(callback: CallbackQuery):
     if callback.from_user.id not in ADMIN_IDS: return
@@ -1905,17 +2024,73 @@ async def process_edit_colors(callback: CallbackQuery):
         return
 
     cq = product.get('colorQuantities', {})
+    ci = product.get('colorImages', {})
     buttons = []
+    
     for color in cq.keys():
-        buttons.append([InlineKeyboardButton(text=f"Змінити залишок: {color} ({cq[color]} шт.)",
-                                             callback_data=f"ch_cqty_{product_id}_{color}")])
+        has_photo = "🖼" if (ci.get(color, {}).get("main") if isinstance(ci.get(color), dict) else ci.get(color)) else "⚪"
+        buttons.append([InlineKeyboardButton(
+            text=f"{has_photo} {color}: {cq[color]} шт.",
+            callback_data=f"col_mgr_{product_id}_{color}"
+        )])
+
+    buttons.append([InlineKeyboardButton(text="➕ Додати новий колір", callback_data=f"add_color_to_{product_id}")])
     buttons.append([InlineKeyboardButton(text="🔙 Назад до товару", callback_data=f"manage_{product_id}")])
 
     markup = InlineKeyboardMarkup(inline_keyboard=buttons)
     try:
-        await callback.message.edit_reply_markup(reply_markup=markup)
+        await callback.message.edit_text(
+            f"🎨 **Керування кольорами та фото товару**:\nОберіть колір для редагування його залишків і фотографій:",
+            reply_markup=markup, parse_mode="Markdown"
+        )
     except Exception:
-        await callback.message.answer("Оберіть колір для редагування залишку:", reply_markup=markup)
+        await callback.message.answer(
+            f"🎨 **Керування кольорами та фото товару**:\nОберіть колір для редагування його залишків і фотографій:",
+            reply_markup=markup, parse_mode="Markdown"
+        )
+    await callback.answer()
+
+
+@router.callback_query(F.data.startswith("col_mgr_"))
+async def process_col_manager(callback: CallbackQuery):
+    if callback.from_user.id not in ADMIN_IDS: return
+    parts = callback.data.replace("col_mgr_", "").split("_", 1)
+    prod_id, color_name = parts[0], parts[1]
+
+    products = get_db_products(include_hidden=True)
+    product = next((p for p in products if p["id"] == prod_id), None)
+    if not product: return
+
+    cq = product.get('colorQuantities', {})
+    ci = product.get('colorImages', {})
+    current_q = cq.get(color_name, 0)
+    col_data = ci.get(color_name, {})
+    main_photo = col_data.get("main", "") if isinstance(col_data, dict) else col_data
+    gal_count = len(col_data.get("gallery", [])) if isinstance(col_data, dict) else 0
+
+    text = (
+        f"🎨 **Керування кольором: {color_name}**\n\n"
+        f"• Кількість на складі: **{current_q} шт.**\n"
+        f"• Головне фото: {'✅ Встановлено' if main_photo else '❌ Немає'}\n"
+        f"• Додаткових фото в галереї: **{gal_count} шт.**"
+    )
+
+    markup = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="📦 Змінити залишок", callback_data=f"ch_cqty_{prod_id}_{color_name}")],
+        [InlineKeyboardButton(text="🖼 Змінити головне фото кольору", callback_data=f"ch_cmain_{prod_id}_{color_name}")],
+        [InlineKeyboardButton(text="📸 Додати фото до галереї кольору", callback_data=f"ch_cgal_{prod_id}_{color_name}")],
+        [InlineKeyboardButton(text="🗑 Видалити цей колір", callback_data=f"del_col_{prod_id}_{color_name}")],
+        [InlineKeyboardButton(text="🔙 До списку кольорів", callback_data=f"edit_colors_{prod_id}")]
+    ])
+
+    try:
+        if main_photo and main_photo.startswith("http"):
+            await callback.message.delete()
+            await callback.message.answer_photo(photo=main_photo, caption=text, reply_markup=markup, parse_mode="Markdown")
+        else:
+            await callback.message.edit_text(text, reply_markup=markup, parse_mode="Markdown")
+    except Exception:
+        await callback.message.answer(text, reply_markup=markup, parse_mode="Markdown")
     await callback.answer()
 
 
@@ -1940,7 +2115,8 @@ async def save_edited_color_qty_proxy(message: Message, state: FSMContext):
         if new_q < 0: raise ValueError()
 
         products = get_db_products(include_hidden=True)
-        product = next((p for p in products if p["id"] == data.get("editing_product_id")), None)
+        prod_id = data.get("editing_product_id")
+        product = next((p for p in products if p["id"] == prod_id), None)
         if product:
             cq = product.get("colorQuantities", {})
             cq[data.get("editing_color_name")] = new_q
@@ -1949,7 +2125,7 @@ async def save_edited_color_qty_proxy(message: Message, state: FSMContext):
             conn = get_db_connection()
             cursor = conn.cursor()
             cursor.execute("UPDATE products SET color_quantities = %s, quantity = %s WHERE id = %s",
-                           (json.dumps(cq, ensure_ascii=False), total_qty, data.get("editing_product_id")))
+                           (json.dumps(cq, ensure_ascii=False), total_qty, prod_id))
             conn.commit()
             cursor.close()
             conn.close()
@@ -1958,6 +2134,151 @@ async def save_edited_color_qty_proxy(message: Message, state: FSMContext):
         await state.clear()
     except ValueError:
         await message.answer("❌ Будь ласка, введіть ціле число (0 або більше):")
+
+
+@router.callback_query(F.data.startswith("ch_cmain_"))
+async def process_change_color_main_photo(callback: CallbackQuery, state: FSMContext):
+    if callback.from_user.id not in ADMIN_IDS: return
+    parts = callback.data.replace("ch_cmain_", "").split("_", 1)
+    await state.update_data(editing_product_id=parts[0], editing_color_name=parts[1])
+    await state.set_state(AdminEditStates.waiting_for_color_main_photo)
+    await callback.message.answer(f"🖼 Надішліть нове **головне фото** для кольору **{parts[1]}**:", parse_mode="Markdown")
+    await callback.answer()
+
+
+@router.message(AdminEditStates.waiting_for_color_main_photo, F.photo)
+async def save_color_main_photo_edit(message: Message, state: FSMContext):
+    if message.from_user.id not in ADMIN_IDS: return
+    data = await state.get_data()
+    prod_id = data.get("editing_product_id")
+    color_name = data.get("editing_color_name")
+
+    photo_url = await get_file_url(message.bot, message.photo[-1].file_id)
+    products = get_db_products(include_hidden=True)
+    product = next((p for p in products if p["id"] == prod_id), None)
+    if product:
+        ci = product.get("colorImages", {})
+        if color_name not in ci or not isinstance(ci[color_name], dict):
+            ci[color_name] = {"main": photo_url, "gallery": []}
+        else:
+            ci[color_name]["main"] = photo_url
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("UPDATE products SET color_images = %s WHERE id = %s",
+                       (json.dumps(ci, ensure_ascii=False), prod_id))
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+    await state.clear()
+    await message.answer(f"✅ Головне фото для кольору **{color_name}** збережено! Напишіть /admin.")
+
+
+@router.callback_query(F.data.startswith("ch_cgal_"))
+async def process_change_color_gal(callback: CallbackQuery, state: FSMContext):
+    if callback.from_user.id not in ADMIN_IDS: return
+    parts = callback.data.replace("ch_cgal_", "").split("_", 1)
+    await state.update_data(editing_product_id=parts[0], editing_color_name=parts[1])
+    await state.set_state(AdminEditStates.waiting_for_color_gallery_photo)
+    await callback.message.answer(f"📸 Надішліть додаткові фото для галереї кольору **{parts[1]}** (можна по одному або альбомом):", parse_mode="Markdown")
+    await callback.answer()
+
+
+@router.message(AdminEditStates.waiting_for_color_gallery_photo, F.photo)
+async def save_color_gal_photo_edit(message: Message, state: FSMContext):
+    if message.from_user.id not in ADMIN_IDS: return
+    data = await state.get_data()
+    prod_id = data.get("editing_product_id")
+    color_name = data.get("editing_color_name")
+
+    photo_url = await get_file_url(message.bot, message.photo[-1].file_id)
+    products = get_db_products(include_hidden=True)
+    product = next((p for p in products if p["id"] == prod_id), None)
+    if product:
+        ci = product.get("colorImages", {})
+        if color_name not in ci or not isinstance(ci[color_name], dict):
+            ci[color_name] = {"main": "", "gallery": [photo_url]}
+        else:
+            if photo_url not in ci[color_name].get("gallery", []):
+                ci[color_name].setdefault("gallery", []).append(photo_url)
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("UPDATE products SET color_images = %s WHERE id = %s",
+                       (json.dumps(ci, ensure_ascii=False), prod_id))
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+    await message.answer(f"✅ Додано в галерею кольору **{color_name}**! Надішліть ще або напишіть /admin.")
+
+
+@router.callback_query(F.data.startswith("del_col_"))
+async def process_delete_color(callback: CallbackQuery):
+    if callback.from_user.id not in ADMIN_IDS: return
+    parts = callback.data.replace("del_col_", "").split("_", 1)
+    prod_id, color_name = parts[0], parts[1]
+
+    products = get_db_products(include_hidden=True)
+    product = next((p for p in products if p["id"] == prod_id), None)
+    if product:
+        cq = product.get("colorQuantities", {})
+        ci = product.get("colorImages", {})
+        cq.pop(color_name, None)
+        ci.pop(color_name, None)
+        total_qty = sum(cq.values())
+        colors_str = ", ".join(cq.keys())
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("UPDATE products SET color_quantities = %s, color_images = %s, quantity = %s, colors = %s WHERE id = %s",
+                       (json.dumps(cq, ensure_ascii=False), json.dumps(ci, ensure_ascii=False), total_qty, colors_str, prod_id))
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+    await callback.answer(f"Колір {color_name} видалено!", show_alert=True)
+    await process_edit_colors(callback)
+
+
+@router.callback_query(F.data.startswith("add_color_to_"))
+async def process_add_color_to_prod(callback: CallbackQuery, state: FSMContext):
+    if callback.from_user.id not in ADMIN_IDS: return
+    prod_id = callback.data.replace("add_color_to_", "")
+    await state.update_data(editing_product_id=prod_id)
+    await state.set_state(AdminEditStates.waiting_for_new_color_name)
+    await callback.message.answer("🎨 Введіть назву нового кольору (наприклад: `Червоний` або `М'ятний`):", parse_mode="Markdown")
+    await callback.answer()
+
+
+@router.message(AdminEditStates.waiting_for_new_color_name, F.text)
+async def process_save_new_color_name(message: Message, state: FSMContext):
+    if message.from_user.id not in ADMIN_IDS: return
+    new_color = message.text.strip()
+    data = await state.get_data()
+    prod_id = data.get("editing_product_id")
+
+    products = get_db_products(include_hidden=True)
+    product = next((p for p in products if p["id"] == prod_id), None)
+    if product:
+        cq = product.get("colorQuantities", {})
+        ci = product.get("colorImages", {})
+        cq[new_color] = 5
+        ci[new_color] = {"main": "", "gallery": []}
+        total_qty = sum(cq.values())
+        colors_str = ", ".join(cq.keys())
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("UPDATE products SET color_quantities = %s, color_images = %s, quantity = %s, colors = %s WHERE id = %s",
+                       (json.dumps(cq, ensure_ascii=False), json.dumps(ci, ensure_ascii=False), total_qty, colors_str, prod_id))
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+    await state.clear()
+    await message.answer(f"✅ Колір **{new_color}** успішно додано з початковим залишком 5 шт.! Напишіть /admin.", parse_mode="Markdown")
 
 
 # ============================================================================
@@ -2095,11 +2416,21 @@ async def process_spec_input(message: Message, state: FSMContext):
         colors_markup = InlineKeyboardMarkup(inline_keyboard=[
             [InlineKeyboardButton(text="🖤 Чорний", callback_data="col_Чорний"),
              InlineKeyboardButton(text="🤍 Білий", callback_data="col_Білий")],
-            [InlineKeyboardButton(text="🌸 Рожевий", callback_data="col_Рожевий"),
-             InlineKeyboardButton(text="✅ Готово / Завершити вибір", callback_data="col_done")]
+            [InlineKeyboardButton(text="🔴 Червоний", callback_data="col_Червоний"),
+             InlineKeyboardButton(text="🌸 Рожевий", callback_data="col_Рожевий")],
+            [InlineKeyboardButton(text="🔵 Синій", callback_data="col_Синій"),
+             InlineKeyboardButton(text="🟣 Фіолетовий", callback_data="col_Фіолетовий")],
+            [InlineKeyboardButton(text="🟢 Зелений", callback_data="col_Зелений"),
+             InlineKeyboardButton(text="🟡 Жовтий", callback_data="col_Жовтий")],
+            [InlineKeyboardButton(text="🟠 Помаранчевий", callback_data="col_Помаранчевий"),
+             InlineKeyboardButton(text="🔘 Сірий", callback_data="col_Сірий")],
+            [InlineKeyboardButton(text="🥈 Сріблястий", callback_data="col_Сріблястий"),
+             InlineKeyboardButton(text="💎 Бірюзовий", callback_data="col_Бірюзовий")],
+            [InlineKeyboardButton(text="✍️ Ввести інший колір", callback_data="col_custom")],
+            [InlineKeyboardButton(text="✅ Готово / Завершити вибір", callback_data="col_done")]
         ])
         await state.update_data(selected_colors=[])
-        await message.answer("🎨 Оберіть кольори та натисніть «Готово»:", reply_markup=colors_markup)
+        await message.answer("🎨 Оберіть кольори товару та натисніть «Готово»:", reply_markup=colors_markup)
         return
 
     data = await state.get_data()
@@ -2124,6 +2455,11 @@ async def select_color_cb(callback: CallbackQuery, state: FSMContext):
     data = await state.get_data()
     colors_list = data.get("selected_colors", [])
 
+    if action == "custom":
+        await callback.message.answer("🎨 Введіть **назву кольору** текстом (наприклад: `М'ятний` або `Лавандовий`):")
+        await callback.answer()
+        return
+
     if action == "done":
         if not colors_list: colors_list = ["Чорний", "Білий"]
         await state.update_data(selected_colors=colors_list, color_quantities_dict={}, current_color_qty_index=0)
@@ -2133,8 +2469,15 @@ async def select_color_cb(callback: CallbackQuery, state: FSMContext):
         except Exception:
             pass
         first_color = colors_list[0]
-        await callback.message.answer(f"📦 Введіть кількість на складі для кольору **{first_color}** (ціле число):",
-                                      parse_mode="Markdown")
+        skip_qty_markup = InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton(text="⏭ Пропустити (по 5 шт. для всіх)", callback_data="skip_all_cqty")],
+            [InlineKeyboardButton(text=f"⏭ Пропустити для {first_color} (5 шт.)", callback_data="skip_one_cqty")]
+        ])
+        await callback.message.answer(
+            f"📦 Введіть кількість на складі для кольору **{first_color}** (ціле число або натисніть «Пропустити»):",
+            reply_markup=skip_qty_markup,
+            parse_mode="Markdown"
+        )
         await callback.answer()
         return
 
@@ -2143,33 +2486,134 @@ async def select_color_cb(callback: CallbackQuery, state: FSMContext):
     await callback.answer(f"Додано: {action}! Обрано: {', '.join(colors_list)}")
 
 
+@router.message(AddProductStates.waiting_for_colors)
+async def process_custom_color_text(message: Message, state: FSMContext):
+    if message.from_user.id not in ADMIN_IDS: return
+    col_name = message.text.strip()
+    data = await state.get_data()
+    colors_list = data.get("selected_colors", [])
+    if col_name and col_name not in colors_list:
+        colors_list.append(col_name)
+    await state.update_data(selected_colors=colors_list)
+    await message.answer(f"✅ Додано колір: **{col_name}**! Всі обрані кольори: {', '.join(colors_list)}.\n\nКоли закінчите, натисніть кнопку «Готово» вище або напишіть /done.", parse_mode="Markdown")
+
+
+@router.callback_query(F.data == "skip_all_cqty", AddProductStates.waiting_for_color_qty)
+async def skip_all_cqty_cb(callback: CallbackQuery, state: FSMContext):
+    data = await state.get_data()
+    colors_list = data.get("selected_colors", ["Чорний"])
+    cq_dict = {c: 5 for c in colors_list}
+    await state.update_data(color_quantities_dict=cq_dict, current_color_photo_index=0, color_images_dict={})
+    await state.set_state(AddProductStates.waiting_for_color_main_photo)
+    try:
+        await callback.message.delete()
+    except Exception:
+        pass
+    first_c = colors_list[0]
+    skip_photo_markup = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="⏭ Пропустити фото кольору", callback_data="skip_cmain_photo")]
+    ])
+    await callback.message.answer(f"🖼 Надішліть **головне фото** для кольору **{first_c}** (або пропустіть):", reply_markup=skip_photo_markup, parse_mode="Markdown")
+    await callback.answer()
+
+
+@router.callback_query(F.data == "skip_one_cqty", AddProductStates.waiting_for_color_qty)
+async def skip_one_cqty_cb(callback: CallbackQuery, state: FSMContext):
+    data = await state.get_data()
+    colors_list = data.get("selected_colors", [])
+    idx = data.get("current_color_qty_index", 0)
+    cq_dict = data.get("color_quantities_dict", {})
+    current_color = colors_list[idx]
+    cq_dict[current_color] = 5
+    idx += 1
+    if idx < len(colors_list):
+        await state.update_data(current_color_qty_index=idx, color_quantities_dict=cq_dict)
+        next_color = colors_list[idx]
+        skip_qty_markup = InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton(text="⏭ Пропустити всі інші (по 5 шт.)", callback_data="skip_all_cqty")],
+            [InlineKeyboardButton(text=f"⏭ Пропустити для {next_color} (5 шт.)", callback_data="skip_one_cqty")]
+        ])
+        await callback.message.edit_text(f"📦 Введіть кількість для кольору **{next_color}** (або пропустіть):", reply_markup=skip_qty_markup, parse_mode="Markdown")
+    else:
+        await state.update_data(color_quantities_dict=cq_dict, current_color_photo_index=0, color_images_dict={})
+        await state.set_state(AddProductStates.waiting_for_color_main_photo)
+        try:
+            await callback.message.delete()
+        except Exception:
+            pass
+        first_c = colors_list[0]
+        skip_photo_markup = InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton(text="⏭ Пропустити фото кольору", callback_data="skip_cmain_photo")]
+        ])
+        await callback.message.answer(f"🖼 Надішліть **головне фото** для кольору **{first_c}** (або пропустіть):", reply_markup=skip_photo_markup, parse_mode="Markdown")
+    await callback.answer()
+
+
 @router.message(AddProductStates.waiting_for_color_qty)
 async def process_color_qty_input(message: Message, state: FSMContext):
     if message.from_user.id not in ADMIN_IDS: return
+    text_val = message.text.strip()
+    if text_val.lower() in ["/skip", "skip", "пропустити", "-"]:
+        qty = 5
+    else:
+        try:
+            qty = int(text_val)
+            if qty < 0: raise ValueError()
+        except ValueError:
+            await message.answer("❌ Будь ласка, введіть ціле число (0 або більше) або напишіть /skip:")
+            return
+
+    data = await state.get_data()
+    colors_list = data.get("selected_colors", [])
+    idx = data.get("current_color_qty_index", 0)
+    cq_dict = data.get("color_quantities_dict", {})
+
+    current_color = colors_list[idx]
+    cq_dict[current_color] = qty
+    idx += 1
+
+    if idx < len(colors_list):
+        await state.update_data(current_color_qty_index=idx, color_quantities_dict=cq_dict)
+        next_color = colors_list[idx]
+        skip_qty_markup = InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton(text="⏭ Пропустити всі інші (по 5 шт.)", callback_data="skip_all_cqty")],
+            [InlineKeyboardButton(text=f"⏭ Пропустити для {next_color} (5 шт.)", callback_data="skip_one_cqty")]
+        ])
+        await message.answer(f"📦 Введіть кількість для кольору **{next_color}** (або пропустіть):", reply_markup=skip_qty_markup, parse_mode="Markdown")
+    else:
+        await state.update_data(color_quantities_dict=cq_dict, current_color_photo_index=0, color_images_dict={})
+        await state.set_state(AddProductStates.waiting_for_color_main_photo)
+        first_c = colors_list[0]
+        skip_photo_markup = InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton(text="⏭ Пропустити фото кольору", callback_data="skip_cmain_photo")]
+        ])
+        await message.answer(f"🖼 Надішліть **головне фото** для кольору **{first_c}** (або пропустіть):",
+                             reply_markup=skip_photo_markup, parse_mode="Markdown")
+
+
+@router.callback_query(F.data == "skip_cmain_photo", AddProductStates.waiting_for_color_main_photo)
+async def skip_cmain_photo_cb(callback: CallbackQuery, state: FSMContext):
+    data = await state.get_data()
+    colors_list = data.get("selected_colors", [])
+    idx = data.get("current_color_photo_index", 0)
+    ci_dict = data.get("color_images_dict", {})
+    current_color = colors_list[idx]
+    if current_color not in ci_dict:
+        ci_dict[current_color] = {"main": "", "gallery": []}
+    await state.update_data(color_images_dict=ci_dict)
+    await state.set_state(AddProductStates.waiting_for_color_gallery_photos)
+    done_markup = InlineKeyboardMarkup(
+        inline_keyboard=[[InlineKeyboardButton(text="✅ Готово (перейти далі)", callback_data="col_gallery_done")]]
+    )
     try:
-        qty = int(message.text.strip())
-        if qty < 0: raise ValueError()
-        data = await state.get_data()
-        colors_list = data.get("selected_colors", [])
-        idx = data.get("current_color_qty_index", 0)
-        cq_dict = data.get("color_quantities_dict", {})
-
-        current_color = colors_list[idx]
-        cq_dict[current_color] = qty
-        idx += 1
-
-        if idx < len(colors_list):
-            await state.update_data(current_color_qty_index=idx, color_quantities_dict=cq_dict)
-            next_color = colors_list[idx]
-            await message.answer(f"📦 Введіть кількість для кольору **{next_color}**:", parse_mode="Markdown")
-        else:
-            await state.update_data(color_quantities_dict=cq_dict, current_color_photo_index=0, color_images_dict={})
-            await state.set_state(AddProductStates.waiting_for_color_main_photo)
-            first_c = colors_list[0]
-            await message.answer(f"🖼 Надішліть **обов'язкове головне фото** для кольору **{first_c}**:",
-                                 parse_mode="Markdown")
-    except ValueError:
-        await message.answer("❌ Будь ласка, введіть ціле число (0 або більше):")
+        await callback.message.delete()
+    except Exception:
+        pass
+    await callback.message.answer(
+        f"📸 Надішліть додаткові фото галереї для кольору **{current_color}** (або натисніть «Готово»):",
+        reply_markup=done_markup, parse_mode="Markdown"
+    )
+    await callback.answer()
 
 
 @router.message(AddProductStates.waiting_for_color_main_photo, F.photo)

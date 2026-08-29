@@ -1572,6 +1572,184 @@
         }
         .profile-empty-state { font-size: 0.85rem; color: var(--text-muted); text-align: center; padding: 18px 0; }
         .profile-signin-note { font-size: 0.85rem; color: var(--text-muted); text-align: center; padding: 30px 10px; }
+
+        /* ---- Fullscreen Lightbox Modal ---- */
+        .lightbox-modal {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.92);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 16px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .lightbox-modal.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .lightbox-topbar {
+            width: 100%;
+            max-width: 900px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #ffffff;
+            z-index: 10;
+        }
+        .lightbox-title-wrap {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .lightbox-title {
+            font-size: 1rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+        .lightbox-color-badge {
+            background: var(--accent);
+            color: #ffffff;
+            font-size: 0.72rem;
+            font-weight: 800;
+            padding: 3px 10px;
+            border-radius: 999px;
+            text-transform: uppercase;
+        }
+        .lightbox-close-btn {
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: 0.2s ease;
+        }
+        .lightbox-close-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: scale(1.05);
+        }
+        .lightbox-main-view {
+            position: relative;
+            width: 100%;
+            max-width: 900px;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+        .lightbox-main-img {
+            max-width: 100%;
+            max-height: 70vh;
+            object-fit: contain;
+            border-radius: 12px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            transition: transform 0.25s ease, opacity 0.2s ease;
+            user-select: none;
+        }
+        .lightbox-nav-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            color: #ffffff;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.3rem;
+            transition: 0.2s ease;
+            z-index: 5;
+        }
+        .lightbox-nav-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-50%) scale(1.08);
+        }
+        .lightbox-prev { left: 10px; }
+        .lightbox-next { right: 10px; }
+        .lightbox-bottombar {
+            width: 100%;
+            max-width: 900px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            z-index: 10;
+        }
+        .lightbox-counter {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+        }
+        .lightbox-thumbs-strip {
+            display: flex;
+            gap: 8px;
+            max-width: 100%;
+            overflow-x: auto;
+            padding: 4px;
+            scrollbar-width: none;
+        }
+        .lightbox-thumbs-strip::-webkit-scrollbar { display: none; }
+        .lightbox-strip-thumb {
+            width: 54px;
+            height: 54px;
+            border-radius: 8px;
+            object-fit: cover;
+            border: 2px solid transparent;
+            cursor: pointer;
+            opacity: 0.6;
+            transition: 0.2s ease;
+            background: rgba(255,255,255,0.05);
+        }
+        .lightbox-strip-thumb.active {
+            border-color: var(--accent);
+            opacity: 1;
+            transform: scale(1.08);
+        }
+        .modal-main-img-wrap {
+            position: relative;
+            cursor: zoom-in;
+        }
+        .modal-main-img-wrap .gallery-zoom-hint {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.65);
+            color: #fff;
+            padding: 5px 10px;
+            border-radius: 999px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            pointer-events: none;
+            backdrop-filter: blur(4px);
+        }
+        .color-circle-big.active {
+            box-shadow: 0 0 0 3px var(--bg-surface), 0 0 0 5px var(--accent);
+            transform: scale(1.1);
+        }
     </style>
 </head>
 <body data-theme="light">
@@ -1955,8 +2133,12 @@
         <button class="close-drawer" style="position: absolute; top: 16px; right: 16px; z-index: 10;" onclick="closeProductModal()">✕</button>
         <div class="modal-grid">
             <div class="modal-gallery">
-                <div class="modal-main-img-wrap">
+                <div class="modal-main-img-wrap" onclick="openColorGalleryLightbox()">
                     <img class="modal-main-img" id="modal-img" alt="Product">
+                    <div class="gallery-zoom-hint">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/><path d="M11 8v6"/><path d="M8 11h6"/></svg>
+                        <span>Галерея</span>
+                    </div>
                 </div>
                 <div class="modal-thumbs" id="modal-thumbs"></div>
             </div>
@@ -1969,7 +2151,7 @@
 
                 <div class="modal-options-row">
                     <div class="option-group">
-                        <label>Колір <span id="modal-color-name">не вибрано</span></label>
+                        <label>Колір <span id="modal-color-name">не вибрано</span> <small style="color:var(--text-muted); font-size:0.75rem; font-weight:500;">(натисніть двічі для фото)</small></label>
                         <div class="color-selector-large" id="modal-color-selector"></div>
                         <div id="modal-stock-status" class="stock-status"></div>
                     </div>
@@ -1993,6 +2175,28 @@
 
                 <div class="specs-grid" id="modal-specs"></div>
             </div>
+        </div>
+    </div>
+
+    <!-- FULLSCREEN LIGHTBOX GALLERY MODAL -->
+    <div class="lightbox-modal" id="lightbox-modal" onclick="if(event.target === this) closeColorGalleryLightbox()">
+        <div class="lightbox-topbar">
+            <div class="lightbox-title-wrap">
+                <span class="lightbox-title" id="lightbox-product-title">Галерея товару</span>
+                <span class="lightbox-color-badge" id="lightbox-color-badge">Колір</span>
+            </div>
+            <button class="lightbox-close-btn" onclick="closeColorGalleryLightbox()" aria-label="Закрити">✕</button>
+        </div>
+
+        <div class="lightbox-main-view">
+            <button class="lightbox-nav-btn lightbox-prev" onclick="prevLightboxImage()" aria-label="Попереднє фото">‹</button>
+            <img class="lightbox-main-img" id="lightbox-active-img" src="" alt="Gallery full preview">
+            <button class="lightbox-nav-btn lightbox-next" onclick="nextLightboxImage()" aria-label="Наступне фото">›</button>
+        </div>
+
+        <div class="lightbox-bottombar">
+            <div class="lightbox-counter" id="lightbox-counter">1 / 1</div>
+            <div class="lightbox-thumbs-strip" id="lightbox-thumbs-strip"></div>
         </div>
     </div>
 
@@ -2177,13 +2381,16 @@
             if (lower.includes('pink') || lower.includes('рожев')) return 'pink';
             if (lower.includes('white') || lower.includes('біл')) return 'white';
             if (lower.includes('black') || lower.includes('чорн')) return 'black';
-            if (lower.includes('red') || lower.includes('червон')) return 'red';
+            if (lower.includes('red') || lower.includes('червон') || lower.includes('красн')) return 'red';
             if (lower.includes('blue') || lower.includes('блакит') || lower.includes('син')) return 'blue';
             if (lower.includes('green') || lower.includes('зелен')) return 'green';
-            if (lower.includes('purple') || lower.includes('фіолет')) return 'purple';
+            if (lower.includes('mint') || lower.includes('м\'ят') || lower.includes('мят')) return 'mint';
+            if (lower.includes('cyan') || lower.includes('бірюз') || lower.includes('бирюз')) return 'turquoise';
+            if (lower.includes('purple') || lower.includes('фіолет') || lower.includes('пурпур')) return 'purple';
             if (lower.includes('yellow') || lower.includes('жовт')) return 'yellow';
-            if (lower.includes('grey') || lower.includes('gray') || lower.includes('сір')) return 'grey';
-            if (lower.includes('orange') || lower.includes('помаранч')) return 'orange';
+            if (lower.includes('grey') || lower.includes('gray') || lower.includes('сір') || lower.includes('графіт')) return 'grey';
+            if (lower.includes('silver') || lower.includes('срібл') || lower.includes('серебр')) return 'silver';
+            if (lower.includes('orange') || lower.includes('помаранч') || lower.includes('оранж')) return 'orange';
             return lower;
         }
 
@@ -2192,14 +2399,17 @@
             let lower = name.toLowerCase().trim();
             if (lower.includes('pink') || lower.includes('рожев')) return '#ff2a85';
             if (lower.includes('white') || lower.includes('біл')) return '#ffffff';
-            if (lower.includes('black') || lower.includes('чорн')) return '#1a1a1a';
-            if (lower.includes('red') || lower.includes('червон')) return '#e53935';
+            if (lower.includes('black') || lower.includes('чорн')) return '#181818';
+            if (lower.includes('red') || lower.includes('червон') || lower.includes('красн')) return '#e53935';
             if (lower.includes('blue') || lower.includes('блакит') || lower.includes('син')) return '#1e88e5';
             if (lower.includes('green') || lower.includes('зелен')) return '#43a047';
-            if (lower.includes('purple') || lower.includes('фіолет')) return '#8e24aa';
+            if (lower.includes('mint') || lower.includes('м\'ят') || lower.includes('мят')) return '#00e5a3';
+            if (lower.includes('cyan') || lower.includes('бірюз') || lower.includes('бирюз')) return '#00bcd4';
+            if (lower.includes('purple') || lower.includes('фіолет') || lower.includes('пурпур')) return '#8e24aa';
             if (lower.includes('yellow') || lower.includes('жовт')) return '#fbc02d';
-            if (lower.includes('grey') || lower.includes('gray') || lower.includes('сір')) return '#9e9e9e';
-            if (lower.includes('orange') || lower.includes('помаранч')) return '#fb8c00';
+            if (lower.includes('grey') || lower.includes('gray') || lower.includes('сір') || lower.includes('графіт')) return '#616161';
+            if (lower.includes('silver') || lower.includes('срібл') || lower.includes('серебр')) return '#b0bec5';
+            if (lower.includes('orange') || lower.includes('помаранч') || lower.includes('оранж')) return '#fb8c00';
             return lower;
         }
 
@@ -2769,12 +2979,155 @@
             }
         }
 
+        let lightboxImages = [];
+        let lightboxCurrentIndex = 0;
+
         function selectModalColor(idx) {
-            const colors = currentModalProduct.colors || [];
+            const colors = currentModalProduct?.colors || [];
             if (colors[idx] && colors[idx].isOut) return;
+
+            // If the user taps the ALREADY selected color, open its photo gallery!
+            if (selectedColorIndex === idx) {
+                openColorGalleryLightbox();
+                return;
+            }
+
             selectedColorIndex = idx;
             updateModalGalleryAndColor();
         }
+
+        function openColorGalleryLightbox(startImgUrl = null) {
+            if (!currentModalProduct) return;
+            const colors = currentModalProduct.colors || [];
+            let images = [];
+            let colorName = '';
+
+            if (selectedColorIndex !== null && colors[selectedColorIndex]) {
+                const activeColor = colors[selectedColorIndex];
+                colorName = activeColor.name;
+                if (activeColor.image) images.push(activeColor.image);
+                if (Array.isArray(activeColor.gallery)) {
+                    activeColor.gallery.forEach(g => { if (g && !images.includes(g)) images.push(g); });
+                }
+            }
+
+            // If color has no specific gallery or no color selected, use product general gallery
+            if (images.length === 0) {
+                images = currentModalProduct.gallery && currentModalProduct.gallery.length > 0
+                    ? [...currentModalProduct.gallery]
+                    : [currentModalProduct.img];
+                if (!colorName && selectedColorIndex !== null && colors[selectedColorIndex]) {
+                    colorName = colors[selectedColorIndex].name;
+                }
+            }
+
+            // Also append any extra general images if they are distinct
+            if (currentModalProduct.gallery) {
+                currentModalProduct.gallery.forEach(g => {
+                    if (g && !images.includes(g)) images.push(g);
+                });
+            }
+
+            lightboxImages = images.filter(Boolean);
+            if (lightboxImages.length === 0) {
+                lightboxImages = [currentModalProduct.img];
+            }
+
+            let initialIdx = 0;
+            if (startImgUrl) {
+                const found = lightboxImages.indexOf(startImgUrl);
+                if (found !== -1) initialIdx = found;
+            } else {
+                const currentMainImg = document.getElementById('modal-img')?.src;
+                if (currentMainImg) {
+                    const found = lightboxImages.findIndex(img => currentMainImg.includes(img) || img.includes(currentMainImg));
+                    if (found !== -1) initialIdx = found;
+                }
+            }
+
+            lightboxCurrentIndex = initialIdx;
+
+            const modalTitleEl = document.getElementById('lightbox-product-title');
+            const colorBadgeEl = document.getElementById('lightbox-color-badge');
+            if (modalTitleEl) modalTitleEl.innerText = `${currentModalProduct.brand} ${currentModalProduct.title}`;
+            if (colorBadgeEl) {
+                if (colorName) {
+                    colorBadgeEl.innerText = colorName;
+                    colorBadgeEl.style.display = 'inline-block';
+                } else {
+                    colorBadgeEl.style.display = 'none';
+                }
+            }
+
+            renderLightboxView();
+            document.getElementById('lightbox-modal')?.classList.add('active');
+        }
+
+        function renderLightboxView() {
+            if (lightboxImages.length === 0) return;
+            if (lightboxCurrentIndex < 0) lightboxCurrentIndex = 0;
+            if (lightboxCurrentIndex >= lightboxImages.length) lightboxCurrentIndex = lightboxImages.length - 1;
+
+            const activeImg = lightboxImages[lightboxCurrentIndex];
+            const imgEl = document.getElementById('lightbox-active-img');
+            const counterEl = document.getElementById('lightbox-counter');
+            const stripEl = document.getElementById('lightbox-thumbs-strip');
+
+            if (imgEl) {
+                imgEl.style.opacity = '0.3';
+                imgEl.src = activeImg;
+                setTimeout(() => { imgEl.style.opacity = '1'; }, 100);
+            }
+
+            if (counterEl) {
+                counterEl.innerText = `${lightboxCurrentIndex + 1} / ${lightboxImages.length}`;
+            }
+
+            if (stripEl) {
+                if (lightboxImages.length > 1) {
+                    stripEl.style.display = 'flex';
+                    stripEl.innerHTML = lightboxImages.map((url, idx) => `
+                        <img class="lightbox-strip-thumb ${idx === lightboxCurrentIndex ? 'active' : ''}" 
+                             src="${url}" 
+                             onclick="setLightboxImageIndex(${idx})" 
+                             alt="thumb ${idx + 1}">
+                    `).join('');
+                } else {
+                    stripEl.style.display = 'none';
+                }
+            }
+        }
+
+        function setLightboxImageIndex(idx) {
+            lightboxCurrentIndex = idx;
+            renderLightboxView();
+        }
+
+        function nextLightboxImage() {
+            if (lightboxImages.length <= 1) return;
+            lightboxCurrentIndex = (lightboxCurrentIndex + 1) % lightboxImages.length;
+            renderLightboxView();
+        }
+
+        function prevLightboxImage() {
+            if (lightboxImages.length <= 1) return;
+            lightboxCurrentIndex = (lightboxCurrentIndex - 1 + lightboxImages.length) % lightboxImages.length;
+            renderLightboxView();
+        }
+
+        function closeColorGalleryLightbox() {
+            document.getElementById('lightbox-modal')?.classList.remove('active');
+        }
+
+        // Add keyboard navigation for the gallery
+        document.addEventListener('keydown', (e) => {
+            const lightbox = document.getElementById('lightbox-modal');
+            if (lightbox && lightbox.classList.contains('active')) {
+                if (e.key === 'ArrowRight') nextLightboxImage();
+                if (e.key === 'ArrowLeft') prevLightboxImage();
+                if (e.key === 'Escape') closeColorGalleryLightbox();
+            }
+        });
 
         function changeModalImage(url, thumbEl) {
             const mainImg = document.getElementById('modal-img');
