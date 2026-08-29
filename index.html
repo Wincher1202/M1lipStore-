@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>M1lipStore — Premium Gaming Hardware</title>
+    <title>M1lipStore — Gaming Hardware & Electronics</title>
+    <meta name="description" content="Gaming hardware and electronics store with catalog, cart, and ordering">
+    <meta property="og:title" content="M1lipStore">
+    <meta property="og:description" content="Gaming hardware and electronics store with catalog, cart, and ordering">
     <!-- Inline favicon: prevents GitHub Pages from requesting a missing /favicon.ico (404). -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%235764e2'/%3E%3Cpath fill='white' d='M13 43V21h7l7 11 7-11h7v22h-7V32l-7 10-7-10v11z'/%3E%3C/svg%3E">
     <!-- Telegram Web App SDK -->
@@ -1996,6 +1999,349 @@
             box-shadow: 0 0 0 3px var(--bg-surface), 0 0 0 5px var(--accent);
             transform: scale(1.1);
         }
+
+        /* ---- Order Review Step (Step 4) ---- */
+        .review-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-sm);
+            padding: 14px 16px;
+            margin-bottom: 12px;
+        }
+        .review-card-title {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            font-weight: 800;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .review-item-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border-light);
+        }
+        .review-item-row:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+        .review-item-thumb {
+            width: 52px;
+            height: 52px;
+            border-radius: 8px;
+            object-fit: cover;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-light);
+            flex-shrink: 0;
+        }
+        .review-item-info {
+            flex: 1;
+            min-width: 0;
+        }
+        .review-item-name {
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            line-height: 1.3;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .review-item-meta {
+            font-size: 0.76rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 3px;
+        }
+        .review-item-pricing {
+            text-align: right;
+            flex-shrink: 0;
+        }
+        .review-item-price {
+            font-size: 0.92rem;
+            font-weight: 800;
+            color: var(--text-primary);
+        }
+        .review-item-calc {
+            font-size: 0.74rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+        .review-info-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            padding: 4px 0;
+            line-height: 1.4;
+        }
+        .review-info-label {
+            color: var(--text-muted);
+            min-width: 110px;
+        }
+        .review-info-val {
+            color: var(--text-primary);
+            font-weight: 600;
+            text-align: right;
+            word-break: break-word;
+        }
+
+        /* ---- Status Badges ---- */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.72rem;
+            font-weight: 800;
+            padding: 3px 9px;
+            border-radius: 999px;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            white-space: nowrap;
+        }
+        .status-badge.status-new { background: rgba(87, 100, 226, 0.14); color: #5764e2; }
+        .status-badge.status-pending-payment { background: rgba(237, 108, 2, 0.14); color: #ed6c02; }
+        .status-badge.status-confirmed { background: rgba(2, 136, 209, 0.14); color: #0288d1; }
+        .status-badge.status-packing { background: rgba(156, 39, 176, 0.14); color: #9c27b0; }
+        .status-badge.status-packed { background: rgba(103, 58, 183, 0.14); color: #673ab7; }
+        .status-badge.status-dispatch-prep { background: rgba(255, 152, 0, 0.14); color: #f57c00; }
+        .status-badge.status-shipped { background: rgba(46, 125, 50, 0.15); color: #2e7d32; }
+        .status-badge.status-delivered { background: rgba(0, 150, 136, 0.15); color: #00897b; }
+        .status-badge.status-completed { background: rgba(46, 125, 50, 0.2); color: #1b5e20; }
+        .status-badge.status-cancelled { background: rgba(211, 47, 47, 0.14); color: #d32f2f; }
+
+        /* ---- Admin Drawer & Modals ---- */
+        .admin-drawer {
+            position: fixed;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: 100%;
+            max-width: 680px;
+            background: var(--bg-surface);
+            box-shadow: -6px 0 30px rgba(0,0,0,0.25);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            transform: translateX(100%);
+            transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .admin-drawer.active {
+            transform: translateX(0);
+        }
+        .admin-kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+        @media (max-width: 580px) {
+            .admin-kpi-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        .admin-kpi-card {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-sm);
+            padding: 10px 12px;
+            text-align: center;
+        }
+        .admin-kpi-val {
+            font-size: 1.15rem;
+            font-weight: 900;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--text-primary);
+        }
+        .admin-kpi-lbl {
+            font-size: 0.68rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            color: var(--text-muted);
+            margin-top: 3px;
+        }
+        .admin-tabs-scroll {
+            display: flex;
+            gap: 6px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+            margin-bottom: 12px;
+            scrollbar-width: none;
+        }
+        .admin-tabs-scroll::-webkit-scrollbar { display: none; }
+        .admin-tab-btn {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-light);
+            color: var(--text-secondary);
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 0.76rem;
+            font-weight: 700;
+            cursor: pointer;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: var(--transition-smooth);
+        }
+        .admin-tab-btn.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #ffffff;
+        }
+        .admin-order-card {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-sm);
+            padding: 14px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+        }
+        .admin-order-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-1px);
+        }
+        .admin-order-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        .admin-order-id {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 800;
+            font-size: 0.95rem;
+            color: var(--text-primary);
+        }
+        .admin-order-date {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+        }
+        .admin-order-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+        }
+        .admin-order-foot {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 10px;
+            padding-top: 8px;
+            border-top: 1px dashed var(--border-light);
+        }
+
+        /* ---- Order Details Modal ---- */
+        .order-detail-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.96);
+            width: 94%;
+            max-width: 620px;
+            max-height: 90vh;
+            background: var(--bg-surface);
+            border-radius: var(--radius);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            border: 1px solid var(--border-light);
+            z-index: 10001;
+            display: flex;
+            flex-direction: column;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .order-detail-modal.active {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        /* ---- Order History Timeline ---- */
+        .order-timeline {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            position: relative;
+            padding-left: 20px;
+            margin: 12px 0;
+        }
+        .order-timeline::before {
+            content: '';
+            position: absolute;
+            top: 6px;
+            bottom: 6px;
+            left: 6px;
+            width: 2px;
+            background: var(--border-light);
+        }
+        .order-timeline-step {
+            position: relative;
+        }
+        .order-timeline-step::before {
+            content: '';
+            position: absolute;
+            top: 4px;
+            left: -18px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--accent);
+            border: 2px solid var(--bg-surface);
+        }
+        .order-timeline-title {
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        .order-timeline-meta {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        /* ---- Payment Modal (Smart Glocal Test) ---- */
+        .payment-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.96);
+            width: 94%;
+            max-width: 480px;
+            background: var(--bg-surface);
+            border-radius: var(--radius);
+            box-shadow: 0 25px 70px rgba(0,0,0,0.35);
+            border: 1px solid var(--border-light);
+            z-index: 10002;
+            display: flex;
+            flex-direction: column;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            overflow: hidden;
+        }
+        .payment-modal.active {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translate(-50%, -50%) scale(1);
+        }
+        .smart-card-chip {
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            color: #ffffff;
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+            margin-bottom: 14px;
+        }
     </style>
 </head>
 <body data-theme="light">
@@ -2037,6 +2383,21 @@
                     <span class="badge-count" id="cart-count">0</span>
                 </button>
                 <span class="tooltip">Кошик</span>
+            </div>
+
+            <div class="icon-btn-wrapper">
+                <button class="icon-btn" id="orders-open-btn" aria-label="Мої замовлення" onclick="openMyOrdersModal()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                </button>
+                <span class="tooltip">Мої замовлення</span>
+            </div>
+
+            <div class="icon-btn-wrapper">
+                <button class="icon-btn" id="admin-orders-btn" aria-label="Замовлення" onclick="openAdminOrdersDrawer()" style="border-color: rgba(87,100,226,0.35); color: var(--accent);">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/><path d="M12 15h.01"/></svg>
+                    <span class="badge-count" id="admin-new-badge" style="display:none; background: var(--accent);">0</span>
+                </button>
+                <span class="tooltip">Замовлення</span>
             </div>
         </div>
     </header>
@@ -2298,21 +2659,7 @@
                             </div>
                         </div>
 
-                        <!-- COURIER ADDRESS FORM -->
-                        <div class="checkout-group" id="delivery-courier-group" style="display:none;">
-                            <label>Адреса доставки кур'єром</label>
-                            <div class="courier-address-grid">
-                                <div class="street-col">
-                                    <input type="text" id="chk-courier-street" placeholder="Вулиця / Проспект / Бульвар" autocomplete="address-line1">
-                                </div>
-                                <div>
-                                    <input type="text" id="chk-courier-building" placeholder="Будинок" autocomplete="address-line2">
-                                </div>
-                                <div>
-                                    <input type="text" id="chk-courier-apt" placeholder="Кв. / Офіс">
-                                </div>
-                            </div>
-                        </div>
+                        <!-- (Courier delivery removed per user requirement) -->
                     </div>
                 </div>
 
@@ -2325,7 +2672,7 @@
                                 <input type="radio" name="pay-method" id="pay-opt-online" value="online" checked style="margin-top: 3px;">
                                 <div style="flex: 1;">
                                     <div style="font-weight: 700; font-size: 0.95rem; display: flex; align-items: center; justify-content: space-between;">
-                                        <span>💳 Онлайн-оплата (Telegram / Картка)</span>
+                                        <span>💳 Онлайн-оплата (Smart Glocal / Telegram)</span>
                                         <span style="font-size: 0.75rem; color: #2E7D32; font-weight: 800; background: rgba(46,125,50,0.1); padding: 2px 8px; border-radius: 10px;">0% комісії</span>
                                     </div>
                                     <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px;">Миттєва та безпечна оплата банківською картою, Apple Pay або Google Pay прямо в Telegram.</div>
@@ -2362,10 +2709,7 @@
 
                 <!-- STEP 4: review -->
                 <div class="checkout-step-panel" data-step-panel="4">
-                    <div class="review-block" id="review-items-block"></div>
-                    <div class="review-block" id="review-contact-block"></div>
-                    <div class="review-block" id="review-delivery-block"></div>
-                    <div class="review-block" id="review-payment-block"></div>
+                    <div id="review-screen-content"></div>
                 </div>
 
             </div>
@@ -2374,7 +2718,7 @@
             <div class="checkout-step-nav">
                 <button class="btn-secondary" id="chk-back-btn" onclick="checkoutStepBack()" style="display:none;">← Назад</button>
                 <button class="btn-primary" id="chk-next-btn" style="flex:1; justify-content: center;" onclick="checkoutStepNext()">Далі →</button>
-                <button class="btn-primary" id="chk-submit-btn" style="flex:1; justify-content: center; display:none;" onclick="submitOrder()">Підтвердити замовлення</button>
+                <button class="btn-primary" id="chk-submit-btn" style="flex:1; justify-content: center; display:none;" onclick="submitOrder()">Перейти до оплати →</button>
             </div>
         </div>
     </div>
@@ -2416,6 +2760,267 @@
 
             <div style="display: flex; gap: 10px;">
                 <button class="btn-primary" style="width: 100%; justify-content: center;" onclick="closeSuccessModal()">Продовжити покупки</button>
+                <button class="btn-secondary" style="width: 100%; justify-content: center;" onclick="closeSuccessModal(); openMyOrdersModal();">Мої замовлення</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SMART GLOCAL TEST PAYMENT GATEWAY MODAL -->
+    <div class="payment-modal" id="payment-modal">
+        <button class="close-drawer" style="position: absolute; top: 14px; right: 14px; z-index: 10;" onclick="closePaymentModal()">✕</button>
+        <div style="padding: 24px 20px;">
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+                <span style="font-size: 1.6rem;">💳</span>
+                <div>
+                    <h3 style="font-size: 1.15rem; font-weight: 800; margin: 0; line-height: 1.2;">Оплата замовлення</h3>
+                    <div id="pay-modal-order-number" style="font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: var(--accent); font-weight: 700; margin-top: 2px;">#MLP-XXXXXX</div>
+                </div>
+            </div>
+
+            <!-- Smart Glocal Test Card Representation -->
+            <div class="smart-card-chip">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+                    <span style="font-size: 0.72rem; font-weight: 800; letter-spacing: 0.1em; opacity: 0.85;">SMART GLOCAL • TEST</span>
+                    <span style="font-size: 0.75rem; background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 6px; font-weight: 700;">TEST GATEWAY</span>
+                </div>
+                <div style="font-family: 'JetBrains Mono', monospace; font-size: 1.15rem; letter-spacing: 2px; font-weight: 700; margin-bottom: 14px;">
+                    •••• •••• •••• 4444
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: flex-end; font-size: 0.75rem;">
+                    <div>
+                        <div style="font-size: 0.62rem; opacity: 0.65; text-transform: uppercase;">Сума до сплати</div>
+                        <div id="pay-card-amount-disp" style="font-size: 1.1rem; font-weight: 800; font-family: 'JetBrains Mono', monospace;">0 ₴</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 0.62rem; opacity: 0.65; text-transform: uppercase;">Термін дії</div>
+                        <div style="font-family: 'JetBrains Mono', monospace; font-weight: 700;">12/28</div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="background: rgba(87,100,226,0.06); border: 1px dashed rgba(87,100,226,0.25); border-radius: var(--radius-sm); padding: 10px 12px; margin-bottom: 16px; font-size: 0.78rem; color: var(--text-secondary); line-height: 1.4;">
+                🔒 <strong>Безпечний тестовий платіж:</strong> Інтеграція зі <strong>Smart Glocal Test</strong> (Telegram Payments). Реальні кошти не списуються. Оплата перевіряється сервером.
+            </div>
+
+            <!-- Card Inputs Form -->
+            <form id="payment-test-form" onsubmit="event.preventDefault(); processGatewayPayment();" style="display: flex; flex-direction: column; gap: 12px;">
+                <div class="checkout-group" style="margin: 0;">
+                    <label style="font-size: 0.75rem;">Номер картки</label>
+                    <input type="text" id="pay-input-card" value="4111 2222 3333 4444" maxlength="19" style="font-family: 'JetBrains Mono', monospace;" required>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div class="checkout-group" style="margin: 0;">
+                        <label style="font-size: 0.75rem;">Термін (ММ/РР)</label>
+                        <input type="text" id="pay-input-exp" value="12/28" maxlength="5" style="font-family: 'JetBrains Mono', monospace;" required>
+                    </div>
+                    <div class="checkout-group" style="margin: 0;">
+                        <label style="font-size: 0.75rem;">CVC / CVV</label>
+                        <input type="password" id="pay-input-cvc" value="123" maxlength="3" style="font-family: 'JetBrains Mono', monospace;" required>
+                    </div>
+                </div>
+
+                <div id="payment-status-message" style="display:none; font-size: 0.8rem; padding: 8px 10px; border-radius: 6px;"></div>
+
+                <button type="submit" id="btn-pay-confirm" class="btn-primary" style="width: 100%; justify-content: center; padding: 14px; font-size: 0.95rem;">
+                    Підтвердити оплату <span id="pay-btn-amount-label">0 ₴</span> →
+                </button>
+
+                <div id="tg-open-invoice-wrap" style="display:none; text-align: center; margin-top: 4px;">
+                    <button type="button" class="btn-secondary" style="width: 100%; justify-content: center; font-size: 0.84rem;" onclick="openNativeTgInvoice()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+                        Відкрити оплату в Telegram WebApp
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ADMIN PANEL DRAWER: ЗАМОВЛЕННЯ -->
+    <div class="admin-drawer" id="admin-orders-drawer">
+        <div class="drawer-header" style="background: var(--bg-surface); border-bottom: 1px solid var(--border-light);">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 1.3rem;">📋</span>
+                <div>
+                    <h3 style="font-weight: 900; font-size: 1.2rem; letter-spacing: -0.5px; margin: 0;">Замовлення</h3>
+                    <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; margin-top: 1px;">Панель керування MILIPSTORE</div>
+                </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <button class="icon-btn" onclick="refreshAdminOrders()" title="Оновити">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+                </button>
+                <button class="close-drawer" onclick="closeAdminOrdersDrawer()">✕</button>
+            </div>
+        </div>
+
+        <div class="drawer-body" style="padding: 16px;">
+            <!-- KPI Metrics -->
+            <div class="admin-kpi-grid">
+                <div class="admin-kpi-card">
+                    <div class="admin-kpi-val" id="admin-stat-total">0</div>
+                    <div class="admin-kpi-lbl">Всього</div>
+                </div>
+                <div class="admin-kpi-card" style="border-color: rgba(87,100,226,0.4); background: rgba(87,100,226,0.06);">
+                    <div class="admin-kpi-val" id="admin-stat-new" style="color: var(--accent);">0</div>
+                    <div class="admin-kpi-lbl" style="color: var(--accent);">Нові</div>
+                </div>
+                <div class="admin-kpi-card">
+                    <div class="admin-kpi-val" id="admin-stat-revenue">0 ₴</div>
+                    <div class="admin-kpi-lbl">Дохід</div>
+                </div>
+                <div class="admin-kpi-card">
+                    <div class="admin-kpi-val" id="admin-stat-avg">0 ₴</div>
+                    <div class="admin-kpi-lbl">Сер. чек</div>
+                </div>
+            </div>
+
+            <!-- Status Filter Tabs -->
+            <div class="admin-tabs-scroll" id="admin-status-tabs">
+                <button type="button" class="admin-tab-btn active" data-status="ALL" onclick="setAdminStatusFilter('ALL')">Всі</button>
+                <button type="button" class="admin-tab-btn" data-status="NEW" onclick="setAdminStatusFilter('NEW')">Нові</button>
+                <button type="button" class="admin-tab-btn" data-status="CONFIRMED" onclick="setAdminStatusFilter('CONFIRMED')">Підтверджені</button>
+                <button type="button" class="admin-tab-btn" data-status="PACKING_PREP" onclick="setAdminStatusFilter('PACKING_PREP')">До пакування</button>
+                <button type="button" class="admin-tab-btn" data-status="PACKED" onclick="setAdminStatusFilter('PACKED')">Упаковано</button>
+                <button type="button" class="admin-tab-btn" data-status="DISPATCH_PREP" onclick="setAdminStatusFilter('DISPATCH_PREP')">До відправки</button>
+                <button type="button" class="admin-tab-btn" data-status="SHIPPED" onclick="setAdminStatusFilter('SHIPPED')">Відправлено</button>
+                <button type="button" class="admin-tab-btn" data-status="DELIVERED" onclick="setAdminStatusFilter('DELIVERED')">Доставлено</button>
+                <button type="button" class="admin-tab-btn" data-status="COMPLETED" onclick="setAdminStatusFilter('COMPLETED')">Виконано</button>
+                <button type="button" class="admin-tab-btn" data-status="CANCELLED" onclick="setAdminStatusFilter('CANCELLED')">Скасовано</button>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="delivery-input-wrap" style="margin-bottom: 14px;">
+                <span class="delivery-input-icon">🔍</span>
+                <input type="text" id="admin-orders-search-input" placeholder="Пошук за #MLP, телефоном, клієнтом, ТТН..." oninput="handleAdminSearch(this.value)">
+                <button type="button" class="delivery-input-clear" id="admin-search-clear" onclick="clearAdminSearch()" style="display:none;">✕</button>
+            </div>
+
+            <!-- Orders List -->
+            <div id="admin-orders-list">
+                <div style="text-align: center; padding: 30px; color: var(--text-muted); font-size: 0.85rem;">Завантаження списку замовлень...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADMIN ORDER DETAIL MODAL -->
+    <div class="order-detail-modal" id="admin-order-modal">
+        <div class="drawer-header" style="border-bottom: 1px solid var(--border-light); padding: 14px 18px;">
+            <div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <h3 id="adm-detail-id" style="font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 1.15rem; margin: 0; color: var(--text-primary);">#MLP-XXXXXX</h3>
+                    <span id="adm-detail-status-badge" class="status-badge status-new">НОВЕ</span>
+                </div>
+                <div id="adm-detail-date" style="font-size: 0.74rem; color: var(--text-muted); margin-top: 3px;">29.08.2026, 12:00</div>
+            </div>
+            <button class="close-drawer" onclick="closeAdminOrderDetail()">✕</button>
+        </div>
+
+        <div style="overflow-y: auto; padding: 18px; flex: 1; display: flex; flex-direction: column; gap: 14px;">
+            <!-- Status Update Controller -->
+            <div style="background: var(--bg-primary); border: 1px solid var(--border-light); border-radius: var(--radius-sm); padding: 14px;">
+                <div style="font-size: 0.78rem; text-transform: uppercase; font-weight: 800; color: var(--text-muted); margin-bottom: 8px;">Зміна статусу замовлення</div>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <select id="adm-status-select" style="flex: 1; min-width: 180px; padding: 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-light); background: var(--bg-surface); color: var(--text-primary); font-weight: 600; font-size: 0.85rem;">
+                        <option value="NEW">Нове (NEW)</option>
+                        <option value="CONFIRMED">Підтверджено (CONFIRMED)</option>
+                        <option value="PACKING_PREP">Готується до пакування (PACKING_PREP)</option>
+                        <option value="PACKED">Упаковано (PACKED)</option>
+                        <option value="DISPATCH_PREP">Готується до відправки (DISPATCH_PREP)</option>
+                        <option value="SHIPPED">Відправлено (SHIPPED)</option>
+                        <option value="DELIVERED">Доставлено (DELIVERED)</option>
+                        <option value="COMPLETED">Виконано (COMPLETED)</option>
+                        <option value="CANCELLED">Скасовано (CANCELLED)</option>
+                    </select>
+                    <button type="button" class="btn-primary" onclick="saveAdminStatusChange()" style="padding: 10px 14px; font-size: 0.82rem;">
+                        Оновити статус
+                    </button>
+                </div>
+                <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 6px;">
+                    ℹ️ Покупцю в Telegram автоматично надійде повідомлення про новий статус замовлення.
+                </div>
+            </div>
+
+            <!-- TTN Update Controller -->
+            <div style="background: var(--bg-primary); border: 1px solid var(--border-light); border-radius: var(--radius-sm); padding: 14px;">
+                <div style="font-size: 0.78rem; text-transform: uppercase; font-weight: 800; color: var(--text-muted); margin-bottom: 8px;">Номер ТТН (Накладна перевізника)</div>
+                <div style="display: flex; gap: 8px;">
+                    <input type="text" id="adm-ttn-input" placeholder="Наприклад: 20450918234851" style="flex: 1; padding: 10px; font-family: 'JetBrains Mono', monospace; font-size: 0.88rem; border-radius: var(--radius-sm); border: 1px solid var(--border-light); background: var(--bg-surface); color: var(--text-primary);">
+                    <button type="button" class="btn-primary" onclick="saveAdminOrderTtn()" style="padding: 10px 14px; font-size: 0.82rem; white-space: nowrap;">
+                        Зберегти ТТН
+                    </button>
+                </div>
+                <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 6px;">
+                    🚀 При збереженні ТТН клієнту в Telegram надсилається повідомлення з номером ТТН та посиланням на трекінг.
+                </div>
+            </div>
+
+            <!-- Customer & Delivery Info -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div style="background: var(--bg-primary); border: 1px solid var(--border-light); border-radius: var(--radius-sm); padding: 12px;">
+                    <div style="font-size: 0.72rem; text-transform: uppercase; font-weight: 800; color: var(--text-muted); margin-bottom: 6px;">Клієнт</div>
+                    <div id="adm-detail-customer" style="font-size: 0.85rem; color: var(--text-primary); line-height: 1.4;"></div>
+                </div>
+                <div style="background: var(--bg-primary); border: 1px solid var(--border-light); border-radius: var(--radius-sm); padding: 12px;">
+                    <div style="font-size: 0.72rem; text-transform: uppercase; font-weight: 800; color: var(--text-muted); margin-bottom: 6px;">Доставка та оплата</div>
+                    <div id="adm-detail-delivery" style="font-size: 0.85rem; color: var(--text-primary); line-height: 1.4;"></div>
+                </div>
+            </div>
+
+            <!-- Ordered Items List -->
+            <div style="background: var(--bg-primary); border: 1px solid var(--border-light); border-radius: var(--radius-sm); padding: 12px;">
+                <div style="font-size: 0.72rem; text-transform: uppercase; font-weight: 800; color: var(--text-muted); margin-bottom: 8px;">Товари в замовленні</div>
+                <div id="adm-detail-items"></div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--border-light); font-weight: 800;">
+                    <span>Разом до сплати:</span>
+                    <span id="adm-detail-total" style="font-family: 'JetBrains Mono', monospace; font-size: 1.05rem; color: var(--accent);">0 ₴</span>
+                </div>
+            </div>
+
+            <!-- Internal Note Comment -->
+            <div style="background: var(--bg-primary); border: 1px solid var(--border-light); border-radius: var(--radius-sm); padding: 12px;">
+                <div style="font-size: 0.72rem; text-transform: uppercase; font-weight: 800; color: var(--text-muted); margin-bottom: 6px;">Внутрішній коментар магазину</div>
+                <div style="display: flex; gap: 8px;">
+                    <input type="text" id="adm-comment-input" placeholder="Нотатки менеджера щодо замовлення..." style="flex: 1; padding: 8px 10px; font-size: 0.82rem; border-radius: var(--radius-sm); border: 1px solid var(--border-light); background: var(--bg-surface); color: var(--text-primary);">
+                    <button type="button" class="btn-secondary" onclick="saveAdminOrderComment()" style="padding: 8px 12px; font-size: 0.8rem;">Зберегти</button>
+                </div>
+            </div>
+
+            <!-- Order Timeline -->
+            <div style="background: var(--bg-primary); border: 1px solid var(--border-light); border-radius: var(--radius-sm); padding: 12px;">
+                <div style="font-size: 0.72rem; text-transform: uppercase; font-weight: 800; color: var(--text-muted); margin-bottom: 6px;">Історія статусів</div>
+                <div class="order-timeline" id="adm-detail-timeline"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CUSTOMER "МОЇ ЗАМОВЛЕННЯ" MODAL -->
+    <div class="order-detail-modal" id="my-orders-modal" style="max-width: 540px;">
+        <div class="drawer-header" style="border-bottom: 1px solid var(--border-light); padding: 14px 18px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 1.3rem;">📦</span>
+                <div>
+                    <h3 style="font-weight: 800; font-size: 1.15rem; margin: 0;">Мої замовлення</h3>
+                    <div style="font-size: 0.72rem; color: var(--text-muted);">Відстеження та історія ваших покупок</div>
+                </div>
+            </div>
+            <button class="close-drawer" onclick="closeMyOrdersModal()">✕</button>
+        </div>
+
+        <div style="overflow-y: auto; padding: 16px; flex: 1;">
+            <!-- Search Lookup by Phone or Order # -->
+            <div style="background: var(--bg-primary); border: 1px solid var(--border-light); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 14px;">
+                <label style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); margin-bottom: 6px; display: block;">Швидкий пошук замовлення</label>
+                <div style="display: flex; gap: 8px;">
+                    <input type="text" id="my-orders-search-input" placeholder="Введіть +380... або #MLP-..." style="flex: 1; padding: 10px; font-size: 0.85rem; border-radius: var(--radius-sm); border: 1px solid var(--border-light); background: var(--bg-surface); color: var(--text-primary);">
+                    <button type="button" class="btn-primary" onclick="searchCustomerOrders()" style="padding: 10px 14px; font-size: 0.82rem;">Знайти</button>
+                </div>
+            </div>
+
+            <!-- Orders Container -->
+            <div id="my-orders-list-content">
+                <div style="text-align: center; padding: 30px; color: var(--text-muted); font-size: 0.85rem;">
+                    Завантаження замовлень...
+                </div>
             </div>
         </div>
     </div>
@@ -3753,14 +4358,6 @@
                 icon: '<img src="brand-novaposhta.svg" alt="Нова Пошта" style="width: 26px; height: 26px; object-fit: contain;">'
             },
             {
-                id: 'nova_poshta_courier',
-                provider: 'nova_poshta',
-                method: 'courier',
-                name: "Кур'єр Нової Пошти",
-                sub: 'Адресна доставка до дверей',
-                icon: '<img src="brand-novaposhta.svg" alt="Нова Пошта" style="width: 26px; height: 26px; object-fit: contain;">'
-            },
-            {
                 id: 'ukrposhta_branch',
                 provider: 'ukrposhta',
                 method: 'branch',
@@ -4321,6 +4918,156 @@
             loadDeliveryWarehouses('');
         }
 
+        function renderReviewStep() {
+            const container = document.getElementById('review-screen-content');
+            if (!container) return;
+
+            const name = (document.getElementById('chk-name')?.value || '').trim();
+            const surname = (document.getElementById('chk-surname')?.value || '').trim();
+            const email = (document.getElementById('chk-email')?.value || '').trim();
+            const phone = (document.getElementById('chk-phone')?.value || '').trim();
+            const paymentMethod = document.getElementById('chk-payment')?.value || 'online';
+            const comment = (document.getElementById('chk-comment')?.value || '').trim();
+
+            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+            const isCod = paymentMethod === 'cod';
+            const codFee = isCod ? Math.round(20 + subtotal * 0.02) : 0;
+            const grandTotal = subtotal + codFee;
+
+            const provLabel = PROVIDER_LABELS[checkoutDelivery.provider] || (checkoutDelivery.provider === 'nova_poshta' ? 'Нова Пошта' : 'Укрпошта');
+            const methodLabel = checkoutDelivery.method === 'postomat' ? 'Поштомат' : 'Відділення';
+
+            const submitBtn = document.getElementById('chk-submit-btn');
+            if (submitBtn) {
+                submitBtn.innerText = isCod ? 'Підтвердити замовлення' : 'Перейти до оплати →';
+            }
+
+            container.innerHTML = `
+                <!-- 1. Ordered Products -->
+                <div class="review-card">
+                    <div class="review-card-title">
+                        <span>Товари в замовленні (${cart.reduce((c, i) => c + i.qty, 0)} шт.)</span>
+                        <button type="button" onclick="toggleCheckoutDrawer(false); toggleCart(true);" style="background:none; border:none; color: var(--accent); font-size: 0.72rem; font-weight:700; cursor:pointer;">Змінити</button>
+                    </div>
+                    <div>
+                        ${cart.map(item => {
+                            const prod = products.find(p => p.id === item.id) || item;
+                            const lineTotal = item.price * item.qty;
+                            const colorChip = item.color ? `<span style="display:inline-block; width:9px; height:9px; border-radius:50%; background:${getColorHex(item.color)}; border:1px solid rgba(0,0,0,0.15);"></span>` : '';
+                            return `
+                                <div class="review-item-row">
+                                    <img src="${item.img || prod.img}" alt="${item.title}" class="review-item-thumb">
+                                    <div class="review-item-info">
+                                        <div class="review-item-name">${item.title}</div>
+                                        <div class="review-item-meta">
+                                            ${colorChip}
+                                            <span>Колір: <strong>${item.color || 'Базовий'}</strong></span>
+                                            ${prod.sku ? `<span>• Арт: ${prod.sku}</span>` : ''}
+                                        </div>
+                                        <div class="review-item-calc">${item.qty} × ${formatPrice(item.price)}</div>
+                                    </div>
+                                    <div class="review-item-pricing">
+                                        <div class="review-item-price">${formatPrice(lineTotal)}</div>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+
+                <!-- 2. Customer Info -->
+                <div class="review-card">
+                    <div class="review-card-title">
+                        <span>Отримувач</span>
+                        <button type="button" onclick="checkoutStepIndex = 1; renderCheckoutStep();" style="background:none; border:none; color: var(--accent); font-size: 0.72rem; font-weight:700; cursor:pointer;">Змінити</button>
+                    </div>
+                    <div class="review-info-row">
+                        <span class="review-info-label">ПІБ:</span>
+                        <span class="review-info-val">${name} ${surname}</span>
+                    </div>
+                    <div class="review-info-row">
+                        <span class="review-info-label">Телефон:</span>
+                        <span class="review-info-val" style="font-family:'JetBrains Mono', monospace;">${phone}</span>
+                    </div>
+                    <div class="review-info-row">
+                        <span class="review-info-label">Email:</span>
+                        <span class="review-info-val">${email}</span>
+                    </div>
+                </div>
+
+                <!-- 3. Delivery Info -->
+                <div class="review-card">
+                    <div class="review-card-title">
+                        <span>Доставка</span>
+                        <button type="button" onclick="checkoutStepIndex = 2; renderCheckoutStep();" style="background:none; border:none; color: var(--accent); font-size: 0.72rem; font-weight:700; cursor:pointer;">Змінити</button>
+                    </div>
+                    <div class="review-info-row">
+                        <span class="review-info-label">Служба:</span>
+                        <span class="review-info-val">${provLabel} (${methodLabel})</span>
+                    </div>
+                    <div class="review-info-row">
+                        <span class="review-info-label">Місто:</span>
+                        <span class="review-info-val">м. ${checkoutDelivery.city || 'Не обрано'}</span>
+                    </div>
+                    <div class="review-info-row">
+                        <span class="review-info-label">Пункт:</span>
+                        <span class="review-info-val">${checkoutDelivery.department || 'Не обрано'}</span>
+                    </div>
+                    <div class="review-info-row" style="margin-top: 4px;">
+                        <span class="review-info-label">Термін:</span>
+                        <span class="review-info-val" style="color: var(--accent);">⚡ Відправка 1–2 робочих дні</span>
+                    </div>
+                </div>
+
+                <!-- 4. Payment Info -->
+                <div class="review-card">
+                    <div class="review-card-title">
+                        <span>Оплата</span>
+                        <button type="button" onclick="checkoutStepIndex = 3; renderCheckoutStep();" style="background:none; border:none; color: var(--accent); font-size: 0.72rem; font-weight:700; cursor:pointer;">Змінити</button>
+                    </div>
+                    <div class="review-info-row">
+                        <span class="review-info-label">Спосіб:</span>
+                        <span class="review-info-val">${isCod ? '📦 Оплата при отриманні (Накладений)' : '💳 Онлайн-оплата (Smart Glocal / Telegram)'}</span>
+                    </div>
+                    ${comment ? `
+                    <div class="review-info-row" style="margin-top: 4px;">
+                        <span class="review-info-label">Коментар:</span>
+                        <span class="review-info-val" style="font-style: italic;">"${comment}"</span>
+                    </div>
+                    ` : ''}
+                </div>
+
+                <!-- 5. Cost Summary -->
+                <div class="review-card" style="background: var(--bg-surface); border: 1.5px solid var(--border-light);">
+                    <div class="review-info-row">
+                        <span class="review-info-label">Вартість товарів:</span>
+                        <span class="review-info-val">${formatPrice(subtotal)}</span>
+                    </div>
+                    <div class="review-info-row">
+                        <span class="review-info-label">Доставка:</span>
+                        <span class="review-info-val" style="color: var(--text-muted);">За тарифами перевізника (~70–90 ₴)</span>
+                    </div>
+                    ${isCod ? `
+                    <div class="review-info-row">
+                        <span class="review-info-label">Комісія накладеного:</span>
+                        <span class="review-info-val">+${codFee} ₴</span>
+                    </div>
+                    ` : `
+                    <div class="review-info-row">
+                        <span class="review-info-label">Комісія за оплату:</span>
+                        <span class="review-info-val" style="color: #2E7D32;">0 ₴ (Без комісії)</span>
+                    </div>
+                    `}
+                    <div class="review-info-row" style="border-top: 1px solid var(--border-light); margin-top: 8px; padding-top: 8px; font-size: 1.05rem;">
+                        <span style="font-weight: 800; color: var(--text-primary);">Разом до сплати:</span>
+                        <span style="font-family: 'JetBrains Mono', monospace; font-weight: 900; color: var(--accent);">${formatPrice(grandTotal)}</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        let currentPendingPaymentOrder = null;
+
         async function submitOrder() {
             if (!validateCheckoutStep(1) || !validateCheckoutStep(2)) return;
 
@@ -4377,119 +5124,634 @@
 
                 if (!data) {
                     const randomNum = Math.floor(100000 + Math.random() * 900000);
-                    data = { order_id: `MLP-${randomNum}`, id: `MLP-${randomNum}` };
-                    // If in Telegram bot webapp, also send data back to bot
-                    if (tg?.sendData) {
-                        try { tg.sendData(JSON.stringify({ ...payload, order_id: data.order_id })); } catch(e) {}
+                    data = { order_id: `MLP-${randomNum}`, id: `MLP-${randomNum}`, total: grandTotal };
+                }
+
+                const orderObj = data.order || data;
+                const orderIdStr = orderObj.order_id || orderObj.id || data.order_id || data.id;
+
+                // Save recent customer phone for "My Orders" lookup
+                localStorage.setItem('m1lip_last_phone', phone);
+                localStorage.setItem('m1lip_last_order_id', orderIdStr);
+
+                // If online payment: open Smart Glocal Test Payment Gateway Modal
+                if (paymentMethod === 'online') {
+                    currentPendingPaymentOrder = {
+                        ...orderObj,
+                        id: orderIdStr,
+                        order_id: orderIdStr,
+                        total: grandTotal,
+                        customer: payload.customer,
+                        delivery: payload.delivery,
+                        items: payload.items
+                    };
+                    toggleCheckoutDrawer(false);
+                    openPaymentGateway(currentPendingPaymentOrder);
+                } else {
+                    // COD (Cash On Delivery) flow
+                    const provName = PROVIDER_LABELS[checkoutDelivery.provider] || 'Нова Пошта';
+                    const detailsBox = document.getElementById('success-details-content');
+                    if (detailsBox) {
+                        detailsBox.innerHTML = `
+                            <div><strong>Отримувач:</strong> ${name} ${surname} (${phone})</div>
+                            <div><strong>Доставка:</strong> ${provName}, м. ${checkoutDelivery.city}, ${checkoutDelivery.department}</div>
+                            <div><strong>Оплата:</strong> Оплата при отриманні (Накладений платіж)</div>
+                            <div style="font-weight: 700; color: var(--text-primary); margin-top: 4px;"><strong>Сума до сплати:</strong> ${formatPrice(grandTotal)}</div>
+                        `;
                     }
+                    cart = [];
+                    saveCart();
+                    toggleCheckoutDrawer(false);
+
+                    document.getElementById('success-order-id').innerText = orderIdStr;
+                    document.getElementById('success-modal').classList.add('active');
+                    document.getElementById('backdrop').classList.add('active');
+                    updateAdminNewBadge();
                 }
-
-                const orderIdStr = data.order_id || data.id || data.orderId || `#MLP-2026-${Math.floor(100000 + Math.random() * 900000)}`;
-                const provName = PROVIDER_LABELS[checkoutDelivery.provider] || (checkoutDelivery.provider === 'nova_poshta' ? 'Нова Пошта' : 'Укрпошта');
-
-                // If online payment and Telegram WebApp is available, trigger haptic feedback or invoice
-                if (paymentMethod === 'online' && tg?.HapticFeedback) {
-                    try {
-                        tg.HapticFeedback.notificationOccurred('success');
-                    } catch (e) {}
-                }
-
-                // Populate success modal details
-                const detailsBox = document.getElementById('success-details-content');
-                if (detailsBox) {
-                    detailsBox.innerHTML = `
-                        <div><strong>Отримувач:</strong> ${name} ${surname} (${phone})</div>
-                        <div><strong>Доставка:</strong> ${provName}, м. ${checkoutDelivery.city}, ${checkoutDelivery.department}</div>
-                        <div><strong>Оплата:</strong> ${paymentMethod === 'online' ? 'Онлайн-оплата (Telegram / Картка)' : 'Накладений платіж'}</div>
-                        <div style="font-weight: 700; color: var(--text-primary); margin-top: 4px;"><strong>Сума до сплати:</strong> ${formatPrice(grandTotal)}</div>
-                    `;
-                }
-
-                cart = [];
-                saveCart();
-                toggleCheckoutDrawer(false);
-
-                document.getElementById('success-order-id').innerText = orderIdStr;
-                document.getElementById('success-modal').classList.add('active');
-                document.getElementById('backdrop').classList.add('active');
             } catch (err) {
                 alert("Помилка при оформленні замовлення. Спробуйте ще раз.");
             } finally {
                 submitBtn.disabled = false;
-                submitBtn.innerText = 'Підтвердити замовлення';
+                submitBtn.innerText = paymentMethod === 'online' ? 'Перейти до оплати →' : 'Підтвердити замовлення';
             }
         }
+
+        /* ---- SMART GLOCAL TEST PAYMENT GATEWAY FLOW ---- */
+        function openPaymentGateway(order) {
+            const modal = document.getElementById('payment-modal');
+            const backdrop = document.getElementById('backdrop');
+            if (!modal) return;
+
+            document.getElementById('pay-modal-order-number').innerText = order.order_id || order.id;
+            const amtStr = formatPrice(order.total || 0);
+            document.getElementById('pay-card-amount-disp').innerText = amtStr;
+            document.getElementById('pay-btn-amount-label').innerText = amtStr;
+
+            const statusMsg = document.getElementById('payment-status-message');
+            if (statusMsg) {
+                statusMsg.style.display = 'none';
+                statusMsg.className = '';
+            }
+
+            const tgBtnWrap = document.getElementById('tg-open-invoice-wrap');
+            if (tgBtnWrap) {
+                tgBtnWrap.style.display = (order.invoice_link || tg?.openInvoice) ? 'block' : 'none';
+            }
+
+            modal.classList.add('active');
+            backdrop.classList.add('active');
+        }
+
+        function closePaymentModal() {
+            document.getElementById('payment-modal')?.classList.remove('active');
+            document.getElementById('backdrop')?.classList.remove('active');
+        }
+
+        async function processGatewayPayment() {
+            if (!currentPendingPaymentOrder) return;
+            const btn = document.getElementById('btn-pay-confirm');
+            const statusMsg = document.getElementById('payment-status-message');
+            
+            btn.disabled = true;
+            btn.innerText = 'Обробка платежу Smart Glocal...';
+            if (statusMsg) {
+                statusMsg.style.display = 'block';
+                statusMsg.style.background = 'rgba(87,100,226,0.1)';
+                statusMsg.style.color = 'var(--accent)';
+                statusMsg.innerText = '🔒 Перевірка тестової картки та підтвердження транзакції...';
+            }
+
+            try {
+                const orderId = currentPendingPaymentOrder.id || currentPendingPaymentOrder.order_id;
+                const txId = 'tx_sg_' + Math.floor(100000 + Math.random() * 900000);
+                
+                const res = await fetch(`${API_BASE}/orders/${orderId}/confirm-payment`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        provider: 'smart_glocal_test',
+                        tx_id: txId,
+                        card_last4: '4444'
+                    })
+                });
+
+                if (res.ok) {
+                    if (statusMsg) {
+                        statusMsg.style.background = 'rgba(46,125,50,0.15)';
+                        statusMsg.style.color = '#2E7D32';
+                        statusMsg.innerText = '✅ Оплата успішно підтверджена!';
+                    }
+
+                    if (tg?.HapticFeedback) {
+                        try { tg.HapticFeedback.notificationOccurred('success'); } catch(e) {}
+                    }
+
+                    setTimeout(() => {
+                        closePaymentModal();
+                        // Populate success modal
+                        const name = currentPendingPaymentOrder.customer?.first_name || '';
+                        const phone = currentPendingPaymentOrder.customer?.phone || '';
+                        const prov = PROVIDER_LABELS[currentPendingPaymentOrder.delivery?.provider] || 'Нова Пошта';
+                        const city = currentPendingPaymentOrder.delivery?.city || '';
+                        const dept = currentPendingPaymentOrder.delivery?.department || '';
+
+                        const detailsBox = document.getElementById('success-details-content');
+                        if (detailsBox) {
+                            detailsBox.innerHTML = `
+                                <div><strong>Отримувач:</strong> ${name} (${phone})</div>
+                                <div><strong>Доставка:</strong> ${prov}, м. ${city}, ${dept}</div>
+                                <div><strong>Оплата:</strong> ✅ Онлайн-оплата карткою (Smart Glocal Test)</div>
+                                <div><strong>ID транзакції:</strong> <span style="font-family:'JetBrains Mono', monospace;">${txId}</span></div>
+                                <div style="font-weight: 700; color: var(--text-primary); margin-top: 4px;"><strong>Сплачено:</strong> ${formatPrice(currentPendingPaymentOrder.total || 0)}</div>
+                            `;
+                        }
+
+                        cart = [];
+                        saveCart();
+                        document.getElementById('success-order-id').innerText = orderId;
+                        document.getElementById('success-modal').classList.add('active');
+                        document.getElementById('backdrop').classList.add('active');
+                        updateAdminNewBadge();
+                        currentPendingPaymentOrder = null;
+                    }, 600);
+                } else {
+                    throw new Error('Помилка підтвердження оплати');
+                }
+            } catch (err) {
+                if (statusMsg) {
+                    statusMsg.style.background = 'rgba(211,47,47,0.15)';
+                    statusMsg.style.color = '#d32f2f';
+                    statusMsg.innerText = 'Помилка авторизації платежу. Спробуйте ще раз.';
+                }
+            } finally {
+                btn.disabled = false;
+                btn.innerText = `Підтвердити оплату ${document.getElementById('pay-btn-amount-label').innerText} →`;
+            }
+        }
+
+        function openNativeTgInvoice() {
+            if (currentPendingPaymentOrder?.invoice_link && tg?.openInvoice) {
+                tg.openInvoice(currentPendingPaymentOrder.invoice_link, (status) => {
+                    if (status === 'paid') {
+                        processGatewayPayment();
+                    }
+                });
+            } else {
+                processGatewayPayment();
+            }
+        }
+
+        /* ---- ADMIN PANEL: ЗАМОВЛЕННЯ ---- */
+        let activeAdminStatusFilter = 'ALL';
+        let currentAdminOrders = [];
+        let currentActiveAdminOrder = null;
+
+        const STATUS_MAP = {
+            NEW: { label: 'Нове', cls: 'status-new' },
+            PENDING_PAYMENT: { label: 'Очікує оплати', cls: 'status-pending-payment' },
+            CONFIRMED: { label: 'Підтверджено', cls: 'status-confirmed' },
+            PACKING_PREP: { label: 'До пакування', cls: 'status-packing' },
+            PACKED: { label: 'Упаковано', cls: 'status-packed' },
+            DISPATCH_PREP: { label: 'До відправки', cls: 'status-dispatch-prep' },
+            SHIPPED: { label: 'Відправлено', cls: 'status-shipped' },
+            DELIVERED: { label: 'Доставлено', cls: 'status-delivered' },
+            COMPLETED: { label: 'Виконано', cls: 'status-completed' },
+            CANCELLED: { label: 'Скасовано', cls: 'status-cancelled' }
+        };
+
+        function getStatusBadge(status) {
+            const conf = STATUS_MAP[status] || { label: status, cls: 'status-new' };
+            return `<span class="status-badge ${conf.cls}">${conf.label}</span>`;
+        }
+
+        async function openAdminOrdersDrawer() {
+            const drawer = document.getElementById('admin-orders-drawer');
+            const backdrop = document.getElementById('backdrop');
+            if (!drawer) return;
+
+            drawer.classList.add('active');
+            backdrop.classList.add('active');
+            refreshAdminOrders();
+        }
+
+        function closeAdminOrdersDrawer() {
+            document.getElementById('admin-orders-drawer')?.classList.remove('active');
+            document.getElementById('backdrop')?.classList.remove('active');
+        }
+
+        async function refreshAdminOrders() {
+            loadAdminStats();
+            loadAdminOrdersList();
+        }
+
+        async function loadAdminStats() {
+            try {
+                const res = await fetch(`${API_BASE}/stats`);
+                if (res.ok) {
+                    const stats = await res.json();
+                    document.getElementById('admin-stat-total').innerText = stats.total_orders || 0;
+                    document.getElementById('admin-stat-new').innerText = stats.new_orders || 0;
+                    document.getElementById('admin-stat-revenue').innerText = formatPrice(stats.total_sales ?? stats.revenue ?? 0);
+                    document.getElementById('admin-stat-avg').innerText = formatPrice(stats.average_check ?? stats.avg_order_value ?? 0);
+
+                    // Update live header badge
+                    const badge = document.getElementById('admin-new-badge');
+                    if (badge) {
+                        const cnt = Number(stats.new_orders || 0);
+                        badge.innerText = cnt;
+                        badge.style.display = cnt > 0 ? 'inline-block' : 'none';
+                    }
+                }
+            } catch (e) {}
+        }
+
+        async function updateAdminNewBadge() {
+            try {
+                const res = await fetch(`${API_BASE}/stats`);
+                if (res.ok) {
+                    const stats = await res.json();
+                    const badge = document.getElementById('admin-new-badge');
+                    if (badge) {
+                        const cnt = Number(stats.new_orders || 0);
+                        badge.innerText = cnt;
+                        badge.style.display = cnt > 0 ? 'inline-block' : 'none';
+                    }
+                }
+            } catch (e) {}
+        }
+
+        async function loadAdminOrdersList() {
+            const container = document.getElementById('admin-orders-list');
+            if (!container) return;
+
+            try {
+                const res = await fetch(`${API_BASE}/orders`);
+                if (res.ok) {
+                    currentAdminOrders = await res.json();
+                    renderAdminOrdersList();
+                } else {
+                    container.innerHTML = '<div style="text-align:center; padding:30px; color:var(--text-muted);">Помилка завантаження замовлень</div>';
+                }
+            } catch (e) {
+                container.innerHTML = '<div style="text-align:center; padding:30px; color:var(--text-muted);">Немає зв\'язку з сервером</div>';
+            }
+        }
+
+        function setAdminStatusFilter(status) {
+            activeAdminStatusFilter = status;
+            document.querySelectorAll('#admin-status-tabs .admin-tab-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.status === status);
+            });
+            renderAdminOrdersList();
+        }
+
+        function handleAdminSearch(val) {
+            const clearBtn = document.getElementById('admin-search-clear');
+            if (clearBtn) clearBtn.style.display = val && val.length > 0 ? 'block' : 'none';
+            renderAdminOrdersList();
+        }
+
+        function clearAdminSearch() {
+            const input = document.getElementById('admin-orders-search-input');
+            if (input) input.value = '';
+            const clearBtn = document.getElementById('admin-search-clear');
+            if (clearBtn) clearBtn.style.display = 'none';
+            renderAdminOrdersList();
+        }
+
+        function renderAdminOrdersList() {
+            const container = document.getElementById('admin-orders-list');
+            if (!container) return;
+
+            const q = (document.getElementById('admin-orders-search-input')?.value || '').trim().toLowerCase();
+
+            let list = currentAdminOrders || [];
+            if (activeAdminStatusFilter !== 'ALL') {
+                list = list.filter(o => o.status === activeAdminStatusFilter);
+            }
+
+            if (q) {
+                list = list.filter(o => {
+                    const idStr = String(o.id || o.order_id || '').toLowerCase();
+                    const custName = String(o.customer?.first_name || '' + ' ' + o.customer?.last_name || '').toLowerCase();
+                    const custPhone = String(o.customer?.phone || '').toLowerCase();
+                    const custEmail = String(o.customer?.email || '').toLowerCase();
+                    const ttn = String(o.ttn || '').toLowerCase();
+                    return idStr.includes(q) || custName.includes(q) || custPhone.includes(q) || custEmail.includes(q) || ttn.includes(q);
+                });
+            }
+
+            if (list.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 40px 10px; color: var(--text-muted);">
+                        <span style="font-size: 2rem; display: block; margin-bottom: 8px;">📭</span>
+                        <div style="font-size: 0.9rem; font-weight: 700;">Замовлень не знайдено</div>
+                        <div style="font-size: 0.78rem; margin-top: 4px;">Спробуйте змінити фільтр або пошуковий запит</div>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = list.map(order => {
+                const orderId = order.id || order.order_id;
+                const custName = `${order.customer?.first_name || ''} ${order.customer?.last_name || ''}`.trim() || 'Клієнт';
+                const prov = PROVIDER_LABELS[order.delivery?.provider] || 'Нова Пошта';
+                const itemsCount = (order.items || []).reduce((c, i) => c + (i.qty || 1), 0);
+                const createdDate = order.created_at ? new Date(order.created_at).toLocaleString('uk-UA', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : '';
+                const isPaid = order.payment?.status === 'PAID' || order.status === 'CONFIRMED' || order.status === 'SHIPPED';
+
+                return `
+                    <div class="admin-order-card" onclick="openAdminOrderDetail('${orderId}')">
+                        <div class="admin-order-head">
+                            <span class="admin-order-id">${orderId}</span>
+                            ${getStatusBadge(order.status)}
+                        </div>
+                        <div class="admin-order-meta">
+                            <div><strong>${custName}</strong> • <span style="font-family:'JetBrains Mono', monospace;">${order.customer?.phone || ''}</span></div>
+                            <div style="color: var(--text-muted); font-size: 0.78rem;">
+                                📍 ${prov}, м. ${order.delivery?.city || ''} (${order.delivery?.department || ''})
+                            </div>
+                            ${order.ttn ? `<div style="color: var(--accent); font-family:'JetBrains Mono', monospace; font-size: 0.78rem; font-weight:700;">📦 ТТН: ${order.ttn}</div>` : ''}
+                        </div>
+                        <div class="admin-order-foot">
+                            <span class="admin-order-date">${createdDate} • ${itemsCount} од.</span>
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                ${isPaid ? '<span style="font-size:0.72rem; color:#2E7D32; font-weight:700;">● Сплачено</span>' : '<span style="font-size:0.72rem; color:var(--text-muted);">● Оплата при отриманні</span>'}
+                                <span style="font-family:'JetBrains Mono', monospace; font-weight:900; color:var(--accent); font-size:0.95rem;">${formatPrice(order.total || 0)}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        /* ---- ORDER DETAILS MODAL ---- */
+        async function openAdminOrderDetail(orderId) {
+            let order = currentAdminOrders.find(o => (o.id === orderId || o.order_id === orderId));
+            if (!order) {
+                try {
+                    const res = await fetch(`${API_BASE}/orders/${orderId}`);
+                    if (res.ok) order = await res.json();
+                } catch(e) {}
+            }
+            if (!order) return;
+
+            currentActiveAdminOrder = order;
+            const modal = document.getElementById('admin-order-modal');
+            if (!modal) return;
+
+            const idStr = order.id || order.order_id;
+            document.getElementById('adm-detail-id').innerText = idStr;
+            const badgeEl = document.getElementById('adm-detail-status-badge');
+            if (badgeEl) {
+                const conf = STATUS_MAP[order.status] || { label: order.status, cls: 'status-new' };
+                badgeEl.className = `status-badge ${conf.cls}`;
+                badgeEl.innerText = conf.label;
+            }
+
+            const createdDate = order.created_at ? new Date(order.created_at).toLocaleString('uk-UA', { dateStyle: 'long', timeStyle: 'short' }) : '';
+            document.getElementById('adm-detail-date').innerText = createdDate;
+
+            // Status select
+            const statusSelect = document.getElementById('adm-status-select');
+            if (statusSelect) statusSelect.value = order.status || 'NEW';
+
+            // TTN input
+            const ttnInput = document.getElementById('adm-ttn-input');
+            if (ttnInput) ttnInput.value = order.ttn || '';
+
+            // Comment input
+            const commentInput = document.getElementById('adm-comment-input');
+            if (commentInput) commentInput.value = order.admin_comment || order.comment || '';
+
+            // Customer info
+            document.getElementById('adm-detail-customer').innerHTML = `
+                <div><strong>ПІБ:</strong> ${order.customer?.first_name || ''} ${order.customer?.last_name || ''}</div>
+                <div><strong>Телефон:</strong> <a href="tel:${order.customer?.phone}" style="color:var(--accent);">${order.customer?.phone || ''}</a></div>
+                <div><strong>Email:</strong> ${order.customer?.email || 'не вказано'}</div>
+                ${order.telegram_user_id ? `<div><strong>Telegram ID:</strong> <code>${order.telegram_user_id}</code></div>` : ''}
+            `;
+
+            // Delivery info
+            const prov = PROVIDER_LABELS[order.delivery?.provider] || order.delivery?.provider || 'Нова Пошта';
+            const payMethod = order.payment?.method === 'online' ? 'Онлайн-оплата (Smart Glocal)' : 'Накладений платіж';
+            document.getElementById('adm-detail-delivery').innerHTML = `
+                <div><strong>Служба:</strong> ${prov}</div>
+                <div><strong>Місто:</strong> м. ${order.delivery?.city || ''}</div>
+                <div><strong>Пункт:</strong> ${order.delivery?.department || ''}</div>
+                <div><strong>Оплата:</strong> ${payMethod}</div>
+            `;
+
+            // Items list
+            const itemsBox = document.getElementById('adm-detail-items');
+            if (itemsBox) {
+                itemsBox.innerHTML = (order.items || []).map(item => {
+                    const prod = products.find(p => p.id === item.id) || item;
+                    const lineTotal = (item.price || prod.price || 0) * (item.qty || 1);
+                    return `
+                        <div style="display: flex; align-items: center; justify-content: space-between; padding: 6px 0; border-bottom: 1px dashed var(--border-light); font-size: 0.82rem;">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <img src="${item.img || prod.img || ''}" alt="" style="width: 34px; height: 34px; border-radius: 6px; object-fit: cover; background: var(--bg-surface);">
+                                <div>
+                                    <div style="font-weight: 700;">${item.title || prod.title || item.id}</div>
+                                    <div style="font-size: 0.72rem; color: var(--text-muted);">Колір: ${item.color || 'Базовий'} • ${item.qty || 1} шт.</div>
+                                </div>
+                            </div>
+                            <div style="font-family: 'JetBrains Mono', monospace; font-weight: 700;">${formatPrice(lineTotal)}</div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            document.getElementById('adm-detail-total').innerText = formatPrice(order.total || 0);
+
+            // Timeline
+            const timelineBox = document.getElementById('adm-detail-timeline');
+            if (timelineBox) {
+                const history = order.history || [];
+                if (history.length === 0) {
+                    timelineBox.innerHTML = `
+                        <div class="order-timeline-step">
+                            <div class="order-timeline-title">Замовлення створено (${STATUS_MAP[order.status]?.label || order.status})</div>
+                            <div class="order-timeline-meta">${createdDate}</div>
+                        </div>
+                    `;
+                } else {
+                    timelineBox.innerHTML = history.map(h => `
+                        <div class="order-timeline-step">
+                            <div class="order-timeline-title">${STATUS_MAP[h.status]?.label || h.status} ${h.note ? `— ${h.note}` : ''}</div>
+                            <div class="order-timeline-meta">${new Date(h.timestamp).toLocaleString('uk-UA', { dateStyle: 'short', timeStyle: 'short' })}</div>
+                        </div>
+                    `).join('');
+                }
+            }
+
+            modal.classList.add('active');
+        }
+
+        function closeAdminOrderDetail() {
+            document.getElementById('admin-order-modal')?.classList.remove('active');
+        }
+
+        async function saveAdminStatusChange() {
+            if (!currentActiveAdminOrder) return;
+            const newStatus = document.getElementById('adm-status-select').value;
+            const orderId = currentActiveAdminOrder.id || currentActiveAdminOrder.order_id;
+
+            try {
+                const res = await fetch(`${API_BASE}/orders/${orderId}/status`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: newStatus })
+                });
+                if (res.ok) {
+                    const updated = await res.json();
+                    currentActiveAdminOrder = updated;
+                    openAdminOrderDetail(orderId);
+                    refreshAdminOrders();
+                    alert(`✅ Статус замовлення успішно оновлено на: ${STATUS_MAP[newStatus]?.label || newStatus}`);
+                } else {
+                    alert("Помилка при оновленні статусу.");
+                }
+            } catch (e) {
+                alert("Помилка зв'язку з сервером.");
+            }
+        }
+
+        async function saveAdminOrderTtn() {
+            if (!currentActiveAdminOrder) return;
+            const ttn = (document.getElementById('adm-ttn-input')?.value || '').trim();
+            const orderId = currentActiveAdminOrder.id || currentActiveAdminOrder.order_id;
+
+            try {
+                const res = await fetch(`${API_BASE}/orders/${orderId}/ttn`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ttn })
+                });
+                if (res.ok) {
+                    const updated = await res.json();
+                    currentActiveAdminOrder = updated;
+                    openAdminOrderDetail(orderId);
+                    refreshAdminOrders();
+                    alert(`✅ ТТН збережено: ${ttn}. Повідомлення надіслано покупцю в Telegram!`);
+                } else {
+                    alert("Помилка при збереженні ТТН.");
+                }
+            } catch (e) {
+                alert("Помилка зв'язку з сервером.");
+            }
+        }
+
+        async function saveAdminOrderComment() {
+            if (!currentActiveAdminOrder) return;
+            const comment = (document.getElementById('adm-comment-input')?.value || '').trim();
+            const orderId = currentActiveAdminOrder.id || currentActiveAdminOrder.order_id;
+
+            try {
+                const res = await fetch(`${API_BASE}/orders/${orderId}/comment`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ comment })
+                });
+                if (res.ok) {
+                    alert("✅ Коментар збережено.");
+                }
+            } catch (e) {}
+        }
+
+        /* ---- CUSTOMER "МОЇ ЗАМОВЛЕННЯ" ---- */
+        async function openMyOrdersModal() {
+            const modal = document.getElementById('my-orders-modal');
+            const backdrop = document.getElementById('backdrop');
+            if (!modal) return;
+
+            modal.classList.add('active');
+            backdrop.classList.add('active');
+
+            const savedPhone = localStorage.getItem('m1lip_last_phone') || document.getElementById('chk-phone')?.value || '';
+            const searchInput = document.getElementById('my-orders-search-input');
+            if (searchInput && savedPhone && !searchInput.value) {
+                searchInput.value = savedPhone;
+            }
+
+            searchCustomerOrders();
+        }
+
+        function closeMyOrdersModal() {
+            document.getElementById('my-orders-modal')?.classList.remove('active');
+            document.getElementById('backdrop')?.classList.remove('active');
+        }
+
+        async function searchCustomerOrders() {
+            const container = document.getElementById('my-orders-list-content');
+            if (!container) return;
+
+            const q = (document.getElementById('my-orders-search-input')?.value || '').trim().replace(/\s+/g, '');
+
+            container.innerHTML = '<div style="text-align:center; padding:30px; color:var(--text-muted);">Пошук замовлень...</div>';
+
+            try {
+                const res = await fetch(`${API_BASE}/orders`);
+                if (!res.ok) throw new Error();
+                const all = await res.json();
+
+                let found = all;
+                if (q) {
+                    const qClean = q.toLowerCase();
+                    found = all.filter(o => {
+                        const idStr = String(o.id || o.order_id || '').toLowerCase();
+                        const phone = String(o.customer?.phone || '').replace(/\D/g, '');
+                        const qDigits = qClean.replace(/\D/g, '');
+                        return idStr.includes(qClean) || (qDigits.length > 5 && phone.includes(qDigits));
+                    });
+                }
+
+                if (found.length === 0) {
+                    container.innerHTML = `
+                        <div style="text-align: center; padding: 40px 10px; color: var(--text-muted);">
+                            <span style="font-size: 2rem; display: block; margin-bottom: 8px;">🔍</span>
+                            <div style="font-weight: 700; font-size: 0.9rem;">Замовлень не знайдено</div>
+                            <div style="font-size: 0.78rem; margin-top: 4px;">Перевірте правильність введеного номера телефону або номеру замовлення</div>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = found.map(order => {
+                    const orderId = order.id || order.order_id;
+                    const prov = PROVIDER_LABELS[order.delivery?.provider] || 'Нова Пошта';
+                    const createdDate = order.created_at ? new Date(order.created_at).toLocaleDateString('uk-UA', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '';
+                    return `
+                        <div class="review-card" style="margin-bottom: 12px; background: var(--bg-surface); border: 1.5px solid var(--border-light);">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                <span style="font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 0.95rem; color: var(--accent);">${orderId}</span>
+                                ${getStatusBadge(order.status)}
+                            </div>
+                            <div style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.4; margin-bottom: 8px;">
+                                <div>📅 <strong>Дата:</strong> ${createdDate}</div>
+                                <div>📍 <strong>Доставка:</strong> ${prov}, м. ${order.delivery?.city || ''} (${order.delivery?.department || ''})</div>
+                                ${order.ttn ? `<div style="margin-top: 4px; color: #2E7D32; font-weight: 800; font-family:'JetBrains Mono', monospace;">🚀 ТТН: ${order.ttn}</div>` : '<div style="margin-top: 2px; color: var(--text-muted);">⚡ Очікується відправка (1–2 дні)</div>'}
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px dashed var(--border-light); padding-top: 8px; font-weight: 800;">
+                                <span style="font-size: 0.8rem; color: var(--text-muted);">До сплати:</span>
+                                <span style="font-family: 'JetBrains Mono', monospace; font-size: 1rem; color: var(--text-primary);">${formatPrice(order.total || 0)}</span>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } catch (e) {
+                container.innerHTML = '<div style="text-align:center; padding:30px; color:var(--text-muted);">Не вдалося завантажити замовлення</div>';
+            }
+        }
+
+        // Periodic background poll for admin badge
+        setInterval(updateAdminNewBadge, 20000);
+        setTimeout(updateAdminNewBadge, 1500);
 
         function closeSuccessModal() {
             document.getElementById('success-modal')?.classList.remove('active');
             document.getElementById('backdrop')?.classList.remove('active');
-            filterByBrand('All');
-        }
-
-        async function toggleProfileDrawer(open) {
-            const drawer = document.getElementById('profile-drawer');
-            const backdrop = document.getElementById('backdrop');
-            if (open) {
-                drawer.classList.add('active');
-                backdrop.classList.add('active');
-                await renderProfileDrawerContent();
-            } else {
-                drawer.classList.remove('active');
-                backdrop.classList.remove('active');
-            }
-        }
-
-        async function renderProfileDrawerContent() {
-            const body = document.getElementById('profile-drawer-body');
-            if (!tg?.initData) {
-                body.innerHTML = `<div class="profile-signin-note">Профіль доступний лише при відкритті магазину через Telegram Web App.</div>`;
-                return;
-            }
-            body.innerHTML = `<div class="profile-signin-note">Завантаження профілю та замовлень...</div>`;
-
-            try {
-                const [profRes, ordersRes] = await Promise.all([
-                    fetch(PROFILE_API_URL, { headers: { 'X-Telegram-Init-Data': tg.initData } }),
-                    fetch(MY_ORDERS_API_URL, { headers: { 'X-Telegram-Init-Data': tg.initData } })
-                ]);
-
-                const profileData = profRes.ok ? await profRes.json() : null;
-                const ordersData = ordersRes.ok ? await ordersRes.json() : [];
-
-                if (!profileData) {
-                    body.innerHTML = `<div class="profile-signin-note">Не вдалося завантажити профіль користувача.</div>`;
-                    return;
-                }
-
-                body.innerHTML = `
-                    <div class="profile-section">
-                        <h4>Дані профілю</h4>
-                        <div class="review-block">
-                            <div class="review-line"><span>Ім'я:</span> <span>${profileData.first_name || ''} ${profileData.last_name || ''}</span></div>
-                            <div class="review-line"><span>Телефон:</span> <span>${profileData.phone || 'не вказано'}</span></div>
-                        </div>
-                    </div>
-                    <div class="profile-section">
-                        <h4>Історія замовлень</h4>
-                        ${Array.isArray(ordersData) && ordersData.length > 0 ? ordersData.map(o => `
-                            <div class="profile-order-card">
-                                <div class="order-top">
-                                    <span>${o.order_id || o.id}</span>
-                                    <span class="order-status-pill">${o.status || 'Нове'}</span>
-                                </div>
-                                <div class="order-meta">${o.created_at || ''} • ${formatPrice(o.total || 0)}</div>
-                            </div>
-                        `).join('') : '<div class="profile-empty-state">У вас ще немає замовлень</div>'}
-                    </div>
-                `;
-            } catch (err) {
-                body.innerHTML = `<div class="profile-signin-note">Помилка завантаження даних профілю.</div>`;
-            }
-        }
-
-        function closeSuccessModal() {
-            document.getElementById('success-modal').classList.remove('active');
-            document.getElementById('backdrop').classList.remove('active');
         }
 
         function closeAllDrawers() {
@@ -4500,6 +5762,10 @@
             toggleSearch(false);
             closeProductModal();
             closeSuccessModal();
+            closePaymentModal();
+            closeAdminOrdersDrawer();
+            closeAdminOrderDetail();
+            closeMyOrdersModal();
             closeInfoModal();
         }
 
