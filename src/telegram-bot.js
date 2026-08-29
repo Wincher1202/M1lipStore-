@@ -32,6 +32,90 @@ export class TelegramBotService {
     }
   }
 
+  // Safe message deletion for keeping chat clean for users and admins
+  async safeDeleteMessage(chatId, messageId) {
+    if (!chatId || !messageId) return false;
+    try {
+      const res = await this.callApi('deleteMessage', { chat_id: chatId, message_id: messageId });
+      return res.ok;
+    } catch (err) {
+      return false;
+    }
+  }
+
+  // Edit message in-place if messageId is provided, or send new message and delete old
+  async safeEditOrSend(chatId, messageId, text, extra = {}) {
+    if (chatId && messageId) {
+      try {
+        const editRes = await this.callApi('editMessageText', {
+          chat_id: chatId,
+          message_id: messageId,
+          text,
+          parse_mode: extra.parse_mode || 'HTML',
+          reply_markup: extra.reply_markup,
+          disable_web_page_preview: extra.disable_web_page_preview ?? true
+        });
+        if (editRes.ok) {
+          return editRes.result;
+        }
+      } catch (err) {
+        // Fallback to sending new
+      }
+    }
+
+    const sendRes = await this.callApi('sendMessage', {
+      chat_id: chatId,
+      text,
+      parse_mode: extra.parse_mode || 'HTML',
+      reply_markup: extra.reply_markup,
+      disable_web_page_preview: extra.disable_web_page_preview ?? true
+    });
+
+    if (sendRes.ok && messageId) {
+      await this.safeDeleteMessage(chatId, messageId);
+    }
+    return sendRes.result;
+  }
+
+  // Unified full name formatting including Patronymic (По батькові)
+  formatCustomerFullName(cust) {
+    if (!cust) return 'Покупець';
+    const last = (cust.last_name || '').trim();
+    const first = (cust.first_name || '').trim();
+    const middle = (cust.middle_name || cust.patronymic || '').trim();
+
+    if (last && first && middle) return `${last} ${first} ${middle}`;
+    if (last && first) return `${last} ${first}`;
+    if (first && middle) return `${first} ${middle}`;
+    if (first) return first;
+    if (last) return last;
+    return 'Покупець';
+  }
+
+  // Specification string parser supporting "Key (Value)", "Key: Value", "Key - Value"
+  parseSpecLine(line) {
+    const clean = (line || '').trim();
+    if (!clean) return null;
+
+    // Pattern 1: Сенсор (Paw3395) or Сенсор (PixArt PAW3395 26000 DPI)
+    const parenMatch = clean.match(/^([^()]+)\((.+)\)$/);
+    if (parenMatch) {
+      const key = parenMatch[1].trim();
+      const value = parenMatch[2].trim();
+      if (key && value) return { key, value };
+    }
+
+    // Pattern 2: Сенсор: Paw3395 or Сенсор - Paw3395 or Сенсор — Paw3395
+    const sepMatch = clean.match(/^([^:—\-]+)[:—\-]\s*(.+)$/);
+    if (sepMatch) {
+      const key = sepMatch[1].trim();
+      const value = sepMatch[2].trim();
+      if (key && value) return { key, value };
+    }
+
+    return { key: 'Характеристика', value: clean };
+  }
+
   async init() {
     if (!BOT_TOKEN) {
       console.log('[TelegramBot] BOT_TOKEN not specified. Bot notifications will be recorded in DB audit logs.');
@@ -212,19 +296,24 @@ export class TelegramBotService {
     // Check if admin is currently awaiting TTN input for an order
     if (this.adminSessions[chatId]?.action === 'awaiting_ttn') {
       const orderId = this.adminSessions[chatId].orderId;
+      const promptMsgId = this.adminSessions[chatId].promptMsgId;
       delete this.adminSessions[chatId];
+
+      if (msg.message_id) {
+        await this.safeDeleteMessage(chatId, msg.message_id);
+      }
 
       const ttn = text.replace(/[^\d]/g, '').trim() || text.trim();
       if (ttn.length < 5) {
-        await this.callApi('sendMessage', {
-          chat_id: chatId,
-          text: `⚠️ Номер ТТН надто короткий. Будь ласка, введіть коректний номер ТТН або скористайтеся /ttn ${orderId} <номер>`,
-          parse_mode: 'HTML'
+        await this.safeEditOrSend(chatId, promptMsgId, `⚠️ Номер ТТН надто короткий. Будь ласка, введіть коректний номер ТТН:`, {
+          reply_markup: {
+            inline_keyboard: [[{ text: '❌ Скасувати', callback_data: `admin_view:${orderId}` }]]
+          }
         });
         return;
       }
 
-      await this.processAdminSaveTtn(chatId, orderId, ttn);
+      await this.processAdminSaveTtn(chatId, orderId, ttn, promptMsgId);
       return;
     }
 
@@ -594,20 +683,16 @@ export class TelegramBotService {
       const orderId = data.replace('view_order:', '').trim();
       const order = db.getOrderById(orderId);
       if (order) {
-        await this.sendCustomerOrderWithPayment(chatId, order);
+        await this.sendCustomerOrderWithPayment(chatId, order, msgId);
       } else {
-        await this.callApi('sendMessage', {
-          chat_id: chatId,
-          text: `❌ Замовлення #${orderId} не знайдено.`,
-          parse_mode: 'HTML'
-        });
+        await this.safeEditOrSend(chatId, msgId, `❌ Замовлення #${orderId} не знайдено.`);
       }
       return;
     }
 
     // CUSTOMER: Orders list
     if (data.startsWith('orders_list:')) {
-      await this.sendCustomerOrdersList(chatId, from.id);
+      await this.sendCustomerOrdersList(chatId, from.id, msgId);
       return;
     }
 
@@ -616,15 +701,15 @@ export class TelegramBotService {
       const orderId = data.replace('pay_test:', '').trim();
       const order = db.getOrderById(orderId);
       if (!order) {
-        await this.callApi('sendMessage', { chat_id: chatId, text: `❌ Замовлення #${orderId} не знайдено.` });
+        await this.safeEditOrSend(chatId, msgId, `❌ Замовлення #${orderId} не знайдено.`);
         return;
       }
 
       if (order.payment?.status === 'PAID') {
-        await this.callApi('sendMessage', {
-          chat_id: chatId,
-          text: `ℹ️ Замовлення <b>#${orderId}</b> вже успішно оплачено раніше!`,
-          parse_mode: 'HTML'
+        await this.safeEditOrSend(chatId, msgId, `ℹ️ Замовлення <b>#${orderId}</b> вже успішно оплачено раніше!`, {
+          reply_markup: {
+            inline_keyboard: [[{ text: '🛍 Мої замовлення', callback_data: `orders_list:${chatId}` }]]
+          }
         });
         return;
       }
@@ -638,7 +723,7 @@ export class TelegramBotService {
         paid_at: new Date().toISOString()
       });
 
-      await this.sendCustomerPaymentSuccess(updatedOrder);
+      await this.sendCustomerPaymentSuccess(updatedOrder, msgId);
       await this.sendAdminPaymentSuccess(updatedOrder);
       return;
     }
@@ -655,10 +740,12 @@ export class TelegramBotService {
 
     // CUSTOMER: Support
     if (data === 'customer_support') {
-      await this.callApi('sendMessage', {
-        chat_id: chatId,
-        text: `💬 <b>Служба підтримки MILIPSTORE</b>\n\nГрафік роботи: Щодня 09:00 — 21:00\nTelegram менеджера: @milipmanager\nКанал магазину: @m1lipstore\n\nМи з радістю відповімо на будь-які ваші запитання!`,
-        parse_mode: 'HTML'
+      await this.safeEditOrSend(chatId, msgId, `💬 <b>Служба підтримки MILIPSTORE</b>\n\nГрафік роботи: Щодня 09:00 — 21:00\nTelegram менеджера: @milipmanager\nКанал магазину: @m1lipstore\n\nМи з радістю відповімо на будь-які ваші запитання!`, {
+        reply_markup: {
+          inline_keyboard: [
+            [{ text: '🛍 Мої замовлення', callback_data: `orders_list:${chatId}` }]
+          ]
+        }
       });
       return;
     }
@@ -667,17 +754,13 @@ export class TelegramBotService {
     // ADMIN ACTIONS (Require isAdmin verification)
     // ---------------------------------------------
     if (!this.isAdmin(from)) {
-      await this.callApi('sendMessage', {
-        chat_id: chatId,
-        text: `⛔ Дія доступна тільки адміністраторам.`,
-        parse_mode: 'HTML'
-      });
+      await this.safeEditOrSend(chatId, msgId, `⛔ Дія доступна тільки адміністраторам.`);
       return;
     }
 
     // Admin Dashboard Refresh or Back to Admin
     if (data === 'admin_dashboard' || data === 'back_to_admin' || data === 'show_classic_admin') {
-      await this.sendAdminDashboard(chatId, from);
+      await this.sendAdminDashboard(chatId, from, msgId);
       return;
     }
 
@@ -690,7 +773,7 @@ export class TelegramBotService {
       data.startsWith('admin_list:')
     ) {
       const filter = data.startsWith('admin_list:') ? data.replace('admin_list:', '').trim() : 'ACTIVE';
-      await this.sendAdminOrdersList(chatId, filter);
+      await this.sendAdminOrdersList(chatId, filter, msgId);
       return;
     }
 
@@ -699,9 +782,9 @@ export class TelegramBotService {
       const orderId = data.replace(/^show_order_/, '').replace(/^admin_view:/, '').trim();
       const order = db.getOrderById(orderId);
       if (order) {
-        await this.sendAdminOrderDetails(chatId, order);
+        await this.sendAdminOrderDetails(chatId, order, msgId);
       } else {
-        await this.callApi('sendMessage', { chat_id: chatId, text: `❌ Замовлення #${orderId} не знайдено.` });
+        await this.safeEditOrSend(chatId, msgId, `❌ Замовлення #${orderId} не знайдено.`);
       }
       return;
     }
@@ -711,19 +794,16 @@ export class TelegramBotService {
       const orderId = data.replace('admin_delete_prompt:', '').trim();
       const order = db.getOrderById(orderId);
       if (!order) {
-        await this.callApi('sendMessage', { chat_id: chatId, text: `❌ Замовлення #${orderId} не знайдено.` });
+        await this.safeEditOrSend(chatId, msgId, `❌ Замовлення #${orderId} не знайдено.`);
         return;
       }
-      const custName = `${order.customer?.first_name || ''} ${order.customer?.last_name || ''}`.trim() || 'Клієнт';
-      await this.callApi('sendMessage', {
-        chat_id: chatId,
-        text: `⚠️ <b>Підтвердження видалення замовлення #${orderId}</b>\n\n` +
-          `👤 Покупець: <b>${custName}</b>\n` +
-          `💰 Сума: <b>${order.total} ₴</b>\n` +
-          `📊 Статус: <b>${order.status_name || order.status}</b>\n\n` +
-          `Ви дійсно хочете повністю видалити це замовлення з бази даних?\n` +
-          `<i>❗ Ця дія безповоротна.</i>`,
-        parse_mode: 'HTML',
+      const custName = this.formatCustomerFullName(order.customer);
+      await this.safeEditOrSend(chatId, msgId, `⚠️ <b>Підтвердження видалення замовлення #${orderId}</b>\n\n` +
+        `👤 Покупець: <b>${custName}</b>\n` +
+        `💰 Сума: <b>${order.total} ₴</b>\n` +
+        `📊 Статус: <b>${order.status_name || order.status}</b>\n\n` +
+        `Ви дійсно хочете повністю видалити це замовлення з бази даних?\n` +
+        `<i>❗ Ця дія безповоротна.</i>`, {
         reply_markup: {
           inline_keyboard: [
             [{ text: '🗑 Так, видалити назавжди', callback_data: `admin_delete_confirm:${orderId}` }],
@@ -739,10 +819,7 @@ export class TelegramBotService {
       const orderId = data.replace('admin_delete_confirm:', '').trim();
       const deleted = db.deleteOrder(orderId);
       if (deleted) {
-        await this.callApi('sendMessage', {
-          chat_id: chatId,
-          text: `🗑 <b>Замовлення #${orderId} успішно видалено з бази.</b>`,
-          parse_mode: 'HTML',
+        await this.safeEditOrSend(chatId, msgId, `🗑 <b>Замовлення #${orderId} успішно видалено з бази.</b>`, {
           reply_markup: {
             inline_keyboard: [
               [{ text: '⚡ До активних замовлень', callback_data: 'admin_list:ACTIVE' }],
@@ -751,9 +828,7 @@ export class TelegramBotService {
           }
         });
       } else {
-        await this.callApi('sendMessage', {
-          chat_id: chatId,
-          text: `❌ Замовлення #${orderId} вже було видалене або не знайдене.`,
+        await this.safeEditOrSend(chatId, msgId, `❌ Замовлення #${orderId} вже було видалене або не знайдене.`, {
           reply_markup: {
             inline_keyboard: [
               [{ text: '⚡ До списку замовлень', callback_data: 'admin_list:ACTIVE' }],
@@ -772,7 +847,7 @@ export class TelegramBotService {
       if (lastUnderscore !== -1) {
         const orderId = rest.substring(0, lastUnderscore);
         const newStatus = rest.substring(lastUnderscore + 1);
-        await this.processAdminStatusChange(chatId, orderId, newStatus);
+        await this.processAdminStatusChange(chatId, orderId, newStatus, msgId);
         return;
       }
     }
@@ -780,19 +855,16 @@ export class TelegramBotService {
     // Admin Confirm Order
     if (data.startsWith('admin_confirm:')) {
       const orderId = data.replace('admin_confirm:', '').trim();
-      await this.processAdminConfirmOrder(chatId, orderId);
+      await this.processAdminConfirmOrder(chatId, orderId, msgId);
       return;
     }
 
     // Admin Request TTN Input
     if (data.startsWith('admin_ttn_prompt:')) {
       const orderId = data.replace('admin_ttn_prompt:', '').trim();
-      this.adminSessions[chatId] = { action: 'awaiting_ttn', orderId };
+      this.adminSessions[chatId] = { action: 'awaiting_ttn', orderId, promptMsgId: msgId };
 
-      await this.callApi('sendMessage', {
-        chat_id: chatId,
-        text: `🚚 <b>Вкажіть номер ТТН для замовлення #${orderId}</b>\n\nНадішліть номер накладної (наприклад: <code>20450918234851</code>) наступним повідомленням у цей чат.\n\nАбо скористайтесь командою:\n<code>/ttn ${orderId} 20450918234851</code>`,
-        parse_mode: 'HTML',
+      await this.safeEditOrSend(chatId, msgId, `🚚 <b>Вкажіть номер ТТН для замовлення #${orderId}</b>\n\nНадішліть номер накладної (наприклад: <code>20450918234851</code>) наступним повідомленням у цей чат.\n\nАбо скористайтесь командою:\n<code>/ttn ${orderId} 20450918234851</code>`, {
         reply_markup: {
           inline_keyboard: [
             [{ text: '❌ Скасувати введення', callback_data: `admin_view:${orderId}` }]
@@ -805,7 +877,7 @@ export class TelegramBotService {
     // Admin Change Status Menu
     if (data.startsWith('admin_status_menu:')) {
       const orderId = data.replace('admin_status_menu:', '').trim();
-      await this.sendAdminStatusChangeMenu(chatId, orderId);
+      await this.sendAdminStatusChangeMenu(chatId, orderId, msgId);
       return;
     }
 
@@ -815,19 +887,19 @@ export class TelegramBotService {
       const parts = data.split(':');
       const newStatus = parts[1];
       const orderId = parts[2];
-      await this.processAdminStatusChange(chatId, orderId, newStatus);
+      await this.processAdminStatusChange(chatId, orderId, newStatus, msgId);
       return;
     }
 
     // Admin Add Product Prompt & Wizard
     if (data === 'add_new_product' || data === 'admin_add_product') {
-      await this.startAddProductWizard(chatId);
+      await this.startAddProductWizard(chatId, msgId);
       return;
     }
 
     // Admin Product Wizard Callbacks
     if (data.startsWith('wiz_')) {
-      await this.handleWizardCallback(chatId, from, data);
+      await this.handleWizardCallback(chatId, from, data, msgId);
       return;
     }
 
@@ -836,10 +908,7 @@ export class TelegramBotService {
       const prodId = data.replace('manage_', '').trim();
       const prod = db.getProductById(prodId);
       if (prod) {
-        await this.callApi('sendMessage', {
-          chat_id: chatId,
-          text: `🏷 <b>${prod.brand} ${prod.title}</b>\n💰 Ціна: <b>${prod.price} ₴</b>\n📦 Залишок: <b>${prod.quantity} шт.</b>\nКатегорія: ${prod.category}`,
-          parse_mode: 'HTML',
+        await this.safeEditOrSend(chatId, msgId, `🏷 <b>${prod.brand} ${prod.title}</b>\n💰 Ціна: <b>${prod.price} ₴</b>\n📦 Залишок: <b>${prod.quantity} шт.</b>\nКатегорія: ${prod.category}`, {
           reply_markup: {
             inline_keyboard: [
               [{ text: '🗑 Видалити товар', callback_data: `delete_prod_${prod.id}` }],
@@ -855,9 +924,7 @@ export class TelegramBotService {
     if (data.startsWith('delete_prod_')) {
       const prodId = data.replace('delete_prod_', '').trim();
       db.deleteProduct(prodId);
-      await this.callApi('sendMessage', {
-        chat_id: chatId,
-        text: `🗑 Товар успішно видалено з каталогу.`,
+      await this.safeEditOrSend(chatId, msgId, `🗑 Товар успішно видалено з каталогу.`, {
         reply_markup: {
           inline_keyboard: [[{ text: '🔙 До адмін-панелі', callback_data: 'admin_dashboard' }]]
         }
@@ -875,9 +942,10 @@ export class TelegramBotService {
   }
 
   // ----------------------------------------------------
+  // ----------------------------------------------------
   // Customer Presentation & Payment Flow
   // ----------------------------------------------------
-  async sendCustomerOrderWithPayment(chatId, order) {
+  async sendCustomerOrderWithPayment(chatId, order, messageId = null) {
     const customer = order.customer || {};
     const delivery = order.delivery || {};
     const payment = order.payment || {};
@@ -899,9 +967,7 @@ export class TelegramBotService {
       return `🕹 <b>${i.title}</b>${color}\nКількість: ${i.qty} шт.\nЦіна: <b>${i.price * i.qty} ₴</b>`;
     }).join('\n\n');
 
-    const fullName = [customer.first_name, customer.last_name, customer.middle_name].filter(Boolean).join(' ') ||
-      [customer.first_name, customer.last_name].filter(Boolean).join(' ') || 'Клієнт';
-
+    const fullName = this.formatCustomerFullName(customer);
     const provName = delivery.provider === 'ukrposhta' ? 'Укрпошта' : 'Нова пошта';
     const methodType = (delivery.type === 'postomat' || delivery.method === 'postomat') ? 'поштомат' : 'відділення';
 
@@ -912,6 +978,9 @@ export class TelegramBotService {
 
     text += `👤 <b>Покупець:</b>\n`;
     text += `<b>ПІБ:</b> ${fullName}\n`;
+    if (customer.middle_name || customer.patronymic) {
+      text += `<b>По батькові:</b> ${customer.middle_name || customer.patronymic}\n`;
+    }
     text += `📞 <b>Телефон:</b> <code>${customer.phone || 'не вказано'}</code>\n`;
     if (customer.email) text += `📧 <b>Email:</b> ${customer.email}\n`;
     text += `\n`;
@@ -947,10 +1016,29 @@ export class TelegramBotService {
       { text: '📦 Мої замовлення', callback_data: `orders_list:${chatId}` }
     ]);
 
-    await this.callApi('sendMessage', {
-      chat_id: chatId,
-      text,
-      parse_mode: 'HTML',
+    await this.safeEditOrSend(chatId, messageId, text, {
+      reply_markup: { inline_keyboard: buttons }
+    });
+  }
+
+  async sendCustomerPaymentSuccess(order, messageId = null) {
+    const cust = order.customer || {};
+    const fullName = this.formatCustomerFullName(cust);
+    const text = `🎉 <b>ОПЛАТУ УСПІШНО ЗАРАХОВАНО!</b> 🎉\n\n` +
+      `Замовлення: <b>#${order.order_id}</b>\n` +
+      `👤 Отримувач: <b>${fullName}</b>\n` +
+      `💰 Сума: <b>${order.total} ₴</b>\n` +
+      `💳 Спосіб: ${order.payment?.provider || 'Smart Glocal Test'}\n` +
+      `🆔 ID транзакції: <code>${order.payment?.transaction_id || 'SG_OFFLINE_AUTO'}</code>\n\n` +
+      `✅ Ми вже отримали ваш платіж і передали девайси на комплектацію та пакування.\n` +
+      `Очікуйте сповіщення з номером ТТН!`;
+
+    const buttons = [
+      [{ text: '🔍 Переглянути статус замовлення', callback_data: `view_order:${order.order_id}` }],
+      [{ text: '🛍 Мої замовлення', callback_data: `orders_list:${order.customer?.telegram_id || ''}` }]
+    ];
+
+    await this.safeEditOrSend(order.customer?.telegram_id || cust.telegram_id, messageId, text, {
       reply_markup: { inline_keyboard: buttons }
     });
   }
@@ -1007,15 +1095,11 @@ export class TelegramBotService {
     }
   }
 
-  async sendCustomerOrdersList(chatId, telegramUserId) {
+  async sendCustomerOrdersList(chatId, telegramUserId, messageId = null) {
     const orders = db.getOrdersByTelegramId(telegramUserId || chatId);
 
     if (!orders || orders.length === 0) {
-      await this.callApi('sendMessage', {
-        chat_id: chatId,
-        text: `🛍 <b>Мої замовлення</b>\n\nУ вас поки немає оформлених замовлень.\nОберіть девайси в нашому магазині та оформлюйте замовлення!`,
-        parse_mode: 'HTML'
-      });
+      await this.safeEditOrSend(chatId, messageId, `🛍 <b>Мої замовлення</b>\n\nУ вас поки немає оформлених замовлень.\nОберіть девайси в нашому магазині та оформлюйте замовлення!`);
       return;
     }
 
@@ -1059,10 +1143,7 @@ export class TelegramBotService {
       }
     });
 
-    await this.callApi('sendMessage', {
-      chat_id: chatId,
-      text,
-      parse_mode: 'HTML',
+    await this.safeEditOrSend(chatId, messageId, text, {
       reply_markup: { inline_keyboard: buttons }
     });
   }
@@ -1070,7 +1151,7 @@ export class TelegramBotService {
   // ----------------------------------------------------
   // Admin Management Flow
   // ----------------------------------------------------
-  async sendAdminDashboard(chatId, from) {
+  async sendAdminDashboard(chatId, from, messageId = null) {
     const stats = db.getStats();
     const orders = db.getOrders();
 
@@ -1107,15 +1188,12 @@ export class TelegramBotService {
       ]
     ];
 
-    await this.callApi('sendMessage', {
-      chat_id: chatId,
-      text,
-      parse_mode: 'HTML',
+    await this.safeEditOrSend(chatId, messageId, text, {
       reply_markup: { inline_keyboard: buttons }
     });
   }
 
-  async sendAdminOrdersList(chatId, filter = 'ACTIVE') {
+  async sendAdminOrdersList(chatId, filter = 'ACTIVE', messageId = null) {
     const allOrders = db.getOrders();
     let orders = [];
     let filterTitle = 'Активні замовлення';
@@ -1136,10 +1214,7 @@ export class TelegramBotService {
         ? `🗄 <b>Архів замовлень порожній</b>\n\nСюди потрапляють замовлення зі статусом «Доставлено», «Виконано» або «Скасовано».`
         : `⚡ <b>Активних замовлень немає</b>\n\nВсі поточні замовлення опрацьовані та переміщені до архіву.`;
 
-      await this.callApi('sendMessage', {
-        chat_id: chatId,
-        text: emptyMsg,
-        parse_mode: 'HTML',
+      await this.safeEditOrSend(chatId, messageId, emptyMsg, {
         reply_markup: {
           inline_keyboard: [
             [
@@ -1161,7 +1236,7 @@ export class TelegramBotService {
     const buttons = [];
 
     orders.slice(0, 10).forEach(o => {
-      const name = `${o.customer?.first_name || ''} ${o.customer?.last_name || ''}`.trim() || 'Клієнт';
+      const name = this.formatCustomerFullName(o.customer);
       const statusLabel = ORDER_STATUSES[o.status]?.name || o.status;
       let statusIcon = '📦';
       if (o.status === 'NEW') statusIcon = '🆕';
@@ -1192,15 +1267,12 @@ export class TelegramBotService {
       { text: '🔙 До адмін-панелі', callback_data: 'admin_dashboard' }
     ]);
 
-    await this.callApi('sendMessage', {
-      chat_id: chatId,
-      text,
-      parse_mode: 'HTML',
+    await this.safeEditOrSend(chatId, messageId, text, {
       reply_markup: { inline_keyboard: buttons }
     });
   }
 
-  async sendAdminOrderDetails(chatId, order) {
+  async sendAdminOrderDetails(chatId, order, messageId = null) {
     const cust = order.customer || {};
     const deliv = order.delivery || {};
     const pay = order.payment || {};
@@ -1222,6 +1294,8 @@ export class TelegramBotService {
       return `• <b>${i.title}</b>${color}\n  ${i.qty} шт. × ${i.price} ₴ = <b>${i.price * i.qty} ₴</b>`;
     }).join('\n');
 
+    const fullName = this.formatCustomerFullName(cust);
+
     let text = `👑 <b>ЗАМОВЛЕННЯ #${order.order_id}</b>\n\n`;
     text += `📊 <b>Статус:</b> ${statusEmoji} <b>${statusName}</b>\n`;
     text += `📅 <b>Дата створення:</b> ${new Date(order.created_at || Date.now()).toLocaleString('uk-UA')}\n`;
@@ -1230,7 +1304,10 @@ export class TelegramBotService {
     }
 
     text += `\n👤 <b>Покупець:</b>\n`;
-    text += `• Ім'я: <b>${cust.first_name} ${cust.last_name || ''}</b>\n`;
+    text += `• ПІБ: <b>${fullName}</b>\n`;
+    text += `• Прізвище: <b>${cust.last_name || '—'}</b>\n`;
+    text += `• Ім'я: <b>${cust.first_name || '—'}</b>\n`;
+    text += `• По батькові: <b>${cust.middle_name || cust.patronymic || '—'}</b>\n`;
     text += `• Телефон: <code>${cust.phone || 'не вказано'}</code>\n`;
     if (cust.telegram_username) text += `• Telegram: @${cust.telegram_username}\n`;
     else if (cust.telegram_id) text += `• Telegram ID: <code>${cust.telegram_id}</code>\n`;
@@ -1278,22 +1355,20 @@ export class TelegramBotService {
       { text: '👑 До адмін-панелі', callback_data: 'admin_dashboard' }
     ]);
 
-    await this.callApi('sendMessage', {
-      chat_id: chatId,
-      text,
-      parse_mode: 'HTML',
+    await this.safeEditOrSend(chatId, messageId, text, {
       reply_markup: { inline_keyboard: buttons }
     });
   }
 
-  async sendAdminStatusChangeMenu(chatId, orderId) {
+  async sendAdminStatusChangeMenu(chatId, orderId, messageId = null) {
     const order = db.getOrderById(orderId);
     if (!order) return;
 
     const currentStatusName = ORDER_STATUSES[order.status]?.name || order.status;
+    const custName = this.formatCustomerFullName(order.customer);
     const text = `🔄 <b>Зміна статусу замовлення #${orderId}</b>\n\n` +
       `Поточний статус: <b>${currentStatusName}</b>\n` +
-      `Клієнт: <b>${order.customer?.first_name || ''} ${order.customer?.last_name || ''}</b> | Сума: <b>${order.total} ₴</b>\n\n` +
+      `Клієнт: <b>${custName}</b> | Сума: <b>${order.total} ₴</b>\n\n` +
       `<i>Оберіть новий статус (покупцю буде надіслано автоматичне сповіщення в Telegram):</i>`;
 
     const buttons = [
@@ -1320,28 +1395,22 @@ export class TelegramBotService {
       ]
     ];
 
-    await this.callApi('sendMessage', {
-      chat_id: chatId,
-      text,
-      parse_mode: 'HTML',
+    await this.safeEditOrSend(chatId, messageId, text, {
       reply_markup: { inline_keyboard: buttons }
     });
   }
 
-  async processAdminConfirmOrder(chatId, orderId) {
+  async processAdminConfirmOrder(chatId, orderId, messageId = null) {
     const order = db.getOrderById(orderId);
     if (!order) {
-      await this.callApi('sendMessage', { chat_id: chatId, text: `❌ Замовлення #${orderId} не знайдено.` });
+      await this.safeEditOrSend(chatId, messageId, `❌ Замовлення #${orderId} не знайдено.`);
       return;
     }
 
     db.updateOrderStatus(orderId, 'CONFIRMED', 'Admin', 'Підтверджено адміністратором у Telegram-боті');
     const updated = db.getOrderById(orderId);
 
-    await this.callApi('sendMessage', {
-      chat_id: chatId,
-      text: `✅ <b>Замовлення #${orderId} успішно підтверджено!</b>\nПокупця сповіщено в Telegram про зміну статусу.`,
-      parse_mode: 'HTML',
+    await this.safeEditOrSend(chatId, messageId, `✅ <b>Замовлення #${orderId} успішно підтверджено!</b>\nПокупця сповіщено в Telegram про зміну статусу.`, {
       reply_markup: {
         inline_keyboard: [
           [
@@ -1359,10 +1428,10 @@ export class TelegramBotService {
     await this.notifyCustomerStatusChange(updated, 'CONFIRMED');
   }
 
-  async processAdminSaveTtn(chatId, orderId, ttn) {
+  async processAdminSaveTtn(chatId, orderId, ttn, messageId = null) {
     const order = db.getOrderById(orderId);
     if (!order) {
-      await this.callApi('sendMessage', { chat_id: chatId, text: `❌ Замовлення #${orderId} не знайдено.` });
+      await this.safeEditOrSend(chatId, messageId, `❌ Замовлення #${orderId} не знайдено.`);
       return;
     }
 
@@ -1370,10 +1439,7 @@ export class TelegramBotService {
     db.updateOrderStatus(orderId, 'SHIPPED', 'Admin', `Додано ТТН ${ttn} та переведено у статус Відправлено`);
     const updated = db.getOrderById(orderId);
 
-    await this.callApi('sendMessage', {
-      chat_id: chatId,
-      text: `✅ <b>ТТН збережено для #${orderId}!</b>\n\nНомер ТТН: <code>${ttn}</code>\nСтатус змінено на: <b>🚚 Відправлено (SHIPPED)</b>\nПокупцю надіслано повідомлення з номером накладної.`,
-      parse_mode: 'HTML',
+    await this.safeEditOrSend(chatId, messageId, `✅ <b>ТТН збережено для #${orderId}!</b>\n\nНомер ТТН: <code>${ttn}</code>\nСтатус змінено на: <b>🚚 Відправлено (SHIPPED)</b>\nПокупцю надіслано повідомлення з номером накладної.`, {
       reply_markup: {
         inline_keyboard: [
           [
@@ -1388,10 +1454,10 @@ export class TelegramBotService {
     await this.notifyCustomerStatusChange(updated, 'SHIPPED', ttn);
   }
 
-  async processAdminStatusChange(chatId, orderId, newStatus) {
+  async processAdminStatusChange(chatId, orderId, newStatus, messageId = null) {
     const order = db.getOrderById(orderId);
     if (!order) {
-      await this.callApi('sendMessage', { chat_id: chatId, text: `❌ Замовлення #${orderId} не знайдено.` });
+      await this.safeEditOrSend(chatId, messageId, `❌ Замовлення #${orderId} не знайдено.`);
       return;
     }
 
@@ -1411,10 +1477,7 @@ export class TelegramBotService {
     const statusName = ORDER_STATUSES[updated.status]?.name || updated.status;
     const isArchived = ['DELIVERED', 'COMPLETED', 'CANCELLED'].includes(updated.status);
 
-    await this.callApi('sendMessage', {
-      chat_id: chatId,
-      text: `✅ <b>Статус замовлення #${orderId} успішно змінено на:</b> <b>${statusName}</b>` + (newStatus === 'PAID' ? ' (Оплату зафіксовано)' : '') + (isArchived ? '\n\n📁 Замовлення переміщено в <b>Архів</b>.' : ''),
-      parse_mode: 'HTML',
+    await this.safeEditOrSend(chatId, messageId, `✅ <b>Статус замовлення #${orderId} успішно змінено на:</b> <b>${statusName}</b>` + (newStatus === 'PAID' ? ' (Оплату зафіксовано)' : '') + (isArchived ? '\n\n📁 Замовлення переміщено в <b>Архів</b>.' : ''), {
       reply_markup: {
         inline_keyboard: [
           [
@@ -1726,13 +1789,16 @@ export class TelegramBotService {
   // ----------------------------------------------------
   // Interactive Product Creation Wizard (Admin)
   // ----------------------------------------------------
-  async startAddProductWizard(chatId) {
+  async startAddProductWizard(chatId, messageId = null) {
     this.adminSessions[chatId] = {
       action: 'wizard_add_product',
       step: 'brand',
+      cardMsgId: messageId,
       data: {
         brand: '',
         title: '',
+        description: '',
+        specs: [],
         price: 0,
         category: '',
         colors: [],
@@ -1741,7 +1807,6 @@ export class TelegramBotService {
         quantity: 10,
         img: '',
         gallery: [],
-        description: '',
         currentColorIndex: 0,
         currentQtyIndex: 0
       }
@@ -1755,32 +1820,32 @@ export class TelegramBotService {
       [{ text: '❌ Скасувати', callback_data: 'wiz_cancel' }]
     ];
 
-    await this.callApi('sendMessage', {
-      chat_id: chatId,
-      text: `➕ <b>Створення нового товару MILIPSTORE</b>\n\n` +
-        `<b>Крок 1/7: Оберіть бренд товару:</b>\n` +
-        `<i>Натисніть на один із брендів нижче або введіть назву вручну:</i>`,
-      parse_mode: 'HTML',
+    const res = await this.safeEditOrSend(chatId, messageId, `➕ <b>Створення нового товару MILIPSTORE</b>\n\n` +
+      `<b>Крок 1/8: Оберіть бренд товару:</b>\n` +
+      `<i>Натисніть на один із брендів нижче або введіть назву вручну:</i>`, {
       reply_markup: { inline_keyboard: brands }
     });
+
+    if (res?.result?.message_id) {
+      this.adminSessions[chatId].cardMsgId = res.result.message_id;
+    }
   }
 
-  async handleWizardCallback(chatId, from, data) {
+  async handleWizardCallback(chatId, from, data, messageId = null) {
     const session = this.adminSessions[chatId];
     if (!session || session.action !== 'wizard_add_product') {
-      await this.callApi('sendMessage', {
-        chat_id: chatId,
-        text: 'ℹ️ Сесію створення товару завершено або скасовано. Щоб розпочати заново, натисніть /add_product або оберіть «➕ Додати новий товар» в адмін-панелі.',
-        reply_markup: this.getReplyKeyboard(from)
-      });
+      await this.safeEditOrSend(chatId, messageId, 'ℹ️ Сесію створення товару завершено або скасовано. Щоб розпочати заново, натисніть /add_product або оберіть «➕ Додати новий товар» в адмін-панелі.');
       return;
     }
 
+    if (messageId) {
+      session.cardMsgId = messageId;
+    }
+
     if (data === 'wiz_cancel') {
+      const cardId = session.cardMsgId;
       delete this.adminSessions[chatId];
-      await this.callApi('sendMessage', {
-        chat_id: chatId,
-        text: '❌ Створення товару скасовано.',
+      await this.safeEditOrSend(chatId, cardId, '❌ Створення товару скасовано.', {
         reply_markup: {
           inline_keyboard: [[{ text: '🔙 До адмін-панелі', callback_data: 'admin_dashboard' }]]
         }
@@ -1793,10 +1858,7 @@ export class TelegramBotService {
       const brandVal = data.replace('wiz_brand:', '').trim();
       if (brandVal === 'CUSTOM') {
         session.step = 'custom_brand';
-        await this.callApi('sendMessage', {
-          chat_id: chatId,
-          text: `🏷 <b>Введіть назву бренду текстом:</b>\n\n<i>Наприклад: Razer, Logitech, ATK, Keychron, Lamzu:</i>`,
-          parse_mode: 'HTML',
+        await this.safeEditOrSend(chatId, session.cardMsgId, `🏷 <b>Введіть назву бренду текстом:</b>\n\n<i>Наприклад: Razer, Logitech, ATK, Keychron, Lamzu:</i>`, {
           reply_markup: {
             inline_keyboard: [[{ text: '❌ Скасувати', callback_data: 'wiz_cancel' }]]
           }
@@ -1809,23 +1871,41 @@ export class TelegramBotService {
       return;
     }
 
-    // STEP 3: PRICE BUTTONS
-    if (data.startsWith('wiz_price:')) {
-      const priceVal = parseInt(data.replace('wiz_price:', '').trim(), 10) || 999;
-      session.data.price = priceVal;
-      await this.promptWizardCategory(chatId);
+    // STEP 3: DESCRIPTION SKIP / AUTO
+    if (data === 'wiz_desc_skip' || data === 'wiz_desc_auto') {
+      const fullTitle = `${session.data.brand} ${session.data.title}`.trim();
+      session.data.description = `${fullTitle} — якісний ігровий девайс з офіційною гарантією від MILIPSTORE.`;
+      await this.promptWizardSpecs(chatId);
       return;
     }
 
-    // STEP 4: CATEGORY
+    // STEP 4: SPECS ACTIONS
+    if (data === 'wiz_specs_done') {
+      if (!session.data.specs || session.data.specs.length === 0) {
+        session.data.specs = this.getDefaultSpecs(session.data.category || 'мишки');
+      }
+      await this.promptWizardPrice(chatId);
+      return;
+    }
+
+    if (data === 'wiz_specs_skip') {
+      session.data.specs = this.getDefaultSpecs(session.data.category || 'мишки');
+      await this.promptWizardPrice(chatId);
+      return;
+    }
+
+    if (data === 'wiz_specs_clear') {
+      session.data.specs = [];
+      await this.promptWizardSpecs(chatId);
+      return;
+    }
+
+    // STEP 6: CATEGORY
     if (data.startsWith('wiz_cat:')) {
       const catVal = data.replace('wiz_cat:', '').trim();
       if (catVal === 'CUSTOM') {
         session.step = 'custom_category';
-        await this.callApi('sendMessage', {
-          chat_id: chatId,
-          text: `🗂 <b>Введіть назву нової категорії текстом:</b>\n\n<i>Наприклад: Світчі, Кейкапи, Мікрофони, Кронштейни:</i>`,
-          parse_mode: 'HTML',
+        await this.safeEditOrSend(chatId, session.cardMsgId, `🗂 <b>Введіть назву нової категорії текстом:</b>\n\n<i>Наприклад: Світчі, Кейкапи, Мікрофони, Кронштейни:</i>`, {
           reply_markup: {
             inline_keyboard: [[{ text: '❌ Скасувати', callback_data: 'wiz_cancel' }]]
           }
@@ -1839,7 +1919,7 @@ export class TelegramBotService {
       return;
     }
 
-    // STEP 5: COLOR TOGGLES (Multi-selection)
+    // STEP 7: COLOR TOGGLES (Single Plate Multi-selection without spamming)
     if (data.startsWith('wiz_color_toggle:')) {
       const colName = data.replace('wiz_color_toggle:', '').trim();
       if (!session.data.colors) session.data.colors = [];
@@ -1855,10 +1935,7 @@ export class TelegramBotService {
 
     if (data === 'wiz_color:CUSTOM') {
       session.step = 'custom_color';
-      await this.callApi('sendMessage', {
-        chat_id: chatId,
-        text: `🎨 <b>Введіть назву кольору / варіації текстом:</b>\n\n<i>Наприклад: Gradient Purple, Matt White, Retro Grey, Cyberpunk:</i>`,
-        parse_mode: 'HTML',
+      await this.safeEditOrSend(chatId, session.cardMsgId, `🎨 <b>Введіть назву кольору / варіації текстом:</b>\n\n<i>Наприклад: Gradient Purple, Matt White, Retro Grey, Cyberpunk:</i>`, {
         reply_markup: {
           inline_keyboard: [[{ text: '❌ Скасувати', callback_data: 'wiz_cancel' }]]
         }
@@ -1880,26 +1957,20 @@ export class TelegramBotService {
       return;
     }
 
-    // STEP 6: MAIN CATALOG PHOTO ACTIONS
+    // STEP 8: MAIN CATALOG PHOTO ACTIONS
     if (data === 'wiz_cat_photo_auto' || data === 'wiz_cat_photo_skip') {
       const autoCatalogImg = this.getDefaultProductImage(session.data.brand, session.data.category);
       session.data.img = autoCatalogImg;
       session.data.currentColorIndex = 0;
-      await this.callApi('sendMessage', {
-        chat_id: chatId,
-        text: `🖼 <b>Встановлено авто-фото для каталогу!</b>\nПереходимо до фотографій для кожного кольору.`,
-        parse_mode: 'HTML'
-      });
       await this.promptWizardColorPhotos(chatId);
       return;
     }
 
-    // STEP 7: COLOR PHOTOS ACTIONS (Per Color)
+    // STEP 9: COLOR PHOTOS ACTIONS (Per Color)
     const colors = session.data.colors || ['Black'];
     const curColor = colors[session.data.currentColorIndex] || 'Black';
 
     if (data === 'wiz_color_done_photos') {
-      // If no photos uploaded for this color, set default
       if (!session.data.color_images?.[curColor]?.main) {
         const autoImg = this.getDefaultColorImage(curColor, session.data.brand, session.data.category);
         if (!session.data.color_images) session.data.color_images = {};
@@ -1961,7 +2032,7 @@ export class TelegramBotService {
       return;
     }
 
-    // STEP 8: QUANTITIES
+    // STEP 10: QUANTITIES
     if (data.startsWith('wiz_qty:')) {
       const qtyVal = parseInt(data.replace('wiz_qty:', '').trim(), 10) || 10;
       const curColorQty = colors[session.data.currentQtyIndex] || 'Black';
@@ -1987,7 +2058,7 @@ export class TelegramBotService {
       return;
     }
 
-    // STEP 9: CONFIRM & PUBLISH
+    // STEP 11: CONFIRM & PUBLISH
     if (data === 'wiz_save_publish') {
       await this.saveWizardProduct(chatId);
       return;
@@ -1998,12 +2069,17 @@ export class TelegramBotService {
     const session = this.adminSessions[chatId];
     if (!session || session.action !== 'wizard_add_product') return;
 
+    // Delete user's incoming message to keep the chat clean
+    if (msg.message_id) {
+      await this.safeDeleteMessage(chatId, msg.message_id);
+    }
+
     const text = (msg.text || '').trim();
 
     // 1. Custom Brand Input
     if (session.step === 'custom_brand') {
       if (!text) {
-        await this.callApi('sendMessage', { chat_id: chatId, text: '⚠️ Будь ласка, введіть коректну назву бренду:' });
+        await this.safeEditOrSend(chatId, session.cardMsgId, '⚠️ Будь ласка, введіть коректну назву бренду:');
         return;
       }
       session.data.brand = text;
@@ -2015,22 +2091,71 @@ export class TelegramBotService {
     // 2. Title / Model Input
     if (session.step === 'title') {
       if (!text) {
-        await this.callApi('sendMessage', { chat_id: chatId, text: '⚠️ Будь ласка, надішліть назву моделі товару:' });
+        await this.safeEditOrSend(chatId, session.cardMsgId, '⚠️ Будь ласка, надішліть назву моделі товару:');
         return;
       }
       session.data.title = text;
-      await this.promptWizardPrice(chatId);
+      await this.promptWizardDescription(chatId);
       return;
     }
 
-    // 3. Price Input
+    // 3. Description Input
+    if (session.step === 'description') {
+      if (text) {
+        session.data.description = text;
+      } else {
+        const fullTitle = `${session.data.brand} ${session.data.title}`.trim();
+        session.data.description = `${fullTitle} — якісний ігровий девайс від MILIPSTORE.`;
+      }
+      await this.promptWizardSpecs(chatId);
+      return;
+    }
+
+    // 4. Specs / Characteristics Input (up to 10 specs, format: Сенсор (Paw3395) or command /done)
+    if (session.step === 'specs') {
+      if (text === '/done' || text.toLowerCase() === 'готово' || text.toLowerCase() === 'далі' || text.toLowerCase() === 'stop') {
+        if (!session.data.specs || session.data.specs.length === 0) {
+          session.data.specs = this.getDefaultSpecs(session.data.category || 'мишки');
+        }
+        await this.promptWizardPrice(chatId);
+        return;
+      }
+
+      if (!session.data.specs) session.data.specs = [];
+
+      // Support multi-line input or single line input
+      const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+      for (const line of lines) {
+        if (session.data.specs.length >= 10) break;
+        const parsed = this.parseSpecLine(line);
+        if (parsed && parsed.key && parsed.value) {
+          // Avoid duplicate keys
+          const existingIdx = session.data.specs.findIndex(s => s.key.toLowerCase() === parsed.key.toLowerCase());
+          if (existingIdx !== -1) {
+            session.data.specs[existingIdx] = parsed;
+          } else {
+            session.data.specs.push(parsed);
+          }
+        }
+      }
+
+      // If reached 10 specs, automatically advance to price
+      if (session.data.specs.length >= 10) {
+        await this.promptWizardPrice(chatId);
+      } else {
+        await this.promptWizardSpecs(chatId);
+      }
+      return;
+    }
+
+    // 5. Price Input (Manual Only)
     if (session.step === 'price') {
       const num = parseInt(text.replace(/[^\d]/g, ''), 10);
       if (isNaN(num) || num <= 0) {
-        await this.callApi('sendMessage', {
-          chat_id: chatId,
-          text: '⚠️ Вкажіть коректне число для ціни (наприклад: <code>1899</code>):',
-          parse_mode: 'HTML'
+        await this.safeEditOrSend(chatId, session.cardMsgId, '⚠️ Вкажіть коректне число для ціни (наприклад: <code>1899</code>):', {
+          reply_markup: {
+            inline_keyboard: [[{ text: '❌ Скасувати', callback_data: 'wiz_cancel' }]]
+          }
         });
         return;
       }
@@ -2039,10 +2164,10 @@ export class TelegramBotService {
       return;
     }
 
-    // 4. Custom Category Input
+    // 6. Custom Category Input
     if (session.step === 'custom_category') {
       if (!text) {
-        await this.callApi('sendMessage', { chat_id: chatId, text: '⚠️ Будь ласка, введіть назву категорії:' });
+        await this.safeEditOrSend(chatId, session.cardMsgId, '⚠️ Будь ласка, введіть назву категорії:');
         return;
       }
       session.data.category = text;
@@ -2051,10 +2176,10 @@ export class TelegramBotService {
       return;
     }
 
-    // 5. Custom Color Input
+    // 7. Custom Color Input
     if (session.step === 'custom_color') {
       if (!text) {
-        await this.callApi('sendMessage', { chat_id: chatId, text: '⚠️ Будь ласка, введіть назву кольору:' });
+        await this.safeEditOrSend(chatId, session.cardMsgId, '⚠️ Будь ласка, введіть назву кольору:');
         return;
       }
       if (!session.data.colors) session.data.colors = [];
@@ -2065,7 +2190,7 @@ export class TelegramBotService {
       return;
     }
 
-    // 6. Main Catalog Photo Input (Only 1 Photo)
+    // 8. Main Catalog Photo Input (Only 1 Photo)
     if (session.step === 'catalog_photo') {
       let photoUrl = '';
       if (msg.photo && msg.photo.length > 0) {
@@ -2080,25 +2205,23 @@ export class TelegramBotService {
 
       if (photoUrl) {
         session.data.img = photoUrl;
-        await this.callApi('sendMessage', {
-          chat_id: chatId,
-          text: `✅ <b>Головне фото каталогу збережено!</b>\n\nТепер додамо фотографії для кожного обраного кольору.`,
-          parse_mode: 'HTML'
-        });
-
         session.data.currentColorIndex = 0;
         await this.promptWizardColorPhotos(chatId);
         return;
       }
 
-      await this.callApi('sendMessage', {
-        chat_id: chatId,
-        text: `⚠️ Будь ласка, надішліть фото файлом/зображенням або посиланням на картинку (або скористайтеся кнопкою «Використати авто-фото»).`
+      await this.safeEditOrSend(chatId, session.cardMsgId, `⚠️ Будь ласка, надішліть фото зображенням або посиланням на картинку:`, {
+        reply_markup: {
+          inline_keyboard: [
+            [{ text: '🖼 Використати авто-фото', callback_data: 'wiz_cat_photo_auto' }],
+            [{ text: '❌ Скасувати', callback_data: 'wiz_cancel' }]
+          ]
+        }
       });
       return;
     }
 
-    // 7. Color Photos Input (Unlimited Photos per Color)
+    // 9. Color Photos Input (Unlimited Photos per Color)
     if (session.step === 'color_photos') {
       let photoUrl = '';
       if (msg.photo && msg.photo.length > 0) {
@@ -2129,43 +2252,26 @@ export class TelegramBotService {
           }
         }
 
-        const totalForColor = session.data.color_images[curColor].gallery.length;
-        const isFirst = totalForColor === 1;
-
-        const infoMsg = isFirst
-          ? `🌟 <b>Головне фото для кольору «${curColor}» збережено!</b>\n\nТепер ви можете надіслати <b>додаткові фото</b> для галереї цього кольору (можна додавати необмежено), або натиснути кнопку переходу до наступного кроку:`
-          : `📸 <b>Фото #${totalForColor} додано до галереї кольору «${curColor}»!</b>\n\nМожна надіслати ще фото або перейти далі:`;
-
-        await this.callApi('sendMessage', {
-          chat_id: chatId,
-          text: infoMsg,
-          parse_mode: 'HTML',
-          reply_markup: {
-            inline_keyboard: [
-              [{ text: `➡️ Завершити фото для «${curColor}» (${totalForColor} фото) →`, callback_data: 'wiz_color_done_photos' }],
-              [{ text: '❌ Скасувати', callback_data: 'wiz_cancel' }]
-            ]
-          }
-        });
+        await this.promptWizardColorPhotos(chatId);
         return;
       }
 
-      await this.callApi('sendMessage', {
-        chat_id: chatId,
-        text: `⚠️ Будь ласка, завантажте фото або надішліть посилання на зображення (або натисніть кнопку «Завершити» / «Авто-фото»).`
+      await this.safeEditOrSend(chatId, session.cardMsgId, `⚠️ Будь ласка, завантажте фото або скористайтеся кнопками нижче:`, {
+        reply_markup: {
+          inline_keyboard: [
+            [{ text: '➡️ Завершити фото', callback_data: 'wiz_color_done_photos' }],
+            [{ text: '❌ Скасувати', callback_data: 'wiz_cancel' }]
+          ]
+        }
       });
       return;
     }
 
-    // 8. Quantity Input
+    // 10. Quantity Input
     if (session.step === 'color_quantities') {
       const num = parseInt(text.replace(/[^\d]/g, ''), 10);
       if (isNaN(num) || num < 0) {
-        await this.callApi('sendMessage', {
-          chat_id: chatId,
-          text: '⚠️ Будь ласка, введіть число залишку (наприклад: <code>10</code>):',
-          parse_mode: 'HTML'
-        });
+        await this.safeEditOrSend(chatId, session.cardMsgId, '⚠️ Будь ласка, введіть число залишку (наприклад: <code>10</code>):');
         return;
       }
 
@@ -2189,16 +2295,69 @@ export class TelegramBotService {
     if (!session) return;
     session.step = 'title';
 
-    await this.callApi('sendMessage', {
-      chat_id: chatId,
-      text: `🏷 <b>Бренд:</b> ${session.data.brand}\n\n` +
-        `<b>Крок 2/7: Введіть назву / модель товару:</b>\n\n` +
-        `<i>Приклад: R1 Pro Max Wireless, F75 Tri-Mode Gasket, Mad Major 8K</i>\n\n` +
-        `Надішліть назву наступним повідомленням у чат:`,
-      parse_mode: 'HTML',
+    await this.safeEditOrSend(chatId, session.cardMsgId, `🏷 <b>Бренд:</b> ${session.data.brand}\n\n` +
+      `<b>Крок 2/8: Введіть назву / модель товару:</b>\n\n` +
+      `<i>Приклад: R1 Pro Max Wireless, F75 Tri-Mode Gasket, Mad Major 8K</i>\n\n` +
+      `Надішліть назву наступним повідомленням у чат:`, {
       reply_markup: {
         inline_keyboard: [[{ text: '❌ Скасувати', callback_data: 'wiz_cancel' }]]
       }
+    });
+  }
+
+  async promptWizardDescription(chatId) {
+    const session = this.adminSessions[chatId];
+    if (!session) return;
+    session.step = 'description';
+
+    const fullTitle = `${session.data.brand} ${session.data.title}`.trim();
+    await this.safeEditOrSend(chatId, session.cardMsgId, `🏷 <b>Товар:</b> ${fullTitle}\n\n` +
+      `<b>Крок 3/8: Введіть опис товару:</b>\n\n` +
+      `Надішліть текст опису або натисніть «⏩ Пропустити» (буде згенеровано стандартний гарний опис):`, {
+      reply_markup: {
+        inline_keyboard: [
+          [{ text: '⏩ Пропустити (Створити авто-опис)', callback_data: 'wiz_desc_skip' }],
+          [{ text: '❌ Скасувати', callback_data: 'wiz_cancel' }]
+        ]
+      }
+    });
+  }
+
+  async promptWizardSpecs(chatId) {
+    const session = this.adminSessions[chatId];
+    if (!session) return;
+    session.step = 'specs';
+
+    const fullTitle = `${session.data.brand} ${session.data.title}`.trim();
+    const specs = session.data.specs || [];
+
+    let specsListFormatted = '';
+    if (specs.length > 0) {
+      specsListFormatted = `\n📋 <b>Вже додані характеристики (${specs.length}/10):</b>\n` +
+        specs.map((s, idx) => `  ${idx + 1}. <b>${s.key}:</b> ${s.value}`).join('\n') + `\n`;
+    }
+
+    const text = `🏷 <b>Товар:</b> ${fullTitle}\n\n` +
+      `<b>Крок 4/8: Характеристики та переваги товару (до 10 шт.):</b>\n\n` +
+      `<i>Формат введення (кожна з нового рядка або по одній):</i>\n` +
+      `<code>Сенсор (Paw3395)</code>\n` +
+      `<code>Вага (49г)</code>\n` +
+      `<code>Перемикачі (Huano Blue Shell Pink Dot)</code>\n` +
+      `<code>Підключення (2.4G / Bluetooth / Type-C)</code>\n` +
+      `${specsListFormatted}\n` +
+      `<i>Надішліть характеристики текстом, команду <code>/done</code> або натисніть кнопку:</i>`;
+
+    const buttons = [];
+    if (specs.length > 0) {
+      buttons.push([{ text: `✅ Зберегти характеристики (${specs.length}) та далі →`, callback_data: 'wiz_specs_done' }]);
+      buttons.push([{ text: '🗑 Очистити характеристики', callback_data: 'wiz_specs_clear' }]);
+    } else {
+      buttons.push([{ text: '⏩ Встановити стандартні характеристики', callback_data: 'wiz_specs_skip' }]);
+    }
+    buttons.push([{ text: '❌ Скасувати', callback_data: 'wiz_cancel' }]);
+
+    await this.safeEditOrSend(chatId, session.cardMsgId, text, {
+      reply_markup: { inline_keyboard: buttons }
     });
   }
 
@@ -2207,20 +2366,13 @@ export class TelegramBotService {
     if (!session) return;
     session.step = 'price';
 
-    const priceButtons = [
-      [{ text: '899 ₴', callback_data: 'wiz_price:899' }, { text: '1299 ₴', callback_data: 'wiz_price:1299' }, { text: '1599 ₴', callback_data: 'wiz_price:1599' }],
-      [{ text: '1999 ₴', callback_data: 'wiz_price:1999' }, { text: '2499 ₴', callback_data: 'wiz_price:2499' }, { text: '2899 ₴', callback_data: 'wiz_price:2899' }],
-      [{ text: '3299 ₴', callback_data: 'wiz_price:3299' }, { text: '3899 ₴', callback_data: 'wiz_price:3899' }, { text: '4499 ₴', callback_data: 'wiz_price:4499' }],
-      [{ text: '❌ Скасувати', callback_data: 'wiz_cancel' }]
-    ];
-
-    await this.callApi('sendMessage', {
-      chat_id: chatId,
-      text: `🏷 <b>Товар:</b> ${session.data.brand} ${session.data.title}\n\n` +
-        `<b>Крок 3/7: Вкажіть ціну товару (у гривнях):</b>\n\n` +
-        `<i>Оберіть швидку кнопку або введіть число текстом (наприклад: <code>1750</code>):</i>`,
-      parse_mode: 'HTML',
-      reply_markup: { inline_keyboard: priceButtons }
+    const fullTitle = `${session.data.brand} ${session.data.title}`.trim();
+    await this.safeEditOrSend(chatId, session.cardMsgId, `🏷 <b>Товар:</b> ${fullTitle}\n\n` +
+      `<b>Крок 5/8: Вкажіть ціну товару (у гривнях):</b>\n\n` +
+      `<i>Введіть число текстом (наприклад: <code>1499</code>):</i>`, {
+      reply_markup: {
+        inline_keyboard: [[{ text: '❌ Скасувати', callback_data: 'wiz_cancel' }]]
+      }
     });
   }
 
@@ -2237,12 +2389,9 @@ export class TelegramBotService {
       [{ text: '❌ Скасувати', callback_data: 'wiz_cancel' }]
     ];
 
-    await this.callApi('sendMessage', {
-      chat_id: chatId,
-      text: `💰 <b>Ціна:</b> ${session.data.price} ₴\n\n` +
-        `<b>Крок 4/7: Оберіть категорію товару:</b>\n` +
-        `<i>Категорія одразу відобразиться у фільтрах вітрини магазину:</i>`,
-      parse_mode: 'HTML',
+    await this.safeEditOrSend(chatId, session.cardMsgId, `💰 <b>Ціна:</b> ${session.data.price} ₴\n\n` +
+      `<b>Крок 6/8: Оберіть категорію товару:</b>\n` +
+      `<i>Категорія одразу відобразиться у фільтрах вітрини магазину:</i>`, {
       reply_markup: { inline_keyboard: catButtons }
     });
   }
@@ -2296,13 +2445,10 @@ export class TelegramBotService {
 
     const selectedText = selected.length > 0 ? selected.join(', ') : 'Поки не обрано (натисніть на кнопки кольорів)';
 
-    await this.callApi('sendMessage', {
-      chat_id: chatId,
-      text: `🗂 <b>Категорія:</b> ${session.data.category}\n\n` +
-        `<b>Крок 5/7: Оберіть кольори товару (можна вибрати одразу декілька в одній панелі):</b>\n\n` +
-        `Обрані: <b>${selectedText}</b>\n\n` +
-        `<i>Натискайте на кнопки потрібних кольорів, щоб увімкнути/вимкнути галочку [✅]:</i>`,
-      parse_mode: 'HTML',
+    await this.safeEditOrSend(chatId, session.cardMsgId, `🗂 <b>Категорія:</b> ${session.data.category}\n\n` +
+      `<b>Крок 7/8: Оберіть кольори товару (однією плашкою з галочками):</b>\n\n` +
+      `Обрані: <b>${selectedText}</b>\n\n` +
+      `<i>Натискайте на кнопки потрібних кольорів, щоб увімкнути/вимкнути галочку [✅]:</i>`, {
       reply_markup: { inline_keyboard: keyboard }
     });
   }
@@ -2318,12 +2464,9 @@ export class TelegramBotService {
       [{ text: '❌ Скасувати', callback_data: 'wiz_cancel' }]
     ];
 
-    await this.callApi('sendMessage', {
-      chat_id: chatId,
-      text: `📸 <b>Крок 6/7: Головне фото для каталогу (лише 1 фото)</b>\n\n` +
-        `Надішліть <b>1 основне фото</b>, яке буде відображатися на вітрині та в списку каталогу (надішліть файл фото або посилання на зображення):\n\n` +
-        `<i>Це загальне фото товару. На наступному кроці ви зможете завантажити окремі фото для кожного обраного кольору.</i>`,
-      parse_mode: 'HTML',
+    await this.safeEditOrSend(chatId, session.cardMsgId, `📸 <b>Крок 8/8: Головне фото для каталогу (лише 1 фото)</b>\n\n` +
+      `Надішліть <b>1 основне фото</b>, яке буде відображатися на вітрині (надішліть файл фото або посилання на зображення):\n\n` +
+      `<i>Це загальне фото товару. На наступному кроці ви зможете додати окремі фото для кожного обраного кольору.</i>`, {
       reply_markup: { inline_keyboard: buttons }
     });
   }
@@ -2354,17 +2497,14 @@ export class TelegramBotService {
     buttons.push([{ text: `⏭ Пропустити фото для всіх кольорів →`, callback_data: 'wiz_color_photo_skip_all' }]);
     buttons.push([{ text: '❌ Скасувати', callback_data: 'wiz_cancel' }]);
 
-    let descText = `🎨 <b>Крок 7/7 (Колір ${colorIndexHuman}/${colors.length}): Фотографії для кольору «${curColor}»</b>\n\n` +
+    const descText = `🎨 <b>Фотографії для кольору «${curColor}» (${colorIndexHuman}/${colors.length})</b>\n\n` +
       `Надішліть фотографії для кольору <b>${curColor}</b>:\n` +
-      `• <b>1-ше фото</b> автоматично стане <b>головним для кольору «${curColor}»</b> (показується при виборі цього кольору на сайті).\n` +
-      `• <b>Усі наступні фото</b> будуть додані до галереї цього кольору. Ви можете надіслати <b>необмежену кількість фото</b>!\n\n` +
+      `• <b>1-ше фото</b> автоматично стане <b>головним для кольору «${curColor}»</b>.\n` +
+      `• <b>Усі наступні фото</b> будуть додані до галереї цього кольору (необмежено).\n\n` +
       `📷 <i>Завантажено для «${curColor}»: <b>${uploadedCount} фото</b>${uploadedCount > 0 ? ' (1 головне + ' + (uploadedCount - 1) + ' додаткових)' : ''}</i>\n\n` +
-      `<i>Надсилайте фото по одному або посиланнями. Після додавання потрібної кількості натисніть кнопку переходу:</i>`;
+      `<i>Надсилайте фото по одному або посиланнями. Після додавання натисніть кнопку переходу:</i>`;
 
-    await this.callApi('sendMessage', {
-      chat_id: chatId,
-      text: descText,
-      parse_mode: 'HTML',
+    await this.safeEditOrSend(chatId, session.cardMsgId, descText, {
       reply_markup: { inline_keyboard: buttons }
     });
   }
@@ -2390,11 +2530,8 @@ export class TelegramBotService {
       [{ text: '❌ Скасувати', callback_data: 'wiz_cancel' }]
     ];
 
-    await this.callApi('sendMessage', {
-      chat_id: chatId,
-      text: `📦 <b>Склад (${qtyIndexHuman}/${colors.length}): Кількість для кольору «${curColor}»</b>\n\n` +
-        `Оберіть кількість одиниць на складі для кольору <b>${curColor}</b> або надішліть число текстом:`,
-      parse_mode: 'HTML',
+    await this.safeEditOrSend(chatId, session.cardMsgId, `📦 <b>Склад (${qtyIndexHuman}/${colors.length}): Кількість для кольору «${curColor}»</b>\n\n` +
+      `Оберіть кількість одиниць на складі для кольору <b>${curColor}</b> або надішліть число текстом:`, {
       reply_markup: { inline_keyboard: buttons }
     });
   }
@@ -2416,11 +2553,19 @@ export class TelegramBotService {
       colorSummary += `  • <b>${c}</b>: ${q} шт. (${photoInfo})\n`;
     });
 
+    let specsSummary = '';
+    if (d.specs && d.specs.length > 0) {
+      specsSummary = `\n📋 <b>Характеристики (${d.specs.length}):</b>\n` +
+        d.specs.map(s => `  • <b>${s.key}:</b> ${s.value}`).join('\n') + `\n`;
+    }
+
     const text = `✨ <b>ПЕРЕВІРКА НОВОГО ТОВАРУ</b> ✨\n\n` +
       `🏷 <b>Бренд:</b> ${d.brand}\n` +
       `🎮 <b>Назва:</b> <b>${d.title}</b>\n` +
       `💰 <b>Ціна:</b> <b>${d.price} ₴</b> (стара ціна: ${Math.round(d.price * 1.15)} ₴)\n` +
       `🗂 <b>Категорія:</b> ${d.category}\n` +
+      `📝 <b>Опис:</b> <i>${(d.description || '').slice(0, 100)}${(d.description || '').length > 100 ? '...' : ''}</i>\n` +
+      `${specsSummary}` +
       `🎨 <b>Варіанти кольорів, фото та склад:</b>\n${colorSummary}\n` +
       `📦 <b>Загальний залишок:</b> <b>${totalQty} шт.</b>\n\n` +
       `<i>Після підтвердження товар миттєво з'явиться на сайті MILIPSTORE та у Telegram-боті!</i>`;
@@ -2430,10 +2575,7 @@ export class TelegramBotService {
       [{ text: '❌ Скасувати створення', callback_data: 'wiz_cancel' }]
     ];
 
-    await this.callApi('sendMessage', {
-      chat_id: chatId,
-      text,
-      parse_mode: 'HTML',
+    await this.safeEditOrSend(chatId, session.cardMsgId, text, {
       reply_markup: { inline_keyboard: buttons }
     });
   }
@@ -2442,6 +2584,7 @@ export class TelegramBotService {
     const session = this.adminSessions[chatId];
     if (!session) return;
     const d = session.data;
+    const cardId = session.cardMsgId;
     delete this.adminSessions[chatId];
 
     const brand = d.brand || 'MILIP';
@@ -2467,7 +2610,6 @@ export class TelegramBotService {
       const cData = d.color_images?.[c];
       if (cData && cData.main) {
         const rawGallery = Array.isArray(cData.gallery) && cData.gallery.length > 0 ? cData.gallery : [cData.main];
-        // Ensure main photo is first and no duplicates in color gallery
         const cleanGallery = Array.from(new Set([cData.main, ...rawGallery])).filter(Boolean);
         color_images[c] = {
           main: cData.main,
@@ -2485,7 +2627,7 @@ export class TelegramBotService {
     // Main catalog photo
     const mainCatalogImg = d.img || color_images[colors[0]]?.main || defaultImg;
 
-    // Overall product gallery (deduplicated across all colors & catalog photo)
+    // Overall product gallery
     const allGalleryPhotos = [mainCatalogImg];
     colors.forEach(c => {
       if (color_images[c]?.main) allGalleryPhotos.push(color_images[c].main);
@@ -2508,10 +2650,10 @@ export class TelegramBotService {
       category,
       quantity: totalQuantity,
       colors: colors.join(', '),
-      description: `${fullTitle} — якісний ігровий девайс з офіційною гарантією від MILIPSTORE.`,
+      description: d.description || `${fullTitle} — якісний ігровий девайс з офіційною гарантією від MILIPSTORE.`,
       img: mainCatalogImg,
       gallery: finalProductGallery.length ? finalProductGallery : [mainCatalogImg],
-      specs: this.getDefaultSpecs(category),
+      specs: d.specs && d.specs.length > 0 ? d.specs : this.getDefaultSpecs(category),
       color_images,
       color_quantities,
       sku: `${brand.toUpperCase().slice(0, 3)}-${title.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8)}`,
@@ -2527,16 +2669,13 @@ export class TelegramBotService {
 
     const appUrl = (process.env.APP_URL || 'https://m1lipstore.onrender.com').replace(/\/$/, '');
 
-    await this.callApi('sendMessage', {
-      chat_id: chatId,
-      text: `🎉 <b>Товар успішно створено та опубліковано!</b>\n\n` +
-        `🏷 <b>${newProduct.title}</b>\n` +
-        `💰 Ціна: <b>${newProduct.price} ₴</b>\n` +
-        `🗂 Категорія: <b>${newProduct.category}</b>\n` +
-        `📦 Залишок: <b>${newProduct.quantity} шт.</b> (${colors.join(', ')})\n` +
-        `🆔 Артикул: <code>${newProduct.sku}</code>\n\n` +
-        `Товар уже доступний у каталозі магазину та готовий до замовлень!`,
-      parse_mode: 'HTML',
+    await this.safeEditOrSend(chatId, cardId, `🎉 <b>Товар успішно створено та опубліковано!</b>\n\n` +
+      `🏷 <b>${newProduct.title}</b>\n` +
+      `💰 Ціна: <b>${newProduct.price} ₴</b>\n` +
+      `🗂 Категорія: <b>${newProduct.category}</b>\n` +
+      `📦 Залишок: <b>${newProduct.quantity} шт.</b> (${colors.join(', ')})\n` +
+      `🆔 Артикул: <code>${newProduct.sku}</code>\n\n` +
+      `Товар уже доступний у каталозі магазину та готовий до замовлень!`, {
       reply_markup: {
         inline_keyboard: [
           [{ text: '🚀 Відкрити вітрину магазину', web_app: { url: appUrl } }],
