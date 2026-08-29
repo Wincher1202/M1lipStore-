@@ -2874,14 +2874,6 @@ export class TelegramBotService {
 
     const buttons = [];
 
-    // Quick set row
-    buttons.push([
-      { text: `+5 шт. (${curColor})`, callback_data: 'wiz_qty_set:5' },
-      { text: `+10 шт.`, callback_data: 'wiz_qty_set:10' },
-      { text: `+20 шт.`, callback_data: 'wiz_qty_set:20' },
-      { text: `+50 шт.`, callback_data: 'wiz_qty_set:50' }
-    ]);
-
     // Color selector buttons if > 1 color
     if (colors.length > 1) {
       const colRow = [];
@@ -2913,7 +2905,6 @@ export class TelegramBotService {
       `🎯 Зараз обрано для введення: <b>«${curColor}»</b>\n\n` +
       `💡 <b>Як вказати залишок:</b>\n` +
       `• Надішліть число текстом у чат (наприклад: <code>15</code> або <code>10 20 15</code> для всіх кольорів одразу).\n` +
-      `• Або натисніть кнопку швидкого залишку вище.\n` +
       `• Або натисніть <b>«⏩ Пропустити (Всі кольори в наявності)»</b> — всі кольори будуть увімкнені та активні на сайті!\n` +
       `• Після завершення натисніть <b>«✅ Підтвердити склад та перейти далі ➡️»</b>:`;
 
