@@ -2230,33 +2230,47 @@ export class TelegramBotService {
       return;
     }
 
-    // STEP 10: QUANTITIES (Manual text input with Skip option)
-    if (data === 'wiz_qty_skip') {
-      const curColorQty = colors[session.data.currentQtyIndex] || 'Black';
+    // STEP 10: QUANTITIES (Interactive warehouse panel, quick buttons, Skip, and Confirm)
+    if (data === 'wiz_qty_skip' || data === 'wiz_qty_skip_all') {
       if (!session.data.color_quantities) session.data.color_quantities = {};
-      session.data.color_quantities[curColorQty] = 0;
-
-      session.data.currentQtyIndex++;
-      if (session.data.currentQtyIndex < colors.length) {
-        await this.promptWizardColorQuantity(chatId);
-      } else {
-        await this.showWizardConfirm(chatId);
-      }
+      colors.forEach(c => {
+        if (session.data.color_quantities[c] === undefined) {
+          session.data.color_quantities[c] = 25;
+        }
+      });
+      await this.showWizardConfirm(chatId);
       return;
     }
 
-    if (data.startsWith('wiz_qty:')) {
-      const qtyVal = parseInt(data.replace('wiz_qty:', '').trim(), 10) || 0;
-      const curColorQty = colors[session.data.currentQtyIndex] || 'Black';
+    if (data === 'wiz_qty_confirm_done') {
       if (!session.data.color_quantities) session.data.color_quantities = {};
-      session.data.color_quantities[curColorQty] = qtyVal;
+      colors.forEach(c => {
+        if (session.data.color_quantities[c] === undefined) {
+          session.data.color_quantities[c] = 25;
+        }
+      });
+      await this.showWizardConfirm(chatId);
+      return;
+    }
 
-      session.data.currentQtyIndex++;
-      if (session.data.currentQtyIndex < colors.length) {
-        await this.promptWizardColorQuantity(chatId);
-      } else {
-        await this.showWizardConfirm(chatId);
+    if (data.startsWith('wiz_qty_sel:')) {
+      const selectedColor = data.replace('wiz_qty_sel:', '').trim();
+      session.data.activeQtyColor = selectedColor;
+      await this.promptWizardColorQuantity(chatId);
+      return;
+    }
+
+    if (data.startsWith('wiz_qty_set:') || data.startsWith('wiz_qty:')) {
+      const qtyVal = parseInt(data.replace(/wiz_qty_set:|wiz_qty:/, '').trim(), 10) || 10;
+      const targetColor = session.data.activeQtyColor || colors[0] || 'Black';
+      if (!session.data.color_quantities) session.data.color_quantities = {};
+      session.data.color_quantities[targetColor] = qtyVal;
+
+      const curIdx = colors.indexOf(targetColor);
+      if (curIdx !== -1 && curIdx + 1 < colors.length) {
+        session.data.activeQtyColor = colors[curIdx + 1];
       }
+      await this.promptWizardColorQuantity(chatId);
       return;
     }
 
@@ -2475,25 +2489,46 @@ export class TelegramBotService {
       return;
     }
 
-    // 10. Quantity Input
+    // 10. Quantity Input (Unified warehouse input)
     if (session.step === 'color_quantities') {
-      const num = parseInt(text.replace(/[^\d]/g, ''), 10);
-      if (isNaN(num) || num < 0) {
-        await this.safeEditOrSend(chatId, session.cardMsgId, '⚠️ Будь ласка, введіть число залишку (наприклад: <code>10</code>):');
+      const colors = (session.data.colors && session.data.colors.length) ? session.data.colors : ['Black'];
+      if (!session.data.color_quantities) session.data.color_quantities = {};
+
+      if (text.toLowerCase() === '/done' || text.toLowerCase() === 'готово' || text.toLowerCase() === 'далі') {
+        colors.forEach(c => {
+          if (session.data.color_quantities[c] === undefined) {
+            session.data.color_quantities[c] = 25;
+          }
+        });
+        await this.showWizardConfirm(chatId);
         return;
       }
 
-      const colors = session.data.colors || ['Black'];
-      const curColor = colors[session.data.currentQtyIndex] || 'Black';
-      if (!session.data.color_quantities) session.data.color_quantities = {};
-      session.data.color_quantities[curColor] = num;
+      // Check if user sent multiple numbers separated by space or comma (e.g. "10 20 15")
+      const nums = text.split(/[\s,]+/).map(n => parseInt(n.replace(/[^\d]/g, ''), 10)).filter(n => !isNaN(n) && n >= 0);
 
-      session.data.currentQtyIndex++;
-      if (session.data.currentQtyIndex < colors.length) {
+      if (nums.length > 1) {
+        nums.forEach((val, idx) => {
+          if (idx < colors.length) {
+            session.data.color_quantities[colors[idx]] = val;
+          }
+        });
         await this.promptWizardColorQuantity(chatId);
-      } else {
-        await this.showWizardConfirm(chatId);
+        return;
+      } else if (nums.length === 1) {
+        const val = nums[0];
+        const targetColor = session.data.activeQtyColor || colors[0] || 'Black';
+        session.data.color_quantities[targetColor] = val;
+
+        const curIdx = colors.indexOf(targetColor);
+        if (curIdx !== -1 && curIdx + 1 < colors.length) {
+          session.data.activeQtyColor = colors[curIdx + 1];
+        }
+        await this.promptWizardColorQuantity(chatId);
+        return;
       }
+
+      await this.safeEditOrSend(chatId, session.cardMsgId, '⚠️ Будь ласка, введіть число залишку (наприклад: <code>15</code> або <code>10 20</code>):');
       return;
     }
   }
@@ -2738,23 +2773,69 @@ export class TelegramBotService {
     if (!session) return;
     session.step = 'color_quantities';
 
-    const colors = session.data.colors || ['Black'];
-    if (colors.length === 0 || session.data.currentQtyIndex >= colors.length) {
-      await this.showWizardConfirm(chatId);
-      return;
+    const colors = (session.data.colors && session.data.colors.length) ? session.data.colors : ['Black'];
+    if (!session.data.color_quantities) session.data.color_quantities = {};
+
+    if (!session.data.activeQtyColor || !colors.includes(session.data.activeQtyColor)) {
+      session.data.activeQtyColor = colors[0];
+    }
+    const curColor = session.data.activeQtyColor;
+
+    let colorListFormatted = '';
+    colors.forEach((c, idx) => {
+      const qVal = session.data.color_quantities[c];
+      const isSelected = c === curColor;
+      const statusStr = (qVal !== undefined && qVal !== null) ? `<b>${qVal} шт.</b>` : '<i>В наявності (без точного обліку)</i>';
+      const pointer = isSelected ? '👉 ' : '   ';
+      colorListFormatted += `${pointer}${idx + 1}. <b>${c}</b>: ${statusStr}\n`;
+    });
+
+    const buttons = [];
+
+    // Quick set row
+    buttons.push([
+      { text: `+5 шт. (${curColor})`, callback_data: 'wiz_qty_set:5' },
+      { text: `+10 шт.`, callback_data: 'wiz_qty_set:10' },
+      { text: `+20 шт.`, callback_data: 'wiz_qty_set:20' },
+      { text: `+50 шт.`, callback_data: 'wiz_qty_set:50' }
+    ]);
+
+    // Color selector buttons if > 1 color
+    if (colors.length > 1) {
+      const colRow = [];
+      colors.forEach(c => {
+        const isSel = c === curColor;
+        const qVal = session.data.color_quantities[c];
+        const qBadge = qVal !== undefined ? ` (${qVal})` : '';
+        colRow.push({
+          text: isSel ? `🔘 ${c}${qBadge}` : `${c}${qBadge}`,
+          callback_data: `wiz_qty_sel:${c}`
+        });
+      });
+      buttons.push(colRow);
     }
 
-    const curColor = colors[session.data.currentQtyIndex];
-    const qtyIndexHuman = session.data.currentQtyIndex + 1;
+    // Direct actions
+    buttons.push([
+      { text: '⏩ Пропустити (Всі кольори в наявності)', callback_data: 'wiz_qty_skip_all' }
+    ]);
+    buttons.push([
+      { text: '✅ Підтвердити склад та перейти далі ➡️', callback_data: 'wiz_qty_confirm_done' }
+    ]);
+    buttons.push([
+      { text: '❌ Скасувати створення', callback_data: 'wiz_cancel' }
+    ]);
 
-    const buttons = [
-      [{ text: '⏩ Пропустити (встановити 0 шт.)', callback_data: 'wiz_qty_skip' }],
-      [{ text: '❌ Скасувати', callback_data: 'wiz_cancel' }]
-    ];
+    const text = `📦 <b>Крок 8/8: Склад та наявність для кольорів</b>\n\n` +
+      `📋 <b>Поточна наявність за кольорами:</b>\n${colorListFormatted}\n` +
+      `🎯 Зараз обрано для введення: <b>«${curColor}»</b>\n\n` +
+      `💡 <b>Як вказати залишок:</b>\n` +
+      `• Надішліть число текстом у чат (наприклад: <code>15</code> або <code>10 20 15</code> для всіх кольорів одразу).\n` +
+      `• Або натисніть кнопку швидкого залишку вище.\n` +
+      `• Або натисніть <b>«⏩ Пропустити (Всі кольори в наявності)»</b> — всі кольори будуть увімкнені та активні на сайті!\n` +
+      `• Після завершення натисніть <b>«✅ Підтвердити склад та перейти далі ➡️»</b>:`;
 
-    await this.safeEditOrSend(chatId, session.cardMsgId, `📦 <b>Склад (${qtyIndexHuman}/${colors.length}): Кількість для кольору «${curColor}»</b>\n\n` +
-      `Надішліть кількість одиниць на складі для кольору <b>${curColor}</b> числом текстом у чат (наприклад: <code>15</code>)\n` +
-      `або натисніть кнопку «⏩ Пропустити» (буде встановлено 0 шт.):`, {
+    await this.safeEditOrSend(chatId, session.cardMsgId, text, {
       reply_markup: { inline_keyboard: buttons }
     });
   }
@@ -2766,14 +2847,17 @@ export class TelegramBotService {
 
     const d = session.data;
     const colorsList = (d.colors && d.colors.length) ? d.colors : ['Black'];
-    const totalQty = Object.values(d.color_quantities || {}).reduce((a, b) => a + b, 0) || d.quantity || 10;
+    let totalQty = 0;
     
     let colorSummary = '';
     colorsList.forEach(c => {
-      const q = d.color_quantities?.[c] ?? Math.round(totalQty / colorsList.length);
+      const rawQ = d.color_quantities?.[c];
+      const qVal = (rawQ !== undefined && rawQ !== null) ? Number(rawQ) : 25;
+      totalQty += qVal;
+      const qDisplay = (rawQ !== undefined && rawQ !== null) ? `${rawQ} шт.` : 'В наявності (25 шт.)';
       const photoCount = (d.color_images?.[c]?.gallery || []).length || (d.color_images?.[c]?.main ? 1 : 0);
       const photoInfo = photoCount > 0 ? `📷 ${photoCount} фото` : '⚙️ Авто-фото';
-      colorSummary += `  • <b>${c}</b>: ${q} шт. (${photoInfo})\n`;
+      colorSummary += `  • <b>${c}</b>: ${qDisplay} (${photoInfo})\n`;
     });
 
     let specsSummary = '';
@@ -2817,13 +2901,15 @@ export class TelegramBotService {
     const category = d.category || 'Аксесуари';
     const colors = (d.colors && d.colors.length) ? d.colors : ['Black'];
     
-    // Fill color quantities
+    // Fill color quantities ensuring none are 0 when unspecified/skipped
     const color_quantities = {};
     let totalQuantity = 0;
     colors.forEach(c => {
-      const q = d.color_quantities?.[c] !== undefined ? Number(d.color_quantities[c]) : 10;
-      color_quantities[c] = q;
-      totalQuantity += q;
+      const rawQ = d.color_quantities?.[c];
+      const q = (rawQ !== undefined && rawQ !== null && rawQ !== '') ? Number(rawQ) : 25;
+      const finalQ = q > 0 ? q : 25;
+      color_quantities[c] = finalQ;
+      totalQuantity += finalQ;
     });
 
     // Build deduplicated color images structure
@@ -2862,7 +2948,10 @@ export class TelegramBotService {
     const finalProductGallery = Array.from(new Set(allGalleryPhotos)).filter(Boolean);
 
     const fullTitle = `${brand} ${title}`;
-    const slugId = `prod-${brand.toLowerCase().replace(/[^a-z0-9]/g, '')}-${title.toLowerCase().replace(/[^a-z0-9]/g, '')}-${Date.now().toString().slice(-4)}`;
+    const shortRand = Math.random().toString(36).slice(2, 6);
+    const shortTime = Date.now().toString(36).slice(-4);
+    const brandPrefix = (brand || 'p').toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 3) || 'p';
+    const slugId = `p_${brandPrefix}_${shortTime}_${shortRand}`;
 
     const newProduct = {
       id: slugId,
@@ -2880,8 +2969,8 @@ export class TelegramBotService {
       specs: d.specs && d.specs.length > 0 ? d.specs : this.getDefaultSpecs(category),
       color_images,
       color_quantities,
-      sku: `${brand.toUpperCase().slice(0, 3)}-${title.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8)}`,
-      featured: true,
+      sku: `${brand.toUpperCase().slice(0, 3)}-${Math.random().toString(36).slice(2, 7).toUpperCase()}`,
+      featured: false,
       popular: true,
       hidden: false,
       created_at: new Date().toISOString()
@@ -2902,8 +2991,10 @@ export class TelegramBotService {
       `Товар уже доступний у каталозі магазину та готовий до замовлень!`, {
       reply_markup: {
         inline_keyboard: [
+          [{ text: '✏️ Відкрити картку товару в боті', callback_data: `admin_prod_view:${newProduct.id}` }],
           [{ text: '🚀 Відкрити вітрину магазину', web_app: { url: appUrl } }],
           [{ text: '➕ Додати ще один товар', callback_data: 'add_new_product' }],
+          [{ text: '📦 До каталогу товарів', callback_data: 'admin_catalog' }],
           [{ text: '👑 До адмін-панелі', callback_data: 'admin_dashboard' }]
         ]
       }

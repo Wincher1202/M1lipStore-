@@ -3403,11 +3403,14 @@
                     }
 
                     if (rawColors && Object.keys(rawColors).length > 0) {
+                        const totalColorCount = Object.keys(rawColors).length;
                         parsedColors = Object.keys(rawColors).map(colorName => {
-                            let stockVal = 5;
-                            if (colorStocks[colorName] !== undefined) {
+                            let stockVal = 15;
+                            if (colorStocks[colorName] !== undefined && colorStocks[colorName] !== null) {
                                 stockVal = Number(colorStocks[colorName]);
-                            } else if (item.stock !== undefined) {
+                            } else if (item.quantity !== undefined && item.quantity !== null && Number(item.quantity) > 0) {
+                                stockVal = Math.max(1, Math.round(Number(item.quantity) / totalColorCount));
+                            } else if (item.stock !== undefined && item.stock !== null) {
                                 stockVal = Number(item.stock);
                             }
                             
@@ -3432,11 +3435,14 @@
                     
                     if (parsedColors.length === 0 && item.colors) {
                         let colorNames = typeof item.colors === 'string' ? item.colors.split(',').map(s => s.trim()) : item.colors;
+                        const totalColorCount = colorNames.length || 1;
                         parsedColors = colorNames.map(colorName => {
-                            let stockVal = 5;
-                            if (colorStocks[colorName] !== undefined) {
+                            let stockVal = 15;
+                            if (colorStocks[colorName] !== undefined && colorStocks[colorName] !== null) {
                                 stockVal = Number(colorStocks[colorName]);
-                            } else if (item.stock !== undefined) {
+                            } else if (item.quantity !== undefined && item.quantity !== null && Number(item.quantity) > 0) {
+                                stockVal = Math.max(1, Math.round(Number(item.quantity) / totalColorCount));
+                            } else if (item.stock !== undefined && item.stock !== null) {
                                 stockVal = Number(item.stock);
                             }
                             return { 

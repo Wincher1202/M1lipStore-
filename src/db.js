@@ -443,7 +443,23 @@ class Database {
   }
 
   getProductById(id) {
-    return this.data.products.find(p => p.id === id);
+    if (!id) return null;
+    const strId = String(id).trim();
+    // 1. Direct match
+    let found = this.data.products.find(p => p.id === strId);
+    if (found) return found;
+
+    // 2. Case-insensitive or trimmed match
+    found = this.data.products.find(p => p.id.toLowerCase() === strId.toLowerCase());
+    if (found) return found;
+
+    // 3. Prefix/suffix or SKU match
+    found = this.data.products.find(p => 
+      p.id.startsWith(strId) || 
+      strId.startsWith(p.id) || 
+      (p.sku && p.sku.toLowerCase() === strId.toLowerCase())
+    );
+    return found || null;
   }
 
   addProduct(product) {
