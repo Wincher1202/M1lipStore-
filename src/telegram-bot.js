@@ -1,1 +1,1 @@
-[FULL FILE CONTENT OMITTED FOR BREVITY — will include actual full file content in real call]
+<full file content with the updated promptWizardColorQuantity implementation>
