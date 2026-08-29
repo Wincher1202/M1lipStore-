@@ -3722,6 +3722,10 @@
             return `${Number(price).toLocaleString('uk-UA')} <span class="currency">₴</span>`;
         }
 
+        function formatPriceText(price) {
+            return `${Number(price).toLocaleString('uk-UA')} ₴`;
+        }
+
         function filterByCategory(category) {
             currentCategoryFilter = category;
             document.querySelectorAll('.filter-btn').forEach(btn => {
@@ -5301,16 +5305,17 @@
             if (!modal) return;
 
             const orderId = order.order_id || order.id;
-            const amtStr = formatPrice(order.total || 0);
+            const amtHtml = formatPrice(order.total || 0);
+            const amtText = formatPriceText(order.total || 0);
 
             const numEl = document.getElementById('pay-modal-order-number');
             if (numEl) numEl.innerText = `#${orderId}`;
 
             const cardAmtDisp = document.getElementById('pay-card-amount-disp');
-            if (cardAmtDisp) cardAmtDisp.innerText = amtStr;
+            if (cardAmtDisp) cardAmtDisp.innerHTML = amtHtml;
 
             const btnAmtLbl = document.getElementById('pay-btn-amount-label');
-            if (btnAmtLbl) btnAmtLbl.innerText = amtStr;
+            if (btnAmtLbl) btnAmtLbl.innerText = amtText;
 
             const statusMsg = document.getElementById('payment-status-message');
             if (statusMsg) {
@@ -5320,7 +5325,7 @@
 
             const tgBtnWrap = document.getElementById('tg-open-invoice-wrap');
             if (tgBtnWrap) {
-                tgBtnWrap.style.display = (order.invoice_link || tg?.openInvoice) ? 'block' : 'none';
+                tgBtnWrap.style.display = 'block';
             }
 
             modal.classList.add('active');
