@@ -145,7 +145,8 @@ export class TelegramBotService {
 
     return {
       keyboard,
-      resize_keyboard: true
+      resize_keyboard: true,
+      is_persistent: true
     };
   }
 
@@ -274,6 +275,12 @@ export class TelegramBotService {
       await this.callApi('sendMessage', {
         chat_id: chatId,
         text: welcomeText,
+        parse_mode: 'HTML',
+        reply_markup: this.getReplyKeyboard(from)
+      });
+      await this.callApi('sendMessage', {
+        chat_id: chatId,
+        text: `✨ Оберіть потрібну дію або відкрийте вітрину магазину:`,
         parse_mode: 'HTML',
         reply_markup: {
           inline_keyboard: [
