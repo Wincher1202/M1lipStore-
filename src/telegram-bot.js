@@ -10,6 +10,41 @@ class TelegramBotService {
     this.username = process.env.BOT_USERNAME || 'm1lipstore_bot';
     // Store wizard sessions in memory or db
     this.wizardSessions = {};
+    this.pollingStarted = false;
+
+    if (this.token) {
+      this.startPolling();
+    }
+  }
+
+  startPolling() {
+    if (this.pollingStarted) return;
+    this.pollingStarted = true;
+    console.log('[TelegramBot] Starting Telegram bot long polling...');
+    let offset = 0;
+
+    // Delete webhook to ensure getUpdates works
+    this.callApi('deleteWebhook', { drop_pending_updates: false }).catch(() => {});
+
+    const poll = async () => {
+      try {
+        const res = await fetch(`https://api.telegram.org/bot${this.token}/getUpdates?offset=${offset}&timeout=25`, {
+          method: 'GET'
+        });
+        const data = await res.json();
+        if (data.ok && Array.isArray(data.result)) {
+          for (const update of data.result) {
+            offset = update.update_id + 1;
+            await this.handleUpdate(update);
+          }
+        }
+      } catch (e) {
+        // silent
+      }
+      setTimeout(poll, 1500);
+    };
+
+    poll();
   }
 
   getBotUsername() {
