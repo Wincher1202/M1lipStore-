@@ -6,6 +6,14 @@ export const PAYMENT_PROVIDER_TOKEN = process.env.PAYMENT_PROVIDER_TOKEN || '187
 
 const TELEGRAM_API_BASE = 'https://api.telegram.org';
 
+function escapeHtml(str) {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
 export class TelegramBotService {
   constructor() {
     this.pollingActive = false;
@@ -13,6 +21,17 @@ export class TelegramBotService {
     this.botInfo = null;
     this.adminSessions = {}; // chatId -> { action: 'awaiting_ttn', orderId: '...' }
     this.chatHistory = {}; // chatId -> Set of message IDs for clean chat management
+  }
+
+  // Safe normalization of product colors whether stored as Array ['Black', 'White'] or String 'Black, White'
+  normalizeColorsList(colors) {
+    if (Array.isArray(colors)) {
+      return colors.map(c => String(c).trim()).filter(Boolean);
+    }
+    if (typeof colors === 'string') {
+      return colors.split(',').map(s => s.trim()).filter(Boolean);
+    }
+    return ['Black'];
   }
 
   trackMessage(chatId, messageId) {
@@ -3144,13 +3163,19 @@ export class TelegramBotService {
     const buttons = [];
 
     pageProducts.forEach(p => {
-      const colorCount = (p.colors || '').split(',').filter(Boolean).length || 1;
-      const specCount = (p.specs || []).length;
-      text += `🏷 <b>${p.brand} ${p.title}</b>\n`;
-      text += `• Ціна: <b>${p.price} ₴</b> | Залишок: <b>${p.quantity} шт.</b> | Кольорів: ${colorCount} | Хар-к: ${specCount}\n\n`;
+      const colorsList = this.normalizeColorsList(p.colors);
+      const colorCount = colorsList.length;
+      const specCount = Array.isArray(p.specs) ? p.specs.length : 0;
+      const brandStr = escapeHtml(p.brand || 'MILIPSTORE');
+      const titleStr = escapeHtml(p.title || 'Товар');
+      const totalQty = (typeof p.quantity === 'number' && p.quantity > 0)
+        ? p.quantity
+        : (p.color_quantities ? Object.values(p.color_quantities).reduce((a, b) => a + Number(b || 0), 0) : 0);
+      text += `🏷 <b>${brandStr} ${titleStr}</b>\n`;
+      text += `• Ціна: <b>${p.price} ₴</b> | Залишок: <b>${totalQty} шт.</b> | Кольорів: ${colorCount} | Хар-к: ${specCount}\n\n`;
 
       buttons.push([
-        { text: `✏️ ${p.brand} ${p.title} (${p.price} ₴)`, callback_data: `admin_prod_view:${p.id}` }
+        { text: `✏️ ${p.brand || ''} ${p.title || ''} (${p.price} ₴)`.trim(), callback_data: `admin_prod_view:${p.id}` }
       ]);
     });
 
@@ -3190,30 +3215,41 @@ export class TelegramBotService {
       return;
     }
 
-    const colorsList = (prod.colors || 'Black').split(',').map(s => s.trim()).filter(Boolean);
-    const specsList = prod.specs || [];
+    const colorsList = this.normalizeColorsList(prod.colors);
+    const specsList = Array.isArray(prod.specs) ? prod.specs : [];
 
     let specsFormatted = '<i>Не вказано</i>';
     if (specsList.length > 0) {
-      specsFormatted = specsList.map((s, idx) => `  ${idx + 1}. <b>${s.key}:</b> ${s.value}`).join('\n');
+      specsFormatted = specsList.map((s, idx) => `  ${idx + 1}. <b>${escapeHtml(s.key)}:</b> ${escapeHtml(s.value)}`).join('\n');
     }
 
     let colorsFormatted = '';
     colorsList.forEach(c => {
-      const q = prod.color_quantities?.[c] ?? Math.round(prod.quantity / (colorsList.length || 1));
+      const q = prod.color_quantities?.[c] ?? Math.round((prod.quantity || 10) / (colorsList.length || 1));
       const photos = prod.color_images?.[c]?.gallery?.length || (prod.color_images?.[c]?.main ? 1 : 0);
-      colorsFormatted += `  • <b>${c}</b>: ${q} шт. (📷 ${photos} фото)\n`;
+      colorsFormatted += `  • <b>${escapeHtml(c)}</b>: ${q} шт. (📷 ${photos} фото)\n`;
     });
 
+    const brandSafe = escapeHtml(prod.brand || '—');
+    const titleSafe = escapeHtml(prod.title || '—');
+    const descSafe = escapeHtml((prod.description || '').slice(0, 120)) + ((prod.description || '').length > 120 ? '...' : '');
+    const catSafe = escapeHtml(prod.category || '—');
+    const skuSafe = escapeHtml(prod.sku || '—');
+    const tagSafe = escapeHtml(prod.tag || 'Без бейджа');
+
+    const prodTotalQty = (typeof prod.quantity === 'number' && prod.quantity > 0)
+      ? prod.quantity
+      : (prod.color_quantities ? Object.values(prod.color_quantities).reduce((a, b) => a + Number(b || 0), 0) : 0);
+
     let text = `🎮 <b>КЕРУВАННЯ ТОВАРОМ</b>\n\n`;
-    text += `🏷 <b>1. Бренд:</b> <b>${prod.brand || '—'}</b>\n`;
-    text += `🎮 <b>2. Назва / модель:</b> <b>${prod.title || '—'}</b>\n`;
-    text += `📝 <b>3. Опис:</b> <i>${(prod.description || '').slice(0, 120)}${(prod.description || '').length > 120 ? '...' : ''}</i>\n`;
+    text += `🏷 <b>1. Бренд:</b> <b>${brandSafe}</b>\n`;
+    text += `🎮 <b>2. Назва / модель:</b> <b>${titleSafe}</b>\n`;
+    text += `📝 <b>3. Опис:</b> <i>${descSafe || 'Не вказано'}</i>\n`;
     text += `💰 <b>4. Ціна:</b> <b>${prod.price} ₴</b> (стара: ${prod.old_price || Math.round(prod.price * 1.15)} ₴)\n`;
-    text += `🗂 <b>Категорія:</b> <b>${prod.category || '—'}</b> | Артикул: <code>${prod.sku || '—'}</code>\n`;
-    text += `🏷 <b>Позначка / Бейдж:</b> <b>${prod.tag || 'Без бейджа'}</b>\n\n`;
+    text += `🗂 <b>Категорія:</b> <b>${catSafe}</b> | Артикул: <code>${skuSafe}</code>\n`;
+    text += `🏷 <b>Позначка / Бейдж:</b> <b>${tagSafe}</b>\n\n`;
     text += `🎨 <b>5. Кольори та склад (${colorsList.length}):</b>\n${colorsFormatted || '  • Black'}\n`;
-    text += `📦 <b>Загальний залишок:</b> <b>${prod.quantity} шт.</b>\n\n`;
+    text += `📦 <b>Загальний залишок:</b> <b>${prodTotalQty} шт.</b>\n\n`;
     text += `📋 <b>6. Характеристики (${specsList.length}/10):</b>\n${specsFormatted}\n\n`;
     text += `📸 <b>7. Головне фото каталогу:</b> ${prod.img ? '✅ Встановлено (1 фото)' : '⚙️ Стандартне'}\n`;
     text += `🖼 <b>8. Фото кольорів:</b> Налаштовано окремо для кожного кольору\n\n`;
@@ -3263,8 +3299,8 @@ export class TelegramBotService {
       field,
       cardMsgId: messageId,
       data: {
-        tempColors: (prod.colors || 'Black').split(',').map(s => s.trim()).filter(Boolean),
-        tempSpecs: prod.specs ? JSON.parse(JSON.stringify(prod.specs)) : [],
+        tempColors: this.normalizeColorsList(prod.colors),
+        tempSpecs: Array.isArray(prod.specs) ? JSON.parse(JSON.stringify(prod.specs)) : [],
         activeColorForPhotos: null
       }
     };
@@ -3281,7 +3317,7 @@ export class TelegramBotService {
       ];
 
       await this.safeEditOrSend(chatId, cardId, `🏷 <b>Редагування бренду для товару:</b>\n` +
-        `Поточний бренд: <b>${prod.brand}</b>\n\n` +
+        `Поточний бренд: <b>${escapeHtml(prod.brand)}</b>\n\n` +
         `<i>Оберіть бренд кнопкою або надішліть назву текстом у чат:</i>`, {
         reply_markup: { inline_keyboard: brandButtons }
       });
@@ -3291,7 +3327,7 @@ export class TelegramBotService {
     // 2. TITLE
     if (field === 'title') {
       await this.safeEditOrSend(chatId, cardId, `🎮 <b>Редагування назви / моделі товару:</b>\n` +
-        `Поточна назва: <b>${prod.title}</b>\n\n` +
+        `Поточна назва: <b>${escapeHtml(prod.title)}</b>\n\n` +
         `<i>Надішліть нову назву товару наступним повідомленням у чат:</i>`, {
         reply_markup: {
           inline_keyboard: [
@@ -3305,7 +3341,7 @@ export class TelegramBotService {
     // 3. DESCRIPTION
     if (field === 'description') {
       await this.safeEditOrSend(chatId, cardId, `📝 <b>Редагування опису товару:</b>\n\n` +
-        `Поточний опис:\n<i>${prod.description || 'Не вказано'}</i>\n\n` +
+        `Поточний опис:\n<i>${escapeHtml(prod.description || 'Не вказано')}</i>\n\n` +
         `<i>Надішліть новий опис текстом або натисніть кнопку авто-генерації:</i>`, {
         reply_markup: {
           inline_keyboard: [
@@ -3346,7 +3382,7 @@ export class TelegramBotService {
     // 7. MAIN PHOTO
     if (field === 'main_photo') {
       await this.safeEditOrSend(chatId, cardId, `📸 <b>Головне фото для каталогу (1 фото):</b>\n\n` +
-        `Поточне фото: <code>${prod.img || 'немає'}</code>\n\n` +
+        `Поточне фото: <code>${escapeHtml(prod.img || 'немає')}</code>\n\n` +
         `<i>Надішліть нове фото файлом зображення або прямим посиланням на картинку в цей чат:</i>`, {
         reply_markup: {
           inline_keyboard: [
@@ -3374,7 +3410,7 @@ export class TelegramBotService {
       ];
 
       await this.safeEditOrSend(chatId, cardId, `🏷 <b>Редагування позначки / бейджа товару:</b>\n` +
-        `Поточний бейдж: <b>${prod.tag || 'Не встановлено'}</b>\n\n` +
+        `Поточний бейдж: <b>${escapeHtml(prod.tag || 'Не встановлено')}</b>\n\n` +
         `<i>Оберіть позначку кнопкою або надішліть свій текст повідомленням у чат:</i>`, {
         reply_markup: { inline_keyboard: tagButtons }
       });
@@ -3423,7 +3459,7 @@ export class TelegramBotService {
     keyboard.push([{ text: '🔙 Скасувати зміни', callback_data: `admin_prod_view:${prodId}` }]);
 
     const text = `🎨 <b>Редагування кольорів товару (одна плашка з галочками):</b>\n\n` +
-      `Обрані кольори: <b>${selected.join(', ') || 'не обрано'}</b>\n\n` +
+      `Обрані кольори: <b>${escapeHtml(selected.join(', ') || 'не обрано')}</b>\n\n` +
       `<i>Натискайте кнопки кольорів, щоб увімкнути/вимкнути [✅], після чого натисніть «💾 Зберегти кольори»:</i>`;
 
     await this.safeEditOrSend(chatId, messageId, text, {
@@ -3437,7 +3473,7 @@ export class TelegramBotService {
 
     let specsListFormatted = '<i>Поки що список порожній</i>\n';
     if (specs.length > 0) {
-      specsListFormatted = specs.map((s, idx) => `  ${idx + 1}. <b>${s.key}:</b> ${s.value}`).join('\n') + '\n';
+      specsListFormatted = specs.map((s, idx) => `  ${idx + 1}. <b>${escapeHtml(s.key)}:</b> ${escapeHtml(s.value)}`).join('\n') + '\n';
     }
 
     const text = `📋 <b>Редагування характеристик товару (${specs.length}/10):</b>\n\n` +
@@ -3463,7 +3499,7 @@ export class TelegramBotService {
     const prod = db.getProductById(prodId);
     if (!prod) return;
 
-    const colors = (prod.colors || 'Black').split(',').map(s => s.trim()).filter(Boolean);
+    const colors = this.normalizeColorsList(prod.colors);
     const buttons = [];
 
     colors.forEach(c => {
