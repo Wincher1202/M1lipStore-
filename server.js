@@ -548,6 +548,53 @@ app.get('/api/admin/brands', (req, res) => {
   res.json(db.getBrands());
 });
 
+// ----------------------------------------------------
+// Sync & Cloud Database Management APIs
+// ----------------------------------------------------
+app.get('/api/sync/status', (req, res) => {
+  res.json({
+    ok: true,
+    server_time: new Date().toISOString(),
+    products_count: db.data.products.length,
+    brands_count: db.data.brands.length,
+    categories_count: db.data.categories.length,
+    orders_count: db.data.orders.length,
+    version: '1.0.0'
+  });
+});
+
+app.get('/api/sync/backup', (req, res) => {
+  const backup = db.exportBackup();
+  res.json(backup);
+});
+
+app.post('/api/sync/restore', (req, res) => {
+  try {
+    db.importBackup(req.body);
+    res.json({ ok: true, message: 'Дані успішно відновлено та синхронізовано' });
+  } catch (err) {
+    res.status(400).json({ ok: false, detail: err.message });
+  }
+});
+
+app.post('/api/sync/reset-demo', (req, res) => {
+  try {
+    db.resetDemoData();
+    res.json({ ok: true, message: 'Стандартні дані відновлено' });
+  } catch (err) {
+    res.status(400).json({ ok: false, detail: err.message });
+  }
+});
+
+app.delete('/api/sync/products/all', (req, res) => {
+  try {
+    db.clearAllProducts();
+    res.json({ ok: true, message: 'Каталог повністю очищено' });
+  } catch (err) {
+    res.status(400).json({ ok: false, detail: err.message });
+  }
+});
+
 app.get('/api/bot-info', (req, res) => {
   res.json({
     username: botService.getBotUsername(),

@@ -4153,9 +4153,9 @@
             // First load from localStorage cache if available
             try {
                 const cached = localStorage.getItem('m1lip_cached_products');
-                if (cached) {
+                if (cached !== null) {
                     const parsed = JSON.parse(cached);
-                    if (Array.isArray(parsed) && parsed.length > 0) {
+                    if (Array.isArray(parsed)) {
                         products = parseRawProductsList(parsed);
                         renderCatalog();
                         if (products.length > 0) setHeroProduct(products[0]);
@@ -4164,6 +4164,7 @@
             } catch(e) {}
 
             let backendData = null;
+            let successFetch = false;
             const endpoints = [
                 API_URL,
                 '/api/products',
@@ -4172,13 +4173,14 @@
 
             for (const ep of endpoints) {
                 try {
-                    let response = await fetch(ep);
+                    let response = await fetch(ep, { cache: 'no-cache' });
                     if (response.ok) {
                         let contentType = response.headers.get("content-type");
                         if (contentType && contentType.includes("application/json")) {
                             let data = await response.json();
-                            if (Array.isArray(data) && data.length > 0) {
+                            if (Array.isArray(data)) {
                                 backendData = data;
+                                successFetch = true;
                                 break;
                             }
                         }
@@ -4186,7 +4188,7 @@
                 } catch(err) {}
             }
 
-            if (backendData && Array.isArray(backendData) && backendData.length > 0) {
+            if (successFetch && backendData !== null && Array.isArray(backendData)) {
                 products = parseRawProductsList(backendData);
                 try {
                     localStorage.setItem('m1lip_cached_products', JSON.stringify(backendData));
@@ -4201,12 +4203,12 @@
 
         async function fetchCategories() {
             try {
-                const response = await fetch(CATEGORIES_API_URL);
+                const response = await fetch(CATEGORIES_API_URL, { cache: 'no-cache' });
                 if (!response.ok) return;
                 const contentType = response.headers.get("content-type");
                 if (!contentType || !contentType.includes("application/json")) return;
                 const data = await response.json();
-                if (Array.isArray(data) && data.length > 0) {
+                if (Array.isArray(data)) {
                     categories = data;
                 }
             } catch (e) {
@@ -4217,19 +4219,44 @@
 
         async function fetchBrands() {
             try {
-                const response = await fetch(BRANDS_API_URL);
+                const response = await fetch(BRANDS_API_URL, { cache: 'no-cache' });
                 if (!response.ok) return;
                 const contentType = response.headers.get("content-type");
                 if (!contentType || !contentType.includes("application/json")) return;
                 const data = await response.json();
-                if (Array.isArray(data) && data.length > 0) {
+                if (Array.isArray(data)) {
                     brands = data;
                     renderBrandsMarquee();
                 }
             } catch (e) {
                 // keep fallback brands
             }
+            renderBrandsMarquee();
         }
+
+        let isSyncing = false;
+        async function syncLiveStoreData() {
+            if (isSyncing) return;
+            isSyncing = true;
+            try {
+                await Promise.allSettled([
+                    fetchProducts(),
+                    fetchCategories(),
+                    fetchBrands()
+                ]);
+            } finally {
+                isSyncing = false;
+            }
+        }
+
+        // Auto live sync with Telegram Bot every 8 seconds & on window focus
+        setInterval(syncLiveStoreData, 8000);
+        window.addEventListener('focus', syncLiveStoreData);
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') {
+                syncLiveStoreData();
+            }
+        });
 
         function renderBrandsMarquee() {
             const track = document.querySelector('.partner-brands-track');

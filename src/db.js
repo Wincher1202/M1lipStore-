@@ -201,25 +201,34 @@ class Database {
         if (parsed && typeof parsed === 'object') {
           const rawAdmins = Array.isArray(parsed.admin_ids) && parsed.admin_ids.length ? parsed.admin_ids : [];
           const combinedAdmins = Array.from(new Set([...rawAdmins, '1929165295', '1248134309', 'invinciblee', 'wincher', 'Invinciblee', 'Wincher']));
-          const existingProducts = Array.isArray(parsed.products) && parsed.products.length > 0
+          
+          // IMPORTANT: If products is an empty array [] (e.g. admin deleted all items), preserve []!
+          const existingProducts = Array.isArray(parsed.products)
             ? parsed.products
             : INITIAL_PRODUCTS;
+          const existingCategories = Array.isArray(parsed.categories)
+            ? parsed.categories
+            : INITIAL_CATEGORIES;
+          const existingBrands = Array.isArray(parsed.brands)
+            ? parsed.brands
+            : INITIAL_BRANDS;
+
           this.data = {
             ...this.data,
             ...parsed,
             products: existingProducts,
-            categories: Array.isArray(parsed.categories) && parsed.categories.length ? parsed.categories : INITIAL_CATEGORIES,
-            brands: Array.isArray(parsed.brands) && parsed.brands.length ? parsed.brands : INITIAL_BRANDS,
+            categories: existingCategories,
+            brands: existingBrands,
             orders: Array.isArray(parsed.orders) ? parsed.orders : [],
             telegram_users: parsed.telegram_users || {},
             admin_ids: combinedAdmins,
             notifications: parsed.notifications || []
           };
-          if (!Array.isArray(parsed.products) || parsed.products.length === 0) {
-            this.save();
-          }
         }
       } else {
+        this.data.products = INITIAL_PRODUCTS;
+        this.data.categories = INITIAL_CATEGORIES;
+        this.data.brands = INITIAL_BRANDS;
         this.save();
       }
     } catch (err) {
@@ -233,6 +242,60 @@ class Database {
     } catch (err) {
       console.error('[DB] Failed to save store.json:', err.message);
     }
+  }
+
+  // Backup & Restore
+  exportBackup() {
+    return {
+      version: '1.0.0',
+      exported_at: new Date().toISOString(),
+      store_data: JSON.parse(JSON.stringify(this.data))
+    };
+  }
+
+  importBackup(backupObj) {
+    if (!backupObj || typeof backupObj !== 'object') {
+      throw new Error('Невалідний обʼєкт резервної копії');
+    }
+    const payload = backupObj.store_data || backupObj;
+    if (!payload || typeof payload !== 'object') {
+      throw new Error('Не знайдено даних для відновлення');
+    }
+
+    if (Array.isArray(payload.products)) {
+      this.data.products = payload.products;
+    }
+    if (Array.isArray(payload.categories)) {
+      this.data.categories = payload.categories;
+    }
+    if (Array.isArray(payload.brands)) {
+      this.data.brands = payload.brands;
+    }
+    if (Array.isArray(payload.orders)) {
+      this.data.orders = payload.orders;
+    }
+    if (payload.telegram_users && typeof payload.telegram_users === 'object') {
+      this.data.telegram_users = payload.telegram_users;
+    }
+    if (Array.isArray(payload.admin_ids) && payload.admin_ids.length > 0) {
+      this.data.admin_ids = Array.from(new Set([...this.data.admin_ids, ...payload.admin_ids]));
+    }
+    this.save();
+    return true;
+  }
+
+  resetDemoData() {
+    this.data.products = JSON.parse(JSON.stringify(INITIAL_PRODUCTS));
+    this.data.categories = JSON.parse(JSON.stringify(INITIAL_CATEGORIES));
+    this.data.brands = JSON.parse(JSON.stringify(INITIAL_BRANDS));
+    this.save();
+    return true;
+  }
+
+  clearAllProducts() {
+    this.data.products = [];
+    this.save();
+    return true;
   }
 
   // Products
