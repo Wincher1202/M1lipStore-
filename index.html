@@ -1035,14 +1035,31 @@
         }
 
         .brand-logo-img.logo-mchose,
-        .partner-brand-tile img[src*="mchose"] {
-            mix-blend-mode: normal;
-            border-radius: 4px;
+        .partner-brand-tile img[src*="mchose"],
+        .partner-brand-tile img[src*="mchose4"] {
+            filter: invert(1);
+            mix-blend-mode: multiply;
         }
 
         .partner-brand-tile img {
             max-height: 44px;
             max-width: 88%;
+        }
+
+        .partner-brand-tile img.logo-vgn,
+        .partner-brand-tile img[src*="vgn"] {
+            max-height: 21px;
+            max-width: 60%;
+        }
+
+        .brand-logo-img.logo-vgn {
+            max-height: 10px !important;
+            max-width: 50px !important;
+        }
+
+        #modal-brand .logo-vgn {
+            max-height: 15px !important;
+            max-width: 65px !important;
         }
 
         [data-theme="dark"] .brand-logo-img,
@@ -1052,16 +1069,10 @@
             mix-blend-mode: screen;
         }
 
-        [data-theme="dark"] .brand-logo-img.logo-aula,
-        [data-theme="dark"] .brand-logo-frameless.logo-aula,
-        [data-theme="dark"] .partner-brand-tile img[src*="aula"] {
-            filter: none;
-            mix-blend-mode: screen;
-        }
-
         [data-theme="dark"] .brand-logo-img.logo-mchose,
         [data-theme="dark"] .brand-logo-frameless.logo-mchose,
-        [data-theme="dark"] .partner-brand-tile img[src*="mchose"] {
+        [data-theme="dark"] .partner-brand-tile img[src*="mchose"],
+        [data-theme="dark"] .partner-brand-tile img[src*="mchose4"] {
             filter: none;
             mix-blend-mode: screen;
         }
@@ -3024,32 +3035,32 @@
         <div class="partner-brands-marquee">
             <div class="partner-brands-track">
                 <!-- Set 1 -->
-                <div class="partner-brand-tile" onclick="filterByBrand('Attack Shark', this)"><img src="/attack-shark.jpg" alt="Attack Shark" loading="lazy" class="brand-logo-img logo-attack-shark" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Attack Shark</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('Ajazz', this)"><img src="/ajazz.webp" alt="Ajazz" loading="lazy" class="brand-logo-img logo-ajazz" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Ajazz</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('AULA', this)"><img src="/aula.png" alt="AULA" loading="lazy" class="brand-logo-img logo-aula" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">AULA</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('Mchose', this)"><img src="/mchose.png" alt="Mchose" loading="lazy" class="brand-logo-img logo-mchose" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Mchose</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('VGN', this)"><img src="/vgn.jpg" alt="VGN" loading="lazy" class="brand-logo-img logo-vgn" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">VGN</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Attack Shark', this)"><img src="/attack-shark2.jpg" alt="Attack Shark" loading="lazy" class="brand-logo-img logo-attack-shark" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Attack Shark</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Ajazz', this)"><img src="/ajazz1.jpg" alt="Ajazz" loading="lazy" class="brand-logo-img logo-ajazz" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Ajazz</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('AULA', this)"><img src="/aula3.jpg" alt="AULA" loading="lazy" class="brand-logo-img logo-aula" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">AULA</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Mchose', this)"><img src="/mchose4.jpg" alt="Mchose" loading="lazy" class="brand-logo-img logo-mchose" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Mchose</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('VGN', this)"><img src="/vgn5.jpg" alt="VGN" loading="lazy" class="brand-logo-img logo-vgn" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">VGN</span></div>
 
                 <!-- Set 2 -->
-                <div class="partner-brand-tile" onclick="filterByBrand('Attack Shark', this)"><img src="/attack-shark.jpg" alt="Attack Shark" loading="lazy" class="brand-logo-img logo-attack-shark" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Attack Shark</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('Ajazz', this)"><img src="/ajazz.webp" alt="Ajazz" loading="lazy" class="brand-logo-img logo-ajazz" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Ajazz</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('AULA', this)"><img src="/aula.png" alt="AULA" loading="lazy" class="brand-logo-img logo-aula" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">AULA</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('Mchose', this)"><img src="/mchose.png" alt="Mchose" loading="lazy" class="brand-logo-img logo-mchose" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Mchose</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('VGN', this)"><img src="/vgn.jpg" alt="VGN" loading="lazy" class="brand-logo-img logo-vgn" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">VGN</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Attack Shark', this)"><img src="/attack-shark2.jpg" alt="Attack Shark" loading="lazy" class="brand-logo-img logo-attack-shark" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Attack Shark</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Ajazz', this)"><img src="/ajazz1.jpg" alt="Ajazz" loading="lazy" class="brand-logo-img logo-ajazz" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Ajazz</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('AULA', this)"><img src="/aula3.jpg" alt="AULA" loading="lazy" class="brand-logo-img logo-aula" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">AULA</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Mchose', this)"><img src="/mchose4.jpg" alt="Mchose" loading="lazy" class="brand-logo-img logo-mchose" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Mchose</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('VGN', this)"><img src="/vgn5.jpg" alt="VGN" loading="lazy" class="brand-logo-img logo-vgn" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">VGN</span></div>
 
                 <!-- Set 3 -->
-                <div class="partner-brand-tile" onclick="filterByBrand('Attack Shark', this)"><img src="/attack-shark.jpg" alt="Attack Shark" loading="lazy" class="brand-logo-img logo-attack-shark" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Attack Shark</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('Ajazz', this)"><img src="/ajazz.webp" alt="Ajazz" loading="lazy" class="brand-logo-img logo-ajazz" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Ajazz</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('AULA', this)"><img src="/aula.png" alt="AULA" loading="lazy" class="brand-logo-img logo-aula" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">AULA</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('Mchose', this)"><img src="/mchose.png" alt="Mchose" loading="lazy" class="brand-logo-img logo-mchose" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Mchose</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('VGN', this)"><img src="/vgn.jpg" alt="VGN" loading="lazy" class="brand-logo-img logo-vgn" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">VGN</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Attack Shark', this)"><img src="/attack-shark2.jpg" alt="Attack Shark" loading="lazy" class="brand-logo-img logo-attack-shark" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Attack Shark</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Ajazz', this)"><img src="/ajazz1.jpg" alt="Ajazz" loading="lazy" class="brand-logo-img logo-ajazz" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Ajazz</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('AULA', this)"><img src="/aula3.jpg" alt="AULA" loading="lazy" class="brand-logo-img logo-aula" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">AULA</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Mchose', this)"><img src="/mchose4.jpg" alt="Mchose" loading="lazy" class="brand-logo-img logo-mchose" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Mchose</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('VGN', this)"><img src="/vgn5.jpg" alt="VGN" loading="lazy" class="brand-logo-img logo-vgn" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">VGN</span></div>
 
                 <!-- Set 4 -->
-                <div class="partner-brand-tile" onclick="filterByBrand('Attack Shark', this)"><img src="/attack-shark.jpg" alt="Attack Shark" loading="lazy" class="brand-logo-img logo-attack-shark" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Attack Shark</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('Ajazz', this)"><img src="/ajazz.webp" alt="Ajazz" loading="lazy" class="brand-logo-img logo-ajazz" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Ajazz</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('AULA', this)"><img src="/aula.png" alt="AULA" loading="lazy" class="brand-logo-img logo-aula" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">AULA</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('Mchose', this)"><img src="/mchose.png" alt="Mchose" loading="lazy" class="brand-logo-img logo-mchose" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Mchose</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('VGN', this)"><img src="/vgn.jpg" alt="VGN" loading="lazy" class="brand-logo-img logo-vgn" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">VGN</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Attack Shark', this)"><img src="/attack-shark2.jpg" alt="Attack Shark" loading="lazy" class="brand-logo-img logo-attack-shark" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Attack Shark</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Ajazz', this)"><img src="/ajazz1.jpg" alt="Ajazz" loading="lazy" class="brand-logo-img logo-ajazz" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Ajazz</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('AULA', this)"><img src="/aula3.jpg" alt="AULA" loading="lazy" class="brand-logo-img logo-aula" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">AULA</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Mchose', this)"><img src="/mchose4.jpg" alt="Mchose" loading="lazy" class="brand-logo-img logo-mchose" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Mchose</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('VGN', this)"><img src="/vgn5.jpg" alt="VGN" loading="lazy" class="brand-logo-img logo-vgn" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">VGN</span></div>
             </div>
         </div>
     </section>
@@ -3949,21 +3960,21 @@
             { id: 'audio', name: 'Аудіо' }
         ];
         let brands = [
-            { id: 'attack-shark', name: 'Attack Shark', logo: '/attack-shark.jpg' },
-            { id: 'ajazz', name: 'Ajazz', logo: '/ajazz.webp' },
-            { id: 'aula', name: 'AULA', logo: '/aula.png' },
-            { id: 'mchose', name: 'Mchose', logo: '/mchose.png' },
-            { id: 'vgn', name: 'VGN', logo: '/vgn.jpg' }
+            { id: 'attack-shark', name: 'Attack Shark', logo: '/attack-shark2.jpg' },
+            { id: 'ajazz', name: 'Ajazz', logo: '/ajazz1.jpg' },
+            { id: 'aula', name: 'AULA', logo: '/aula3.jpg' },
+            { id: 'mchose', name: 'Mchose', logo: '/mchose4.jpg' },
+            { id: 'vgn', name: 'VGN', logo: '/vgn5.jpg' }
         ];
 
         function getBrandLogoUrl(brandName) {
             if (!brandName) return '';
             const bLower = brandName.toLowerCase().trim();
-            if (bLower.includes('mchose') || bLower.includes('mchous')) return '/mchose.png';
-            if (bLower.includes('aula')) return '/aula.png';
-            if (bLower.includes('ajazz') || bLower.includes('adjaras')) return '/ajazz.webp';
-            if (bLower.includes('attack') || bLower.includes('shark')) return '/attack-shark.jpg';
-            if (bLower.includes('vgn')) return '/vgn.jpg';
+            if (bLower.includes('attack') || bLower.includes('shark')) return '/attack-shark2.jpg';
+            if (bLower.includes('ajazz') || bLower.includes('adjaras')) return '/ajazz1.jpg';
+            if (bLower.includes('aula')) return '/aula3.jpg';
+            if (bLower.includes('mchose') || bLower.includes('mchous')) return '/mchose4.jpg';
+            if (bLower.includes('vgn')) return '/vgn5.jpg';
             const found = (brands || []).find(b => (b.name || '').toLowerCase().trim() === bLower);
             if (found && found.logo) {
                 return found.logo.startsWith('/') ? found.logo : '/' + found.logo;

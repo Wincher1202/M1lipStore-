@@ -169,11 +169,11 @@ export const INITIAL_CATEGORIES = [
 ];
 
 export const INITIAL_BRANDS = [
-  { id: 'brand-attack-shark', name: 'Attack Shark', logo: '/attack-shark.jpg', position: 0, hidden: false },
-  { id: 'brand-ajazz', name: 'Ajazz', logo: '/ajazz.webp', position: 1, hidden: false },
-  { id: 'brand-aula', name: 'AULA', logo: '/aula.png', position: 2, hidden: false },
-  { id: 'brand-mchose', name: 'Mchose', logo: '/mchose.png', position: 3, hidden: false },
-  { id: 'brand-vgn', name: 'VGN', logo: '/vgn.jpg', position: 4, hidden: false }
+  { id: 'brand-attack-shark', name: 'Attack Shark', logo: '/attack-shark2.jpg', position: 0, hidden: false },
+  { id: 'brand-ajazz', name: 'Ajazz', logo: '/ajazz1.jpg', position: 1, hidden: false },
+  { id: 'brand-aula', name: 'AULA', logo: '/aula3.jpg', position: 2, hidden: false },
+  { id: 'brand-mchose', name: 'Mchose', logo: '/mchose4.jpg', position: 3, hidden: false },
+  { id: 'brand-vgn', name: 'VGN', logo: '/vgn5.jpg', position: 4, hidden: false }
 ];
 
 class Database {

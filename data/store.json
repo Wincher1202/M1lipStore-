@@ -344,35 +344,35 @@
     {
       "id": "brand-attack-shark",
       "name": "Attack Shark",
-      "logo": "/attack-shark.jpg",
+      "logo": "/attack-shark2.jpg",
       "position": 0,
       "hidden": false
     },
     {
       "id": "brand-ajazz",
       "name": "Ajazz",
-      "logo": "/ajazz.webp",
+      "logo": "/ajazz1.jpg",
       "position": 1,
       "hidden": false
     },
     {
       "id": "brand-aula",
       "name": "AULA",
-      "logo": "/aula.png",
+      "logo": "/aula3.jpg",
       "position": 2,
       "hidden": false
     },
     {
       "id": "brand-mchose",
       "name": "Mchose",
-      "logo": "/mchose.png",
+      "logo": "/mchose4.jpg",
       "position": 3,
       "hidden": false
     },
     {
       "id": "brand-vgn",
       "name": "VGN",
-      "logo": "/vgn.jpg",
+      "logo": "/vgn5.jpg",
       "position": 4,
       "hidden": false
     }
