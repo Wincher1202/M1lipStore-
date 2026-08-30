@@ -11,9 +11,11 @@
       "tag": "🔥 ТОП ПРОДАЖІВ",
       "category": "Мишки",
       "description": "Флагманська ультралегка бездротова ігрова мишка вагою всього 49 грамів з топовим оптичним сенсором PixArt PAW3395 (до 26 000 DPI), надійними мікроперемикачами TTC Gold та потрійним режимом підключення (2.4G, Bluetooth 5.2, Type-C).",
-      "img": "shark.jpg",
+      "img": "/attack-shark-x3-black.jpg",
       "gallery": [
-        "shark.jpg"
+        "/attack-shark-x3-black.jpg",
+        "/attack-shark-x3-white.jpg",
+        "/attack-shark-x3-box.jpg"
       ],
       "specs": [
         {
@@ -45,21 +47,23 @@
       },
       "color_images": {
         "Black": {
-          "main": "shark.jpg",
+          "main": "/attack-shark-x3-black.jpg",
           "gallery": [
-            "shark.jpg"
+            "/attack-shark-x3-black.jpg",
+            "/attack-shark-x3-box.jpg"
           ]
         },
         "White": {
-          "main": "shark.jpg",
+          "main": "/attack-shark-x3-white.jpg",
           "gallery": [
-            "shark.jpg"
+            "/attack-shark-x3-white.jpg",
+            "/attack-shark-x3-box.jpg"
           ]
         },
         "Pink": {
-          "main": "shark.jpg",
+          "main": "/attack-shark-x3-black.jpg",
           "gallery": [
-            "shark.jpg"
+            "/attack-shark-x3-black.jpg"
           ]
         }
       },
@@ -76,9 +80,11 @@
       "tag": "⚡ ХІТ СЕЗОНУ",
       "category": "Мишки",
       "description": "Кіберспортивна бездротова мишка вагою 55г з топовим сенсором PAW3395, чіпом Nordic 52840 та підтримкою частоти опитування до 4000Hz (при використанні 4K Dongle).",
-      "img": "vgn.jpg",
+      "img": "/photo_2026-08-25_15-32-13.jpg",
       "gallery": [
-        "vgn.jpg"
+        "/photo_2026-08-25_15-32-13.jpg",
+        "/photo_2026-08-25_15-32-17.jpg",
+        "/photo_2026-08-25_15-32-36.jpg"
       ],
       "specs": [
         {
@@ -108,15 +114,17 @@
       },
       "color_images": {
         "Black": {
-          "main": "vgn.jpg",
+          "main": "/photo_2026-08-25_15-32-13.jpg",
           "gallery": [
-            "vgn.jpg"
+            "/photo_2026-08-25_15-32-13.jpg",
+            "/photo_2026-08-25_15-32-17.jpg"
           ]
         },
         "White": {
-          "main": "vgn.jpg",
+          "main": "/photo_2026-08-25_15-32-36.jpg",
           "gallery": [
-            "vgn.jpg"
+            "/photo_2026-08-25_15-32-36.jpg",
+            "/photo_2026-08-25_15-32-38.jpg"
           ]
         }
       },
@@ -133,9 +141,11 @@
       "tag": "⭐ ВИБІР ГРАВЦІВ",
       "category": "Клавіатури",
       "description": "Преміальна 75% бездротова механічна клавіатура з багатошаровою Gasket Mount шумоізоляцією (5 шарів поглинання звуку), металевим коліщатком гучності, фабрично змащеними перемикачами LEOBOG Reaper та RGB-підсвіткою.",
-      "img": "aula.png",
+      "img": "/photo_2026-08-25_15-32-57.jpg",
       "gallery": [
-        "aula.png"
+        "/photo_2026-08-25_15-32-57.jpg",
+        "/photo_2026-08-25_15-32-59.jpg",
+        "/photo_2026-08-25_15-33-02.jpg"
       ],
       "specs": [
         {
@@ -167,21 +177,21 @@
       },
       "color_images": {
         "Black": {
-          "main": "aula.png",
+          "main": "/photo_2026-08-25_15-32-57.jpg",
           "gallery": [
-            "aula.png"
+            "/photo_2026-08-25_15-32-57.jpg"
           ]
         },
         "White": {
-          "main": "aula.png",
+          "main": "/photo_2026-08-25_15-32-59.jpg",
           "gallery": [
-            "aula.png"
+            "/photo_2026-08-25_15-32-59.jpg"
           ]
         },
         "Blue": {
-          "main": "aula.png",
+          "main": "/photo_2026-08-25_15-33-02.jpg",
           "gallery": [
-            "aula.png"
+            "/photo_2026-08-25_15-33-02.jpg"
           ]
         }
       },
@@ -198,9 +208,11 @@
       "tag": "✨ НОВИНКА",
       "category": "Клавіатури",
       "description": "Бездротова механічна клавіатура з вбудованим кольоровим TFT-дисплеєм для GIF-анімацій та статусу системи, зручним регулятором гучності та приємним глибоким звуком (creamy sound).",
-      "img": "adjaras.webp",
+      "img": "/350954572_1917991488535350_2141770078765880809_n_2.webp",
       "gallery": [
-        "adjaras.webp"
+        "/350954572_1917991488535350_2141770078765880809_n_2.webp",
+        "/photo_2026-08-25_15-33-42.jpg",
+        "/photo_2026-08-25_15-33-43.jpg"
       ],
       "specs": [
         {
@@ -232,21 +244,22 @@
       },
       "color_images": {
         "Grey": {
-          "main": "adjaras.webp",
+          "main": "/350954572_1917991488535350_2141770078765880809_n_2.webp",
           "gallery": [
-            "adjaras.webp"
+            "/350954572_1917991488535350_2141770078765880809_n_2.webp",
+            "/photo_2026-08-25_15-33-42.jpg"
           ]
         },
         "White": {
-          "main": "adjaras.webp",
+          "main": "/photo_2026-08-25_15-33-43.jpg",
           "gallery": [
-            "adjaras.webp"
+            "/photo_2026-08-25_15-33-43.jpg"
           ]
         },
         "Purple": {
-          "main": "adjaras.webp",
+          "main": "/photo_2026-08-25_15-33-49.jpg",
           "gallery": [
-            "adjaras.webp"
+            "/photo_2026-08-25_15-33-49.jpg"
           ]
         }
       },
@@ -263,9 +276,11 @@
       "tag": "🎯 РЕКОМЕНДУЄМО",
       "category": "Мишки",
       "description": "Ультраергономічна мишка для геймерів та професіоналів. Сенсор PixArt 3395, вага 59г, перемикачі Huano Blue Pink Dot на 80 млн натискань та до 130 годин безперервної гри.",
-      "img": "mchous.png",
+      "img": "/48c2868a-928a-46f4-8b76-9e4d4fd6a7dc.jpg",
       "gallery": [
-        "mchous.png"
+        "/48c2868a-928a-46f4-8b76-9e4d4fd6a7dc.jpg",
+        "/photo_2026-08-25_15-31-22.jpg",
+        "/photo_2026-08-25_15-31-28.jpg"
       ],
       "specs": [
         {
@@ -295,15 +310,16 @@
       },
       "color_images": {
         "Black": {
-          "main": "mchous.png",
+          "main": "/48c2868a-928a-46f4-8b76-9e4d4fd6a7dc.jpg",
           "gallery": [
-            "mchous.png"
+            "/48c2868a-928a-46f4-8b76-9e4d4fd6a7dc.jpg"
           ]
         },
         "White": {
-          "main": "mchous.png",
+          "main": "/photo_2026-08-25_15-31-22.jpg",
           "gallery": [
-            "mchous.png"
+            "/photo_2026-08-25_15-31-22.jpg",
+            "/photo_2026-08-25_15-31-28.jpg"
           ]
         }
       },
@@ -365,7 +381,7 @@
     {
       "id": "brand-mchose",
       "name": "Mchose",
-      "logo": "/mchose4.jpg",
+      "logo": "/mchose4.png",
       "position": 3,
       "hidden": false
     },

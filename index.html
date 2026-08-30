@@ -969,6 +969,19 @@
             box-sizing: border-box;
         }
 
+        .partner-brand-tile.alt-tile {
+            background: #F8FAFC;
+            border-color: rgba(87, 100, 226, 0.15);
+        }
+
+        [data-theme="dark"] .partner-brand-tile {
+            background: #1E2230;
+        }
+
+        [data-theme="dark"] .partner-brand-tile.alt-tile {
+            background: #252A3D;
+        }
+
         .partner-brand-tile img {
             max-width: 100%;
             max-height: 52px;
@@ -1035,10 +1048,11 @@
         }
 
         .brand-logo-img.logo-mchose,
+        .brand-logo-frameless.logo-mchose,
         .partner-brand-tile img[src*="mchose"],
         .partner-brand-tile img[src*="mchose4"] {
-            filter: invert(1);
-            mix-blend-mode: multiply;
+            filter: none !important;
+            mix-blend-mode: normal !important;
         }
 
         .partner-brand-tile img {
@@ -1073,8 +1087,8 @@
         [data-theme="dark"] .brand-logo-frameless.logo-mchose,
         [data-theme="dark"] .partner-brand-tile img[src*="mchose"],
         [data-theme="dark"] .partner-brand-tile img[src*="mchose4"] {
-            filter: none;
-            mix-blend-mode: screen;
+            filter: invert(1) !important;
+            mix-blend-mode: screen !important;
         }
 
         .partner-brand-tile:hover {
@@ -2997,7 +3011,7 @@
                 </div>
 
                 <div class="hero-card-img-wrap">
-                    <img id="hero-img" src="shark.jpg" alt="Featured Product" loading="eager">
+                    <img id="hero-img" src="/attack-shark-x3-black.jpg" alt="Featured Product" loading="eager">
                 </div>
 
                 <div class="hero-card-footer">
@@ -3036,31 +3050,31 @@
             <div class="partner-brands-track">
                 <!-- Set 1 -->
                 <div class="partner-brand-tile" onclick="filterByBrand('Attack Shark', this)"><img src="/attack-shark2.jpg" alt="Attack Shark" loading="lazy" class="brand-logo-img logo-attack-shark" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Attack Shark</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('Ajazz', this)"><img src="/ajazz1.jpg" alt="Ajazz" loading="lazy" class="brand-logo-img logo-ajazz" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Ajazz</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('AULA', this)"><img src="/aula3.jpg" alt="AULA" loading="lazy" class="brand-logo-img logo-aula" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">AULA</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('Mchose', this)"><img src="/mchose4.jpg" alt="Mchose" loading="lazy" class="brand-logo-img logo-mchose" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Mchose</span></div>
+                <div class="partner-brand-tile alt-tile" onclick="filterByBrand('Ajazz', this)"><img src="/ajazz1.jpg" alt="Ajazz" loading="lazy" class="brand-logo-img logo-ajazz" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Ajazz</span></div>
                 <div class="partner-brand-tile" onclick="filterByBrand('VGN', this)"><img src="/vgn5.jpg" alt="VGN" loading="lazy" class="brand-logo-img logo-vgn" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">VGN</span></div>
+                <div class="partner-brand-tile alt-tile" onclick="filterByBrand('AULA', this)"><img src="/aula3.jpg" alt="AULA" loading="lazy" class="brand-logo-img logo-aula" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">AULA</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Mchose', this)"><img src="/mchose4.png" alt="Mchose" loading="lazy" class="brand-logo-img logo-mchose" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Mchose</span></div>
 
                 <!-- Set 2 -->
-                <div class="partner-brand-tile" onclick="filterByBrand('Attack Shark', this)"><img src="/attack-shark2.jpg" alt="Attack Shark" loading="lazy" class="brand-logo-img logo-attack-shark" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Attack Shark</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('Ajazz', this)"><img src="/ajazz1.jpg" alt="Ajazz" loading="lazy" class="brand-logo-img logo-ajazz" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Ajazz</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('AULA', this)"><img src="/aula3.jpg" alt="AULA" loading="lazy" class="brand-logo-img logo-aula" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">AULA</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('Mchose', this)"><img src="/mchose4.jpg" alt="Mchose" loading="lazy" class="brand-logo-img logo-mchose" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Mchose</span></div>
+                <div class="partner-brand-tile alt-tile" onclick="filterByBrand('Ajazz', this)"><img src="/ajazz1.jpg" alt="Ajazz" loading="lazy" class="brand-logo-img logo-ajazz" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Ajazz</span></div>
                 <div class="partner-brand-tile" onclick="filterByBrand('VGN', this)"><img src="/vgn5.jpg" alt="VGN" loading="lazy" class="brand-logo-img logo-vgn" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">VGN</span></div>
+                <div class="partner-brand-tile alt-tile" onclick="filterByBrand('AULA', this)"><img src="/aula3.jpg" alt="AULA" loading="lazy" class="brand-logo-img logo-aula" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">AULA</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Mchose', this)"><img src="/mchose4.png" alt="Mchose" loading="lazy" class="brand-logo-img logo-mchose" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Mchose</span></div>
+                <div class="partner-brand-tile alt-tile" onclick="filterByBrand('Attack Shark', this)"><img src="/attack-shark2.jpg" alt="Attack Shark" loading="lazy" class="brand-logo-img logo-attack-shark" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Attack Shark</span></div>
 
                 <!-- Set 3 -->
-                <div class="partner-brand-tile" onclick="filterByBrand('Attack Shark', this)"><img src="/attack-shark2.jpg" alt="Attack Shark" loading="lazy" class="brand-logo-img logo-attack-shark" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Attack Shark</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('Ajazz', this)"><img src="/ajazz1.jpg" alt="Ajazz" loading="lazy" class="brand-logo-img logo-ajazz" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Ajazz</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('AULA', this)"><img src="/aula3.jpg" alt="AULA" loading="lazy" class="brand-logo-img logo-aula" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">AULA</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('Mchose', this)"><img src="/mchose4.jpg" alt="Mchose" loading="lazy" class="brand-logo-img logo-mchose" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Mchose</span></div>
                 <div class="partner-brand-tile" onclick="filterByBrand('VGN', this)"><img src="/vgn5.jpg" alt="VGN" loading="lazy" class="brand-logo-img logo-vgn" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">VGN</span></div>
+                <div class="partner-brand-tile alt-tile" onclick="filterByBrand('AULA', this)"><img src="/aula3.jpg" alt="AULA" loading="lazy" class="brand-logo-img logo-aula" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">AULA</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Mchose', this)"><img src="/mchose4.png" alt="Mchose" loading="lazy" class="brand-logo-img logo-mchose" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Mchose</span></div>
+                <div class="partner-brand-tile alt-tile" onclick="filterByBrand('Attack Shark', this)"><img src="/attack-shark2.jpg" alt="Attack Shark" loading="lazy" class="brand-logo-img logo-attack-shark" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Attack Shark</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Ajazz', this)"><img src="/ajazz1.jpg" alt="Ajazz" loading="lazy" class="brand-logo-img logo-ajazz" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Ajazz</span></div>
 
                 <!-- Set 4 -->
-                <div class="partner-brand-tile" onclick="filterByBrand('Attack Shark', this)"><img src="/attack-shark2.jpg" alt="Attack Shark" loading="lazy" class="brand-logo-img logo-attack-shark" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Attack Shark</span></div>
+                <div class="partner-brand-tile alt-tile" onclick="filterByBrand('AULA', this)"><img src="/aula3.jpg" alt="AULA" loading="lazy" class="brand-logo-img logo-aula" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">AULA</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Mchose', this)"><img src="/mchose4.png" alt="Mchose" loading="lazy" class="brand-logo-img logo-mchose" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Mchose</span></div>
+                <div class="partner-brand-tile alt-tile" onclick="filterByBrand('Attack Shark', this)"><img src="/attack-shark2.jpg" alt="Attack Shark" loading="lazy" class="brand-logo-img logo-attack-shark" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Attack Shark</span></div>
                 <div class="partner-brand-tile" onclick="filterByBrand('Ajazz', this)"><img src="/ajazz1.jpg" alt="Ajazz" loading="lazy" class="brand-logo-img logo-ajazz" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Ajazz</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('AULA', this)"><img src="/aula3.jpg" alt="AULA" loading="lazy" class="brand-logo-img logo-aula" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">AULA</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('Mchose', this)"><img src="/mchose4.jpg" alt="Mchose" loading="lazy" class="brand-logo-img logo-mchose" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Mchose</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('VGN', this)"><img src="/vgn5.jpg" alt="VGN" loading="lazy" class="brand-logo-img logo-vgn" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">VGN</span></div>
+                <div class="partner-brand-tile alt-tile" onclick="filterByBrand('VGN', this)"><img src="/vgn5.jpg" alt="VGN" loading="lazy" class="brand-logo-img logo-vgn" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">VGN</span></div>
             </div>
         </div>
     </section>
@@ -3709,8 +3723,8 @@
                 tag: "🔥 ТОП ПРОДАЖІВ",
                 popular: true,
                 desc: "Флагманська бездротова мишка з вагою всього 49 грам. Топовий сенсор PixArt PAW3395 (до 26000 DPI) та мікроперемикачі Huano Blue Pink Dot.",
-                img: "shark.jpg",
-                gallery: ["shark.jpg"],
+                img: "/attack-shark-x3-black.jpg",
+                gallery: ["/attack-shark-x3-black.jpg", "/attack-shark-x3-white.jpg", "/attack-shark-x3-box.jpg"],
                 specs: [
                     { label: "Сенсор", value: "PixArt PAW3395 (26 000 DPI)" },
                     { label: "Вага", value: "49 грам (ультралегка)" },
@@ -3719,9 +3733,9 @@
                 ],
                 colors: "Black, White, Pink",
                 color_images: {
-                    "Black": { main: "shark.jpg", gallery: ["shark.jpg"] },
-                    "White": { main: "shark.jpg", gallery: ["shark.jpg"] },
-                    "Pink": { main: "shark.jpg", gallery: ["shark.jpg"] }
+                    "Black": { main: "/attack-shark-x3-black.jpg", gallery: ["/attack-shark-x3-black.jpg", "/attack-shark-x3-box.jpg"] },
+                    "White": { main: "/attack-shark-x3-white.jpg", gallery: ["/attack-shark-x3-white.jpg", "/attack-shark-x3-box.jpg"] },
+                    "Pink": { main: "/attack-shark-x3-black.jpg", gallery: ["/attack-shark-x3-black.jpg"] }
                 },
                 color_quantities: { "Black": 10, "White": 8, "Pink": 4 }
             },
@@ -3736,8 +3750,8 @@
                 tag: "⚡ ХІТ СЕЗОНУ",
                 popular: true,
                 desc: "Преміальний бездротовий контролер з акумулятором на 500 mAh (до 130 годин гри). Контролер Nordic 52840 та сенсор PAW3395.",
-                img: "vgn.jpg",
-                gallery: ["vgn.jpg"],
+                img: "/photo_2026-08-25_15-32-13.jpg",
+                gallery: ["/photo_2026-08-25_15-32-13.jpg", "/photo_2026-08-25_15-32-17.jpg", "/photo_2026-08-25_15-32-36.jpg"],
                 specs: [
                     { label: "Сенсор", value: "PixArt PAW3395 Flagship" },
                     { label: "Чипсет", value: "Nordic 52840 (4K Polling Ready)" },
@@ -3746,8 +3760,8 @@
                 ],
                 colors: "Black, White",
                 color_images: {
-                    "Black": { main: "vgn.jpg", gallery: ["vgn.jpg"] },
-                    "White": { main: "vgn.jpg", gallery: ["vgn.jpg"] }
+                    "Black": { main: "/photo_2026-08-25_15-32-13.jpg", gallery: ["/photo_2026-08-25_15-32-13.jpg", "/photo_2026-08-25_15-32-17.jpg"] },
+                    "White": { main: "/photo_2026-08-25_15-32-36.jpg", gallery: ["/photo_2026-08-25_15-32-36.jpg", "/photo_2026-08-25_15-32-38.jpg"] }
                 },
                 color_quantities: { "Black": 15, "White": 12 }
             },
@@ -3762,8 +3776,8 @@
                 tag: "🌟 ВИБІР ПРОФІ",
                 popular: true,
                 desc: "Легендарна 75% механічна клавіатура з повноцінною Gasket Mount структурою, 5-шаровою шумоізоляцією та пре-лубленими перемикачами LEOBOG Reaper.",
-                img: "aula.png",
-                gallery: ["aula.png"],
+                img: "/photo_2026-08-25_15-32-57.jpg",
+                gallery: ["/photo_2026-08-25_15-32-57.jpg", "/photo_2026-08-25_15-32-59.jpg", "/photo_2026-08-25_15-33-02.jpg"],
                 specs: [
                     { label: "Формат", value: "75% компактна з металевим енкодером" },
                     { label: "Конструкція", value: "Gasket Mount з PC плейтом" },
@@ -3772,9 +3786,9 @@
                 ],
                 colors: "Black, White, Blue",
                 color_images: {
-                    "Black": { main: "aula.png", gallery: ["aula.png"] },
-                    "White": { main: "aula.png", gallery: ["aula.png"] },
-                    "Blue": { main: "aula.png", gallery: ["aula.png"] }
+                    "Black": { main: "/photo_2026-08-25_15-32-57.jpg", gallery: ["/photo_2026-08-25_15-32-57.jpg"] },
+                    "White": { main: "/photo_2026-08-25_15-32-59.jpg", gallery: ["/photo_2026-08-25_15-32-59.jpg"] },
+                    "Blue": { main: "/photo_2026-08-25_15-33-02.jpg", gallery: ["/photo_2026-08-25_15-33-02.jpg"] }
                 },
                 color_quantities: { "Black": 6, "White": 8, "Blue": 4 }
             },
@@ -3789,8 +3803,8 @@
                 tag: "🔥 ТОП ПРОДАЖІВ",
                 popular: true,
                 desc: "Бездротова кастомна клавіатура з кольоровим 0.85-дюймовим TFT-екраном для показу GIF-анімацій, часу та налаштувань. RGB підсвітка південного типу.",
-                img: "adjaras.webp",
-                gallery: ["adjaras.webp"],
+                img: "/350954572_1917991488535350_2141770078765880809_n_2.webp",
+                gallery: ["/350954572_1917991488535350_2141770078765880809_n_2.webp", "/photo_2026-08-25_15-33-42.jpg", "/photo_2026-08-25_15-33-43.jpg"],
                 specs: [
                     { label: "Дисплей", value: "0.85\" Color TFT Screen (GIF/Battery/Clock)" },
                     { label: "Свічі", value: "Ajazz Gift Switch (Linear Pre-Lubed)" },
@@ -3799,9 +3813,9 @@
                 ],
                 colors: "Grey, White, Purple",
                 color_images: {
-                    "Grey": { main: "adjaras.webp", gallery: ["adjaras.webp"] },
-                    "White": { main: "adjaras.webp", gallery: ["adjaras.webp"] },
-                    "Purple": { main: "adjaras.webp", gallery: ["adjaras.webp"] }
+                    "Grey": { main: "/350954572_1917991488535350_2141770078765880809_n_2.webp", gallery: ["/350954572_1917991488535350_2141770078765880809_n_2.webp", "/photo_2026-08-25_15-33-42.jpg"] },
+                    "White": { main: "/photo_2026-08-25_15-33-43.jpg", gallery: ["/photo_2026-08-25_15-33-43.jpg"] },
+                    "Purple": { main: "/photo_2026-08-25_15-33-49.jpg", gallery: ["/photo_2026-08-25_15-33-49.jpg"] }
                 },
                 color_quantities: { "Grey": 10, "White": 5, "Purple": 3 }
             },
@@ -3816,8 +3830,8 @@
                 tag: "⚡ ХІТ СЕЗОНУ",
                 popular: true,
                 desc: "Ергономічна бездротова мишка симетричної форми. Сенсор PAW3395, вага 59 г, перемикачі Blue Transparent Pink Dot з ресурсом 80 млн.",
-                img: "mchous.png",
-                gallery: ["mchous.png"],
+                img: "/48c2868a-928a-46f4-8b76-9e4d4fd6a7dc.jpg",
+                gallery: ["/48c2868a-928a-46f4-8b76-9e4d4fd6a7dc.jpg", "/photo_2026-08-25_15-31-22.jpg", "/photo_2026-08-25_15-31-28.jpg"],
                 specs: [
                     { label: "Сенсор", value: "PixArt PAW3395 (26000 DPI, 650 IPS)" },
                     { label: "Вага", value: "59 грам" },
@@ -3826,8 +3840,8 @@
                 ],
                 colors: "Black, White",
                 color_images: {
-                    "Black": { main: "mchous.png", gallery: ["mchous.png"] },
-                    "White": { main: "mchous.png", gallery: ["mchous.png"] }
+                    "Black": { main: "/48c2868a-928a-46f4-8b76-9e4d4fd6a7dc.jpg", gallery: ["/48c2868a-928a-46f4-8b76-9e4d4fd6a7dc.jpg"] },
+                    "White": { main: "/photo_2026-08-25_15-31-22.jpg", gallery: ["/photo_2026-08-25_15-31-22.jpg", "/photo_2026-08-25_15-31-28.jpg"] }
                 },
                 color_quantities: { "Black": 8, "White": 6 }
             }
@@ -3963,7 +3977,7 @@
             { id: 'attack-shark', name: 'Attack Shark', logo: '/attack-shark2.jpg' },
             { id: 'ajazz', name: 'Ajazz', logo: '/ajazz1.jpg' },
             { id: 'aula', name: 'AULA', logo: '/aula3.jpg' },
-            { id: 'mchose', name: 'Mchose', logo: '/mchose4.jpg' },
+            { id: 'mchose', name: 'Mchose', logo: '/mchose4.png' },
             { id: 'vgn', name: 'VGN', logo: '/vgn5.jpg' }
         ];
 
@@ -3973,7 +3987,7 @@
             if (bLower.includes('attack') || bLower.includes('shark')) return '/attack-shark2.jpg';
             if (bLower.includes('ajazz') || bLower.includes('adjaras')) return '/ajazz1.jpg';
             if (bLower.includes('aula')) return '/aula3.jpg';
-            if (bLower.includes('mchose') || bLower.includes('mchous')) return '/mchose4.jpg';
+            if (bLower.includes('mchose') || bLower.includes('mchous')) return '/mchose4.png';
             if (bLower.includes('vgn')) return '/vgn5.jpg';
             const found = (brands || []).find(b => (b.name || '').toLowerCase().trim() === bLower);
             if (found && found.logo) {
