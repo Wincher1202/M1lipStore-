@@ -252,13 +252,13 @@
         }
 
         .hero {
-            padding: 120px 20px 40px;
-            max-width: 1440px;
+            padding: 105px 20px 14px;
+            max-width: 1400px;
             margin: 0 auto;
             display: grid;
             grid-template-columns: 1fr;
             align-items: center;
-            gap: 36px;
+            gap: 28px;
             width: 100%;
             text-align: center;
             box-sizing: border-box;
@@ -267,11 +267,11 @@
 
         @media(min-width: 960px) {
             .hero {
-                grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+                grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
                 text-align: left;
-                padding-top: 130px;
-                padding-bottom: 50px;
-                gap: 48px;
+                padding-top: 115px;
+                padding-bottom: 16px;
+                gap: 40px;
             }
         }
 
@@ -540,23 +540,24 @@
 
         .hero-card-3d {
             background: var(--bg-secondary);
-            border: 2px solid var(--border-light);
-            border-radius: var(--radius-lg);
-            padding: 16px;
-            box-shadow: 0 16px 45px rgba(0, 0, 0, 0.08);
+            border: 1px solid var(--border-light);
+            border-radius: 22px;
+            padding: 14px;
+            box-shadow: 0 16px 36px -8px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.02);
             width: 100%;
-            max-width: 560px;
+            max-width: 440px;
             position: relative;
             cursor: pointer;
-            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease;
             overflow: hidden;
             box-sizing: border-box;
+            user-select: none;
         }
 
         .hero-card-3d:hover {
             border-color: var(--accent);
-            box-shadow: 0 24px 50px rgba(87, 100, 226, 0.25);
-            transform: translateY(-5px) scale(1.01);
+            box-shadow: 0 20px 42px -6px rgba(87, 100, 226, 0.22);
+            transform: translateY(-4px);
         }
 
         .hero-card-3d.brand-focus {
@@ -565,15 +566,15 @@
         }
 
         @keyframes heroTabletPulse {
-            0% { transform: scale(0.96); box-shadow: 0 0 0 0 rgba(87, 100, 226, 0.8); }
-            50% { transform: scale(1.03); box-shadow: 0 0 35px 8px rgba(87, 100, 226, 0.4); }
-            100% { transform: scale(1); box-shadow: 0 14px 34px rgba(87, 100, 226, 0.25); }
+            0% { transform: scale(0.97); box-shadow: 0 0 0 0 rgba(87, 100, 226, 0.8); }
+            50% { transform: scale(1.02); box-shadow: 0 0 25px 6px rgba(87, 100, 226, 0.35); }
+            100% { transform: scale(1); box-shadow: 0 12px 28px rgba(87, 100, 226, 0.2); }
         }
 
         .hero-card-3d .product-tag {
             position: absolute;
-            top: 24px;
-            left: 24px;
+            top: 22px;
+            left: 22px;
             z-index: 5;
             box-shadow: 0 4px 14px rgba(0,0,0,0.12);
             transition: all 0.3s ease;
@@ -581,34 +582,35 @@
 
         .hero-live-badge {
             position: absolute;
-            top: 24px;
-            right: 24px;
+            top: 22px;
+            right: 22px;
             z-index: 5;
             background: rgba(18, 20, 24, 0.75);
             color: #ffffff;
             backdrop-filter: blur(8px);
             -webkit-backdrop-filter: blur(8px);
             border: 1px solid rgba(255, 255, 255, 0.15);
-            font-size: 0.7rem;
+            font-size: 0.68rem;
             font-weight: 700;
             padding: 4px 10px;
             border-radius: 20px;
             display: inline-flex;
             align-items: center;
             gap: 5px;
+            letter-spacing: 0.03em;
         }
 
         .hero-card-img-wrap {
             width: 100%;
-            aspect-ratio: 1 / 1;
-            border-radius: var(--radius-md);
+            aspect-ratio: 1.05 / 1;
+            border-radius: 16px;
             overflow: hidden;
             display: flex;
             align-items: center;
             justify-content: center;
             background: radial-gradient(circle at center, var(--bg-tertiary) 0%, var(--bg-secondary) 100%);
             position: relative;
-            padding: 8px;
+            padding: 10px;
             box-sizing: border-box;
         }
 
@@ -618,51 +620,22 @@
             object-fit: contain;
             object-position: center;
             display: block;
-            border-radius: var(--radius-md);
-            transition: opacity 0.35s ease-in-out, transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            border-radius: 12px;
+            transition: opacity 0.45s cubic-bezier(0.4, 0, 0.2, 1), transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+            will-change: opacity, transform;
         }
 
         .hero-card-3d:hover img {
-            transform: scale(1.03);
+            transform: scale(1.04);
         }
-
-        .hero-card-nav-btn {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            background: rgba(18, 20, 24, 0.75);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            color: #ffffff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            z-index: 10;
-            transition: all 0.25s ease;
-            opacity: 0.85;
-        }
-
-        .hero-card-nav-btn:hover {
-            opacity: 1;
-            background: var(--accent);
-            transform: translateY(-50%) scale(1.1);
-        }
-
-        .hero-card-nav-prev { left: 14px; }
-        .hero-card-nav-next { right: 14px; }
 
         .hero-card-footer {
             display: flex;
             align-items: center;
             justify-content: space-between;
             gap: 12px;
-            margin-top: 14px;
-            padding-top: 12px;
+            margin-top: 12px;
+            padding-top: 10px;
             border-top: 1px solid var(--border-light);
         }
 
@@ -672,10 +645,11 @@
             gap: 2px;
             text-align: left;
             min-width: 0;
+            transition: opacity 0.35s ease, transform 0.35s ease;
         }
 
         .hero-card-title {
-            font-size: 1.05rem;
+            font-size: 1rem;
             font-weight: 800;
             color: var(--text-primary);
             white-space: nowrap;
@@ -684,7 +658,7 @@
         }
 
         .hero-card-price {
-            font-size: 1.18rem;
+            font-size: 1.12rem;
             font-weight: 800;
             color: var(--accent);
         }
@@ -695,9 +669,9 @@
             gap: 6px;
             background: var(--accent-light);
             color: var(--accent);
-            padding: 8px 16px;
+            padding: 7px 14px;
             border-radius: 20px;
-            font-size: 0.82rem;
+            font-size: 0.8rem;
             font-weight: 700;
             white-space: nowrap;
             transition: var(--transition-smooth);
@@ -788,20 +762,20 @@
 
         /* Popular brands — slow, seamless auto-scrolling marquee */
         .partner-brands-section {
-            padding: 10px 0 16px 0;
-            margin: 6px 0 12px 0;
+            padding: 0 0 10px 0;
+            margin: 0 0 4px 0;
             position: relative;
         }
 
         .partner-brands-section .section-header {
-            padding: 0 20px 10px 20px;
+            padding: 0 20px 6px 20px;
         }
 
         .partner-brands-marquee {
             overflow: hidden;
             width: 100%;
-            padding: 16px 0 20px 0;
-            margin: -6px 0;
+            padding: 8px 0 14px 0;
+            margin: 0;
             position: relative;
             -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 30px, #000 calc(100% - 30px), transparent 100%);
             mask-image: linear-gradient(90deg, transparent 0, #000 30px, #000 calc(100% - 30px), transparent 100%);
@@ -2614,7 +2588,7 @@
     <section class="hero">
         <div class="hero-content">
             <div class="hero-badge-group">
-                <div class="hero-badge"><span style="font-size: 0.95rem; line-height: 1;">🇺🇦</span> M1LIPSTORE / 2026</div>
+                <div class="hero-badge">M1LIPSTORE / 2026</div>
                 <div class="hero-badge" style="background: rgba(16, 185, 129, 0.12); color: #10B981; border: 1px solid rgba(16, 185, 129, 0.25);">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
                     ОРИГІНАЛЬНА ПЕРИФЕРІЯ
@@ -2658,25 +2632,18 @@
             </div>
         </div>
         <div class="hero-visual">
-            <div class="hero-card-3d" id="hero-card" onclick="openHeroProductModal()">
+            <div class="hero-card-3d" id="hero-card" onclick="openHeroProductModal()" onmouseenter="pauseHeroTimer()" onmouseleave="resumeHeroTimer()" title="Натисніть, щоб відкрити товар">
                 <span class="product-tag new" id="hero-tag">🔥 ТОП ПРОДАЖІВ</span>
-                <span class="hero-live-badge"><span class="status-dot"></span> ХІТ СЕЗОНУ</span>
+                <span class="hero-live-badge"><span class="status-dot"></span> LIVE КАТАЛОГ</span>
                 
                 <div class="hero-card-img-wrap">
-                    <img id="hero-img" alt="Hero Product">
+                    <img id="hero-img" src="shark.jpg" alt="Featured Product" loading="eager">
                 </div>
 
-                <button class="hero-card-nav-btn hero-card-nav-prev" onclick="prevHeroBanner(event)" title="Попередній товар" aria-label="Попередній">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m15 18-6-6 6-6"/></svg>
-                </button>
-                <button class="hero-card-nav-btn hero-card-nav-next" onclick="nextHeroBanner(event)" title="Наступний товар" aria-label="Наступний">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg>
-                </button>
-
                 <div class="hero-card-footer">
-                    <div class="hero-card-info">
-                        <span class="hero-card-title" id="hero-prod-title">Завантаження девайсу...</span>
-                        <span class="hero-card-price" id="hero-prod-price">... ₴</span>
+                    <div class="hero-card-info" id="hero-card-info">
+                        <span class="hero-card-title" id="hero-prod-title">Attack Shark X3 Wireless</span>
+                        <span class="hero-card-price" id="hero-prod-price">1 599 <span class="currency">₴</span></span>
                     </div>
                     <div class="hero-card-cta">
                         <span>Детальніше</span>
@@ -3582,7 +3549,9 @@
             }
 
             renderCatalog();
-            updateHeroBanner();
+            if (products && products.length > 0) {
+                setHeroProduct(products[0]);
+            }
         }
 
         async function fetchCategories() {
@@ -3728,6 +3697,7 @@
 
         let heroCurrentProduct = null;
         let heroTimer = null;
+        let isHeroPaused = false;
 
         function setHeroProduct(p) {
             if (!p) return;
@@ -3736,47 +3706,51 @@
             const tagEl = document.getElementById('hero-tag');
             const titleEl = document.getElementById('hero-prod-title');
             const priceEl = document.getElementById('hero-prod-price');
+            const infoEl = document.getElementById('hero-card-info');
 
             if (imgEl) {
                 imgEl.style.opacity = '0';
+                imgEl.style.transform = 'scale(0.95)';
+                if (infoEl) {
+                    infoEl.style.opacity = '0';
+                    infoEl.style.transform = 'translateY(3px)';
+                }
+                
                 setTimeout(() => {
-                    imgEl.src = p.img || '';
+                    imgEl.src = p.img || 'shark.jpg';
                     if (tagEl) tagEl.innerText = p.tag || '🔥 ТОП ПРОДАЖІВ';
                     if (titleEl) titleEl.innerText = `${p.brand ? p.brand + ' ' : ''}${p.title}`;
                     if (priceEl) priceEl.innerHTML = formatPrice(p.price);
+                    
                     imgEl.style.opacity = '1';
-                }, 200);
+                    imgEl.style.transform = 'scale(1)';
+                    if (infoEl) {
+                        infoEl.style.opacity = '1';
+                        infoEl.style.transform = 'translateY(0)';
+                    }
+                }, 220);
             }
         }
 
         function updateHeroBanner() {
-            if (!products || products.length === 0) return;
-            const p = products[heroIndex % products.length];
-            setHeroProduct(p);
-            heroIndex++;
-        }
-
-        function nextHeroBanner(e) {
-            if (e) e.stopPropagation();
+            if (isHeroPaused) return;
             if (!products || products.length === 0) return;
             heroIndex = (heroIndex + 1) % products.length;
             const p = products[heroIndex];
             setHeroProduct(p);
-            restartHeroTimer();
         }
 
-        function prevHeroBanner(e) {
-            if (e) e.stopPropagation();
-            if (!products || products.length === 0) return;
-            heroIndex = (heroIndex - 1 + products.length) % products.length;
-            const p = products[heroIndex];
-            setHeroProduct(p);
-            restartHeroTimer();
+        function pauseHeroTimer() {
+            isHeroPaused = true;
+        }
+
+        function resumeHeroTimer() {
+            isHeroPaused = false;
         }
 
         function restartHeroTimer() {
             if (heroTimer) clearInterval(heroTimer);
-            heroTimer = setInterval(updateHeroBanner, 5000);
+            heroTimer = setInterval(updateHeroBanner, 4200);
         }
 
         function openHeroProductModal() {
@@ -3822,6 +3796,9 @@
             updateBadges();
             renderRecentSearches();
 
+            if (products && products.length > 0) {
+                setHeroProduct(products[0]);
+            }
             restartHeroTimer();
 
             window.addEventListener('scroll', () => {
