@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 100" width="100%" height="100%">
+  <defs>
+    <linearGradient id="ajazz-red" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ff2a3b"/>
+      <stop offset="100%" stop-color="#cc0818"/>
+    </linearGradient>
+  </defs>
+  <!-- Ajazz Geometric A Badge -->
+  <g transform="translate(20, 18)">
+    <polygon points="32,2 62,62 46,62 32,32 18,62 2,62" fill="url(#ajazz-red)"/>
+    <polygon points="32,18 42,42 22,42" fill="#ffffff"/>
+    <polygon points="32,50 48,58 16,58" fill="#18181b"/>
+  </g>
+  <!-- Typography -->
+  <text x="96" y="62" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-weight="900" font-size="40" fill="#18181b" letter-spacing="3">AJAZZ</text>
+  <rect x="98" y="70" width="170" height="4" rx="2" fill="url(#ajazz-red)"/>
+</svg>

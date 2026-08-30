@@ -3082,10 +3082,10 @@ export class TelegramBotService {
   getDefaultProductImage(brand, category) {
     const cat = (category || '').toLowerCase();
     const br = (brand || '').toLowerCase();
-    if (cat.includes('клавіатур')) return '/photo_2026-08-25_15-32-57.jpg';
+    if (cat.includes('клавіатур')) return '/aula копия.png';
     if (cat.includes('килим') || cat.includes('аксесуар')) return '/images.png';
     if (br.includes('attack shark')) return '/attack-shark-r5-ultra-top-angle.jpg';
-    if (br.includes('aula')) return '/photo_2026-08-25_15-32-57.jpg';
+    if (br.includes('aula')) return '/aula копия.png';
     if (br.includes('ajazz')) return '/photo_2026-08-25_15-31-22.jpg';
     return '/attack-shark-x3-black.jpg';
   }
@@ -3097,7 +3097,7 @@ export class TelegramBotService {
     if (c.includes('червон') || c.includes('red')) return '/attack-shark-r5-ultra-colors-price.jpg';
     if (c.includes('фіолет') || c.includes('purple')) return '/photo_2026-08-25_15-31-28.jpg';
     if (c.includes('сір') || c.includes('grey') || c.includes('gray')) return '/photo_2026-08-25_15-31-22.jpg';
-    if (c.includes('зелен') || c.includes('green') || c.includes('м\'ят')) return '/photo_2026-08-25_15-32-57.jpg';
+    if (c.includes('зелен') || c.includes('green') || c.includes('м\'ят')) return '/aula копия.png';
     return this.getDefaultProductImage(brand, category);
   }
 
