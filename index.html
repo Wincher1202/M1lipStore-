@@ -252,26 +252,29 @@
         }
 
         .hero {
-            padding: 105px 20px 14px;
+            min-height: calc(100vh - 72px);
+            padding: 95px 24px 30px;
             max-width: 1400px;
             margin: 0 auto;
             display: grid;
             grid-template-columns: 1fr;
+            align-content: center;
             align-items: center;
-            gap: 28px;
+            gap: 32px;
             width: 100%;
             text-align: center;
             box-sizing: border-box;
-            overflow: hidden;
+            position: relative;
         }
 
         @media(min-width: 960px) {
             .hero {
-                grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+                grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
                 text-align: left;
-                padding-top: 115px;
-                padding-bottom: 16px;
-                gap: 40px;
+                padding-top: 100px;
+                padding-bottom: 30px;
+                gap: 48px;
+                min-height: calc(100vh - 72px);
             }
         }
 
@@ -541,11 +544,11 @@
         .hero-card-3d {
             background: var(--bg-secondary);
             border: 1px solid var(--border-light);
-            border-radius: 22px;
-            padding: 14px;
-            box-shadow: 0 16px 36px -8px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.02);
+            border-radius: 24px;
+            padding: 16px;
+            box-shadow: 0 20px 48px -12px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.03);
             width: 100%;
-            max-width: 440px;
+            max-width: 500px;
             position: relative;
             cursor: pointer;
             transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease;
@@ -556,7 +559,7 @@
 
         .hero-card-3d:hover {
             border-color: var(--accent);
-            box-shadow: 0 20px 42px -6px rgba(87, 100, 226, 0.22);
+            box-shadow: 0 24px 54px -8px rgba(87, 100, 226, 0.25);
             transform: translateY(-4px);
         }
 
@@ -573,44 +576,26 @@
 
         .hero-card-3d .product-tag {
             position: absolute;
-            top: 22px;
-            left: 22px;
+            top: 24px;
+            left: 24px;
             z-index: 5;
-            box-shadow: 0 4px 14px rgba(0,0,0,0.12);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.18);
             transition: all 0.3s ease;
-        }
-
-        .hero-live-badge {
-            position: absolute;
-            top: 22px;
-            right: 22px;
-            z-index: 5;
-            background: rgba(18, 20, 24, 0.75);
-            color: #ffffff;
             backdrop-filter: blur(8px);
             -webkit-backdrop-filter: blur(8px);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            font-size: 0.68rem;
-            font-weight: 700;
-            padding: 4px 10px;
-            border-radius: 20px;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            letter-spacing: 0.03em;
         }
 
         .hero-card-img-wrap {
             width: 100%;
             aspect-ratio: 1.05 / 1;
-            border-radius: 16px;
+            border-radius: 18px;
             overflow: hidden;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: radial-gradient(circle at center, var(--bg-tertiary) 0%, var(--bg-secondary) 100%);
+            background: radial-gradient(circle at center, rgba(87, 100, 226, 0.08) 0%, var(--bg-tertiary) 100%);
             position: relative;
-            padding: 10px;
+            padding: 16px;
             box-sizing: border-box;
         }
 
@@ -620,7 +605,7 @@
             object-fit: contain;
             object-position: center;
             display: block;
-            border-radius: 12px;
+            border-radius: 14px;
             transition: opacity 0.45s cubic-bezier(0.4, 0, 0.2, 1), transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
             will-change: opacity, transform;
         }
@@ -634,22 +619,22 @@
             align-items: center;
             justify-content: space-between;
             gap: 12px;
-            margin-top: 12px;
-            padding-top: 10px;
+            margin-top: 14px;
+            padding-top: 12px;
             border-top: 1px solid var(--border-light);
         }
 
         .hero-card-info {
             display: flex;
             flex-direction: column;
-            gap: 2px;
+            gap: 3px;
             text-align: left;
             min-width: 0;
             transition: opacity 0.35s ease, transform 0.35s ease;
         }
 
         .hero-card-title {
-            font-size: 1rem;
+            font-size: 1.05rem;
             font-weight: 800;
             color: var(--text-primary);
             white-space: nowrap;
@@ -657,10 +642,23 @@
             text-overflow: ellipsis;
         }
 
+        .hero-card-price-wrap {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+        }
+
         .hero-card-price {
-            font-size: 1.12rem;
+            font-size: 1.15rem;
             font-weight: 800;
             color: var(--accent);
+        }
+
+        .hero-card-old-price {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            text-decoration: line-through;
+            font-weight: 500;
         }
 
         .hero-card-cta {
@@ -669,9 +667,9 @@
             gap: 6px;
             background: var(--accent-light);
             color: var(--accent);
-            padding: 7px 14px;
+            padding: 8px 16px;
             border-radius: 20px;
-            font-size: 0.8rem;
+            font-size: 0.82rem;
             font-weight: 700;
             white-space: nowrap;
             transition: var(--transition-smooth);
@@ -762,13 +760,16 @@
 
         /* Popular brands — slow, seamless auto-scrolling marquee */
         .partner-brands-section {
-            padding: 0 0 10px 0;
-            margin: 0 0 4px 0;
+            padding: 36px 0 16px 0;
+            margin: 12px 0 16px 0;
             position: relative;
+            scroll-margin-top: 80px;
         }
 
         .partner-brands-section .section-header {
-            padding: 0 20px 6px 20px;
+            padding: 0 24px 10px 24px;
+            max-width: 1400px;
+            margin: 0 auto;
         }
 
         .partner-brands-marquee {
@@ -2661,7 +2662,6 @@
         <div class="hero-visual">
             <div class="hero-card-3d" id="hero-card" onclick="openHeroProductModal()" onmouseenter="pauseHeroTimer()" onmouseleave="resumeHeroTimer()" title="Натисніть, щоб відкрити товар">
                 <span class="product-tag new" id="hero-tag">🔥 ТОП ПРОДАЖІВ</span>
-                <span class="hero-live-badge"><span class="status-dot"></span> LIVE КАТАЛОГ</span>
                 
                 <div class="hero-card-img-wrap">
                     <img id="hero-img" src="shark.jpg" alt="Featured Product" loading="eager">
@@ -2670,7 +2670,10 @@
                 <div class="hero-card-footer">
                     <div class="hero-card-info" id="hero-card-info">
                         <span class="hero-card-title" id="hero-prod-title">Attack Shark X3 Wireless</span>
-                        <span class="hero-card-price" id="hero-prod-price">1 599 <span class="currency">₴</span></span>
+                        <div class="hero-card-price-wrap">
+                            <span class="hero-card-price" id="hero-prod-price">1 599 <span class="currency">₴</span></span>
+                            <span class="hero-card-old-price" id="hero-prod-old-price">1 899 ₴</span>
+                        </div>
                     </div>
                     <div class="hero-card-cta">
                         <span>Детальніше</span>
@@ -3356,9 +3359,262 @@
             }
         }
 
-        const INITIAL_FALLBACK_PRODUCTS = [];
+        const INITIAL_FALLBACK_PRODUCTS = [
+            {
+                id: "shark-x3-pro",
+                title: "Attack Shark X3 Wireless",
+                brand: "Attack Shark",
+                price: 1599,
+                old_price: 1899,
+                sku: "AS-X3-W",
+                category: "Мишки",
+                tag: "🔥 ТОП ПРОДАЖІВ",
+                popular: true,
+                desc: "Флагманська бездротова мишка з вагою всього 49 грам. Топовий сенсор PixArt PAW3395 (до 26000 DPI) та мікроперемикачі Huano Blue Pink Dot.",
+                img: "shark.jpg",
+                gallery: ["shark.jpg"],
+                specs: [
+                    { label: "Сенсор", value: "PixArt PAW3395 (26 000 DPI)" },
+                    { label: "Вага", value: "49 грам (ультралегка)" },
+                    { label: "Підключення", value: "2.4 GHz / Bluetooth 5.2 / Type-C" },
+                    { label: "Свічі", value: "Huano Blue Pink Dot (80 млн натискань)" }
+                ],
+                colors: "Black, White, Pink",
+                color_images: {
+                    "Black": { main: "shark.jpg", gallery: ["shark.jpg"] },
+                    "White": { main: "shark.jpg", gallery: ["shark.jpg"] },
+                    "Pink": { main: "shark.jpg", gallery: ["shark.jpg"] }
+                },
+                color_quantities: { "Black": 10, "White": 8, "Pink": 4 }
+            },
+            {
+                id: "vgn-f1-promax",
+                title: "VGN Dragonfly F1 Pro Max",
+                brand: "VGN",
+                price: 1999,
+                old_price: 2399,
+                sku: "VGN-F1-MAX",
+                category: "Мишки",
+                tag: "⚡ ХІТ СЕЗОНУ",
+                popular: true,
+                desc: "Преміальний бездротовий контролер з акумулятором на 500 mAh (до 130 годин гри). Контролер Nordic 52840 та сенсор PAW3395.",
+                img: "vgn.jpg",
+                gallery: ["vgn.jpg"],
+                specs: [
+                    { label: "Сенсор", value: "PixArt PAW3395 Flagship" },
+                    { label: "Чипсет", value: "Nordic 52840 (4K Polling Ready)" },
+                    { label: "Вага", value: "55 грам" },
+                    { label: "Автономність", value: "До 130 годин без підзарядки" }
+                ],
+                colors: "Black, White",
+                color_images: {
+                    "Black": { main: "vgn.jpg", gallery: ["vgn.jpg"] },
+                    "White": { main: "vgn.jpg", gallery: ["vgn.jpg"] }
+                },
+                color_quantities: { "Black": 15, "White": 12 }
+            },
+            {
+                id: "aula-f75-wireless",
+                title: "AULA F75 Wireless Gasket",
+                brand: "AULA",
+                price: 2499,
+                old_price: 2899,
+                sku: "AULA-F75-W",
+                category: "Клавіатури",
+                tag: "🌟 ВИБІР ПРОФІ",
+                popular: true,
+                desc: "Легендарна 75% механічна клавіатура з повноцінною Gasket Mount структурою, 5-шаровою шумоізоляцією та пре-лубленими перемикачами LEOBOG Reaper.",
+                img: "aula.png",
+                gallery: ["aula.png"],
+                specs: [
+                    { label: "Формат", value: "75% компактна з металевим енкодером" },
+                    { label: "Конструкція", value: "Gasket Mount з PC плейтом" },
+                    { label: "Свічі", value: "LEOBOG Reaper Switch (змащені з заводу)" },
+                    { label: "Акумулятор", value: "4000 mAh (до 4 тижнів роботи)" }
+                ],
+                colors: "Black, White, Blue",
+                color_images: {
+                    "Black": { main: "aula.png", gallery: ["aula.png"] },
+                    "White": { main: "aula.png", gallery: ["aula.png"] },
+                    "Blue": { main: "aula.png", gallery: ["aula.png"] }
+                },
+                color_quantities: { "Black": 6, "White": 8, "Blue": 4 }
+            },
+            {
+                id: "ajazz-ak820-pro",
+                title: "Ajazz AK820 Pro TFT Screen",
+                brand: "Ajazz",
+                price: 2299,
+                old_price: 2699,
+                sku: "AJ-AK820-PRO",
+                category: "Клавіатури",
+                tag: "🔥 ТОП ПРОДАЖІВ",
+                popular: true,
+                desc: "Бездротова кастомна клавіатура з кольоровим 0.85-дюймовим TFT-екраном для показу GIF-анімацій, часу та налаштувань. RGB підсвітка південного типу.",
+                img: "adjaras.webp",
+                gallery: ["adjaras.webp"],
+                specs: [
+                    { label: "Дисплей", value: "0.85\" Color TFT Screen (GIF/Battery/Clock)" },
+                    { label: "Свічі", value: "Ajazz Gift Switch (Linear Pre-Lubed)" },
+                    { label: "Шумоізоляція", value: "5 шарів (Poron + IXPE + Silicone)" },
+                    { label: "Підключення", value: "Tri-mode (2.4G / BT / Type-C)" }
+                ],
+                colors: "Grey, White, Purple",
+                color_images: {
+                    "Grey": { main: "adjaras.webp", gallery: ["adjaras.webp"] },
+                    "White": { main: "adjaras.webp", gallery: ["adjaras.webp"] },
+                    "Purple": { main: "adjaras.webp", gallery: ["adjaras.webp"] }
+                },
+                color_quantities: { "Grey": 10, "White": 5, "Purple": 3 }
+            },
+            {
+                id: "mchose-a5-ultra",
+                title: "Mchose A5 Ultra Light Wireless",
+                brand: "Mchose",
+                price: 1699,
+                old_price: 1999,
+                sku: "MCH-A5-ULTRA",
+                category: "Мишки",
+                tag: "⚡ ХІТ СЕЗОНУ",
+                popular: true,
+                desc: "Ергономічна бездротова мишка симетричної форми. Сенсор PAW3395, вага 59 г, перемикачі Blue Transparent Pink Dot з ресурсом 80 млн.",
+                img: "mchous.png",
+                gallery: ["mchous.png"],
+                specs: [
+                    { label: "Сенсор", value: "PixArt PAW3395 (26000 DPI, 650 IPS)" },
+                    { label: "Вага", value: "59 грам" },
+                    { label: "Час відгуку", value: "1 мс (сумісна з донглом 4K)" },
+                    { label: "Глайди", value: "100% Virgin Grade PTFE" }
+                ],
+                colors: "Black, White",
+                color_images: {
+                    "Black": { main: "mchous.png", gallery: ["mchous.png"] },
+                    "White": { main: "mchous.png", gallery: ["mchous.png"] }
+                },
+                color_quantities: { "Black": 8, "White": 6 }
+            }
+        ];
 
-        let products = [];
+        function parseRawProductsList(rawList) {
+            if (!Array.isArray(rawList)) return [];
+            return rawList.map(item => {
+                let parsedColors = [];
+                let rawColors = item.color_images || item.colorImages;
+                let colorStocks = item.color_quantities || item.colorQuantities || {};
+                
+                if (typeof rawColors === 'string') {
+                    try { rawColors = JSON.parse(rawColors); } catch(err) { rawColors = {}; }
+                }
+                if (typeof colorStocks === 'string') {
+                    try { colorStocks = JSON.parse(colorStocks); } catch(err) { colorStocks = {}; }
+                }
+
+                if (rawColors && Object.keys(rawColors).length > 0) {
+                    const totalColorCount = Object.keys(rawColors).length;
+                    parsedColors = Object.keys(rawColors).map(colorName => {
+                        let stockVal = 15;
+                        if (colorStocks[colorName] !== undefined && colorStocks[colorName] !== null) {
+                            stockVal = Number(colorStocks[colorName]);
+                        } else if (item.quantity !== undefined && item.quantity !== null && Number(item.quantity) > 0) {
+                            stockVal = Math.max(1, Math.round(Number(item.quantity) / totalColorCount));
+                        } else if (item.stock !== undefined && item.stock !== null) {
+                            stockVal = Number(item.stock);
+                        }
+                        
+                        let colorData = rawColors[colorName];
+                        let colorImg = '';
+                        let colorGallery = [];
+                        if (colorData && typeof colorData === 'object') {
+                            colorImg = colorData.main || '';
+                            colorGallery = Array.isArray(colorData.gallery) ? colorData.gallery : [];
+                        } else if (typeof colorData === 'string') {
+                            colorImg = colorData;
+                        }
+                        return {
+                            name: colorName,
+                            isOut: stockVal <= 0,
+                            stock: stockVal,
+                            image: colorImg,
+                            gallery: colorGallery
+                        };
+                    });
+                }
+                
+                if (parsedColors.length === 0 && item.colors) {
+                    let colorNames = typeof item.colors === 'string' ? item.colors.split(',').map(s => s.trim()) : item.colors;
+                    const totalColorCount = colorNames.length || 1;
+                    parsedColors = colorNames.map(colorName => {
+                        let stockVal = 15;
+                        if (colorStocks[colorName] !== undefined && colorStocks[colorName] !== null) {
+                            stockVal = Number(colorStocks[colorName]);
+                        } else if (item.quantity !== undefined && item.quantity !== null && Number(item.quantity) > 0) {
+                            stockVal = Math.max(1, Math.round(Number(item.quantity) / totalColorCount));
+                        } else if (item.stock !== undefined && item.stock !== null) {
+                            stockVal = Number(item.stock);
+                        }
+                        return { 
+                            name: colorName, 
+                            isOut: stockVal <= 0, 
+                            stock: stockVal 
+                        };
+                    });
+                }
+
+                if (parsedColors.length === 0) {
+                    let defaultStock = item.stock !== undefined ? Number(item.stock) : 5;
+                    parsedColors = [{ name: 'Default', isOut: defaultStock <= 0, stock: defaultStock }];
+                }
+
+                let parsedGallery = [];
+                if (item.gallery) {
+                    if (typeof item.gallery === 'string') {
+                        parsedGallery = item.gallery.split(',').map(s => s.trim()).filter(Boolean);
+                    } else if (Array.isArray(item.gallery)) {
+                        parsedGallery = item.gallery;
+                    }
+                }
+                if (parsedGallery.length === 0 && item.img) {
+                    parsedGallery = [item.img];
+                }
+
+                let allImagesSet = new Set();
+                if (item.img) allImagesSet.add(item.img);
+                parsedGallery.forEach(img => allImagesSet.add(img));
+                parsedColors.forEach(c => {
+                    if (c.image) allImagesSet.add(c.image);
+                    if (Array.isArray(c.gallery)) c.gallery.forEach(g => allImagesSet.add(g));
+                });
+
+                let parsedSpecs = [];
+                if (item.specs) {
+                    if (typeof item.specs === 'string') {
+                        try { parsedSpecs = JSON.parse(item.specs); } catch(err) { parsedSpecs = []; }
+                    } else if (Array.isArray(item.specs)) {
+                        parsedSpecs = item.specs;
+                    }
+                }
+
+                return {
+                    id: item.id || 'prod-' + Math.random(),
+                    brand: item.brand || 'M1LIP',
+                    title: item.title || 'Товар',
+                    price: Number(item.price) || 0,
+                    oldPrice: item.old_price || item.oldPrice || null,
+                    sku: item.sku || '',
+                    popular: !!item.popular,
+                    tag: item.tag || 'НОВИНКА',
+                    category: item.category || 'Аксесуари',
+                    desc: item.description || item.desc || 'Якісний ігровий девайс.',
+                    img: item.img || (parsedGallery.length > 0 ? parsedGallery[0] : 'shark.jpg'),
+                    gallery: Array.from(allImagesSet),
+                    specs: parsedSpecs,
+                    colors: parsedColors,
+                    colorImagesMap: rawColors || {}
+                };
+            });
+        }
+
+        let products = parseRawProductsList(INITIAL_FALLBACK_PRODUCTS);
         let categories = [
             { id: 'mice', name: 'Мишки' },
             { id: 'keyboards', name: 'Клавіатури' },
@@ -3439,6 +3695,19 @@
         }
 
         async function fetchProducts() {
+            // First load from localStorage cache if available
+            try {
+                const cached = localStorage.getItem('m1lip_cached_products');
+                if (cached) {
+                    const parsed = JSON.parse(cached);
+                    if (Array.isArray(parsed) && parsed.length > 0) {
+                        products = parseRawProductsList(parsed);
+                        renderCatalog();
+                        if (products.length > 0) setHeroProduct(products[0]);
+                    }
+                }
+            } catch(e) {}
+
             try {
                 let response = await fetch(API_URL);
                 if (!response.ok) {
@@ -3451,128 +3720,14 @@
                     return;
                 }
                 let backendData = await response.json();
-                if (!Array.isArray(backendData) || backendData.length === 0) {
-                    renderCatalog();
-                    return;
+                if (Array.isArray(backendData) && backendData.length > 0) {
+                    products = parseRawProductsList(backendData);
+                    try {
+                        localStorage.setItem('m1lip_cached_products', JSON.stringify(backendData));
+                    } catch(e) {}
                 }
-
-                products = backendData.map(item => {
-                    let parsedColors = [];
-                    let rawColors = item.color_images || item.colorImages;
-                    let colorStocks = item.color_quantities || item.colorQuantities || {};
-                    
-                    if (typeof rawColors === 'string') {
-                        try { rawColors = JSON.parse(rawColors); } catch(err) { rawColors = {}; }
-                    }
-                    if (typeof colorStocks === 'string') {
-                        try { colorStocks = JSON.parse(colorStocks); } catch(err) { colorStocks = {}; }
-                    }
-
-                    if (rawColors && Object.keys(rawColors).length > 0) {
-                        const totalColorCount = Object.keys(rawColors).length;
-                        parsedColors = Object.keys(rawColors).map(colorName => {
-                            let stockVal = 15;
-                            if (colorStocks[colorName] !== undefined && colorStocks[colorName] !== null) {
-                                stockVal = Number(colorStocks[colorName]);
-                            } else if (item.quantity !== undefined && item.quantity !== null && Number(item.quantity) > 0) {
-                                stockVal = Math.max(1, Math.round(Number(item.quantity) / totalColorCount));
-                            } else if (item.stock !== undefined && item.stock !== null) {
-                                stockVal = Number(item.stock);
-                            }
-                            
-                            let colorData = rawColors[colorName];
-                            let colorImg = '';
-                            let colorGallery = [];
-                            if (colorData && typeof colorData === 'object') {
-                                colorImg = colorData.main || '';
-                                colorGallery = Array.isArray(colorData.gallery) ? colorData.gallery : [];
-                            } else if (typeof colorData === 'string') {
-                                colorImg = colorData;
-                            }
-                            return {
-                                name: colorName,
-                                isOut: stockVal <= 0,
-                                stock: stockVal,
-                                image: colorImg,
-                                gallery: colorGallery
-                            };
-                        });
-                    }
-                    
-                    if (parsedColors.length === 0 && item.colors) {
-                        let colorNames = typeof item.colors === 'string' ? item.colors.split(',').map(s => s.trim()) : item.colors;
-                        const totalColorCount = colorNames.length || 1;
-                        parsedColors = colorNames.map(colorName => {
-                            let stockVal = 15;
-                            if (colorStocks[colorName] !== undefined && colorStocks[colorName] !== null) {
-                                stockVal = Number(colorStocks[colorName]);
-                            } else if (item.quantity !== undefined && item.quantity !== null && Number(item.quantity) > 0) {
-                                stockVal = Math.max(1, Math.round(Number(item.quantity) / totalColorCount));
-                            } else if (item.stock !== undefined && item.stock !== null) {
-                                stockVal = Number(item.stock);
-                            }
-                            return { 
-                                name: colorName, 
-                                isOut: stockVal <= 0, 
-                                stock: stockVal 
-                            };
-                        });
-                    }
-
-                    if (parsedColors.length === 0) {
-                        let defaultStock = item.stock !== undefined ? Number(item.stock) : 5;
-                        parsedColors = [{ name: 'Default', isOut: defaultStock <= 0, stock: defaultStock }];
-                    }
-
-                    let parsedGallery = [];
-                    if (item.gallery) {
-                        if (typeof item.gallery === 'string') {
-                            parsedGallery = item.gallery.split(',').map(s => s.trim()).filter(Boolean);
-                        } else if (Array.isArray(item.gallery)) {
-                            parsedGallery = item.gallery;
-                        }
-                    }
-                    if (parsedGallery.length === 0 && item.img) {
-                        parsedGallery = [item.img];
-                    }
-
-                    let allImagesSet = new Set();
-                    if (item.img) allImagesSet.add(item.img);
-                    parsedGallery.forEach(img => allImagesSet.add(img));
-                    parsedColors.forEach(c => {
-                        if (c.image) allImagesSet.add(c.image);
-                        if (Array.isArray(c.gallery)) c.gallery.forEach(g => allImagesSet.add(g));
-                    });
-
-                    let parsedSpecs = [];
-                    if (item.specs) {
-                        if (typeof item.specs === 'string') {
-                            try { parsedSpecs = JSON.parse(item.specs); } catch(err) { parsedSpecs = []; }
-                        } else if (Array.isArray(item.specs)) {
-                            parsedSpecs = item.specs;
-                        }
-                    }
-
-                    return {
-                        id: item.id || 'prod-' + Math.random(),
-                        brand: item.brand || 'M1LIP',
-                        title: item.title || 'Товар',
-                        price: Number(item.price) || 0,
-                        oldPrice: item.old_price || item.oldPrice || null,
-                        sku: item.sku || '',
-                        popular: !!item.popular,
-                        tag: item.tag || 'НОВИНКА',
-                        category: item.category || 'Аксесуари',
-                        desc: item.description || item.desc || 'Якісний ігровий девайс.',
-                        img: item.img || (parsedGallery.length > 0 ? parsedGallery[0] : ''),
-                        gallery: Array.from(allImagesSet),
-                        specs: parsedSpecs,
-                        colors: parsedColors,
-                        colorImagesMap: rawColors || {}
-                    };
-                });
             } catch (e) {
-                // keep INITIAL_FALLBACK_PRODUCTS
+                // keep current products
             }
 
             renderCatalog();
@@ -3733,6 +3888,7 @@
             const tagEl = document.getElementById('hero-tag');
             const titleEl = document.getElementById('hero-prod-title');
             const priceEl = document.getElementById('hero-prod-price');
+            const oldPriceEl = document.getElementById('hero-prod-old-price');
             const infoEl = document.getElementById('hero-card-info');
 
             if (imgEl) {
@@ -3746,8 +3902,23 @@
                 setTimeout(() => {
                     imgEl.src = p.img || 'shark.jpg';
                     if (tagEl) tagEl.innerText = p.tag || '🔥 ТОП ПРОДАЖІВ';
-                    if (titleEl) titleEl.innerText = `${p.brand ? p.brand + ' ' : ''}${p.title}`;
+                    
+                    const brandStr = (p.brand || '').trim();
+                    const titleStr = (p.title || '').trim();
+                    const displayTitle = (brandStr && !titleStr.toLowerCase().startsWith(brandStr.toLowerCase()))
+                        ? `${brandStr} ${titleStr}`
+                        : titleStr;
+                    if (titleEl) titleEl.innerText = displayTitle;
                     if (priceEl) priceEl.innerHTML = formatPrice(p.price);
+                    
+                    if (oldPriceEl) {
+                        if (p.oldPrice || p.old_price) {
+                            oldPriceEl.innerText = `${p.oldPrice || p.old_price} ₴`;
+                            oldPriceEl.style.display = 'inline';
+                        } else {
+                            oldPriceEl.style.display = 'none';
+                        }
+                    }
                     
                     imgEl.style.opacity = '1';
                     imgEl.style.transform = 'scale(1)';

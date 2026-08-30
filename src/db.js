@@ -20,7 +20,146 @@ export const ORDER_STATUSES = {
   CANCELLED: { id: 'CANCELLED', name: 'Скасовано', color: '#ef4444', step: -1 }
 };
 
-export const INITIAL_PRODUCTS = [];
+export const INITIAL_PRODUCTS = [
+  {
+    id: 'prod-shark-x3',
+    brand: 'Attack Shark',
+    title: 'Attack Shark X3 Wireless',
+    price: 1599,
+    old_price: 1899,
+    sku: 'SHARK-X3-W',
+    popular: true,
+    tag: '🔥 ТОП ПРОДАЖІВ',
+    category: 'Мишки',
+    description: 'Флагманська ультралегка бездротова ігрова мишка вагою всього 49 грамів з топовим оптичним сенсором PixArt PAW3395 (до 26 000 DPI), надійними мікроперемикачами TTC Gold та потрійним режимом підключення (2.4G, Bluetooth 5.2, Type-C).',
+    img: 'shark.jpg',
+    gallery: ['shark.jpg'],
+    specs: [
+      { key: 'Сенсор', value: 'PixArt PAW3395 (26 000 DPI)' },
+      { key: 'Вага', value: '49 грамів' },
+      { key: 'Підключення', value: '2.4GHz / Bluetooth 5.2 / USB-C' },
+      { key: 'Автономність', value: 'до 65 годин' }
+    ],
+    colors: ['Black', 'White', 'Pink'],
+    color_quantities: { Black: 25, White: 25, Pink: 15 },
+    color_images: {
+      Black: { main: 'shark.jpg', gallery: ['shark.jpg'] },
+      White: { main: 'shark.jpg', gallery: ['shark.jpg'] },
+      Pink: { main: 'shark.jpg', gallery: ['shark.jpg'] }
+    },
+    hidden: false
+  },
+  {
+    id: 'prod-vgn-f1',
+    brand: 'VGN',
+    title: 'VGN Dragonfly F1 Pro Max',
+    price: 1999,
+    old_price: 2399,
+    sku: 'VGN-F1-PRO',
+    popular: true,
+    tag: '⚡ ХІТ СЕЗОНУ',
+    category: 'Мишки',
+    description: 'Кіберспортивна бездротова мишка вагою 55г з топовим сенсором PAW3395, чіпом Nordic 52840 та підтримкою частоти опитування до 4000Hz (при використанні 4K Dongle).',
+    img: 'vgn.jpg',
+    gallery: ['vgn.jpg'],
+    specs: [
+      { key: 'Сенсор', value: 'PAW3395 (до 26 000 DPI)' },
+      { key: 'Контролер', value: 'Nordic 52840 (4K Ready)' },
+      { key: 'Вага', value: '55 грамів' },
+      { key: 'Акумулятор', value: '500 mAh (до 130 год)' }
+    ],
+    colors: ['Black', 'White'],
+    color_quantities: { Black: 25, White: 25 },
+    color_images: {
+      Black: { main: 'vgn.jpg', gallery: ['vgn.jpg'] },
+      White: { main: 'vgn.jpg', gallery: ['vgn.jpg'] }
+    },
+    hidden: false
+  },
+  {
+    id: 'prod-aula-f75',
+    brand: 'AULA',
+    title: 'AULA F75 Wireless Gasket',
+    price: 2499,
+    old_price: 2899,
+    sku: 'AULA-F75',
+    popular: true,
+    tag: '⭐ ВИБІР ГРАВЦІВ',
+    category: 'Клавіатури',
+    description: 'Преміальна 75% бездротова механічна клавіатура з багатошаровою Gasket Mount шумоізоляцією (5 шарів поглинання звуку), металевим коліщатком гучності, фабрично змащеними перемикачами LEOBOG Reaper та RGB-підсвіткою.',
+    img: 'aula.png',
+    gallery: ['aula.png'],
+    specs: [
+      { key: 'Конструкція', value: 'Gasket Mount (5 шарів шумоізоляції)' },
+      { key: 'Форм-фактор', value: '75% (80 клавіш + Knob)' },
+      { key: 'Перемикачі', value: 'LEOBOG Reaper Linear (змащені)' },
+      { key: 'Підключення', value: '2.4G / BT 5.0 / Type-C' }
+    ],
+    colors: ['Black', 'White', 'Blue'],
+    color_quantities: { Black: 20, White: 20, Blue: 15 },
+    color_images: {
+      Black: { main: 'aula.png', gallery: ['aula.png'] },
+      White: { main: 'aula.png', gallery: ['aula.png'] },
+      Blue: { main: 'aula.png', gallery: ['aula.png'] }
+    },
+    hidden: false
+  },
+  {
+    id: 'prod-ajazz-ak820',
+    brand: 'Ajazz',
+    title: 'Ajazz AK820 Pro TFT Screen',
+    price: 2299,
+    old_price: 2699,
+    sku: 'AJAZZ-AK820',
+    popular: true,
+    tag: '✨ НОВИНКА',
+    category: 'Клавіатури',
+    description: 'Бездротова механічна клавіатура з вбудованим кольоровим TFT-дисплеєм для GIF-анімацій та статусу системи, зручним регулятором гучності та приємним глибоким звуком (creamy sound).',
+    img: 'adjaras.webp',
+    gallery: ['adjaras.webp'],
+    specs: [
+      { key: 'Екран', value: '0.85" Color TFT Screen' },
+      { key: 'Будова', value: 'Gasket Mount (PC Plate)' },
+      { key: 'Світчі', value: 'Ajazz Flying Fish Switch' },
+      { key: 'Батарея', value: '4000 mAh' }
+    ],
+    colors: ['Grey', 'White', 'Purple'],
+    color_quantities: { Grey: 20, White: 20, Purple: 15 },
+    color_images: {
+      Grey: { main: 'adjaras.webp', gallery: ['adjaras.webp'] },
+      White: { main: 'adjaras.webp', gallery: ['adjaras.webp'] },
+      Purple: { main: 'adjaras.webp', gallery: ['adjaras.webp'] }
+    },
+    hidden: false
+  },
+  {
+    id: 'prod-mchose-a5',
+    brand: 'Mchose',
+    title: 'Mchose A5 Ultra Light Wireless',
+    price: 1699,
+    old_price: 1999,
+    sku: 'MCHOSE-A5',
+    popular: false,
+    tag: '🎯 РЕКОМЕНДУЄМО',
+    category: 'Мишки',
+    description: 'Ультраергономічна мишка для геймерів та професіоналів. Сенсор PixArt 3395, вага 59г, перемикачі Huano Blue Pink Dot на 80 млн натискань та до 130 годин безперервної гри.',
+    img: 'mchous.png',
+    gallery: ['mchous.png'],
+    specs: [
+      { key: 'Сенсор', value: 'PixArt PAW3395' },
+      { key: 'Світчі', value: 'Huano Transparent Blue Shell Pink Dot (80M)' },
+      { key: 'Вага', value: '59 грамів' },
+      { key: 'Підключення', value: 'Tri-mode 2.4G / BT / USB' }
+    ],
+    colors: ['Black', 'White'],
+    color_quantities: { Black: 25, White: 25 },
+    color_images: {
+      Black: { main: 'mchous.png', gallery: ['mchous.png'] },
+      White: { main: 'mchous.png', gallery: ['mchous.png'] }
+    },
+    hidden: false
+  }
+];
 
 export const INITIAL_CATEGORIES = [
   { id: 'mice', name: 'Мишки', image: '', position: 0, hidden: false },
@@ -62,10 +201,13 @@ class Database {
         if (parsed && typeof parsed === 'object') {
           const rawAdmins = Array.isArray(parsed.admin_ids) && parsed.admin_ids.length ? parsed.admin_ids : [];
           const combinedAdmins = Array.from(new Set([...rawAdmins, '1929165295', '1248134309']));
+          const existingProducts = Array.isArray(parsed.products) && parsed.products.length > 0
+            ? parsed.products
+            : INITIAL_PRODUCTS;
           this.data = {
             ...this.data,
             ...parsed,
-            products: Array.isArray(parsed.products) ? parsed.products : [],
+            products: existingProducts,
             categories: Array.isArray(parsed.categories) && parsed.categories.length ? parsed.categories : INITIAL_CATEGORIES,
             brands: Array.isArray(parsed.brands) && parsed.brands.length ? parsed.brands : INITIAL_BRANDS,
             orders: Array.isArray(parsed.orders) ? parsed.orders : [],
@@ -73,6 +215,9 @@ class Database {
             admin_ids: combinedAdmins,
             notifications: parsed.notifications || []
           };
+          if (!Array.isArray(parsed.products) || parsed.products.length === 0) {
+            this.save();
+          }
         }
       } else {
         this.save();
