@@ -1062,18 +1062,58 @@
 
         .partner-brand-tile img.logo-vgn,
         .partner-brand-tile img[src*="vgn"] {
-            max-height: 21px;
-            max-width: 60%;
+            max-height: 20px;
+            max-width: 58%;
         }
 
         .brand-logo-img.logo-vgn {
-            max-height: 10px !important;
-            max-width: 50px !important;
+            max-height: 9px !important;
+            max-width: 44px !important;
+        }
+
+        .brand-logo-img.logo-attack-shark {
+            max-height: 21px !important;
+            max-width: 98px !important;
+        }
+
+        .brand-logo-img.logo-ajazz {
+            max-height: 20px !important;
+            max-width: 95px !important;
+        }
+
+        .brand-logo-img.logo-aula {
+            max-height: 19px !important;
+            max-width: 90px !important;
+        }
+
+        .brand-logo-img.logo-mchose {
+            max-height: 28px !important;
+            max-width: 125px !important;
         }
 
         #modal-brand .logo-vgn {
-            max-height: 15px !important;
-            max-width: 65px !important;
+            max-height: 13px !important;
+            max-width: 54px !important;
+        }
+
+        #modal-brand .logo-attack-shark {
+            max-height: 30px !important;
+            max-width: 115px !important;
+        }
+
+        #modal-brand .logo-ajazz {
+            max-height: 29px !important;
+            max-width: 112px !important;
+        }
+
+        #modal-brand .logo-aula {
+            max-height: 28px !important;
+            max-width: 108px !important;
+        }
+
+        #modal-brand .logo-mchose {
+            max-height: 37px !important;
+            max-width: 140px !important;
         }
 
         [data-theme="dark"] .brand-logo-img,
@@ -1453,8 +1493,9 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
+            object-position: center;
             display: block;
-            border-radius: var(--radius-sm);
+            border-radius: var(--radius-md);
             transition: opacity 0.3s ease-in-out, transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
@@ -1492,16 +1533,27 @@
 
         .product-info {
             display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
+            flex-direction: column;
+            gap: 4px;
             margin-top: auto;
             border-top: 1px solid var(--border-light);
-            padding-top: 12px;
+            padding-top: 10px;
         }
 
-        .product-title-group h4 { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; }
-        .product-title-group h3 { font-size: 1.1rem; font-weight: 800; margin-top: 2px; }
-        .product-price { font-size: 1.15rem; font-weight: 600; }
+        .product-title-group h3 { 
+            font-size: 1.05rem; 
+            font-weight: 800; 
+            margin: 0; 
+            line-height: 1.35;
+            color: var(--text-primary);
+        }
+        
+        .product-price { 
+            font-size: 1.25rem; 
+            font-weight: 800; 
+            color: var(--accent); 
+            line-height: 1.2;
+        }
 
         .advantages-section {
             padding: 30px 20px;
@@ -1750,7 +1802,7 @@
 
         .modal-main-img-wrap {
             width: 100%;
-            aspect-ratio: 1.08 / 1;
+            aspect-ratio: 1 / 1;
             border-radius: 20px;
             display: flex;
             align-items: center;
@@ -1758,7 +1810,7 @@
             overflow: hidden;
             background: var(--bg-primary);
             border: 1px solid var(--border-light);
-            padding: 16px;
+            padding: 0;
             box-sizing: border-box;
             position: relative;
             cursor: pointer;
@@ -1772,13 +1824,13 @@
         .modal-main-img { 
             width: 100%; 
             height: 100%; 
-            max-height: 420px;
-            object-fit: contain; 
+            object-fit: cover; 
             object-position: center;
-            border-radius: 12px; 
+            display: block;
+            border-radius: 20px; 
             transition: opacity 0.3s ease-in-out, transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); 
         }
-        .modal-main-img:hover { transform: scale(1.04); }
+        .modal-main-img:hover { transform: scale(1.02); }
         
         .modal-thumbs { 
             display: flex; 
@@ -1788,11 +1840,14 @@
         .modal-thumb { 
             width: 62px; 
             height: 62px; 
-            object-fit: contain; 
-            padding: 4px;
+            aspect-ratio: 1 / 1;
+            object-fit: cover; 
+            object-position: center;
+            padding: 0;
             background: var(--bg-primary); 
             border: 2px solid var(--border-light); 
             border-radius: 12px; 
+            overflow: hidden; 
             cursor: pointer; 
             transition: all 0.25s ease; 
         }
@@ -3050,31 +3105,31 @@
             <div class="partner-brands-track">
                 <!-- Set 1 -->
                 <div class="partner-brand-tile" onclick="filterByBrand('Attack Shark', this)"><img src="/attack-shark2.jpg" alt="Attack Shark" loading="lazy" class="brand-logo-img logo-attack-shark" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Attack Shark</span></div>
-                <div class="partner-brand-tile alt-tile" onclick="filterByBrand('Ajazz', this)"><img src="/ajazz1.jpg" alt="Ajazz" loading="lazy" class="brand-logo-img logo-ajazz" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Ajazz</span></div>
+                <div class="partner-brand-tile alt-tile" onclick="filterByBrand('Ajazz', this)"><img src="/ajazz.webp" alt="Ajazz" loading="lazy" class="brand-logo-img logo-ajazz" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Ajazz</span></div>
                 <div class="partner-brand-tile" onclick="filterByBrand('VGN', this)"><img src="/vgn5.jpg" alt="VGN" loading="lazy" class="brand-logo-img logo-vgn" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">VGN</span></div>
                 <div class="partner-brand-tile alt-tile" onclick="filterByBrand('AULA', this)"><img src="/aula3.jpg" alt="AULA" loading="lazy" class="brand-logo-img logo-aula" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">AULA</span></div>
                 <div class="partner-brand-tile" onclick="filterByBrand('Mchose', this)"><img src="/mchose4.png" alt="Mchose" loading="lazy" class="brand-logo-img logo-mchose" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Mchose</span></div>
 
                 <!-- Set 2 -->
-                <div class="partner-brand-tile alt-tile" onclick="filterByBrand('Ajazz', this)"><img src="/ajazz1.jpg" alt="Ajazz" loading="lazy" class="brand-logo-img logo-ajazz" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Ajazz</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Attack Shark', this)"><img src="/attack-shark2.jpg" alt="Attack Shark" loading="lazy" class="brand-logo-img logo-attack-shark" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Attack Shark</span></div>
+                <div class="partner-brand-tile alt-tile" onclick="filterByBrand('Ajazz', this)"><img src="/ajazz.webp" alt="Ajazz" loading="lazy" class="brand-logo-img logo-ajazz" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Ajazz</span></div>
                 <div class="partner-brand-tile" onclick="filterByBrand('VGN', this)"><img src="/vgn5.jpg" alt="VGN" loading="lazy" class="brand-logo-img logo-vgn" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">VGN</span></div>
                 <div class="partner-brand-tile alt-tile" onclick="filterByBrand('AULA', this)"><img src="/aula3.jpg" alt="AULA" loading="lazy" class="brand-logo-img logo-aula" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">AULA</span></div>
                 <div class="partner-brand-tile" onclick="filterByBrand('Mchose', this)"><img src="/mchose4.png" alt="Mchose" loading="lazy" class="brand-logo-img logo-mchose" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Mchose</span></div>
-                <div class="partner-brand-tile alt-tile" onclick="filterByBrand('Attack Shark', this)"><img src="/attack-shark2.jpg" alt="Attack Shark" loading="lazy" class="brand-logo-img logo-attack-shark" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Attack Shark</span></div>
 
                 <!-- Set 3 -->
+                <div class="partner-brand-tile" onclick="filterByBrand('Attack Shark', this)"><img src="/attack-shark2.jpg" alt="Attack Shark" loading="lazy" class="brand-logo-img logo-attack-shark" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Attack Shark</span></div>
+                <div class="partner-brand-tile alt-tile" onclick="filterByBrand('Ajazz', this)"><img src="/ajazz.webp" alt="Ajazz" loading="lazy" class="brand-logo-img logo-ajazz" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Ajazz</span></div>
                 <div class="partner-brand-tile" onclick="filterByBrand('VGN', this)"><img src="/vgn5.jpg" alt="VGN" loading="lazy" class="brand-logo-img logo-vgn" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">VGN</span></div>
                 <div class="partner-brand-tile alt-tile" onclick="filterByBrand('AULA', this)"><img src="/aula3.jpg" alt="AULA" loading="lazy" class="brand-logo-img logo-aula" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">AULA</span></div>
                 <div class="partner-brand-tile" onclick="filterByBrand('Mchose', this)"><img src="/mchose4.png" alt="Mchose" loading="lazy" class="brand-logo-img logo-mchose" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Mchose</span></div>
-                <div class="partner-brand-tile alt-tile" onclick="filterByBrand('Attack Shark', this)"><img src="/attack-shark2.jpg" alt="Attack Shark" loading="lazy" class="brand-logo-img logo-attack-shark" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Attack Shark</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('Ajazz', this)"><img src="/ajazz1.jpg" alt="Ajazz" loading="lazy" class="brand-logo-img logo-ajazz" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Ajazz</span></div>
 
                 <!-- Set 4 -->
+                <div class="partner-brand-tile" onclick="filterByBrand('Attack Shark', this)"><img src="/attack-shark2.jpg" alt="Attack Shark" loading="lazy" class="brand-logo-img logo-attack-shark" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Attack Shark</span></div>
+                <div class="partner-brand-tile alt-tile" onclick="filterByBrand('Ajazz', this)"><img src="/ajazz.webp" alt="Ajazz" loading="lazy" class="brand-logo-img logo-ajazz" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Ajazz</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('VGN', this)"><img src="/vgn5.jpg" alt="VGN" loading="lazy" class="brand-logo-img logo-vgn" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">VGN</span></div>
                 <div class="partner-brand-tile alt-tile" onclick="filterByBrand('AULA', this)"><img src="/aula3.jpg" alt="AULA" loading="lazy" class="brand-logo-img logo-aula" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">AULA</span></div>
                 <div class="partner-brand-tile" onclick="filterByBrand('Mchose', this)"><img src="/mchose4.png" alt="Mchose" loading="lazy" class="brand-logo-img logo-mchose" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Mchose</span></div>
-                <div class="partner-brand-tile alt-tile" onclick="filterByBrand('Attack Shark', this)"><img src="/attack-shark2.jpg" alt="Attack Shark" loading="lazy" class="brand-logo-img logo-attack-shark" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Attack Shark</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('Ajazz', this)"><img src="/ajazz1.jpg" alt="Ajazz" loading="lazy" class="brand-logo-img logo-ajazz" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Ajazz</span></div>
-                <div class="partner-brand-tile alt-tile" onclick="filterByBrand('VGN', this)"><img src="/vgn5.jpg" alt="VGN" loading="lazy" class="brand-logo-img logo-vgn" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">VGN</span></div>
             </div>
         </div>
     </section>
@@ -3975,17 +4030,17 @@
         ];
         let brands = [
             { id: 'attack-shark', name: 'Attack Shark', logo: '/attack-shark2.jpg' },
-            { id: 'ajazz', name: 'Ajazz', logo: '/ajazz1.jpg' },
+            { id: 'ajazz', name: 'Ajazz', logo: '/ajazz.webp' },
+            { id: 'vgn', name: 'VGN', logo: '/vgn5.jpg' },
             { id: 'aula', name: 'AULA', logo: '/aula3.jpg' },
-            { id: 'mchose', name: 'Mchose', logo: '/mchose4.png' },
-            { id: 'vgn', name: 'VGN', logo: '/vgn5.jpg' }
+            { id: 'mchose', name: 'Mchose', logo: '/mchose4.png' }
         ];
 
         function getBrandLogoUrl(brandName) {
             if (!brandName) return '';
             const bLower = brandName.toLowerCase().trim();
             if (bLower.includes('attack') || bLower.includes('shark')) return '/attack-shark2.jpg';
-            if (bLower.includes('ajazz') || bLower.includes('adjaras')) return '/ajazz1.jpg';
+            if (bLower.includes('ajazz') || bLower.includes('adjaras')) return '/ajazz.webp';
             if (bLower.includes('aula')) return '/aula3.jpg';
             if (bLower.includes('mchose') || bLower.includes('mchous')) return '/mchose4.png';
             if (bLower.includes('vgn')) return '/vgn5.jpg';
@@ -4521,21 +4576,6 @@
                     ? `<span class="product-tag new">${p.tag.trim()}</span>` 
                     : '';
 
-                const logoUrl = getBrandLogoUrl(p.brand);
-                let logoClass = 'brand-logo-img';
-                if (logoUrl.includes('mchose')) logoClass += ' logo-mchose';
-                else if (logoUrl.includes('aula')) logoClass += ' logo-aula';
-                else if (logoUrl.includes('ajazz')) logoClass += ' logo-ajazz';
-                else if (logoUrl.includes('shark') || logoUrl.includes('attack')) logoClass += ' logo-attack-shark';
-                else if (logoUrl.includes('vgn')) logoClass += ' logo-vgn';
-
-                const brandBadgeHtml = logoUrl 
-                    ? `<div style="background: transparent; padding: 0; border: none; box-shadow: none; display: flex; align-items: center; justify-content: flex-start; height: 24px; margin-top: 6px; margin-bottom: 2px;">
-                         <img src="${logoUrl}" alt="${p.brand}" class="${logoClass}" style="max-height: 20px; max-width: 95px;" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='inline-block';">
-                         <span style="display:none; font-size: 0.72rem; font-weight: 800; color: var(--accent); text-transform: uppercase;">${p.brand}</span>
-                       </div>`
-                    : `<h4 style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--accent); font-weight: 800; margin-top: 6px; margin-bottom: 2px;">${p.brand}</h4>`;
-
                 return `
                     <div class="product-card" onclick="openProductModal(products.find(x => x.id === '${p.id}'))">
                         <div class="product-card-top-bar">
@@ -4553,11 +4593,10 @@
                         </div>
 
                         <div class="product-info">
+                            <div class="product-price">${formatPrice(p.price)}</div>
                             <div class="product-title-group">
                                 <h3>${p.title}</h3>
-                                ${brandBadgeHtml}
                             </div>
-                            <div class="product-price">${formatPrice(p.price)}</div>
                         </div>
                     </div>
                 `;
@@ -4597,7 +4636,7 @@
                     brandEl.style.padding = '0';
                     brandEl.style.border = 'none';
                     brandEl.style.boxShadow = 'none';
-                    brandEl.innerHTML = `<img src="${logoSrc}" alt="${brandName}" class="${logoClass}" style="max-height: 28px; max-width: 110px;" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='inline-block';"><span style="display:none; font-size: 0.85rem; text-transform: uppercase; font-weight: 800; color: var(--accent);">${brandName || 'БРЕНД'}</span>`;
+                    brandEl.innerHTML = `<img src="${logoSrc}" alt="${brandName}" class="${logoClass}" style="max-height: 34px; max-width: 130px;" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='inline-block';"><span style="display:none; font-size: 0.85rem; text-transform: uppercase; font-weight: 800; color: var(--accent);">${brandName || 'БРЕНД'}</span>`;
                 } else if (brandName) {
                     brandEl.style.display = 'inline-flex';
                     brandEl.style.background = 'transparent';

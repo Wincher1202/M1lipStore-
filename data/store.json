@@ -367,28 +367,28 @@
     {
       "id": "brand-ajazz",
       "name": "Ajazz",
-      "logo": "/ajazz1.jpg",
+      "logo": "/ajazz.webp",
       "position": 1,
-      "hidden": false
-    },
-    {
-      "id": "brand-aula",
-      "name": "AULA",
-      "logo": "/aula3.jpg",
-      "position": 2,
-      "hidden": false
-    },
-    {
-      "id": "brand-mchose",
-      "name": "Mchose",
-      "logo": "/mchose4.png",
-      "position": 3,
       "hidden": false
     },
     {
       "id": "brand-vgn",
       "name": "VGN",
       "logo": "/vgn5.jpg",
+      "position": 2,
+      "hidden": false
+    },
+    {
+      "id": "brand-aula",
+      "name": "AULA",
+      "logo": "/aula3.jpg",
+      "position": 3,
+      "hidden": false
+    },
+    {
+      "id": "brand-mchose",
+      "name": "Mchose",
+      "logo": "/mchose4.png",
       "position": 4,
       "hidden": false
     }
