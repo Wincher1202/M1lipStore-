@@ -252,30 +252,99 @@
         }
 
         .hero {
-            min-height: calc(100vh - 72px);
-            padding: 95px 24px 30px;
-            max-width: 1400px;
+            height: 100vh;
+            min-height: 580px;
+            max-height: 100vh;
+            padding: 82px 32px 18px;
+            max-width: 1440px;
             margin: 0 auto;
             display: grid;
             grid-template-columns: 1fr;
             align-content: center;
             align-items: center;
-            gap: 32px;
+            gap: 28px;
             width: 100%;
             text-align: center;
             box-sizing: border-box;
             position: relative;
+            overflow: hidden;
         }
 
         @media(min-width: 960px) {
             .hero {
                 grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
                 text-align: left;
-                padding-top: 100px;
-                padding-bottom: 30px;
+                padding: 84px 40px 24px;
                 gap: 48px;
-                min-height: calc(100vh - 72px);
+                height: 100vh;
+                max-height: 100vh;
             }
+        }
+
+        @media(max-width: 959px) {
+            .hero {
+                height: auto;
+                min-height: calc(100vh - 72px);
+                max-height: none;
+                padding: 92px 20px 36px;
+                overflow: visible;
+            }
+        }
+
+        .hero-scroll-indicator {
+            position: absolute;
+            bottom: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            color: var(--text-muted);
+            font-size: 0.72rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            z-index: 10;
+            user-select: none;
+            opacity: 0.8;
+        }
+
+        @media(min-width: 960px) {
+            .hero-scroll-indicator {
+                display: flex;
+            }
+        }
+
+        .hero-scroll-indicator:hover {
+            color: var(--accent);
+            opacity: 1;
+            transform: translateX(-50%) translateY(2px);
+        }
+
+        .scroll-mouse {
+            width: 18px;
+            height: 28px;
+            border: 2px solid currentColor;
+            border-radius: 12px;
+            position: relative;
+        }
+
+        .scroll-wheel {
+            width: 3px;
+            height: 6px;
+            background: currentColor;
+            border-radius: 2px;
+            position: absolute;
+            top: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: scrollBounce 1.8s infinite ease-in-out;
+        }
+
+        @keyframes scrollBounce {
+            0%, 100% { transform: translate(-50%, 0); opacity: 1; }
+            50% { transform: translate(-50%, 8px); opacity: 0.2; }
         }
 
         .brands-strip {
@@ -545,10 +614,10 @@
             background: var(--bg-secondary);
             border: 1px solid var(--border-light);
             border-radius: 24px;
-            padding: 16px;
+            padding: 0;
             box-shadow: 0 20px 48px -12px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.03);
             width: 100%;
-            max-width: 500px;
+            max-width: 490px;
             position: relative;
             cursor: pointer;
             transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease;
@@ -559,7 +628,7 @@
 
         .hero-card-3d:hover {
             border-color: var(--accent);
-            box-shadow: 0 24px 54px -8px rgba(87, 100, 226, 0.25);
+            box-shadow: 0 26px 58px -8px rgba(87, 100, 226, 0.26);
             transform: translateY(-4px);
         }
 
@@ -576,36 +645,82 @@
 
         .hero-card-3d .product-tag {
             position: absolute;
-            top: 24px;
-            left: 24px;
+            top: 18px;
+            left: 18px;
             z-index: 5;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.22);
             transition: all 0.3s ease;
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .hero-slider-nav {
+            position: absolute;
+            top: 18px;
+            right: 18px;
+            z-index: 5;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: rgba(18, 20, 24, 0.65);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            border-radius: 20px;
+            padding: 3px 6px;
+            color: #ffffff;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.2);
+        }
+
+        .hero-slider-nav button {
+            background: transparent;
+            border: none;
+            color: #ffffff;
+            cursor: pointer;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-size: 0.85rem;
+            line-height: 1;
+            transition: background 0.2s ease, transform 0.2s ease;
+            padding: 0;
+        }
+
+        .hero-slider-nav button:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: scale(1.1);
+        }
+
+        .hero-slider-nav span {
+            padding: 0 4px;
+            font-variant-numeric: tabular-nums;
         }
 
         .hero-card-img-wrap {
             width: 100%;
             aspect-ratio: 1.05 / 1;
-            border-radius: 18px;
             overflow: hidden;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: radial-gradient(circle at center, rgba(87, 100, 226, 0.08) 0%, var(--bg-tertiary) 100%);
+            background: var(--bg-tertiary);
             position: relative;
-            padding: 16px;
+            padding: 0;
             box-sizing: border-box;
         }
 
         .hero-card-3d img {
             width: 100%;
             height: 100%;
-            object-fit: contain;
+            object-fit: cover;
             object-position: center;
             display: block;
-            border-radius: 14px;
             transition: opacity 0.45s cubic-bezier(0.4, 0, 0.2, 1), transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
             will-change: opacity, transform;
         }
@@ -619,8 +734,8 @@
             align-items: center;
             justify-content: space-between;
             gap: 12px;
-            margin-top: 14px;
-            padding-top: 12px;
+            padding: 16px 20px 18px;
+            background: var(--bg-secondary);
             border-top: 1px solid var(--border-light);
         }
 
@@ -2663,6 +2778,12 @@
             <div class="hero-card-3d" id="hero-card" onclick="openHeroProductModal()" onmouseenter="pauseHeroTimer()" onmouseleave="resumeHeroTimer()" title="Натисніть, щоб відкрити товар">
                 <span class="product-tag new" id="hero-tag">🔥 ТОП ПРОДАЖІВ</span>
                 
+                <div class="hero-slider-nav" onclick="event.stopPropagation()">
+                    <button onclick="prevHeroProduct(event)" title="Попередній товар" aria-label="Попередній">‹</button>
+                    <span id="hero-slider-counter">1 / 5</span>
+                    <button onclick="nextHeroProduct(event)" title="Наступний товар" aria-label="Наступний">›</button>
+                </div>
+
                 <div class="hero-card-img-wrap">
                     <img id="hero-img" src="shark.jpg" alt="Featured Product" loading="eager">
                 </div>
@@ -2681,6 +2802,11 @@
                     </div>
                 </div>
             </div>
+        </div>
+
+        <div class="hero-scroll-indicator" onclick="scrollToSection('partner-brands-section')">
+            <span>Гортайте вниз</span>
+            <div class="scroll-mouse"><div class="scroll-wheel"></div></div>
         </div>
     </section>
 
@@ -3708,26 +3834,34 @@
                 }
             } catch(e) {}
 
-            try {
-                let response = await fetch(API_URL);
-                if (!response.ok) {
-                    renderCatalog();
-                    return;
-                }
-                let contentType = response.headers.get("content-type");
-                if (!contentType || !contentType.includes("application/json")) {
-                    renderCatalog();
-                    return;
-                }
-                let backendData = await response.json();
-                if (Array.isArray(backendData) && backendData.length > 0) {
-                    products = parseRawProductsList(backendData);
-                    try {
-                        localStorage.setItem('m1lip_cached_products', JSON.stringify(backendData));
-                    } catch(e) {}
-                }
-            } catch (e) {
-                // keep current products
+            let backendData = null;
+            const endpoints = [
+                API_URL,
+                '/api/products',
+                'https://m1lipstore.onrender.com/api/products'
+            ];
+
+            for (const ep of endpoints) {
+                try {
+                    let response = await fetch(ep);
+                    if (response.ok) {
+                        let contentType = response.headers.get("content-type");
+                        if (contentType && contentType.includes("application/json")) {
+                            let data = await response.json();
+                            if (Array.isArray(data) && data.length > 0) {
+                                backendData = data;
+                                break;
+                            }
+                        }
+                    }
+                } catch(err) {}
+            }
+
+            if (backendData && Array.isArray(backendData) && backendData.length > 0) {
+                products = parseRawProductsList(backendData);
+                try {
+                    localStorage.setItem('m1lip_cached_products', JSON.stringify(backendData));
+                } catch(e) {}
             }
 
             renderCatalog();
@@ -3890,13 +4024,20 @@
             const priceEl = document.getElementById('hero-prod-price');
             const oldPriceEl = document.getElementById('hero-prod-old-price');
             const infoEl = document.getElementById('hero-card-info');
+            const counterEl = document.getElementById('hero-slider-counter');
+
+            if (counterEl && products && products.length > 0) {
+                const curIdx = products.findIndex(x => x.id === p.id);
+                const displayIdx = curIdx >= 0 ? curIdx + 1 : (heroIndex + 1);
+                counterEl.innerText = `${displayIdx} / ${products.length}`;
+            }
 
             if (imgEl) {
                 imgEl.style.opacity = '0';
-                imgEl.style.transform = 'scale(0.95)';
+                imgEl.style.transform = 'scale(0.96)';
                 if (infoEl) {
                     infoEl.style.opacity = '0';
-                    infoEl.style.transform = 'translateY(3px)';
+                    infoEl.style.transform = 'translateY(4px)';
                 }
                 
                 setTimeout(() => {
@@ -3930,6 +4071,22 @@
             }
         }
 
+        function prevHeroProduct(e) {
+            if (e) e.stopPropagation();
+            if (!products || products.length === 0) return;
+            heroIndex = (heroIndex - 1 + products.length) % products.length;
+            setHeroProduct(products[heroIndex]);
+            restartHeroTimer();
+        }
+
+        function nextHeroProduct(e) {
+            if (e) e.stopPropagation();
+            if (!products || products.length === 0) return;
+            heroIndex = (heroIndex + 1) % products.length;
+            setHeroProduct(products[heroIndex]);
+            restartHeroTimer();
+        }
+
         function updateHeroBanner() {
             if (isHeroPaused) return;
             if (!products || products.length === 0) return;
@@ -3948,7 +4105,7 @@
 
         function restartHeroTimer() {
             if (heroTimer) clearInterval(heroTimer);
-            heroTimer = setInterval(updateHeroBanner, 4200);
+            heroTimer = setInterval(updateHeroBanner, 4500);
         }
 
         function openHeroProductModal() {
