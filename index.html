@@ -1559,16 +1559,43 @@
         }
 
         .stock-status {
-            font-size: 0.75rem;
+            font-size: 0.8rem;
             font-weight: 700;
-            margin-top: 4px;
+            margin-top: 6px;
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            letter-spacing: 0.02em;
         }
-        .stock-status.in-stock { color: #2E7D32; }
-        .stock-status.out-of-stock { color: #D32F2F; }
+        .stock-status .status-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            display: inline-block;
+            flex-shrink: 0;
+        }
+        .stock-status.in-stock { 
+            color: #10B981; 
+        }
+        .stock-status.in-stock .status-dot {
+            background: #10B981;
+            box-shadow: 0 0 8px rgba(16, 185, 129, 0.7);
+        }
+        .stock-status.out-of-stock { 
+            color: #EF4444; 
+        }
+        .stock-status.out-of-stock .status-dot {
+            background: #EF4444;
+            box-shadow: 0 0 6px rgba(239, 68, 68, 0.6);
+        }
         .stock-status.not-selected { 
             color: var(--text-muted); 
-            font-weight: 500; 
-            opacity: 0.75; 
+            font-weight: 600; 
+            opacity: 0.85; 
+        }
+        .stock-status.not-selected .status-dot {
+            background: var(--text-muted);
+            opacity: 0.5;
         }
 
         .specs-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin: 12px 0; }
@@ -3996,15 +4023,15 @@
                 }
 
                 if (stockStatusEl) {
-                    if (activeColor.stock > 0) {
-                        stockStatusEl.innerText = `В наявності (${activeColor.stock} шт.)`;
+                    if (activeColor.stock > 0 && !activeColor.isOut) {
+                        stockStatusEl.innerHTML = '<span class="status-dot in-stock-dot"></span> В наявності';
                         stockStatusEl.className = 'stock-status in-stock';
                         if (addCartBtn) {
                             addCartBtn.disabled = false;
                             addCartBtn.innerText = 'Додати в кошик';
                         }
                     } else {
-                        stockStatusEl.innerText = 'Немає в наявності';
+                        stockStatusEl.innerHTML = '<span class="status-dot out-of-stock-dot"></span> Немає в наявності';
                         stockStatusEl.className = 'stock-status out-of-stock';
                         if (addCartBtn) {
                             addCartBtn.disabled = true;
@@ -4018,7 +4045,7 @@
                 activeImg = currentGalleryImages[0] || currentModalProduct.img;
 
                 if (stockStatusEl) {
-                    stockStatusEl.innerText = 'Будь ласка, оберіть колір товару';
+                    stockStatusEl.innerHTML = '<span class="status-dot not-selected-dot"></span> Оберіть колір';
                     stockStatusEl.className = 'stock-status not-selected';
                 }
                 if (addCartBtn) {

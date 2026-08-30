@@ -2148,11 +2148,7 @@ export class TelegramBotService {
     if (data === 'wiz_cancel') {
       const cardId = session.cardMsgId;
       delete this.adminSessions[chatId];
-      await this.safeEditOrSend(chatId, cardId, '❌ Створення товару скасовано.', {
-        reply_markup: {
-          inline_keyboard: [[{ text: '🔙 До адмін-панелі', callback_data: 'admin_dashboard' }]]
-        }
-      });
+      await this.sendAdminDashboard(chatId, from || { first_name: 'Адміністратор' }, cardId);
       return;
     }
 
@@ -2867,7 +2863,7 @@ export class TelegramBotService {
     colors.forEach((c, idx) => {
       const qVal = session.data.color_quantities[c];
       const isSelected = c === curColor;
-      const statusStr = (qVal !== undefined && qVal !== null) ? `<b>${qVal} шт.</b>` : '<i>В наявності (без точного обліку)</i>';
+      const statusStr = (qVal !== undefined && qVal !== null) ? `<b>${qVal} шт.</b>` : '<i>В наявності</i>';
       const pointer = isSelected ? '👉 ' : '   ';
       colorListFormatted += `${pointer}${idx + 1}. <b>${c}</b>: ${statusStr}\n`;
     });
@@ -2880,7 +2876,7 @@ export class TelegramBotService {
       colors.forEach(c => {
         const isSel = c === curColor;
         const qVal = session.data.color_quantities[c];
-        const qBadge = qVal !== undefined ? ` (${qVal})` : '';
+        const qBadge = qVal !== undefined ? ` (${qVal} шт.)` : '';
         colRow.push({
           text: isSel ? `🔘 ${c}${qBadge}` : `${c}${qBadge}`,
           callback_data: `wiz_qty_sel:${c}`
@@ -2905,7 +2901,7 @@ export class TelegramBotService {
       `🎯 Зараз обрано для введення: <b>«${curColor}»</b>\n\n` +
       `💡 <b>Як вказати залишок:</b>\n` +
       `• Надішліть число текстом у чат (наприклад: <code>15</code> або <code>10 20 15</code> для всіх кольорів одразу).\n` +
-      `• Або натисніть <b>«⏩ Пропустити (Всі кольори в наявності)»</b> — всі кольори будуть увімкнені та активні на сайті!\n` +
+      `• Або натисніть <b>«⏩ Пропустити (Всі кольори в наявності)»</b> — всі кольори будуть увімкнені та активні на сайті зі статусом «В наявності»!\n` +
       `• Після завершення натисніть <b>«✅ Підтвердити склад та перейти далі ➡️»</b>:`;
 
     await this.safeEditOrSend(chatId, session.cardMsgId, text, {
@@ -2920,17 +2916,22 @@ export class TelegramBotService {
 
     const d = session.data;
     const colorsList = (d.colors && d.colors.length) ? d.colors : ['Black'];
+    let hasCustomQty = false;
     let totalQty = 0;
     
     let colorSummary = '';
     colorsList.forEach(c => {
       const rawQ = d.color_quantities?.[c];
-      const qVal = (rawQ !== undefined && rawQ !== null) ? Number(rawQ) : 25;
-      totalQty += qVal;
-      const qDisplay = (rawQ !== undefined && rawQ !== null) ? `${rawQ} шт.` : 'В наявності (25 шт.)';
+      if (rawQ !== undefined && rawQ !== null) {
+        hasCustomQty = true;
+        totalQty += Number(rawQ);
+      } else {
+        totalQty += 25;
+      }
+      const qDisplay = (rawQ !== undefined && rawQ !== null) ? `${rawQ} шт.` : 'В наявності';
       const photoCount = (d.color_images?.[c]?.gallery || []).length || (d.color_images?.[c]?.main ? 1 : 0);
       const photoInfo = photoCount > 0 ? `📷 ${photoCount} фото` : '⚙️ Авто-фото';
-      colorSummary += `  • <b>${c}</b>: ${qDisplay} (${photoInfo})\n`;
+      colorSummary += `  • <b>${c}</b>: <b>${qDisplay}</b> (${photoInfo})\n`;
     });
 
     let specsSummary = '';
@@ -2938,6 +2939,10 @@ export class TelegramBotService {
       specsSummary = `\n📋 <b>Характеристики (${d.specs.length}):</b>\n` +
         d.specs.map(s => `  • <b>${s.key}:</b> ${s.value}`).join('\n') + `\n`;
     }
+
+    const stockSummaryLine = hasCustomQty 
+      ? `📦 <b>Загальний залишок:</b> <b>${totalQty} шт.</b>\n\n`
+      : `📦 <b>Статус наявності:</b> <b>В наявності (активно на сайті)</b>\n\n`;
 
     const text = `✨ <b>ПЕРЕВІРКА НОВОГО ТОВАРУ</b> ✨\n\n` +
       `🏷 <b>Бренд:</b> ${d.brand}\n` +
@@ -2948,7 +2953,7 @@ export class TelegramBotService {
       `📝 <b>Опис:</b> <i>${(d.description || '').slice(0, 100)}${(d.description || '').length > 100 ? '...' : ''}</i>\n` +
       `${specsSummary}` +
       `🎨 <b>Варіанти кольорів, фото та склад:</b>\n${colorSummary}\n` +
-      `📦 <b>Загальний залишок:</b> <b>${totalQty} шт.</b>\n\n` +
+      `${stockSummaryLine}` +
       `<i>Після підтвердження товар миттєво з'явиться на сайті MILIPSTORE та у Telegram-боті!</i>`;
 
     const buttons = [
