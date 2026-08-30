@@ -32,8 +32,8 @@ export const INITIAL_PRODUCTS = [
     tag: '🔥 ТОП ПРОДАЖІВ',
     category: 'Мишки',
     description: 'Флагманська ультралегка бездротова ігрова мишка вагою всього 49 грамів з топовим оптичним сенсором PixArt PAW3395 (до 26 000 DPI), надійними мікроперемикачами TTC Gold та потрійним режимом підключення (2.4G, Bluetooth 5.2, Type-C).',
-    img: 'shark.jpg',
-    gallery: ['shark.jpg'],
+    img: 'attack-shark-x3-black.jpg',
+    gallery: ['attack-shark-x3-black.jpg'],
     specs: [
       { key: 'Сенсор', value: 'PixArt PAW3395 (26 000 DPI)' },
       { key: 'Вага', value: '49 грамів' },
@@ -43,9 +43,9 @@ export const INITIAL_PRODUCTS = [
     colors: ['Black', 'White', 'Pink'],
     color_quantities: { Black: 25, White: 25, Pink: 15 },
     color_images: {
-      Black: { main: 'shark.jpg', gallery: ['shark.jpg'] },
-      White: { main: 'shark.jpg', gallery: ['shark.jpg'] },
-      Pink: { main: 'shark.jpg', gallery: ['shark.jpg'] }
+      Black: { main: 'attack-shark-x3-black.jpg', gallery: ['attack-shark-x3-black.jpg'] },
+      White: { main: 'attack-shark-x3-white.jpg', gallery: ['attack-shark-x3-white.jpg'] },
+      Pink: { main: 'attack-shark-x3-black.jpg', gallery: ['attack-shark-x3-black.jpg'] }
     },
     hidden: false
   },
@@ -60,8 +60,8 @@ export const INITIAL_PRODUCTS = [
     tag: '⚡ ХІТ СЕЗОНУ',
     category: 'Мишки',
     description: 'Кіберспортивна бездротова мишка вагою 55г з топовим сенсором PAW3395, чіпом Nordic 52840 та підтримкою частоти опитування до 4000Hz (при використанні 4K Dongle).',
-    img: 'vgn.jpg',
-    gallery: ['vgn.jpg'],
+    img: 'photo_2026-08-25_15-32-38.jpg',
+    gallery: ['photo_2026-08-25_15-32-38.jpg'],
     specs: [
       { key: 'Сенсор', value: 'PAW3395 (до 26 000 DPI)' },
       { key: 'Контролер', value: 'Nordic 52840 (4K Ready)' },
@@ -71,8 +71,8 @@ export const INITIAL_PRODUCTS = [
     colors: ['Black', 'White'],
     color_quantities: { Black: 25, White: 25 },
     color_images: {
-      Black: { main: 'vgn.jpg', gallery: ['vgn.jpg'] },
-      White: { main: 'vgn.jpg', gallery: ['vgn.jpg'] }
+      Black: { main: 'photo_2026-08-25_15-32-38.jpg', gallery: ['photo_2026-08-25_15-32-38.jpg'] },
+      White: { main: 'photo_2026-08-25_15-32-36.jpg', gallery: ['photo_2026-08-25_15-32-36.jpg'] }
     },
     hidden: false
   },
@@ -87,8 +87,8 @@ export const INITIAL_PRODUCTS = [
     tag: '⭐ ВИБІР ГРАВЦІВ',
     category: 'Клавіатури',
     description: 'Преміальна 75% бездротова механічна клавіатура з багатошаровою Gasket Mount шумоізоляцією (5 шарів поглинання звуку), металевим коліщатком гучності, фабрично змащеними перемикачами LEOBOG Reaper та RGB-підсвіткою.',
-    img: 'aula.png',
-    gallery: ['aula.png'],
+    img: 'photo_2026-08-25_15-32-57.jpg',
+    gallery: ['photo_2026-08-25_15-32-57.jpg'],
     specs: [
       { key: 'Конструкція', value: 'Gasket Mount (5 шарів шумоізоляції)' },
       { key: 'Форм-фактор', value: '75% (80 клавіш + Knob)' },
@@ -98,9 +98,9 @@ export const INITIAL_PRODUCTS = [
     colors: ['Black', 'White', 'Blue'],
     color_quantities: { Black: 20, White: 20, Blue: 15 },
     color_images: {
-      Black: { main: 'aula.png', gallery: ['aula.png'] },
-      White: { main: 'aula.png', gallery: ['aula.png'] },
-      Blue: { main: 'aula.png', gallery: ['aula.png'] }
+      Black: { main: 'photo_2026-08-25_15-32-57.jpg', gallery: ['photo_2026-08-25_15-32-57.jpg'] },
+      White: { main: 'photo_2026-08-25_15-32-59.jpg', gallery: ['photo_2026-08-25_15-32-59.jpg'] },
+      Blue: { main: 'photo_2026-08-25_15-33-02.jpg', gallery: ['photo_2026-08-25_15-33-02.jpg'] }
     },
     hidden: false
   },
@@ -115,8 +115,8 @@ export const INITIAL_PRODUCTS = [
     tag: '✨ НОВИНКА',
     category: 'Клавіатури',
     description: 'Бездротова механічна клавіатура з вбудованим кольоровим TFT-дисплеєм для GIF-анімацій та статусу системи, зручним регулятором гучності та приємним глибоким звуком (creamy sound).',
-    img: 'adjaras.webp',
-    gallery: ['adjaras.webp'],
+    img: 'photo_2026-08-25_15-31-22.jpg',
+    gallery: ['photo_2026-08-25_15-31-22.jpg'],
     specs: [
       { key: 'Екран', value: '0.85" Color TFT Screen' },
       { key: 'Будова', value: 'Gasket Mount (PC Plate)' },
@@ -126,9 +126,9 @@ export const INITIAL_PRODUCTS = [
     colors: ['Grey', 'White', 'Purple'],
     color_quantities: { Grey: 20, White: 20, Purple: 15 },
     color_images: {
-      Grey: { main: 'adjaras.webp', gallery: ['adjaras.webp'] },
-      White: { main: 'adjaras.webp', gallery: ['adjaras.webp'] },
-      Purple: { main: 'adjaras.webp', gallery: ['adjaras.webp'] }
+      Grey: { main: 'photo_2026-08-25_15-31-22.jpg', gallery: ['photo_2026-08-25_15-31-22.jpg'] },
+      White: { main: 'photo_2026-08-25_15-31-28.jpg', gallery: ['photo_2026-08-25_15-31-28.jpg'] },
+      Purple: { main: 'photo_2026-08-25_15-31-28.jpg', gallery: ['photo_2026-08-25_15-31-28.jpg'] }
     },
     hidden: false
   },
@@ -143,8 +143,8 @@ export const INITIAL_PRODUCTS = [
     tag: '🎯 РЕКОМЕНДУЄМО',
     category: 'Мишки',
     description: 'Ультраергономічна мишка для геймерів та професіоналів. Сенсор PixArt 3395, вага 59г, перемикачі Huano Blue Pink Dot на 80 млн натискань та до 130 годин безперервної гри.',
-    img: 'mchous.png',
-    gallery: ['mchous.png'],
+    img: 'photo_2026-08-25_15-32-40.jpg',
+    gallery: ['photo_2026-08-25_15-32-40.jpg'],
     specs: [
       { key: 'Сенсор', value: 'PixArt PAW3395' },
       { key: 'Світчі', value: 'Huano Transparent Blue Shell Pink Dot (80M)' },
@@ -154,8 +154,8 @@ export const INITIAL_PRODUCTS = [
     colors: ['Black', 'White'],
     color_quantities: { Black: 25, White: 25 },
     color_images: {
-      Black: { main: 'mchous.png', gallery: ['mchous.png'] },
-      White: { main: 'mchous.png', gallery: ['mchous.png'] }
+      Black: { main: 'photo_2026-08-25_15-32-40.jpg', gallery: ['photo_2026-08-25_15-32-40.jpg'] },
+      White: { main: 'photo_2026-08-25_15-32-42.jpg', gallery: ['photo_2026-08-25_15-32-42.jpg'] }
     },
     hidden: false
   }
@@ -169,11 +169,11 @@ export const INITIAL_CATEGORIES = [
 ];
 
 export const INITIAL_BRANDS = [
-  { id: 'brand-attack-shark', name: 'Attack Shark', logo: '/shark.jpg', position: 0, hidden: false },
-  { id: 'brand-ajazz', name: 'Ajazz', logo: '/adjaras.webp', position: 1, hidden: false },
-  { id: 'brand-aula', name: 'AULA', logo: '/aula.png', position: 2, hidden: false },
-  { id: 'brand-mchose', name: 'Mchose', logo: '/mchous.png', position: 3, hidden: false },
-  { id: 'brand-vgn', name: 'VGN', logo: '/vgn.jpg', position: 4, hidden: false }
+  { id: 'brand-attack-shark', name: 'Attack Shark', logo: '/logo-attack-shark.png', position: 0, hidden: false },
+  { id: 'brand-ajazz', name: 'Ajazz', logo: '/logo-ajazz.png', position: 1, hidden: false },
+  { id: 'brand-aula', name: 'AULA', logo: '/logo-aula.png', position: 2, hidden: false },
+  { id: 'brand-mchose', name: 'Mchose', logo: '/logo-mchose.png', position: 3, hidden: false },
+  { id: 'brand-vgn', name: 'VGN', logo: '/logo-vgn.png', position: 4, hidden: false }
 ];
 
 class Database {
@@ -200,7 +200,7 @@ class Database {
         const parsed = JSON.parse(raw);
         if (parsed && typeof parsed === 'object') {
           const rawAdmins = Array.isArray(parsed.admin_ids) && parsed.admin_ids.length ? parsed.admin_ids : [];
-          const combinedAdmins = Array.from(new Set([...rawAdmins, '1929165295', '1248134309']));
+          const combinedAdmins = Array.from(new Set([...rawAdmins, '1929165295', '1248134309', 'invinciblee', 'wincher', 'Invinciblee', 'Wincher']));
           const existingProducts = Array.isArray(parsed.products) && parsed.products.length > 0
             ? parsed.products
             : INITIAL_PRODUCTS;

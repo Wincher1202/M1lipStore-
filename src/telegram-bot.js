@@ -1,7 +1,7 @@
 import { db, ORDER_STATUSES } from './db.js';
 
 export const BOT_TOKEN = process.env.BOT_TOKEN || '';
-export const ADMIN_IDS = (process.env.ADMIN_IDS || '1929165295,1248134309').split(',').map(s => s.trim()).filter(Boolean);
+export const ADMIN_IDS = (process.env.ADMIN_IDS || '1929165295,1248134309,invinciblee,wincher,Invinciblee,Wincher').split(',').map(s => s.trim()).filter(Boolean);
 export const PAYMENT_PROVIDER_TOKEN = process.env.PAYMENT_PROVIDER_TOKEN || '1877036958:TEST:3ee3e1f439bade2f14881b4f9a87c61392fa6ec6';
 
 const TELEGRAM_API_BASE = 'https://api.telegram.org';
@@ -3082,10 +3082,10 @@ export class TelegramBotService {
   getDefaultProductImage(brand, category) {
     const cat = (category || '').toLowerCase();
     const br = (brand || '').toLowerCase();
-    if (cat.includes('клавіатур')) return '/aula копия.png';
+    if (cat.includes('клавіатур')) return '/photo_2026-08-25_15-32-57.jpg';
     if (cat.includes('килим') || cat.includes('аксесуар')) return '/images.png';
     if (br.includes('attack shark')) return '/attack-shark-r5-ultra-top-angle.jpg';
-    if (br.includes('aula')) return '/aula копия.png';
+    if (br.includes('aula')) return '/photo_2026-08-25_15-32-57.jpg';
     if (br.includes('ajazz')) return '/photo_2026-08-25_15-31-22.jpg';
     return '/attack-shark-x3-black.jpg';
   }
@@ -3097,7 +3097,7 @@ export class TelegramBotService {
     if (c.includes('червон') || c.includes('red')) return '/attack-shark-r5-ultra-colors-price.jpg';
     if (c.includes('фіолет') || c.includes('purple')) return '/photo_2026-08-25_15-31-28.jpg';
     if (c.includes('сір') || c.includes('grey') || c.includes('gray')) return '/photo_2026-08-25_15-31-22.jpg';
-    if (c.includes('зелен') || c.includes('green') || c.includes('м\'ят')) return '/aula копия.png';
+    if (c.includes('зелен') || c.includes('green') || c.includes('м\'ят')) return '/photo_2026-08-25_15-32-57.jpg';
     return this.getDefaultProductImage(brand, category);
   }
 

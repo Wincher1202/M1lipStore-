@@ -18,7 +18,10 @@
         :root {
             --bg-primary: #F8F9FA;
             --bg-secondary: #FFFFFF;
+            --bg-surface: #FFFFFF;
             --bg-tertiary: #F1F3F5;
+            --bg-modal-panel: #F1F5F9;
+            --bg-modal-card: #FFFFFF;
             --text-primary: #111315;
             --text-secondary: #656D76;
             --text-muted: #8C959F;
@@ -39,7 +42,10 @@
         [data-theme="dark"] {
             --bg-primary: #0A0B0D;
             --bg-secondary: #121418;
+            --bg-surface: #121418;
             --bg-tertiary: #1A1D23;
+            --bg-modal-panel: #181C24;
+            --bg-modal-card: #14171E;
             --text-primary: #F4F5F7;
             --text-secondary: #9DA3AF;
             --text-muted: #6B7280;
@@ -617,7 +623,7 @@
             padding: 0;
             box-shadow: 0 20px 48px -12px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.03);
             width: 100%;
-            max-width: 490px;
+            max-width: 410px;
             position: relative;
             cursor: pointer;
             transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease;
@@ -808,13 +814,14 @@
         }
 
         #catalog.section-padding {
-            padding-top: 14px;
+            padding-top: 10px;
             padding-bottom: 50px;
             scroll-margin-top: 76px;
+            max-width: 1320px;
         }
 
         .section-padding {
-            padding: 40px 20px;
+            padding: 30px 20px;
             max-width: 1440px;
             margin: 0 auto;
             width: 100%;
@@ -824,7 +831,7 @@
             display: flex;
             justify-content: space-between;
             align-items: flex-end;
-            margin-bottom: 24px;
+            margin-bottom: 20px;
         }
 
         .section-title {
@@ -841,28 +848,37 @@
         .catalog-filters {
             display: flex;
             gap: 10px;
-            margin-bottom: 28px;
+            margin-bottom: 22px;
             overflow-x: auto;
-            padding: 6px 4px 12px 4px;
+            padding: 6px 12px 14px 12px;
             scroll-behavior: smooth;
             -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            scroll-snap-type: x proximity;
+        }
+
+        .catalog-filters::-webkit-scrollbar {
+            display: none;
         }
 
         .filter-btn {
             background: var(--bg-secondary);
             border: 1px solid var(--border-light);
-            padding: 10px 20px;
+            padding: 10px 22px;
             border-radius: 30px;
-            font-size: 0.85rem;
-            font-weight: 600;
+            font-size: 0.88rem;
+            font-weight: 700;
             color: var(--text-secondary);
             cursor: pointer;
             white-space: nowrap;
             flex-shrink: 0;
+            scroll-snap-align: center;
             box-shadow: var(--shadow-subtle);
-            transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
             position: relative;
-            overflow: hidden;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .filter-btn span {
@@ -873,33 +889,33 @@
         .filter-btn:hover {
             border-color: var(--accent);
             color: var(--accent);
-            transform: translateY(-3px) scale(1.02);
-            box-shadow: 0 4px 12px rgba(87, 100, 226, 0.1);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(87, 100, 226, 0.15);
         }
 
         .filter-btn.active {
             background: var(--accent);
-            color: white;
+            color: #ffffff;
             border-color: var(--accent);
-            transform: translateY(-3px) scale(1.03);
-            box-shadow: 0 4px 14px rgba(87, 100, 226, 0.25);
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 6px 16px rgba(87, 100, 226, 0.35);
         }
 
         .brands-section {
             padding: 0 20px;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
 
         /* Popular brands — slow, seamless auto-scrolling marquee */
         .partner-brands-section {
-            padding: 50px 0 10px 0;
+            padding: 32px 0 6px 0;
             margin: 0;
             position: relative;
             scroll-margin-top: 80px;
         }
 
         .partner-brands-section .section-header {
-            padding: 0 24px 12px 24px;
+            padding: 0 24px 10px 24px;
             max-width: 1400px;
             margin: 0 auto;
         }
@@ -907,7 +923,7 @@
         .partner-brands-marquee {
             overflow: hidden;
             width: 100%;
-            padding: 8px 0 12px 0;
+            padding: 8px 0 10px 0;
             margin: 0;
             position: relative;
             -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 40px, #000 calc(100% - 40px), transparent 100%);
@@ -934,17 +950,17 @@
 
         .partner-brand-tile {
             flex-shrink: 0;
-            width: 175px;
-            height: 94px;
-            margin: 0 12px;
+            width: 155px;
+            height: 88px;
+            margin: 0 10px;
             background: #FFFFFF;
-            border: 2.5px solid var(--border-light);
-            border-radius: 20px;
+            border: 2px solid var(--border-light);
+            border-radius: 18px;
             box-shadow: var(--shadow-subtle);
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 12px 20px;
+            padding: 10px 16px;
             cursor: pointer;
             position: relative;
             overflow: visible;
@@ -989,6 +1005,98 @@
             opacity: 0;
             transition: opacity 0.3s ease;
             pointer-events: none;
+        }
+
+        .site-header-logo-img {
+            height: 36px;
+            width: auto;
+            max-width: 130px;
+            object-fit: contain;
+            mix-blend-mode: multiply;
+            transition: filter 0.2s ease, transform 0.2s ease;
+        }
+
+        [data-theme="dark"] .site-header-logo-img {
+            filter: invert(1);
+            mix-blend-mode: screen;
+        }
+
+        .brand-logo-img,
+        .brand-logo-frameless,
+        .partner-brand-tile img,
+        .card-brand-badge img {
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            display: block;
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: high-quality;
+            mix-blend-mode: multiply;
+            transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), filter 0.2s ease;
+        }
+
+        .card-brand-badge {
+            background: #FFFFFF;
+            border: 1.5px solid var(--border-light);
+            border-radius: 10px;
+            padding: 5px 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            height: 38px;
+            max-width: 145px;
+            margin-top: 8px;
+            margin-bottom: 4px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+            transition: all 0.2s ease;
+            box-sizing: border-box;
+        }
+
+        .card-brand-badge img {
+            max-height: 28px;
+            max-width: 120px;
+        }
+
+        [data-theme="dark"] .card-brand-badge {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.16);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .brand-logo-img.logo-mchose,
+        .partner-brand-tile img[src*="mchose"],
+        .card-brand-badge img[src*="mchose"] {
+            mix-blend-mode: normal;
+            border-radius: 4px;
+        }
+
+        .partner-brand-tile img {
+            max-height: 52px;
+            max-width: 90%;
+        }
+
+        [data-theme="dark"] .brand-logo-img,
+        [data-theme="dark"] .brand-logo-frameless,
+        [data-theme="dark"] .partner-brand-tile img,
+        [data-theme="dark"] .card-brand-badge img {
+            filter: invert(1);
+            mix-blend-mode: screen;
+        }
+
+        [data-theme="dark"] .brand-logo-img.logo-aula,
+        [data-theme="dark"] .brand-logo-frameless.logo-aula,
+        [data-theme="dark"] .partner-brand-tile img[src*="aula"],
+        [data-theme="dark"] .card-brand-badge img[src*="aula"] {
+            filter: none;
+            mix-blend-mode: screen;
+        }
+
+        [data-theme="dark"] .brand-logo-img.logo-mchose,
+        [data-theme="dark"] .brand-logo-frameless.logo-mchose,
+        [data-theme="dark"] .partner-brand-tile img[src*="mchose"],
+        [data-theme="dark"] .card-brand-badge img[src*="mchose"] {
+            filter: none;
+            mix-blend-mode: screen;
         }
 
         .partner-brand-tile:hover {
@@ -1080,11 +1188,11 @@
 
         @media(min-width: 768px) {
             .partner-brand-tile { 
-                width: 215px; 
-                height: 105px; 
-                margin: 0 14px; 
-                border-radius: 22px;
-                padding: 14px 24px;
+                width: 190px; 
+                height: 96px; 
+                margin: 0 12px; 
+                border-radius: 20px;
+                padding: 12px 20px;
             }
             .partner-brand-tile img {
                 max-height: 58px;
@@ -1213,18 +1321,19 @@
             background: var(--bg-secondary);
             border: 1px solid var(--border-light);
             border-radius: var(--radius-lg);
-            padding: 16px;
+            padding: 14px;
             display: flex;
             flex-direction: column;
             position: relative;
             box-shadow: var(--shadow-subtle);
             cursor: pointer;
             height: 100%;
-            min-height: 420px;
+            min-height: 410px;
             will-change: transform;
             transition: var(--transition-smooth);
             animation: catalogCardEntrance 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
             box-sizing: border-box;
+            overflow: hidden;
         }
 
         @media(max-width: 480px) {
@@ -1233,39 +1342,45 @@
                 gap: 14px;
             }
             .product-card {
-                padding: 14px;
+                padding: 12px;
                 min-height: 380px;
             }
         }
 
         .product-card:hover {
-            transform: translateY(-6px) scale(1.01);
+            transform: translateY(-5px) scale(1.01);
             border-color: var(--accent);
             box-shadow: var(--shadow-hover);
         }
 
+        .product-card-top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            z-index: 10;
+        }
+
         .product-tag {
-            background: #0f172a;
-            color: #ffffff;
-            font-size: 0.68rem;
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            font-size: 0.65rem;
             font-weight: 800;
-            padding: 5px 12px;
-            border-radius: 20px;
-            width: fit-content;
+            padding: 4px 10px;
+            border-radius: var(--radius-sm);
             letter-spacing: 0.04em;
             text-transform: uppercase;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.15);
-            z-index: 10;
+            border: 1px solid var(--border-light);
             display: inline-flex;
             align-items: center;
             gap: 4px;
         }
 
         .product-tag.new, .product-tag.hot {
-            background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
+            background: linear-gradient(135deg, #3730a3 0%, #4f46e5 100%);
             color: #ffffff;
-            border: 1px solid rgba(165, 180, 252, 0.45);
-            box-shadow: 0 4px 14px rgba(49, 46, 129, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3);
         }
 
         @keyframes heartBeatAnim {
@@ -1276,20 +1391,40 @@
             60% { transform: scale(1); }
         }
 
+        @keyframes cardSmoothExpand {
+            0% {
+                transform: scale(1);
+            }
+            35% {
+                transform: scale(1.022);
+            }
+            60% {
+                transform: scale(1.022);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .product-card.liked-pulse {
+            animation: cardSmoothExpand 1.6s cubic-bezier(0.25, 1, 0.5, 1) forwards !important;
+        }
+
         .wishlist-btn {
             position: absolute;
-            top: 18px;
-            right: 18px;
-            background: var(--bg-secondary);
+            top: 12px;
+            right: 12px;
+            background: var(--bg-surface);
             border: 1px solid var(--border-light);
-            width: 36px;
-            height: 36px;
+            width: 38px;
+            height: 38px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             z-index: 10;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             transition: var(--transition-smooth);
         }
 
@@ -1316,7 +1451,7 @@
             justify-content: center;
             overflow: hidden;
             position: relative;
-            margin: 14px 0;
+            margin: 0 0 10px 0;
             border-radius: var(--radius-md);
             background: var(--bg-tertiary);
             padding: 0;
@@ -1338,16 +1473,17 @@
         .color-picker-preview {
             display: flex;
             gap: 6px;
-            margin: 6px 0;
+            margin: 4px 0 8px 0;
             align-items: center;
-            min-height: 16px;
+            min-height: 18px;
         }
 
         .color-dot {
             width: 14px;
             height: 14px;
             border-radius: 50%;
-            border: 1px solid var(--border-hover);
+            border: 1.5px solid rgba(0,0,0,0.25);
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,0.4), 0 1px 3px rgba(0,0,0,0.15);
             display: inline-block;
             cursor: pointer;
             transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -1721,16 +1857,16 @@
         }
 
         .color-circle-big {
-            width: 26px;
-            height: 26px;
+            width: 22px;
+            height: 22px;
             border-radius: 50%;
-            border: 2px solid var(--border-hover);
-            transition: all 0.25s ease;
+            border: 1.5px solid rgba(0,0,0,0.2);
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,0.7), 0 1px 3px rgba(0,0,0,0.1);
+            transition: all 0.2s ease;
             display: inline-block;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
         }
 
-        .color-circle-big:hover { transform: scale(1.15); }
+        .color-circle-big:hover { transform: scale(1.1); }
         .color-circle-big.out-of-stock { 
             background-color: #9ca3af !important; 
             border-color: #6b7280 !important; 
@@ -1739,10 +1875,10 @@
         }
 
         .color-circle-big.active {
-            box-shadow: 0 0 0 3px var(--bg-surface), 0 0 0 5px var(--accent);
+            box-shadow: 0 0 0 2px var(--bg-surface), 0 0 0 3.5px var(--accent);
             border-color: transparent;
             opacity: 1;
-            transform: scale(1.12);
+            transform: scale(1.08);
         }
 
         .modal-close-circle {
@@ -2787,7 +2923,7 @@
     <div id="top"></div>
 
     <header id="site-header">
-        <a class="logo" id="logo-scroll-btn">
+        <a class="logo" id="logo-scroll-btn" style="display: flex; align-items: center; gap: 10px; cursor: pointer; text-decoration: none;">
             <div class="logo-text-wrap">
                 <span class="logo-part-1">M1Lip</span><span class="logo-part-2">Store</span>
             </div>
@@ -2883,7 +3019,7 @@
                 </div>
 
                 <div class="hero-card-img-wrap">
-                    <img id="hero-img" src="shark.jpg" alt="Featured Product" loading="eager">
+                    <img id="hero-img" src="attack-shark-x3-black.jpg" alt="Featured Product" loading="eager">
                 </div>
 
                 <div class="hero-card-footer">
@@ -2921,32 +3057,32 @@
         <div class="partner-brands-marquee">
             <div class="partner-brands-track">
                 <!-- Set 1 -->
-                <div class="partner-brand-tile" onclick="filterByBrand('Attack Shark', this)"><img src="shark.jpg" alt="Attack Shark" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Attack Shark</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('Ajazz', this)"><img src="adjaras.webp" alt="Ajazz" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Ajazz</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('AULA', this)"><img src="aula.png" alt="AULA" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">AULA</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('Mchose', this)"><img src="mchous.png" alt="Mchose" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Mchose</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('VGN', this)"><img src="vgn.jpg" alt="VGN" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">VGN</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Attack Shark', this)"><img src="/logo-attack-shark.png" alt="Attack Shark" loading="lazy" class="brand-logo-img logo-attack-shark" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Attack Shark</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Ajazz', this)"><img src="/logo-ajazz.png" alt="Ajazz" loading="lazy" class="brand-logo-img logo-ajazz" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Ajazz</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('AULA', this)"><img src="/logo-aula.png" alt="AULA" loading="lazy" class="brand-logo-img logo-aula" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">AULA</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Mchose', this)"><img src="/logo-mchose.png" alt="Mchose" loading="lazy" class="brand-logo-img logo-mchose" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Mchose</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('VGN', this)"><img src="/logo-vgn.png" alt="VGN" loading="lazy" class="brand-logo-img logo-vgn" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">VGN</span></div>
 
                 <!-- Set 2 -->
-                <div class="partner-brand-tile" onclick="filterByBrand('Attack Shark', this)"><img src="shark.jpg" alt="Attack Shark" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Attack Shark</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('Ajazz', this)"><img src="adjaras.webp" alt="Ajazz" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Ajazz</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('AULA', this)"><img src="aula.png" alt="AULA" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">AULA</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('Mchose', this)"><img src="mchous.png" alt="Mchose" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Mchose</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('VGN', this)"><img src="vgn.jpg" alt="VGN" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">VGN</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Attack Shark', this)"><img src="/logo-attack-shark.png" alt="Attack Shark" loading="lazy" class="brand-logo-img logo-attack-shark" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Attack Shark</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Ajazz', this)"><img src="/logo-ajazz.png" alt="Ajazz" loading="lazy" class="brand-logo-img logo-ajazz" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Ajazz</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('AULA', this)"><img src="/logo-aula.png" alt="AULA" loading="lazy" class="brand-logo-img logo-aula" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">AULA</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Mchose', this)"><img src="/logo-mchose.png" alt="Mchose" loading="lazy" class="brand-logo-img logo-mchose" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Mchose</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('VGN', this)"><img src="/logo-vgn.png" alt="VGN" loading="lazy" class="brand-logo-img logo-vgn" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">VGN</span></div>
 
                 <!-- Set 3 -->
-                <div class="partner-brand-tile" onclick="filterByBrand('Attack Shark', this)"><img src="shark.jpg" alt="Attack Shark" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Attack Shark</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('Ajazz', this)"><img src="adjaras.webp" alt="Ajazz" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Ajazz</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('AULA', this)"><img src="aula.png" alt="AULA" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">AULA</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('Mchose', this)"><img src="mchous.png" alt="Mchose" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Mchose</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('VGN', this)"><img src="vgn.jpg" alt="VGN" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">VGN</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Attack Shark', this)"><img src="/logo-attack-shark.png" alt="Attack Shark" loading="lazy" class="brand-logo-img logo-attack-shark" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Attack Shark</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Ajazz', this)"><img src="/logo-ajazz.png" alt="Ajazz" loading="lazy" class="brand-logo-img logo-ajazz" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Ajazz</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('AULA', this)"><img src="/logo-aula.png" alt="AULA" loading="lazy" class="brand-logo-img logo-aula" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">AULA</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Mchose', this)"><img src="/logo-mchose.png" alt="Mchose" loading="lazy" class="brand-logo-img logo-mchose" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Mchose</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('VGN', this)"><img src="/logo-vgn.png" alt="VGN" loading="lazy" class="brand-logo-img logo-vgn" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">VGN</span></div>
 
                 <!-- Set 4 -->
-                <div class="partner-brand-tile" onclick="filterByBrand('Attack Shark', this)"><img src="shark.jpg" alt="Attack Shark" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Attack Shark</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('Ajazz', this)"><img src="adjaras.webp" alt="Ajazz" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Ajazz</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('AULA', this)"><img src="aula.png" alt="AULA" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">AULA</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('Mchose', this)"><img src="mchous.png" alt="Mchose" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Mchose</span></div>
-                <div class="partner-brand-tile" onclick="filterByBrand('VGN', this)"><img src="vgn.jpg" alt="VGN" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">VGN</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Attack Shark', this)"><img src="/logo-attack-shark.png" alt="Attack Shark" loading="lazy" class="brand-logo-img logo-attack-shark" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Attack Shark</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Ajazz', this)"><img src="/logo-ajazz.png" alt="Ajazz" loading="lazy" class="brand-logo-img logo-ajazz" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Ajazz</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('AULA', this)"><img src="/logo-aula.png" alt="AULA" loading="lazy" class="brand-logo-img logo-aula" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">AULA</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('Mchose', this)"><img src="/logo-mchose.png" alt="Mchose" loading="lazy" class="brand-logo-img logo-mchose" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">Mchose</span></div>
+                <div class="partner-brand-tile" onclick="filterByBrand('VGN', this)"><img src="/logo-vgn.png" alt="VGN" loading="lazy" class="brand-logo-img logo-vgn" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback">VGN</span></div>
             </div>
         </div>
     </section>
@@ -3002,6 +3138,7 @@
         <div class="footer-grid">
             <div class="footer-col">
                 <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px; cursor: pointer;" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+                    <img src="/logo-milipstore.png" alt="M1LipStore" class="site-header-logo-img" style="height: 32px;">
                     <div class="logo" style="font-size: 1.3rem; animation: none;">
                         <div class="logo-text-wrap">
                             <span class="logo-part-1">M1Lip</span><span class="logo-part-2">Store</span>
@@ -3480,19 +3617,19 @@
             <div class="modal-gallery">
                 <div class="modal-main-img-wrap" onclick="openColorGalleryLightbox()">
                     <img class="modal-main-img" id="modal-img" alt="Product">
-                    <div class="gallery-zoom-hint">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/><path d="M11 8v6"/><path d="M8 11h6"/></svg>
-                        <span>Галерея</span>
-                    </div>
                 </div>
                 <div class="modal-thumbs" id="modal-thumbs"></div>
             </div>
             <div class="modal-details">
-                <span class="product-tag new" id="modal-tag">НОВИНКА</span>
-                <h4 id="modal-brand" style="color: var(--text-muted); text-transform: uppercase; font-size: 0.7rem; font-weight: 800; margin-top: 6px;">БРЕНД</h4>
-                <h2 id="modal-title" style="font-size: 1.4rem; font-weight: 800; margin: 4px 0;"></h2>
-                <p id="modal-desc" style="color: var(--text-secondary); margin: 6px 0; font-size: 0.85rem;"></p>
-                <div class="product-price" id="modal-price" style="font-size: 1.3rem; color: var(--accent); margin: 8px 0;">0 <span class="currency">₴</span></div>
+                <div style="display: flex; align-items: center; margin-bottom: 8px; gap: 12px; padding-right: 36px;">
+                    <span class="product-tag new" id="modal-tag" style="position: static; margin: 0;">НОВИНКА</span>
+                </div>
+                <h2 id="modal-title" style="font-size: 1.35rem; font-weight: 800; margin: 4px 0 8px 0; letter-spacing: -0.01em;"></h2>
+                <div style="display: flex; align-items: center; margin: 8px 0 12px 0; gap: 16px; flex-wrap: wrap;">
+                    <div class="product-price" id="modal-price" style="font-size: 1.4rem; color: var(--accent); font-weight: 800; margin: 0;">0 <span class="currency">₴</span></div>
+                    <div id="modal-brand" style="background: transparent; padding: 0; border: none; box-shadow: none; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; margin-left: 4px;">БРЕНД</div>
+                </div>
+                <div id="modal-desc" style="background: var(--bg-tertiary); padding: 12px 16px; border-radius: 12px; border: 1px solid var(--border-light); color: var(--text-secondary); margin: 10px 0; font-size: 0.88rem; line-height: 1.6;"></div>
 
                 <div class="modal-options-row">
                     <div class="option-group">
@@ -3595,8 +3732,8 @@
                 tag: "🔥 ТОП ПРОДАЖІВ",
                 popular: true,
                 desc: "Флагманська бездротова мишка з вагою всього 49 грам. Топовий сенсор PixArt PAW3395 (до 26000 DPI) та мікроперемикачі Huano Blue Pink Dot.",
-                img: "shark.jpg",
-                gallery: ["shark.jpg"],
+                img: "attack-shark-x3-black.jpg",
+                gallery: ["attack-shark-x3-black.jpg"],
                 specs: [
                     { label: "Сенсор", value: "PixArt PAW3395 (26 000 DPI)" },
                     { label: "Вага", value: "49 грам (ультралегка)" },
@@ -3605,9 +3742,9 @@
                 ],
                 colors: "Black, White, Pink",
                 color_images: {
-                    "Black": { main: "shark.jpg", gallery: ["shark.jpg"] },
-                    "White": { main: "shark.jpg", gallery: ["shark.jpg"] },
-                    "Pink": { main: "shark.jpg", gallery: ["shark.jpg"] }
+                    "Black": { main: "attack-shark-x3-black.jpg", gallery: ["attack-shark-x3-black.jpg"] },
+                    "White": { main: "attack-shark-x3-white.jpg", gallery: ["attack-shark-x3-white.jpg"] },
+                    "Pink": { main: "attack-shark-x3-black.jpg", gallery: ["attack-shark-x3-black.jpg"] }
                 },
                 color_quantities: { "Black": 10, "White": 8, "Pink": 4 }
             },
@@ -3622,8 +3759,8 @@
                 tag: "⚡ ХІТ СЕЗОНУ",
                 popular: true,
                 desc: "Преміальний бездротовий контролер з акумулятором на 500 mAh (до 130 годин гри). Контролер Nordic 52840 та сенсор PAW3395.",
-                img: "vgn.jpg",
-                gallery: ["vgn.jpg"],
+                img: "photo_2026-08-25_15-32-38.jpg",
+                gallery: ["photo_2026-08-25_15-32-38.jpg"],
                 specs: [
                     { label: "Сенсор", value: "PixArt PAW3395 Flagship" },
                     { label: "Чипсет", value: "Nordic 52840 (4K Polling Ready)" },
@@ -3632,8 +3769,8 @@
                 ],
                 colors: "Black, White",
                 color_images: {
-                    "Black": { main: "vgn.jpg", gallery: ["vgn.jpg"] },
-                    "White": { main: "vgn.jpg", gallery: ["vgn.jpg"] }
+                    "Black": { main: "photo_2026-08-25_15-32-38.jpg", gallery: ["photo_2026-08-25_15-32-38.jpg"] },
+                    "White": { main: "photo_2026-08-25_15-32-36.jpg", gallery: ["photo_2026-08-25_15-32-36.jpg"] }
                 },
                 color_quantities: { "Black": 15, "White": 12 }
             },
@@ -3648,8 +3785,8 @@
                 tag: "🌟 ВИБІР ПРОФІ",
                 popular: true,
                 desc: "Легендарна 75% механічна клавіатура з повноцінною Gasket Mount структурою, 5-шаровою шумоізоляцією та пре-лубленими перемикачами LEOBOG Reaper.",
-                img: "aula.png",
-                gallery: ["aula.png"],
+                img: "photo_2026-08-25_15-32-57.jpg",
+                gallery: ["photo_2026-08-25_15-32-57.jpg"],
                 specs: [
                     { label: "Формат", value: "75% компактна з металевим енкодером" },
                     { label: "Конструкція", value: "Gasket Mount з PC плейтом" },
@@ -3658,9 +3795,9 @@
                 ],
                 colors: "Black, White, Blue",
                 color_images: {
-                    "Black": { main: "aula.png", gallery: ["aula.png"] },
-                    "White": { main: "aula.png", gallery: ["aula.png"] },
-                    "Blue": { main: "aula.png", gallery: ["aula.png"] }
+                    "Black": { main: "photo_2026-08-25_15-32-57.jpg", gallery: ["photo_2026-08-25_15-32-57.jpg"] },
+                    "White": { main: "photo_2026-08-25_15-32-59.jpg", gallery: ["photo_2026-08-25_15-32-59.jpg"] },
+                    "Blue": { main: "photo_2026-08-25_15-33-02.jpg", gallery: ["photo_2026-08-25_15-33-02.jpg"] }
                 },
                 color_quantities: { "Black": 6, "White": 8, "Blue": 4 }
             },
@@ -3675,8 +3812,8 @@
                 tag: "🔥 ТОП ПРОДАЖІВ",
                 popular: true,
                 desc: "Бездротова кастомна клавіатура з кольоровим 0.85-дюймовим TFT-екраном для показу GIF-анімацій, часу та налаштувань. RGB підсвітка південного типу.",
-                img: "adjaras.webp",
-                gallery: ["adjaras.webp"],
+                img: "photo_2026-08-25_15-31-22.jpg",
+                gallery: ["photo_2026-08-25_15-31-22.jpg"],
                 specs: [
                     { label: "Дисплей", value: "0.85\" Color TFT Screen (GIF/Battery/Clock)" },
                     { label: "Свічі", value: "Ajazz Gift Switch (Linear Pre-Lubed)" },
@@ -3685,9 +3822,9 @@
                 ],
                 colors: "Grey, White, Purple",
                 color_images: {
-                    "Grey": { main: "adjaras.webp", gallery: ["adjaras.webp"] },
-                    "White": { main: "adjaras.webp", gallery: ["adjaras.webp"] },
-                    "Purple": { main: "adjaras.webp", gallery: ["adjaras.webp"] }
+                    "Grey": { main: "photo_2026-08-25_15-31-22.jpg", gallery: ["photo_2026-08-25_15-31-22.jpg"] },
+                    "White": { main: "photo_2026-08-25_15-31-28.jpg", gallery: ["photo_2026-08-25_15-31-28.jpg"] },
+                    "Purple": { main: "photo_2026-08-25_15-31-28.jpg", gallery: ["photo_2026-08-25_15-31-28.jpg"] }
                 },
                 color_quantities: { "Grey": 10, "White": 5, "Purple": 3 }
             },
@@ -3702,8 +3839,8 @@
                 tag: "⚡ ХІТ СЕЗОНУ",
                 popular: true,
                 desc: "Ергономічна бездротова мишка симетричної форми. Сенсор PAW3395, вага 59 г, перемикачі Blue Transparent Pink Dot з ресурсом 80 млн.",
-                img: "mchous.png",
-                gallery: ["mchous.png"],
+                img: "photo_2026-08-25_15-32-40.jpg",
+                gallery: ["photo_2026-08-25_15-32-40.jpg"],
                 specs: [
                     { label: "Сенсор", value: "PixArt PAW3395 (26000 DPI, 650 IPS)" },
                     { label: "Вага", value: "59 грам" },
@@ -3712,8 +3849,8 @@
                 ],
                 colors: "Black, White",
                 color_images: {
-                    "Black": { main: "mchous.png", gallery: ["mchous.png"] },
-                    "White": { main: "mchous.png", gallery: ["mchous.png"] }
+                    "Black": { main: "photo_2026-08-25_15-32-40.jpg", gallery: ["photo_2026-08-25_15-32-40.jpg"] },
+                    "White": { main: "photo_2026-08-25_15-32-42.jpg", gallery: ["photo_2026-08-25_15-32-42.jpg"] }
                 },
                 color_quantities: { "Black": 8, "White": 6 }
             }
@@ -3829,7 +3966,7 @@
                     tag: item.tag || 'НОВИНКА',
                     category: item.category || 'Аксесуари',
                     desc: item.description || item.desc || 'Якісний ігровий девайс.',
-                    img: item.img || (parsedGallery.length > 0 ? parsedGallery[0] : 'shark.jpg'),
+                    img: item.img || (parsedGallery.length > 0 ? parsedGallery[0] : 'attack-shark-x3-black.jpg'),
                     gallery: Array.from(allImagesSet),
                     specs: parsedSpecs,
                     colors: parsedColors,
@@ -3846,12 +3983,27 @@
             { id: 'audio', name: 'Аудіо' }
         ];
         let brands = [
-            { id: 'attack-shark', name: 'Attack Shark' },
-            { id: 'ajazz', name: 'Ajazz' },
-            { id: 'aula', name: 'AULA' },
-            { id: 'mchose', name: 'Mchose' },
-            { id: 'vgn', name: 'VGN' }
+            { id: 'attack-shark', name: 'Attack Shark', logo: '/logo-attack-shark.png' },
+            { id: 'ajazz', name: 'Ajazz', logo: '/logo-ajazz.png' },
+            { id: 'aula', name: 'AULA', logo: '/logo-aula.png' },
+            { id: 'mchose', name: 'Mchose', logo: '/logo-mchose.png' },
+            { id: 'vgn', name: 'VGN', logo: '/logo-vgn.png' }
         ];
+
+        function getBrandLogoUrl(brandName) {
+            if (!brandName) return '';
+            const bLower = brandName.toLowerCase().trim();
+            if (bLower.includes('mchose') || bLower.includes('mchous')) return '/logo-mchose.png';
+            if (bLower.includes('aula')) return '/logo-aula.png';
+            if (bLower.includes('ajazz') || bLower.includes('adjaras')) return '/logo-ajazz.png';
+            if (bLower.includes('attack') || bLower.includes('shark')) return '/logo-attack-shark.png';
+            if (bLower.includes('vgn')) return '/logo-vgn.png';
+            const found = (brands || []).find(b => (b.name || '').toLowerCase().trim() === bLower);
+            if (found && found.logo) {
+                return found.logo.startsWith('/') ? found.logo : '/' + found.logo;
+            }
+            return '';
+        }
         let cart = JSON.parse(localStorage.getItem('m1lip_cart')) || [];
         let wishlist = JSON.parse(localStorage.getItem('m1lip_wishlist')) || [];
         let currentModalProduct = null;
@@ -4009,11 +4161,10 @@
             let tilesHtml = '';
             for (let r = 0; r < 4; r++) {
                 tilesHtml += visibleBrands.map(b => {
-                    const rawLogo = b.logo || '';
-                    const logoSrc = rawLogo.startsWith('/') ? rawLogo.substring(1) : rawLogo;
+                    const logoSrc = getBrandLogoUrl(b.name) || b.logo || '';
                     const safeName = (b.name || '').replace(/'/g, "\\'");
                     const logoHtml = logoSrc 
-                        ? `<img src="${logoSrc}" alt="${b.name}" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback" style="display:none;">${b.name}</span>`
+                        ? `<img src="${logoSrc}" alt="${b.name}" loading="lazy" class="brand-logo-img" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='inline-block';"><span class="brand-text-fallback" style="display:none;">${b.name}</span>`
                         : `<span class="brand-text-fallback" style="display:inline-block;">${b.name}</span>`;
                     const isActive = currentBrandFilter !== 'All' && (b.name || '').toLowerCase() === currentBrandFilter.toLowerCase();
                     return `<div class="partner-brand-tile ${isActive ? 'active' : ''}" onclick="filterByBrand('${safeName}', this)">${logoHtml}</div>`;
@@ -4026,13 +4177,17 @@
             const container = document.getElementById('catalog-filters');
             if (!container) return;
             const items = [{ id: 'All', name: 'Всі товари' }, ...categories];
-            container.innerHTML = items.map(cat => `
-                <button class="filter-btn ${cat.id === currentCategoryFilter || (cat.id === 'All' && currentCategoryFilter === 'All') ? 'active' : ''}"
-                        data-category="${cat.id === 'All' ? 'All' : cat.name}"
-                        onclick="filterByCategory('${cat.id === 'All' ? 'All' : cat.name.replace(/'/g, "\\'")}')">
-                    <span>${cat.name}</span>
-                </button>
-            `).join('');
+            container.innerHTML = items.map(cat => {
+                const catVal = cat.id === 'All' ? 'All' : cat.name;
+                const isActive = (currentCategoryFilter === 'All' && cat.id === 'All') || currentCategoryFilter.toLowerCase() === catVal.toLowerCase();
+                return `
+                    <button class="filter-btn ${isActive ? 'active' : ''}"
+                            data-category="${catVal}"
+                            onclick="filterByCategory('${catVal.replace(/'/g, "\\'")}', this)">
+                        <span>${cat.name}</span>
+                    </button>
+                `;
+            }).join('');
         }
 
         function filterByBrand(brandName, el) {
@@ -4139,7 +4294,7 @@
                 }
                 
                 setTimeout(() => {
-                    imgEl.src = p.img || 'shark.jpg';
+                    imgEl.src = p.img || 'attack-shark-x3-black.jpg';
                     if (tagEl) tagEl.innerText = p.tag || '🔥 ТОП ПРОДАЖІВ';
                     
                     const brandStr = (p.brand || '').trim();
@@ -4222,10 +4377,23 @@
             return `${Number(price).toLocaleString('uk-UA')} ₴`;
         }
 
-        function filterByCategory(category) {
+        function filterByCategory(category, btnEl = null) {
             currentCategoryFilter = category;
+            const container = document.getElementById('catalog-filters');
             document.querySelectorAll('.filter-btn').forEach(btn => {
-                btn.classList.toggle('active', btn.getAttribute('data-category') === category);
+                const btnCat = btn.getAttribute('data-category') || '';
+                const isActive = (category === 'All' && btnCat === 'All') || btnCat.toLowerCase() === category.toLowerCase();
+                btn.classList.toggle('active', isActive);
+                if (isActive && container) {
+                    const btnLeft = btn.offsetLeft;
+                    const btnWidth = btn.offsetWidth;
+                    const containerWidth = container.offsetWidth;
+                    const targetScroll = btnLeft - (containerWidth / 2) + (btnWidth / 2);
+                    container.scrollTo({
+                        left: Math.max(0, targetScroll),
+                        behavior: 'smooth'
+                    });
+                }
             });
             renderCatalog();
         }
@@ -4358,12 +4526,33 @@
                     return `<span class="color-dot ${dotClass}" style="${styleAttr}" title="${c.name}" ${isOut ? '' : `onclick="event.stopPropagation(); openProductModal(products.find(x => x.id === '${p.id}'), ${idx})"`}></span>`;
                 }).join('') : '';
 
+                const tagHtml = (p.tag && p.tag.trim()) 
+                    ? `<span class="product-tag new">${p.tag.trim()}</span>` 
+                    : '';
+
+                const logoUrl = getBrandLogoUrl(p.brand);
+                let logoClass = 'brand-logo-img';
+                if (logoUrl.includes('mchose')) logoClass += ' logo-mchose';
+                else if (logoUrl.includes('aula')) logoClass += ' logo-aula';
+                else if (logoUrl.includes('ajazz')) logoClass += ' logo-ajazz';
+                else if (logoUrl.includes('shark') || logoUrl.includes('attack')) logoClass += ' logo-attack-shark';
+                else if (logoUrl.includes('vgn')) logoClass += ' logo-vgn';
+
+                const brandBadgeHtml = logoUrl 
+                    ? `<div class="card-brand-badge">
+                         <img src="${logoUrl}" alt="${p.brand}" class="${logoClass}" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='inline-block';">
+                         <span style="display:none; font-size: 0.75rem; font-weight: 800; color: var(--accent); text-transform: uppercase;">${p.brand}</span>
+                       </div>`
+                    : `<h4 style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--accent); font-weight: 800; margin-top: 6px; margin-bottom: 2px;">${p.brand}</h4>`;
+
                 return `
                     <div class="product-card" onclick="openProductModal(products.find(x => x.id === '${p.id}'))">
-                        <span class="product-tag new">${p.tag || ''}</span>
-                        <button class="wishlist-btn ${isFav ? 'active' : ''}" id="wishlist-btn-${p.id}" onclick="event.stopPropagation(); toggleWishlist('${p.id}')">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="${isFav ? '#FF3B30' : 'none'}" stroke="${isFav ? '#FF3B30' : 'currentColor'}" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-                        </button>
+                        <div class="product-card-top-bar">
+                            ${tagHtml}
+                            <button class="wishlist-btn ${isFav ? 'active' : ''}" id="wishlist-btn-${p.id}" onclick="event.stopPropagation(); toggleWishlist('${p.id}')" style="position: static; width: 34px; height: 34px; box-shadow: none;">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="${isFav ? '#FF3B30' : 'none'}" stroke="${isFav ? '#FF3B30' : 'currentColor'}" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                            </button>
+                        </div>
                         <div class="product-img-wrap" id="card-img-wrap-${p.id}">
                             <img src="${p.img}" alt="${p.title}" id="card-img-${p.id}">
                         </div>
@@ -4374,8 +4563,8 @@
 
                         <div class="product-info">
                             <div class="product-title-group">
-                                <h4>${p.brand}</h4>
                                 <h3>${p.title}</h3>
+                                ${brandBadgeHtml}
                             </div>
                             <div class="product-price">${formatPrice(p.price)}</div>
                         </div>
@@ -4395,10 +4584,47 @@
                 selectedColorIndex = null;
             }
 
-            document.getElementById('modal-tag').innerText = product.tag || 'НОВИНКА';
-            document.getElementById('modal-brand').innerText = product.brand;
+            const modalTag = document.getElementById('modal-tag');
+            if (modalTag) {
+                modalTag.innerText = product.tag || 'ТОП ПРОДАЖІВ';
+            }
+            const brandEl = document.getElementById('modal-brand');
+            if (brandEl) {
+                const brandName = product.brand || '';
+                const logoSrc = getBrandLogoUrl(brandName);
+
+                if (logoSrc) {
+                    let logoClass = 'brand-logo-img';
+                    if (logoSrc.includes('mchose')) logoClass += ' logo-mchose';
+                    else if (logoSrc.includes('aula')) logoClass += ' logo-aula';
+                    else if (logoSrc.includes('ajazz')) logoClass += ' logo-ajazz';
+                    else if (logoSrc.includes('shark') || logoSrc.includes('attack')) logoClass += ' logo-attack-shark';
+                    else if (logoSrc.includes('vgn')) logoClass += ' logo-vgn';
+
+                    brandEl.className = 'card-brand-badge modal-brand-badge';
+                    brandEl.style.display = 'inline-flex';
+                    brandEl.style.alignItems = 'center';
+                    brandEl.style.justifyContent = 'center';
+                    brandEl.style.height = '44px';
+                    brandEl.style.padding = '6px 16px';
+                    brandEl.style.maxWidth = '160px';
+                    brandEl.style.borderRadius = '12px';
+                    brandEl.style.marginBottom = '8px';
+                    brandEl.innerHTML = `<img src="${logoSrc}" alt="${brandName}" class="${logoClass}" style="max-height: 32px; max-width: 140px;" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='inline-block';"><span style="display:none; font-size: 0.85rem; text-transform: uppercase; font-weight: 800; color: var(--accent);">${brandName || 'БРЕНД'}</span>`;
+                } else if (brandName) {
+                    brandEl.style.display = 'inline-flex';
+                    brandEl.style.background = 'transparent';
+                    brandEl.style.padding = '0';
+                    brandEl.style.border = 'none';
+                    brandEl.style.boxShadow = 'none';
+                    brandEl.innerHTML = `<span style="font-size: 0.85rem; text-transform: uppercase; font-weight: 800; color: var(--accent);">${brandName}</span>`;
+                } else {
+                    brandEl.style.display = 'none';
+                }
+            }
             document.getElementById('modal-title').innerText = product.title;
-            document.getElementById('modal-desc').innerText = product.desc;
+            const modalDesc = document.getElementById('modal-desc');
+            if (modalDesc) modalDesc.innerText = product.desc;
             document.getElementById('modal-price').innerHTML = formatPrice(product.price);
             document.getElementById('modal-qty').innerText = modalQty;
 
@@ -6356,23 +6582,34 @@
             if (!product) return;
 
             const index = wishlist.findIndex(item => item.id === productId);
-            if (index > -1) {
-                wishlist.splice(index, 1);
-            } else {
+            const isAdding = index === -1;
+            if (isAdding) {
                 wishlist.push(product);
+            } else {
+                wishlist.splice(index, 1);
             }
 
             localStorage.setItem('m1lip_wishlist', JSON.stringify(wishlist));
             updateBadges();
-            renderCatalog();
             renderWishlistItems();
 
             const wishBtn = document.getElementById(`wishlist-btn-${productId}`);
             if (wishBtn) {
-                const isFav = index === -1;
-                wishBtn.classList.toggle('active', isFav);
-                wishBtn.querySelector('svg').style.fill = isFav ? '#FF3B30' : 'none';
-                wishBtn.querySelector('svg').style.stroke = isFav ? '#FF3B30' : 'currentColor';
+                wishBtn.classList.toggle('active', isAdding);
+                const svg = wishBtn.querySelector('svg');
+                if (svg) {
+                    svg.setAttribute('fill', isAdding ? '#FF3B30' : 'none');
+                    svg.setAttribute('stroke', isAdding ? '#FF3B30' : 'currentColor');
+                }
+                const cardEl = wishBtn.closest('.product-card');
+                if (cardEl) {
+                    cardEl.classList.remove('liked-pulse');
+                    void cardEl.offsetWidth; // trigger reflow
+                    cardEl.classList.add('liked-pulse');
+                    setTimeout(() => {
+                        cardEl.classList.remove('liked-pulse');
+                    }, 900);
+                }
             }
         }
 
@@ -6385,6 +6622,96 @@
                 wishBtn.classList.toggle('active', isFav);
                 wishBtn.querySelector('svg').style.fill = isFav ? '#FF3B30' : 'none';
                 wishBtn.querySelector('svg').style.stroke = isFav ? '#FF3B30' : 'currentColor';
+            }
+        }
+
+        function toggleProfileDrawer(open) {
+            const drawer = document.getElementById('profile-drawer');
+            const backdrop = document.getElementById('backdrop');
+            if (!drawer) return;
+            if (open) {
+                drawer.classList.add('active');
+                backdrop?.classList.add('active');
+                renderProfileDrawer();
+            } else {
+                drawer.classList.remove('active');
+                if (!document.getElementById('cart-drawer')?.classList.contains('active') && 
+                    !document.getElementById('wishlist-drawer')?.classList.contains('active') && 
+                    !document.getElementById('checkout-drawer')?.classList.contains('active')) {
+                    backdrop?.classList.remove('active');
+                }
+            }
+        }
+
+        async function renderProfileDrawer() {
+            const container = document.getElementById('profile-drawer-body');
+            if (!container) return;
+
+            const savedPhone = localStorage.getItem('m1lip_last_phone') || document.getElementById('chk-phone')?.value || '';
+            const savedName = localStorage.getItem('m1lip_last_name') || document.getElementById('chk-firstname')?.value || '';
+
+            container.innerHTML = `
+                <div class="profile-section">
+                    <div style="display: flex; align-items: center; gap: 14px; background: var(--bg-tertiary); padding: 16px; border-radius: var(--radius-md); border: 1px solid var(--border-light);">
+                        <div style="width: 46px; height: 46px; border-radius: 50%; background: var(--accent); color: white; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.2rem;">
+                            ${savedName ? savedName.charAt(0).toUpperCase() : '👤'}
+                        </div>
+                        <div>
+                            <h3 style="font-size: 1.05rem; font-weight: 800; margin-bottom: 2px;">${savedName || 'Клієнт M1lipStore'}</h3>
+                            <p style="font-size: 0.82rem; color: var(--text-muted);">${savedPhone || 'Телефон не вказано'}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="profile-section">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <h4>МОЇ ЗАМОВЛЕННЯ</h4>
+                        <button class="btn-secondary" style="padding: 4px 10px; font-size: 0.75rem;" onclick="toggleProfileDrawer(false); openMyOrdersModal();">Всі замовлення →</button>
+                    </div>
+                    <div id="profile-recent-orders">
+                        <div class="profile-signin-note">Завантаження замовлень...</div>
+                    </div>
+                </div>
+            `;
+
+            try {
+                const res = await fetch(`${API_BASE}/orders`);
+                if (!res.ok) throw new Error();
+                const all = await res.json();
+                
+                const recentOrdersContainer = document.getElementById('profile-recent-orders');
+                if (!recentOrdersContainer) return;
+
+                let userOrders = all;
+                if (savedPhone) {
+                    const cleanPhone = savedPhone.replace(/\D/g, '');
+                    if (cleanPhone) {
+                        userOrders = all.filter(o => String(o.customer?.phone || '').replace(/\D/g, '').includes(cleanPhone));
+                    }
+                }
+
+                if (!userOrders || userOrders.length === 0) {
+                    recentOrdersContainer.innerHTML = '<div class="profile-empty-state">У вас поки немає замовлень</div>';
+                    return;
+                }
+
+                recentOrdersContainer.innerHTML = userOrders.slice(0, 3).map(o => `
+                    <div class="profile-order-card" style="margin-bottom: 10px;" onclick="toggleProfileDrawer(false); openMyOrdersModal();">
+                        <div class="order-top">
+                            <span>#${o.id || o.order_id || '---'}</span>
+                            <span class="order-status-pill">${o.status || 'В обробці'}</span>
+                        </div>
+                        <div class="order-meta">
+                            <div>Сума: <strong>${formatPrice(o.total || 0)}</strong></div>
+                            <div>Дата: ${o.created_at ? new Date(o.created_at).toLocaleDateString('uk-UA') : 'Сьогодні'}</div>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (e) {
+                const recentOrdersContainer = document.getElementById('profile-recent-orders');
+                if (recentOrdersContainer) {
+                    recentOrdersContainer.innerHTML = '<div class="profile-empty-state">У вас поки немає замовлень</div>';
+                }
             }
         }
 

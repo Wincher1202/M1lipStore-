@@ -50,6 +50,39 @@ app.get('/api/products/:id', (req, res) => {
   res.json(product);
 });
 
+app.post('/api/products', (req, res) => {
+  try {
+    const newProd = db.addProduct(req.body);
+    res.status(201).json(newProd);
+  } catch (err) {
+    res.status(400).json({ detail: 'Помилка збереження товару: ' + err.message });
+  }
+});
+
+app.put('/api/products/:id', (req, res) => {
+  try {
+    const updated = db.updateProduct(req.params.id, req.body);
+    if (!updated) {
+      return res.status(404).json({ detail: 'Товар не знайдено' });
+    }
+    res.json(updated);
+  } catch (err) {
+    res.status(400).json({ detail: 'Помилка оновлення товару: ' + err.message });
+  }
+});
+
+app.delete('/api/products/:id', (req, res) => {
+  try {
+    const deleted = db.deleteProduct(req.params.id);
+    if (!deleted) {
+      return res.status(404).json({ detail: 'Товар не знайдено' });
+    }
+    res.json({ ok: true, deleted });
+  } catch (err) {
+    res.status(400).json({ detail: 'Помилка видалення товару: ' + err.message });
+  }
+});
+
 app.get('/api/categories', (req, res) => {
   res.json(db.getCategories());
 });
