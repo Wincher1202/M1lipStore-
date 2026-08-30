@@ -906,7 +906,7 @@
             margin-bottom: 6px;
         }
 
-        /* Popular brands — slow, seamless auto-scrolling marquee */
+        /* Popular brands — slow, seamless auto-scrolling marquee with ambient illumination */
         .partner-brands-section {
             padding: 32px 0 6px 0;
             margin: 0;
@@ -923,11 +923,29 @@
         .partner-brands-marquee {
             overflow: hidden;
             width: 100%;
-            padding: 8px 0 10px 0;
+            padding: 10px 0 12px 0;
             margin: 0;
             position: relative;
             -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 40px, #000 calc(100% - 40px), transparent 100%);
             mask-image: linear-gradient(90deg, transparent 0, #000 40px, #000 calc(100% - 40px), transparent 100%);
+        }
+
+        /* Ribbon lighting / ambient illumination */
+        .partner-brands-marquee::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 100%;
+            transform: translateY(-50%);
+            background: radial-gradient(ellipse 65% 85% at 50% 50%, rgba(87, 100, 226, 0.08) 0%, transparent 80%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        [data-theme="dark"] .partner-brands-marquee::before {
+            background: radial-gradient(ellipse 65% 90% at 50% 50%, rgba(87, 100, 226, 0.22) 0%, rgba(87, 100, 226, 0.06) 55%, transparent 85%);
         }
 
         .partner-brands-track {
@@ -937,6 +955,8 @@
             padding: 8px 0;
             animation: partnerBrandsScroll 55s linear infinite;
             will-change: transform;
+            position: relative;
+            z-index: 1;
         }
 
         .partner-brands-marquee:hover .partner-brands-track {
@@ -953,10 +973,10 @@
             width: 155px;
             height: 88px;
             margin: 0 10px;
-            background: #FFFFFF;
+            background: #FFFFFF !important;
             border: 2px solid var(--border-light);
             border-radius: 18px;
-            box-shadow: var(--shadow-subtle);
+            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.05);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -970,16 +990,21 @@
         }
 
         .partner-brand-tile.alt-tile {
-            background: #F8FAFC;
-            border-color: rgba(87, 100, 226, 0.15);
+            background: #FFFFFF !important;
+            border-color: var(--border-light);
         }
 
+        /* Illuminated glow lighting for brand tiles in dark theme */
         [data-theme="dark"] .partner-brand-tile {
-            background: #1E2230;
+            background: #FFFFFF !important;
+            border: 2px solid rgba(87, 100, 226, 0.45);
+            box-shadow: 0 0 18px rgba(87, 100, 226, 0.28), 0 4px 14px rgba(0, 0, 0, 0.4);
         }
 
         [data-theme="dark"] .partner-brand-tile.alt-tile {
-            background: #252A3D;
+            background: #FFFFFF !important;
+            border-color: rgba(87, 100, 226, 0.45);
+            box-shadow: 0 0 18px rgba(87, 100, 226, 0.28), 0 4px 14px rgba(0, 0, 0, 0.4);
         }
 
         .partner-brand-tile img {
@@ -996,7 +1021,7 @@
         .partner-brand-tile span.brand-text-fallback {
             font-weight: 800;
             font-size: 0.95rem;
-            color: var(--text-primary);
+            color: #1E2230;
             letter-spacing: 0.5px;
             display: none;
         }
@@ -1014,7 +1039,7 @@
             position: absolute;
             inset: -2px;
             border-radius: var(--radius-md);
-            background: radial-gradient(circle at center, rgba(87, 100, 226, 0.15) 0%, transparent 70%);
+            background: radial-gradient(circle at center, rgba(87, 100, 226, 0.2) 0%, transparent 70%);
             opacity: 0;
             transition: opacity 0.3s ease;
             pointer-events: none;
@@ -1029,11 +1054,7 @@
             transition: filter 0.2s ease, transform 0.2s ease;
         }
 
-        [data-theme="dark"] .site-header-logo-img {
-            filter: invert(1);
-            mix-blend-mode: screen;
-        }
-
+        /* All brand logos maintain 100% original natural colors */
         .brand-logo-img,
         .brand-logo-frameless,
         .partner-brand-tile img {
@@ -1043,16 +1064,9 @@
             display: block;
             image-rendering: -webkit-optimize-contrast;
             image-rendering: high-quality;
-            mix-blend-mode: multiply;
-            transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), filter 0.2s ease;
-        }
-
-        .brand-logo-img.logo-mchose,
-        .brand-logo-frameless.logo-mchose,
-        .partner-brand-tile img[src*="mchose"],
-        .partner-brand-tile img[src*="mchose4"] {
-            filter: none !important;
             mix-blend-mode: normal !important;
+            filter: none !important;
+            transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .partner-brand-tile img {
@@ -1067,23 +1081,23 @@
         }
 
         .brand-logo-img.logo-vgn {
-            max-height: 9px !important;
-            max-width: 44px !important;
+            max-height: 11px !important;
+            max-width: 48px !important;
         }
 
         .brand-logo-img.logo-attack-shark {
+            max-height: 22px !important;
+            max-width: 100px !important;
+        }
+
+        .brand-logo-img.logo-ajazz {
             max-height: 21px !important;
             max-width: 98px !important;
         }
 
-        .brand-logo-img.logo-ajazz {
-            max-height: 20px !important;
-            max-width: 95px !important;
-        }
-
         .brand-logo-img.logo-aula {
-            max-height: 19px !important;
-            max-width: 90px !important;
+            max-height: 20px !important;
+            max-width: 92px !important;
         }
 
         .brand-logo-img.logo-mchose {
@@ -1091,9 +1105,27 @@
             max-width: 125px !important;
         }
 
+        #modal-brand {
+            background: #FFFFFF;
+            border: 1px solid var(--border-light);
+            border-radius: 10px;
+            padding: 4px 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        [data-theme="dark"] #modal-brand {
+            background: #FFFFFF;
+            border-color: rgba(87, 100, 226, 0.4);
+            box-shadow: 0 0 14px rgba(87, 100, 226, 0.25);
+        }
+
         #modal-brand .logo-vgn {
-            max-height: 13px !important;
-            max-width: 54px !important;
+            max-height: 14px !important;
+            max-width: 58px !important;
         }
 
         #modal-brand .logo-attack-shark {
@@ -1116,25 +1148,10 @@
             max-width: 140px !important;
         }
 
-        [data-theme="dark"] .brand-logo-img,
-        [data-theme="dark"] .brand-logo-frameless,
-        [data-theme="dark"] .partner-brand-tile img {
-            filter: invert(1);
-            mix-blend-mode: screen;
-        }
-
-        [data-theme="dark"] .brand-logo-img.logo-mchose,
-        [data-theme="dark"] .brand-logo-frameless.logo-mchose,
-        [data-theme="dark"] .partner-brand-tile img[src*="mchose"],
-        [data-theme="dark"] .partner-brand-tile img[src*="mchose4"] {
-            filter: invert(1) !important;
-            mix-blend-mode: screen !important;
-        }
-
         .partner-brand-tile:hover {
-            border-color: var(--accent);
+            border-color: var(--accent) !important;
             transform: translateY(-4px) scale(1.04);
-            box-shadow: 0 10px 24px rgba(87, 100, 226, 0.22);
+            box-shadow: 0 0 24px rgba(87, 100, 226, 0.42), 0 8px 22px rgba(0, 0, 0, 0.2) !important;
         }
 
         .partner-brand-tile:hover::after {
@@ -1147,7 +1164,7 @@
 
         .partner-brand-tile.just-clicked {
             animation: brandTilePop 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-            border-color: var(--accent);
+            border-color: var(--accent) !important;
         }
 
         @keyframes brandTilePop {
@@ -1157,9 +1174,8 @@
         }
 
         .partner-brand-tile.active {
-            border-color: var(--accent);
-            background: var(--accent-light);
-            box-shadow: 0 0 0 3px var(--accent), 0 8px 24px rgba(87, 100, 226, 0.35);
+            border-color: var(--accent) !important;
+            box-shadow: 0 0 26px rgba(87, 100, 226, 0.55), 0 0 0 2px var(--accent) !important;
             transform: translateY(-3px) scale(1.03);
             animation: brandGlowPulse 2.4s infinite ease-in-out;
         }
