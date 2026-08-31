@@ -278,14 +278,24 @@
                 gap: 12px;
             }
             .hero-card-img-wrap {
-                aspect-ratio: 1.05 / 1;
-                max-height: 300px;
+                width: 100% !important;
+                aspect-ratio: 1.05 / 1 !important;
+                max-height: none !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                overflow: hidden !important;
             }
             .hero-card-3d img {
-                object-fit: contain !important;
+                width: 100% !important;
+                height: 100% !important;
+                object-fit: cover !important;
+                object-position: center !important;
+                display: block !important;
             }
             .hero-card-3d {
-                max-width: 360px;
+                width: 100%;
+                max-width: 410px;
+                margin: 0 auto;
             }
         }
 
