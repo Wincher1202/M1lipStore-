@@ -2749,19 +2749,25 @@
         .profile-empty-state { font-size: 0.85rem; color: var(--text-muted); text-align: center; padding: 18px 0; }
         .profile-signin-note { font-size: 0.85rem; color: var(--text-muted); text-align: center; padding: 30px 10px; }
 
-        /* ---- Fullscreen Lightbox Modal ---- */
+        /* ---- Fullscreen Lightbox Gallery Modal ---- */
         .lightbox-modal {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0, 0, 0, 0.92);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
+            width: 100vw;
+            height: 100vh;
+            height: 100dvh;
+            max-width: 100%;
+            background: rgba(10, 15, 26, 0.96);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             z-index: 10000;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: space-between;
-            padding: 20px 16px;
+            padding: 16px;
+            box-sizing: border-box;
+            overflow: hidden;
             opacity: 0;
             pointer-events: none;
             transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1);
@@ -2778,16 +2784,25 @@
             align-items: center;
             color: #ffffff;
             z-index: 10;
+            flex-shrink: 0;
+            padding: 0 4px;
+            box-sizing: border-box;
         }
         .lightbox-title-wrap {
             display: flex;
             align-items: center;
             gap: 10px;
+            min-width: 0;
+            flex: 1;
+            margin-right: 12px;
         }
         .lightbox-title {
-            font-size: 1rem;
+            font-size: 0.98rem;
             font-weight: 800;
-            letter-spacing: -0.02em;
+            letter-spacing: -0.01em;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         .lightbox-color-badge {
             background: var(--accent);
@@ -2797,10 +2812,12 @@
             padding: 3px 10px;
             border-radius: 999px;
             text-transform: uppercase;
+            flex-shrink: 0;
+            letter-spacing: 0.03em;
         }
         .lightbox-close-btn {
-            background: rgba(255, 255, 255, 0.12);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.16);
+            border: 1px solid rgba(255, 255, 255, 0.25);
             color: #ffffff;
             width: 40px;
             height: 40px;
@@ -2811,9 +2828,10 @@
             cursor: pointer;
             font-size: 1.1rem;
             transition: 0.2s ease;
+            flex-shrink: 0;
         }
         .lightbox-close-btn:hover {
-            background: rgba(255, 255, 255, 0.25);
+            background: rgba(255, 255, 255, 0.3);
             transform: scale(1.05);
         }
         .lightbox-main-view {
@@ -2821,61 +2839,74 @@
             width: 100%;
             max-width: 900px;
             flex: 1;
+            min-height: 0;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 10px 0;
+            margin: 8px 0;
             overflow: hidden;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: pan-y;
         }
         .lightbox-main-img {
             max-width: 100%;
-            max-height: 70vh;
+            max-height: 100%;
+            width: auto;
+            height: auto;
             object-fit: contain;
-            border-radius: 12px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            border-radius: 14px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.6);
             transition: transform 0.25s ease, opacity 0.2s ease;
             user-select: none;
+            pointer-events: auto;
         }
         .lightbox-nav-btn {
             position: absolute;
             top: 50%;
             transform: translateY(-50%);
-            background: rgba(255, 255, 255, 0.15);
+            background: rgba(0, 0, 0, 0.45);
             backdrop-filter: blur(8px);
             -webkit-backdrop-filter: blur(8px);
-            border: 1px solid rgba(255, 255, 255, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             color: #ffffff;
-            width: 48px;
-            height: 48px;
+            width: 44px;
+            height: 44px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            font-size: 1.3rem;
+            font-size: 1.2rem;
             transition: 0.2s ease;
-            z-index: 5;
+            z-index: 10;
         }
         .lightbox-nav-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.25);
             transform: translateY(-50%) scale(1.08);
         }
-        .lightbox-prev { left: 10px; }
-        .lightbox-next { right: 10px; }
+        .lightbox-prev { left: 8px; }
+        .lightbox-next { right: 8px; }
         .lightbox-bottombar {
             width: 100%;
             max-width: 900px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 12px;
+            gap: 8px;
             z-index: 10;
+            flex-shrink: 0;
+            box-sizing: border-box;
         }
         .lightbox-counter {
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.78rem;
             font-weight: 700;
             letter-spacing: 0.05em;
+            background: rgba(0,0,0,0.45);
+            padding: 3px 12px;
+            border-radius: 999px;
+            backdrop-filter: blur(4px);
         }
         .lightbox-thumbs-strip {
             display: flex;
@@ -2884,23 +2915,65 @@
             overflow-x: auto;
             padding: 4px;
             scrollbar-width: none;
+            justify-content: center;
+            align-items: center;
+            -webkit-overflow-scrolling: touch;
         }
         .lightbox-thumbs-strip::-webkit-scrollbar { display: none; }
         .lightbox-strip-thumb {
-            width: 54px;
-            height: 54px;
-            border-radius: 8px;
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
             object-fit: cover;
             border: 2px solid transparent;
             cursor: pointer;
-            opacity: 0.6;
-            transition: 0.2s ease;
+            opacity: 0.55;
+            transition: all 0.2s ease;
             background: rgba(255,255,255,0.05);
+            flex-shrink: 0;
         }
         .lightbox-strip-thumb.active {
             border-color: var(--accent);
             opacity: 1;
             transform: scale(1.08);
+            box-shadow: 0 0 12px var(--accent-light);
+        }
+
+        @media (max-width: 640px) {
+            .lightbox-modal {
+                padding: 12px 10px 14px 10px !important;
+            }
+            .lightbox-topbar {
+                padding: 0 2px 4px 2px !important;
+            }
+            .lightbox-title {
+                font-size: 0.88rem !important;
+            }
+            .lightbox-color-badge {
+                font-size: 0.65rem !important;
+                padding: 2px 8px !important;
+            }
+            .lightbox-close-btn {
+                width: 36px !important;
+                height: 36px !important;
+                font-size: 1rem !important;
+            }
+            .lightbox-nav-btn {
+                width: 38px !important;
+                height: 38px !important;
+                font-size: 1.1rem !important;
+            }
+            .lightbox-prev { left: 4px !important; }
+            .lightbox-next { right: 4px !important; }
+            .lightbox-strip-thumb {
+                width: 44px !important;
+                height: 44px !important;
+                border-radius: 8px !important;
+            }
+            .lightbox-counter {
+                font-size: 0.72rem !important;
+                padding: 2px 10px !important;
+            }
         }
         .modal-main-img-wrap {
             position: relative;
@@ -5966,7 +6039,17 @@
 
             const modalTitleEl = document.getElementById('lightbox-product-title');
             const colorBadgeEl = document.getElementById('lightbox-color-badge');
-            if (modalTitleEl) modalTitleEl.innerText = `${currentModalProduct.brand} ${currentModalProduct.title}`;
+            if (modalTitleEl) {
+                const brandStr = (currentModalProduct.brand || '').trim();
+                let rawTitle = (currentModalProduct.title || '').trim();
+                if (brandStr && rawTitle.toLowerCase().startsWith(brandStr.toLowerCase())) {
+                    modalTitleEl.innerText = rawTitle;
+                } else if (brandStr) {
+                    modalTitleEl.innerText = `${brandStr} ${rawTitle}`;
+                } else {
+                    modalTitleEl.innerText = rawTitle;
+                }
+            }
             if (colorBadgeEl) {
                 if (colorName) {
                     colorBadgeEl.innerText = colorName;
@@ -5989,6 +6072,11 @@
             const imgEl = document.getElementById('lightbox-active-img');
             const counterEl = document.getElementById('lightbox-counter');
             const stripEl = document.getElementById('lightbox-thumbs-strip');
+            const prevBtn = document.querySelector('.lightbox-prev');
+            const nextBtn = document.querySelector('.lightbox-next');
+
+            if (prevBtn) prevBtn.style.display = lightboxImages.length > 1 ? 'flex' : 'none';
+            if (nextBtn) nextBtn.style.display = lightboxImages.length > 1 ? 'flex' : 'none';
 
             if (imgEl) {
                 imgEl.style.opacity = '0.3';
@@ -6009,6 +6097,10 @@
                              onclick="setLightboxImageIndex(${idx})" 
                              alt="thumb ${idx + 1}">
                     `).join('');
+                    const activeThumb = stripEl.querySelector('.lightbox-strip-thumb.active');
+                    if (activeThumb) {
+                        activeThumb.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+                    }
                 } else {
                     stripEl.style.display = 'none';
                 }
@@ -6036,7 +6128,7 @@
             document.getElementById('lightbox-modal')?.classList.remove('active');
         }
 
-        // Add keyboard navigation for the gallery
+        // Add keyboard & touch swipe navigation for the gallery
         document.addEventListener('keydown', (e) => {
             const lightbox = document.getElementById('lightbox-modal');
             if (lightbox && lightbox.classList.contains('active')) {
@@ -6045,6 +6137,31 @@
                 if (e.key === 'Escape') closeColorGalleryLightbox();
             }
         });
+
+        let lightboxTouchStartX = 0;
+        let lightboxTouchStartY = 0;
+        document.addEventListener('touchstart', (e) => {
+            const lightbox = document.getElementById('lightbox-modal');
+            if (lightbox && lightbox.classList.contains('active') && e.touches && e.touches.length === 1) {
+                lightboxTouchStartX = e.touches[0].clientX;
+                lightboxTouchStartY = e.touches[0].clientY;
+            }
+        }, { passive: true });
+
+        document.addEventListener('touchend', (e) => {
+            const lightbox = document.getElementById('lightbox-modal');
+            if (lightbox && lightbox.classList.contains('active') && e.changedTouches && e.changedTouches.length === 1) {
+                const deltaX = e.changedTouches[0].clientX - lightboxTouchStartX;
+                const deltaY = e.changedTouches[0].clientY - lightboxTouchStartY;
+                if (Math.abs(deltaX) > 35 && Math.abs(deltaX) > Math.abs(deltaY) * 1.2) {
+                    if (deltaX < 0) {
+                        nextLightboxImage();
+                    } else {
+                        prevLightboxImage();
+                    }
+                }
+            }
+        }, { passive: true });
 
         function changeModalImage(url, thumbEl) {
             const mainImg = document.getElementById('modal-img');
