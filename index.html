@@ -5925,16 +5925,7 @@
                             </button>
                         </div>
                         <div class="product-img-wrap" id="card-img-wrap-${p.id}">
-                            <img src="${p.img}" alt="${p.title}" id="card-img-${p.id}" data-active-index="0" data-gallery="${encodeURIComponent(JSON.stringify(gallery))}" ontouchstart="handleCardTouchStart(event, '${p.id}')" ontouchend="handleCardTouchEnd(event, '${p.id}')">
-                            ${gallery.length > 1 ? `
-                                <button class="card-slider-arrow card-prev" onclick="event.stopPropagation(); prevCardImage('${p.id}')" aria-label="Попереднє фото">‹</button>
-                                <button class="card-slider-arrow card-next" onclick="event.stopPropagation(); nextCardImage('${p.id}')" aria-label="Наступне фото">›</button>
-                                <div class="card-slider-dots" id="card-dots-${p.id}">
-                                    ${gallery.map((g, gIdx) => `
-                                        <span class="card-dot-indicator ${gIdx === 0 ? 'active' : ''}"></span>
-                                    `).join('')}
-                                </div>
-                            ` : ''}
+                            <img src="${p.img}" alt="${p.title}" id="card-img-${p.id}">
                         </div>
                         
                         <div class="color-picker-preview">
@@ -8738,7 +8729,7 @@
         </button>
         <button class="bottom-nav-item" id="bottom-tab-showcase" onclick="handleBottomTabClick('showcase')">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
-            <span>Вітрина</span>
+            <span>Каталог</span>
         </button>
         <button class="bottom-nav-item" id="bottom-tab-wishlist" onclick="handleBottomTabClick('wishlist')">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
