@@ -266,16 +266,49 @@
         }
 
         @media(max-width: 959px) {
+            header {
+                padding: 10px 14px;
+            }
             .hero {
                 height: auto;
                 min-height: auto;
                 max-height: none;
-                padding: 36px 14px 10px;
-                gap: 12px;
+                padding: 56px 12px 10px;
+                gap: 10px;
                 overflow: visible;
             }
             .hero-content {
-                gap: 12px;
+                gap: 8px;
+            }
+            .hero-badge-group {
+                gap: 6px;
+            }
+            .hero-badge {
+                padding: 3px 10px;
+                font-size: 0.65rem;
+            }
+            .store-status {
+                padding: 3px 8px;
+                font-size: 0.68rem;
+            }
+            .hero h1 {
+                font-size: clamp(1.25rem, 4.5vw, 1.55rem);
+                line-height: 1.15;
+                letter-spacing: -0.02em;
+            }
+            .hero-desc {
+                font-size: 0.8rem;
+                line-height: 1.35;
+                max-width: 92%;
+                margin: 0 auto;
+            }
+            .hero-actions {
+                gap: 8px;
+                margin-top: 2px;
+            }
+            .btn-primary, .btn-secondary {
+                padding: 8px 16px;
+                font-size: 0.82rem;
             }
             .hero-card-img-wrap {
                 width: 100% !important;
@@ -294,8 +327,23 @@
             }
             .hero-card-3d {
                 width: 100%;
-                max-width: 410px;
+                max-width: 330px;
                 margin: 0 auto;
+            }
+            .hero-card-footer {
+                padding: 10px 14px 12px;
+            }
+            .hero-card-3d .product-tag {
+                top: 10px !important;
+                left: 10px !important;
+                padding: 4px 10px !important;
+                font-size: 0.68rem !important;
+            }
+            .hero-slider-nav {
+                top: 10px !important;
+                right: 10px !important;
+                padding: 3px 8px !important;
+                font-size: 0.68rem !important;
             }
         }
 
