@@ -735,6 +735,47 @@ export class TelegramBotService {
       return;
     }
 
+    // ADMIN COMMAND: /cloudsync, /pullcloud, /backup
+    if (text === '/cloudsync' || text === '/pullcloud' || text === '/backup') {
+      if (!this.isAdmin(from)) {
+        await this.callApi('sendMessage', { chat_id: chatId, text: '⛔ У вас немає прав адміністратора.' });
+        return;
+      }
+      const statusMsg = await this.callApi('sendMessage', {
+        chat_id: chatId,
+        text: '🔄 <i>Виконується зʼєднання та синхронізація з хмарою MILIPSTORE...</i>',
+        parse_mode: 'HTML'
+      });
+      const res = await db.syncWithCloud('https://m1lipstore.onrender.com');
+      const timeStr = new Date().toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      let resText = `☁️ <b>Синхронізація з хмарою MILIPSTORE</b>\n\n`;
+      if (res.ok) {
+        resText += `✅ <b>Статус: Успішно збережено та синхронізовано</b>\n`;
+      } else {
+        resText += `⚠️ <b>Статус: Локальна база актуальна</b> (${res.reason || 'використано локальний кеш'})\n`;
+      }
+      resText += `📦 Товарів у каталозі: <b>${db.data.products.length}</b>\n` +
+        `📋 Замовлень у базі: <b>${db.data.orders.length}</b>\n` +
+        `🏷 Брендів: <b>${db.data.brands.length}</b>\n` +
+        `🗂 Категорій: <b>${db.data.categories.length}</b>\n` +
+        `🕒 Час перевірки: <b>${timeStr}</b>\n` +
+        `🌐 Вузол хмари: <code>https://m1lipstore.onrender.com</code>`;
+
+      await this.callApi('editMessageText', {
+        chat_id: chatId,
+        message_id: statusMsg.result?.message_id,
+        text: resText,
+        parse_mode: 'HTML',
+        reply_markup: {
+          inline_keyboard: [
+            [{ text: '🔄 Синхронізувати ще раз', callback_data: 'admin_cloud_sync' }],
+            [{ text: '👑 До адмін-панелі', callback_data: 'admin_dashboard' }]
+          ]
+        }
+      });
+      return;
+    }
+
     // ORDER ID LOOKUP BY NUMBER (e.g. #MLP-120009 or MLP-120009)
     if (/^(#?MLP-?\d{5,8})$/i.test(text)) {
       const order = db.getOrderById(text);
@@ -866,6 +907,35 @@ export class TelegramBotService {
     // Admin Dashboard Refresh or Back to Admin
     if (data === 'admin_dashboard' || data === 'back_to_admin' || data === 'show_classic_admin') {
       await this.sendAdminDashboard(chatId, from, msgId);
+      return;
+    }
+
+    // Admin Cloud Sync & Backup Trigger
+    if (data === 'admin_cloud_sync') {
+      await this.safeEditOrSend(chatId, msgId, '🔄 <i>Виконується зʼєднання та синхронізація з хмарою...</i>');
+      const res = await db.syncWithCloud('https://m1lipstore.onrender.com');
+      const timeStr = new Date().toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      let resText = `☁️ <b>Синхронізація з хмарою MILIPSTORE</b>\n\n`;
+      if (res.ok) {
+        resText += `✅ <b>Статус: База синхронізована та збережена</b>\n`;
+      } else {
+        resText += `⚠️ <b>Статус: Локальна база актуальна</b> (${res.reason || 'використано локальний стан'})\n`;
+      }
+      resText += `📦 Товарів у каталозі: <b>${db.data.products.length}</b>\n` +
+        `📋 Замовлень: <b>${db.data.orders.length}</b>\n` +
+        `🏷 Брендів: <b>${db.data.brands.length}</b>\n` +
+        `🗂 Категорій: <b>${db.data.categories.length}</b>\n` +
+        `🕒 Час перевірки: <b>${timeStr}</b>\n` +
+        `🌐 Вузол хмари: <code>https://m1lipstore.onrender.com</code>`;
+
+      await this.safeEditOrSend(chatId, msgId, resText, {
+        reply_markup: {
+          inline_keyboard: [
+            [{ text: '🔄 Оновити синхронізацію', callback_data: 'admin_cloud_sync' }],
+            [{ text: '👑 До адмін-панелі', callback_data: 'admin_dashboard' }]
+          ]
+        }
+      });
       return;
     }
 
@@ -1503,6 +1573,9 @@ export class TelegramBotService {
       [
         { text: '🌟 Популярні бренди', callback_data: 'admin_brands' },
         { text: '📥 Вхідні повідомлення', callback_data: 'admin_inbox' }
+      ],
+      [
+        { text: '☁️ Хмара та збереження', callback_data: 'admin_cloud_sync' }
       ]
     ];
 

@@ -559,8 +559,20 @@ app.get('/api/sync/status', (req, res) => {
     brands_count: db.data.brands.length,
     categories_count: db.data.categories.length,
     orders_count: db.data.orders.length,
+    last_cloud_sync: db.data.last_cloud_sync,
+    cloud_url: process.env.CLOUD_SYNC_URL || 'https://m1lipstore.onrender.com',
     version: '1.0.0'
   });
+});
+
+app.get('/api/sync/cloud-pull', async (req, res) => {
+  try {
+    const cloudUrl = req.query.url || process.env.CLOUD_SYNC_URL || 'https://m1lipstore.onrender.com';
+    const result = await db.syncWithCloud(cloudUrl);
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ ok: false, detail: err.message });
+  }
 });
 
 app.get('/api/sync/backup', (req, res) => {
@@ -624,4 +636,23 @@ app.get('*', (req, res) => {
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`MILIPSTORE server running on http://0.0.0.0:${PORT}`);
+
+  // Auto-sync with cloud on startup
+  setTimeout(async () => {
+    try {
+      const syncRes = await db.syncWithCloud('https://m1lipstore.onrender.com');
+      if (syncRes.ok && !syncRes.skipped) {
+        console.log(`[CloudSync] Initial sync completed: ${syncRes.products_count} products, ${syncRes.orders_count || 0} orders.`);
+      }
+    } catch(e) {
+      console.warn('[CloudSync] Initial startup sync skipped/failed:', e.message);
+    }
+  }, 1500);
+
+  // Background sync every 90 seconds
+  setInterval(async () => {
+    try {
+      await db.syncWithCloud('https://m1lipstore.onrender.com');
+    } catch(e) {}
+  }, 90000);
 });

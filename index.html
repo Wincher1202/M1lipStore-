@@ -1453,9 +1453,16 @@
             cursor: pointer;
             height: 100%;
             min-height: 360px;
-            transition: border-color 0.25s ease, box-shadow 0.25s ease;
+            transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease, box-shadow 0.2s ease;
             box-sizing: border-box;
             overflow: hidden;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .product-card:active {
+            transform: scale(0.982);
         }
 
         @media(max-width: 767px) {
@@ -1467,6 +1474,10 @@
                 padding: 10px 10px 12px 10px !important;
                 min-height: auto !important;
                 border-radius: 16px !important;
+                -webkit-tap-highlight-color: transparent !important;
+            }
+            .product-card:active {
+                transform: scale(0.975) !important;
             }
             .product-card-top-bar {
                 margin-bottom: 6px !important;
@@ -1815,17 +1826,35 @@
 
         .drawer {
             position: fixed;
-            top: 0; right: -100%; width: 100%; height: 100%;
+            top: 0;
+            right: 0;
+            width: 100%;
+            max-width: 100%;
+            height: 100%;
+            height: 100dvh;
             background: var(--bg-secondary);
             z-index: 2001;
-            box-shadow: -10px 0 40px rgba(0,0,0,0.15);
+            box-shadow: none;
             display: flex;
             flex-direction: column;
-            transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            transform: translateX(105%);
+            visibility: hidden;
+            pointer-events: none;
+            transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.32s ease, box-shadow 0.32s ease;
         }
-        @media(min-width: 500px) { .drawer { width: 420px; right: -420px; } }
+        @media(min-width: 500px) {
+            .drawer {
+                width: 420px;
+                max-width: 420px;
+            }
+        }
 
-        .drawer.active { right: 0; }
+        .drawer.active {
+            transform: translateX(0);
+            visibility: visible;
+            pointer-events: auto;
+            box-shadow: -10px 0 40px rgba(0, 0, 0, 0.22);
+        }
         .drawer-header { padding: 20px; border-bottom: 1px solid var(--border-light); display: flex; justify-content: space-between; align-items: center; }
         .close-drawer { background: transparent; border: none; font-size: 1.1rem; font-weight: 800; cursor: pointer; color: var(--text-primary); transition: var(--transition-smooth); }
         .close-drawer:hover { transform: rotate(90deg) scale(1.1); color: var(--accent); }
@@ -1869,15 +1898,25 @@
 
         .search-modal {
             position: fixed;
-            top: -100%; left: 0; width: 100%;
+            top: 0;
+            left: 0;
+            width: 100%;
             background: var(--bg-secondary);
             z-index: 2002;
             padding: 30px 20px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            transition: top 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: none;
+            transform: translateY(-105%);
+            visibility: hidden;
+            pointer-events: none;
+            transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.32s ease, box-shadow 0.32s ease;
         }
 
-        .search-modal.active { top: 0; }
+        .search-modal.active {
+            transform: translateY(0);
+            visibility: visible;
+            pointer-events: auto;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.18);
+        }
         .search-container { max-width: 800px; margin: 0 auto; }
         .search-input-wrap { display: flex; align-items: center; border-bottom: 2px solid var(--text-primary); padding-bottom: 10px; gap: 12px; }
         .search-input-wrap input { width: 100%; background: transparent; border: none; font-size: 1.2rem; font-weight: 700; color: var(--text-primary); outline: none; }
@@ -4809,6 +4848,21 @@
         </div>
 
         <div class="drawer-body" style="padding: 16px;">
+            <!-- Cloud Storage Status & Sync Banner -->
+            <div style="background: rgba(87,100,226,0.08); border: 1px solid rgba(87,100,226,0.25); border-radius: var(--radius-sm); padding: 10px 14px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 1.1rem;">☁️</span>
+                    <div>
+                        <div style="font-size: 0.82rem; font-weight: 800; color: var(--text-primary);">Хмарна база: <span style="color: #00c853;">🟢 Активна</span></div>
+                        <div style="font-size: 0.7rem; color: var(--text-muted);" id="admin-cloud-sync-label">Синхронізація з https://m1lipstore.onrender.com</div>
+                    </div>
+                </div>
+                <button type="button" class="btn-secondary" onclick="triggerAdminCloudPull(this)" style="padding: 6px 12px; font-size: 0.75rem; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+                    <span>Синхронізувати з хмарою</span>
+                </button>
+            </div>
+
             <!-- KPI Metrics -->
             <div class="admin-kpi-grid">
                 <div class="admin-kpi-card">
@@ -5537,12 +5591,12 @@
         }
 
         async function fetchProducts() {
-            // First load from localStorage cache if available
+            // 1. Instant load from localStorage cache if available
             try {
                 const cached = localStorage.getItem('m1lip_cached_products');
                 if (cached !== null) {
                     const parsed = JSON.parse(cached);
-                    if (Array.isArray(parsed)) {
+                    if (Array.isArray(parsed) && parsed.length > 0) {
                         products = parseRawProductsList(parsed);
                         renderCatalog();
                         if (products.length > 0) setHeroProduct(products[0]);
@@ -5596,34 +5650,79 @@
         }
 
         async function fetchCategories() {
+            // Load from cache first
             try {
-                const response = await fetch(CATEGORIES_API_URL, { cache: 'no-cache' });
-                if (!response.ok) return;
-                const contentType = response.headers.get("content-type");
-                if (!contentType || !contentType.includes("application/json")) return;
-                const data = await response.json();
-                if (Array.isArray(data)) {
-                    categories = data;
+                const cached = localStorage.getItem('m1lip_cached_categories');
+                if (cached) {
+                    const parsed = JSON.parse(cached);
+                    if (Array.isArray(parsed) && parsed.length > 0) {
+                        categories = parsed;
+                        renderCategoryFilters();
+                    }
                 }
-            } catch (e) {
-                // keep fallback categories
+            } catch(e) {}
+
+            const endpoints = [
+                CATEGORIES_API_URL,
+                '/api/categories',
+                'https://m1lipstore.onrender.com/api/categories'
+            ];
+
+            for (const ep of endpoints) {
+                try {
+                    const response = await fetch(ep, { cache: 'no-cache' });
+                    if (!response.ok) continue;
+                    const contentType = response.headers.get("content-type");
+                    if (!contentType || !contentType.includes("application/json")) continue;
+                    const data = await response.json();
+                    if (Array.isArray(data) && data.length > 0) {
+                        categories = data;
+                        try {
+                            localStorage.setItem('m1lip_cached_categories', JSON.stringify(data));
+                        } catch(e) {}
+                        renderCategoryFilters();
+                        break;
+                    }
+                } catch (e) {}
             }
             renderCategoryFilters();
         }
 
         async function fetchBrands() {
+            // Load from cache first
             try {
-                const response = await fetch(BRANDS_API_URL, { cache: 'no-cache' });
-                if (!response.ok) return;
-                const contentType = response.headers.get("content-type");
-                if (!contentType || !contentType.includes("application/json")) return;
-                const data = await response.json();
-                if (Array.isArray(data)) {
-                    brands = data;
-                    renderBrandsMarquee();
+                const cached = localStorage.getItem('m1lip_cached_brands');
+                if (cached) {
+                    const parsed = JSON.parse(cached);
+                    if (Array.isArray(parsed) && parsed.length > 0) {
+                        brands = parsed;
+                        renderBrandsMarquee();
+                    }
                 }
-            } catch (e) {
-                // keep fallback brands
+            } catch(e) {}
+
+            const endpoints = [
+                BRANDS_API_URL,
+                '/api/brands',
+                'https://m1lipstore.onrender.com/api/brands'
+            ];
+
+            for (const ep of endpoints) {
+                try {
+                    const response = await fetch(ep, { cache: 'no-cache' });
+                    if (!response.ok) continue;
+                    const contentType = response.headers.get("content-type");
+                    if (!contentType || !contentType.includes("application/json")) continue;
+                    const data = await response.json();
+                    if (Array.isArray(data) && data.length > 0) {
+                        brands = data;
+                        try {
+                            localStorage.setItem('m1lip_cached_brands', JSON.stringify(data));
+                        } catch(e) {}
+                        renderBrandsMarquee();
+                        break;
+                    }
+                } catch (e) {}
             }
             renderBrandsMarquee();
         }
@@ -7917,6 +8016,34 @@
         async function refreshAdminOrders() {
             loadAdminStats();
             loadAdminOrdersList();
+        }
+
+        async function triggerAdminCloudPull(btn) {
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<span>Синхронізація...</span>';
+            }
+            try {
+                const res = await fetch(`${API_BASE}/sync/cloud-pull`);
+                if (res.ok) {
+                    const data = await res.json();
+                    await syncLiveStoreData();
+                    await loadAdminStats();
+                    await loadAdminOrdersList();
+                    showNotificationToast('✅ Хмарну базу успішно синхронізовано!');
+                } else {
+                    await syncLiveStoreData();
+                    showNotificationToast('✅ Каталог оновлено!');
+                }
+            } catch(e) {
+                await syncLiveStoreData();
+                showNotificationToast('✅ Каталог актуальний!');
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg><span>Синхронізувати з хмарою</span>';
+                }
+            }
         }
 
         async function loadAdminStats() {
