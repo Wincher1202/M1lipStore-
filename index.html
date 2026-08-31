@@ -270,7 +270,7 @@
                 height: auto;
                 min-height: auto;
                 max-height: none;
-                padding: 44px 14px 10px;
+                padding: 36px 14px 10px;
                 gap: 12px;
                 overflow: visible;
             }
@@ -278,8 +278,11 @@
                 gap: 12px;
             }
             .hero-card-img-wrap {
-                aspect-ratio: 1.25 / 1;
-                max-height: 220px;
+                aspect-ratio: 1.05 / 1;
+                max-height: 300px;
+            }
+            .hero-card-3d img {
+                object-fit: contain !important;
             }
             .hero-card-3d {
                 max-width: 360px;
@@ -719,6 +722,40 @@
             display: block;
             transition: opacity 0.45s cubic-bezier(0.4, 0, 0.2, 1), transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
             will-change: opacity, transform;
+        }
+
+        .hero-advantages-bar {
+            display: none;
+            max-width: 1440px;
+            margin: 0 auto;
+            padding: 20px 20px 28px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        @media(max-width: 959px) {
+            .hero-advantages-bar {
+                display: block;
+            }
+            .hero-content .hero-features {
+                display: none !important;
+            }
+        }
+
+        .advantages-bar-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+
+        @media(max-width: 768px) {
+            .hero-advantages-bar {
+                padding: 12px 14px 20px;
+            }
+            .advantages-bar-container {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
         }
 
         .hero-card-3d:hover img {
@@ -3554,9 +3591,9 @@
             }
             .modal-desc-section {
                 order: 5 !important;
-                margin-top: 110px !important;
+                margin-top: 18px !important;
                 border-top: 1px solid var(--border-light) !important;
-                padding-top: 16px !important;
+                padding-top: 14px !important;
             }
             .modal-section-heading {
                 font-size: 0.88rem !important;
@@ -3740,6 +3777,32 @@
         <div class="hero-scroll-indicator" onclick="scrollToSection('partner-brands-section')">
             <span>Гортайте вниз</span>
             <div class="scroll-mouse"><div class="scroll-wheel"></div></div>
+        </div>
+    </section>
+
+    <section class="hero-advantages-bar" id="hero-advantages-bar">
+        <div class="advantages-bar-container">
+            <div class="hero-feature-item">
+                <div class="hero-feature-icon">🚚</div>
+                <div class="hero-feature-text">
+                    <span class="hero-feature-title">Швидка відправка</span>
+                    <span class="hero-feature-desc">1-2 дні Новою Поштою</span>
+                </div>
+            </div>
+            <div class="hero-feature-item">
+                <div class="hero-feature-icon">🛡️</div>
+                <div class="hero-feature-text">
+                    <span class="hero-feature-title">Гарантія якості</span>
+                    <span class="hero-feature-desc">100% оригінальні девайси</span>
+                </div>
+            </div>
+            <div class="hero-feature-item">
+                <div class="hero-feature-icon">💬</div>
+                <div class="hero-feature-text">
+                    <span class="hero-feature-title">Підтримка 24/7</span>
+                    <span class="hero-feature-desc">Консультація в Telegram</span>
+                </div>
+            </div>
         </div>
     </section>
 
