@@ -1760,16 +1760,14 @@
            ========================================================================== */
         .product-modal {
             position: fixed;
-            top: max(32px, env(safe-area-inset-top, 32px));
-            bottom: max(16px, env(safe-area-inset-bottom, 16px));
-            left: 50%;
-            transform: translateX(-50%) scale(0.96);
-            width: calc(100% - 32px);
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%) scale(0.96);
+            width: 92%; 
             max-width: 1000px;
-            max-height: calc(100vh - 48px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+            max-height: 90vh;
             background: var(--bg-surface);
             z-index: 2005;
-            box-shadow: 0 24px 70px rgba(0,0,0,0.28), 0 0 0 1px var(--border-light);
+            box-shadow: 0 30px 80px -15px rgba(0,0,0,0.25), 0 0 0 1px var(--border-light);
             border-radius: 24px;
             overflow-y: auto;
             overflow-x: hidden;
@@ -1782,36 +1780,22 @@
         .product-modal.active { 
             opacity: 1; 
             visibility: visible; 
-            transform: translateX(-50%) scale(1); 
+            transform: translate(-50%, -50%) scale(1); 
         }
 
         .modal-inner-container {
-            padding: 24px 20px 28px;
+            padding: 32px 36px 40px;
             display: flex;
             flex-direction: column;
-            gap: 16px;
-        }
-
-        @media(min-width: 820px) {
-            .modal-inner-container {
-                padding: 36px 40px 42px;
-                gap: 24px;
-            }
+            gap: 20px;
+            box-sizing: border-box;
         }
 
         .modal-grid { 
-            display: flex;
-            flex-direction: column;
-            gap: 24px; 
-        }
-
-        @media(min-width: 820px) { 
-            .modal-grid { 
-                display: grid;
-                grid-template-columns: minmax(360px, 1.15fr) minmax(340px, 1fr); 
-                gap: 44px; 
-                align-items: start;
-            } 
+            display: grid;
+            grid-template-columns: minmax(320px, 1fr) minmax(340px, 1.2fr); 
+            gap: 36px; 
+            align-items: start;
         }
         
         /* LEFT COLUMN: Gallery */
@@ -1819,21 +1803,16 @@
             display: flex; 
             flex-direction: column; 
             gap: 14px; 
-            position: relative;
-        }
-
-        @media(min-width: 820px) {
-            .modal-gallery {
-                position: sticky;
-                top: 0;
-            }
+            position: sticky;
+            top: 0;
         }
 
         .modal-main-img-wrap {
             width: 100%;
             height: auto;
+            max-height: 400px;
             aspect-ratio: 1 / 1;
-            border-radius: 16px;
+            border-radius: 18px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -1849,16 +1828,6 @@
 
         [data-theme="dark"] .modal-main-img-wrap {
             background: #111827;
-        }
-
-        @media(min-width: 820px) {
-            .modal-main-img-wrap {
-                width: 100%;
-                height: auto;
-                aspect-ratio: 1 / 1;
-                border-radius: 18px;
-                padding: 0;
-            }
         }
 
         .modal-main-img-wrap:hover {
@@ -1891,18 +1860,19 @@
         .modal-thumbs { 
             display: flex; 
             flex-wrap: nowrap; 
-            gap: 10px; 
+            gap: 4px; 
+            justify-content: center;
         }
         .modal-thumb { 
-            width: 58px; 
-            height: 58px; 
+            width: 42px; 
+            height: 42px; 
             aspect-ratio: 1 / 1;
             object-fit: cover; 
             object-position: center;
             padding: 0;
             background: #FAFAFA; 
             border: 1px solid var(--border-light); 
-            border-radius: 10px; 
+            border-radius: 8px; 
             overflow: hidden; 
             cursor: pointer; 
             flex-shrink: 0;
@@ -1923,7 +1893,7 @@
         .modal-details {
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 18px;
         }
 
         .modal-header-block {
@@ -2241,9 +2211,9 @@
             position: absolute;
             top: 16px;
             right: 16px;
-            z-index: 20;
-            width: 36px;
-            height: 36px;
+            z-index: 30;
+            width: 38px;
+            height: 38px;
             border-radius: 50%;
             background: var(--bg-surface);
             border: 1px solid var(--border-light);
@@ -2251,10 +2221,10 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.92rem;
+            font-size: 0.95rem;
             font-weight: 700;
             cursor: pointer;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
             transition: all 0.2s ease;
         }
         .modal-close-circle:hover {
@@ -3408,21 +3378,21 @@
                 border-radius: 20px !important;
             }
             .product-modal {
-                width: calc(100% - 20px) !important;
-                max-width: calc(100vw - 20px) !important;
+                width: calc(100% - 4px) !important;
+                max-width: calc(100vw - 4px) !important;
                 height: auto !important;
-                max-height: calc(100vh - 36px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)) !important;
-                top: max(26px, env(safe-area-inset-top, 26px)) !important;
-                bottom: max(10px, env(safe-area-inset-bottom, 10px)) !important;
-                left: 10px !important;
-                right: 10px !important;
+                max-height: calc(98vh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)) !important;
+                top: max(6px, env(safe-area-inset-top, 6px)) !important;
+                bottom: max(2px, env(safe-area-inset-bottom, 2px)) !important;
+                left: 2px !important;
+                right: 2px !important;
                 margin: 0 auto !important;
-                transform: translateY(calc(100% + 30px)) scale(0.98) !important;
-                border-radius: 24px !important;
+                transform: translateY(15px) scale(0.98) !important;
+                border-radius: 18px !important;
                 overflow-y: auto !important;
                 overflow-x: hidden !important;
                 -webkit-overflow-scrolling: touch !important;
-                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.32), 0 0 0 1px var(--border-light) !important;
+                box-shadow: 0 16px 50px rgba(0, 0, 0, 0.32), 0 0 0 1px var(--border-light) !important;
             }
             .product-modal.active {
                 opacity: 1 !important;
@@ -3430,29 +3400,33 @@
                 transform: translateY(0) scale(1) !important;
             }
             .modal-inner-container {
-                padding: 24px 18px 36px !important;
-                gap: 16px !important;
+                padding: 5px !important;
+                gap: 4px !important;
+                display: flex !important;
+                flex-direction: column !important;
+                justify-content: space-between !important;
             }
             .modal-grid {
                 display: flex !important;
                 flex-direction: column !important;
                 padding: 0 !important;
-                gap: 20px !important;
+                gap: 4px !important;
             }
             .modal-main-img-wrap {
-                width: 100% !important;
-                height: auto !important;
+                width: auto !important;
+                height: 32vh !important;
+                max-height: 180px !important;
                 aspect-ratio: 1 / 1 !important;
-                max-height: none !important;
-                border-radius: 14px !important;
+                border-radius: 12px !important;
                 padding: 0 !important;
+                margin: 0 auto !important;
             }
             .modal-product-title {
-                font-size: 1.35rem !important;
-                line-height: 1.25 !important;
+                font-size: 1.15rem !important;
+                line-height: 1.2 !important;
             }
             .modal-details {
-                gap: 18px !important;
+                gap: 4px !important;
             }
             .advantages-section {
                 padding: 20px 14px !important;
