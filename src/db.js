@@ -5,6 +5,7 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const DB_FILE = path.join(__dirname, '../data/store.json');
+const BACKUP_FILE = path.join(__dirname, '../data/store_backup.json');
 
 // Canonical Statuses
 export const ORDER_STATUSES = {
@@ -195,14 +196,35 @@ class Database {
       if (!fs.existsSync(path.dirname(DB_FILE))) {
         fs.mkdirSync(path.dirname(DB_FILE), { recursive: true });
       }
+      let loaded = false;
+      let raw = null;
       if (fs.existsSync(DB_FILE)) {
-        const raw = fs.readFileSync(DB_FILE, 'utf8');
+        try {
+          const content = fs.readFileSync(DB_FILE, 'utf8');
+          if (content && content.trim()) {
+            raw = content;
+            loaded = true;
+          }
+        } catch(e) {}
+      }
+      if (!loaded && fs.existsSync(BACKUP_FILE)) {
+        try {
+          const backupContent = fs.readFileSync(BACKUP_FILE, 'utf8');
+          if (backupContent && backupContent.trim()) {
+            raw = backupContent;
+            loaded = true;
+            console.log('[DB] Restored database state from store_backup.json');
+          }
+        } catch(e) {}
+      }
+
+      if (loaded && raw) {
         const parsed = JSON.parse(raw);
         if (parsed && typeof parsed === 'object') {
           const rawAdmins = Array.isArray(parsed.admin_ids) && parsed.admin_ids.length ? parsed.admin_ids : [];
           const combinedAdmins = Array.from(new Set([...rawAdmins, '1929165295', '1248134309', 'invinciblee', 'wincher', 'Invinciblee', 'Wincher']));
           
-          // IMPORTANT: If products is an empty array [] (e.g. admin deleted all items), preserve []!
+          // IMPORTANT: If products is an array, preserve it!
           const existingProducts = Array.isArray(parsed.products)
             ? parsed.products
             : INITIAL_PRODUCTS;
@@ -224,6 +246,7 @@ class Database {
             admin_ids: combinedAdmins,
             notifications: parsed.notifications || []
           };
+          this.save();
         }
       } else {
         this.data.products = INITIAL_PRODUCTS;
@@ -238,7 +261,11 @@ class Database {
 
   save() {
     try {
-      fs.writeFileSync(DB_FILE, JSON.stringify(this.data, null, 2), 'utf8');
+      const serialized = JSON.stringify(this.data, null, 2);
+      fs.writeFileSync(DB_FILE, serialized, 'utf8');
+      try {
+        fs.writeFileSync(BACKUP_FILE, serialized, 'utf8');
+      } catch (e) {}
     } catch (err) {
       console.error('[DB] Failed to save store.json:', err.message);
     }

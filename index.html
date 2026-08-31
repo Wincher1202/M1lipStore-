@@ -4439,7 +4439,7 @@
                 } catch(e) {}
             }
 
-            renderCatalog();
+            renderCatalog(true);
             if (products && products.length > 0) {
                 if (!heroCurrentProduct || !products.some(x => x.id === heroCurrentProduct.id)) {
                     setHeroProduct(products[0]);
@@ -4770,6 +4770,25 @@
             updateBadges();
             renderRecentSearches();
 
+            // Auto-sync when user returns to the tab or periodically
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'visible') {
+                    fetchProducts();
+                    fetchCategories();
+                    fetchBrands();
+                }
+            });
+            window.addEventListener('focus', () => {
+                fetchProducts();
+                fetchCategories();
+                fetchBrands();
+            });
+            setInterval(() => {
+                if (document.visibilityState === 'visible') {
+                    fetchProducts();
+                }
+            }, 10000);
+
             if (products && products.length > 0) {
                 setHeroProduct(products[0]);
             }
@@ -4859,37 +4878,40 @@
 
         let lastRenderedCatalogSignature = '';
         function renderCatalog(force = false) {
-            const container = document.getElementById('catalog-container');
-            if (!container) return;
+            try {
+                const container = document.getElementById('catalog-container');
+                if (!container) return;
 
-            const filteredProducts = getFilteredProducts();
+                const filteredProducts = getFilteredProducts();
 
-            const currentSignature = JSON.stringify({
-                cat: activeCategoryFilter,
-                brand: activeBrandFilter,
-                search: (document.getElementById('catalog-search-input') ? document.getElementById('catalog-search-input').value : ''),
-                sort: (document.getElementById('sort-select') ? document.getElementById('sort-select').value : ''),
-                wishlistIds: wishlist.map(x => x.id),
-                prods: filteredProducts.map(p => ({
-                    id: p.id,
-                    title: p.title,
-                    price: p.price,
-                    old_price: p.old_price,
-                    tag: p.tag,
-                    img: p.img,
-                    colors: p.colors
-                }))
-            });
+                const searchVal = document.getElementById('catalog-search-input') ? document.getElementById('catalog-search-input').value : '';
+                const sortVal = document.getElementById('sort-select') ? document.getElementById('sort-select').value : '';
+                const currentSignature = JSON.stringify({
+                    cat: currentCategoryFilter,
+                    brand: currentBrandFilter,
+                    search: searchVal,
+                    sort: sortVal,
+                    wishlistIds: wishlist.map(x => x.id),
+                    prods: filteredProducts.map(p => ({
+                        id: p.id,
+                        title: p.title,
+                        price: p.price,
+                        old_price: p.old_price,
+                        tag: p.tag,
+                        img: p.img,
+                        colors: p.colors
+                    }))
+                });
 
-            if (!force && currentSignature === lastRenderedCatalogSignature) {
-                return;
-            }
-            lastRenderedCatalogSignature = currentSignature;
+                if (!force && currentSignature === lastRenderedCatalogSignature) {
+                    return;
+                }
+                lastRenderedCatalogSignature = currentSignature;
 
-            if (filteredProducts.length === 0) {
-                container.innerHTML = `<p style="color: var(--text-secondary); grid-column: span 12; text-align: center; padding: 30px;">Товарів за цими фільтрами не знайдено</p>`;
-                return;
-            }
+                if (filteredProducts.length === 0) {
+                    container.innerHTML = `<p style="color: var(--text-secondary); grid-column: span 12; text-align: center; padding: 30px;">Товарів за цими фільтрами не знайдено</p>`;
+                    return;
+                }
 
             container.innerHTML = filteredProducts.map((p) => {
                 const isFav = wishlist.some(item => item.id === p.id);
@@ -4931,6 +4953,9 @@
                     </div>
                 `;
             }).join('');
+            } catch (err) {
+                console.error('[renderCatalog] Error rendering catalog:', err);
+            }
         }
 
         function openProductModal(product, colorIdx = null) {
