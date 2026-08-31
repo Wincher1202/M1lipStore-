@@ -1198,8 +1198,8 @@
         .modal-color-brand-row {
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            gap: 12px;
+            justify-content: flex-start;
+            gap: 24px;
             margin: 2px 0 8px 0;
             padding-right: 4px;
         }
@@ -1208,7 +1208,7 @@
             display: flex;
             flex-direction: column;
             gap: 6px;
-            flex: 1;
+            flex-shrink: 0;
         }
 
         #modal-brand {
@@ -1219,9 +1219,9 @@
             box-shadow: none;
             display: inline-flex;
             align-items: center;
-            justify-content: flex-end;
-            margin-right: 6px;
-            flex-shrink: 0;
+            justify-content: center;
+            flex: 1;
+            margin: 0;
             transition: transform 0.2s ease;
         }
 
@@ -1230,8 +1230,8 @@
         }
 
         #modal-brand img {
-            max-height: 24px !important;
-            max-width: 100px !important;
+            max-height: 32px !important;
+            max-width: 140px !important;
             object-fit: contain;
             display: block;
             image-rendering: -webkit-optimize-contrast;
@@ -1249,28 +1249,28 @@
         }
 
         #modal-brand .logo-vgn {
-            max-height: 14px !important;
-            max-width: 58px !important;
+            max-height: 20px !important;
+            max-width: 80px !important;
         }
 
         #modal-brand .logo-attack-shark {
-            max-height: 24px !important;
-            max-width: 95px !important;
+            max-height: 32px !important;
+            max-width: 135px !important;
         }
 
         #modal-brand .logo-ajazz {
-            max-height: 24px !important;
-            max-width: 95px !important;
+            max-height: 32px !important;
+            max-width: 130px !important;
         }
 
         #modal-brand .logo-aula {
-            max-height: 24px !important;
-            max-width: 90px !important;
+            max-height: 30px !important;
+            max-width: 120px !important;
         }
 
         #modal-brand .logo-mchose {
-            max-height: 28px !important;
-            max-width: 105px !important;
+            max-height: 36px !important;
+            max-width: 140px !important;
         }
 
         .partner-brand-tile:hover {
@@ -3947,16 +3947,16 @@
                 order: 2 !important;
                 display: flex !important;
                 align-items: center !important;
-                justify-content: space-between !important;
-                gap: 10px !important;
-                margin: 2px 0 4px 0 !important;
+                justify-content: flex-start !important;
+                gap: 16px !important;
+                margin: 2px 0 6px 0 !important;
                 padding-right: 4px !important;
             }
             .modal-color-block {
                 display: flex !important;
                 flex-direction: column !important;
                 gap: 4px !important;
-                flex: 1 !important;
+                flex-shrink: 0 !important;
             }
             .modal-field-label {
                 font-size: 0.82rem !important;
@@ -3988,17 +3988,17 @@
             #modal-brand {
                 display: inline-flex !important;
                 align-items: center !important;
-                justify-content: flex-end !important;
+                justify-content: center !important;
                 background: transparent !important;
                 border: none !important;
                 box-shadow: none !important;
                 padding: 0 !important;
-                flex-shrink: 0 !important;
-                margin-right: 4px !important;
+                flex: 1 !important;
+                margin: 0 !important;
             }
             #modal-brand img {
-                max-height: 24px !important;
-                max-width: 90px !important;
+                max-height: 30px !important;
+                max-width: 130px !important;
                 object-fit: contain !important;
                 display: block !important;
             }
