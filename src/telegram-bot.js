@@ -673,7 +673,7 @@ export class TelegramBotService {
           brand,
           title: `${brand} ${model}`,
           price,
-          old_price: Math.round(price * 1.15),
+          old_price: null,
           tag: 'НОВИНКА',
           category,
           quantity: 15,
@@ -3055,7 +3055,7 @@ export class TelegramBotService {
       brand,
       title: fullTitle,
       price,
-      old_price: Math.round(price * 1.15),
+      old_price: d.old_price !== undefined ? d.old_price : null,
       tag: d.tag !== undefined ? d.tag : 'НОВИНКА',
       category,
       quantity: totalQuantity,
@@ -3241,11 +3241,14 @@ export class TelegramBotService {
       ? prod.quantity
       : (prod.color_quantities ? Object.values(prod.color_quantities).reduce((a, b) => a + Number(b || 0), 0) : 0);
 
+    const oldPriceStr = (prod.old_price && Number(prod.old_price) > Number(prod.price))
+      ? ` (стара: ${prod.old_price} ₴)`
+      : '';
     let text = `🎮 <b>КЕРУВАННЯ ТОВАРОМ</b>\n\n`;
     text += `🏷 <b>1. Бренд:</b> <b>${brandSafe}</b>\n`;
     text += `🎮 <b>2. Назва / модель:</b> <b>${titleSafe}</b>\n`;
     text += `📝 <b>3. Опис:</b> <i>${descSafe || 'Не вказано'}</i>\n`;
-    text += `💰 <b>4. Ціна:</b> <b>${prod.price} ₴</b> (стара: ${prod.old_price || Math.round(prod.price * 1.15)} ₴)\n`;
+    text += `💰 <b>4. Ціна:</b> <b>${prod.price} ₴</b>${oldPriceStr}\n`;
     text += `🗂 <b>Категорія:</b> <b>${catSafe}</b> | Артикул: <code>${skuSafe}</code>\n`;
     text += `🏷 <b>Позначка / Бейдж:</b> <b>${tagSafe}</b>\n\n`;
     text += `🎨 <b>5. Кольори та склад (${colorsList.length}):</b>\n${colorsFormatted || '  • Black'}\n`;
@@ -3768,8 +3771,13 @@ export class TelegramBotService {
     if (field === 'price') {
       const num = parseInt(text.replace(/[^\d]/g, ''), 10);
       if (!isNaN(num) && num > 0) {
+        const oldVal = prod.price;
+        if (oldVal && num < oldVal) {
+          prod.old_price = oldVal;
+        } else if (num >= oldVal) {
+          prod.old_price = null;
+        }
         prod.price = num;
-        prod.old_price = Math.round(num * 1.15);
         db.save();
         delete this.adminSessions[chatId];
         await this.sendAdminProductView(chatId, prodId, cardId);

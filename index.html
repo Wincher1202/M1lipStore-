@@ -290,9 +290,10 @@
         @media(max-width: 959px) {
             .hero {
                 height: auto;
-                min-height: calc(100vh - 72px);
+                min-height: auto;
                 max-height: none;
-                padding: 92px 20px 36px;
+                padding: 64px 14px 16px;
+                gap: 16px;
                 overflow: visible;
             }
         }
@@ -1376,27 +1377,71 @@
             box-shadow: var(--shadow-subtle);
             cursor: pointer;
             height: 100%;
-            min-height: 410px;
-            will-change: transform;
-            transition: var(--transition-smooth);
-            animation: catalogCardEntrance 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+            min-height: 360px;
+            transition: border-color 0.25s ease, box-shadow 0.25s ease;
             box-sizing: border-box;
             overflow: hidden;
         }
 
-        @media(max-width: 480px) {
+        @media(max-width: 767px) {
             .catalog-grid {
-                grid-template-columns: 1fr;
-                gap: 14px;
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 8px !important;
             }
             .product-card {
-                padding: 12px;
-                min-height: 380px;
+                padding: 7px 7px 9px 7px !important;
+                min-height: auto !important;
+                border-radius: 12px !important;
+            }
+            .product-card-top-bar {
+                margin-bottom: 4px !important;
+            }
+            .product-tag {
+                font-size: 0.52rem !important;
+                padding: 2px 5px !important;
+                border-radius: 4px !important;
+            }
+            .wishlist-btn {
+                width: 26px !important;
+                height: 26px !important;
+                top: 6px !important;
+                right: 6px !important;
+            }
+            .wishlist-btn svg {
+                width: 12px !important;
+                height: 12px !important;
+            }
+            .product-img-wrap {
+                border-radius: 8px !important;
+                margin-bottom: 4px !important;
+            }
+            .color-picker-preview {
+                min-height: 14px !important;
+                margin: 2px 0 4px 0 !important;
+                gap: 3px !important;
+            }
+            .color-dot {
+                width: 9px !important;
+                height: 9px !important;
+            }
+            .product-info {
+                padding-top: 4px !important;
+                gap: 2px !important;
+            }
+            .product-price {
+                font-size: 0.88rem !important;
+            }
+            .product-title-group h3 {
+                font-size: 0.72rem !important;
+                line-height: 1.22 !important;
+                display: -webkit-box;
+                -webkit-line-clamp: 2;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
             }
         }
 
         .product-card:hover {
-            transform: translateY(-5px) scale(1.01);
             border-color: var(--accent);
             box-shadow: var(--shadow-hover);
         }
@@ -1433,29 +1478,10 @@
 
         @keyframes heartBeatAnim {
             0% { transform: scale(1); }
-            15% { transform: scale(1.35); }
-            30% { transform: scale(0.95); }
-            45% { transform: scale(1.2); }
-            60% { transform: scale(1); }
-        }
-
-        @keyframes cardSmoothExpand {
-            0% {
-                transform: scale(1);
-            }
-            35% {
-                transform: scale(1.022);
-            }
-            60% {
-                transform: scale(1.022);
-            }
-            100% {
-                transform: scale(1);
-            }
-        }
-
-        .product-card.liked-pulse {
-            animation: cardSmoothExpand 1.6s cubic-bezier(0.25, 1, 0.5, 1) forwards !important;
+            20% { transform: scale(1.35); }
+            40% { transform: scale(0.92); }
+            60% { transform: scale(1.18); }
+            100% { transform: scale(1); }
         }
 
         .wishlist-btn {
@@ -1477,7 +1503,7 @@
         }
 
         .wishlist-btn:hover {
-            transform: scale(1.1);
+            transform: scale(1.08);
             border-color: var(--border-hover);
         }
 
@@ -1486,9 +1512,9 @@
         }
 
         .wishlist-btn.active svg {
-            animation: heartBeatAnim 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
-            fill: #FF3B30;
-            stroke: #FF3B30;
+            animation: heartBeatAnim 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+            fill: #FF3B30 !important;
+            stroke: #FF3B30 !important;
         }
 
         .product-img-wrap {
@@ -2985,6 +3011,224 @@
             box-shadow: 0 10px 25px rgba(0,0,0,0.25);
             margin-bottom: 14px;
         }
+
+        /* Unified Compact Mobile Design Optimization */
+        @media (max-width: 768px) {
+            header {
+                padding: 8px 12px !important;
+            }
+            header.scrolled {
+                padding: 6px 12px !important;
+            }
+            .logo {
+                font-size: 1.22rem !important;
+            }
+            .icon-btn {
+                width: 32px !important;
+                height: 32px !important;
+            }
+            .icon-btn svg {
+                width: 14px !important;
+                height: 14px !important;
+            }
+            .badge-count {
+                width: 14px !important;
+                height: 14px !important;
+                font-size: 0.55rem !important;
+                top: 0px !important;
+                right: 0px !important;
+            }
+            .hero {
+                padding: 62px 12px 14px !important;
+                gap: 14px !important;
+            }
+            .hero-content {
+                gap: 8px !important;
+            }
+            .hero-badge-group {
+                gap: 6px !important;
+            }
+            .hero-badge {
+                padding: 4px 10px !important;
+                font-size: 0.62rem !important;
+            }
+            .store-status {
+                padding: 3px 8px !important;
+                font-size: 0.65rem !important;
+            }
+            .hero h1 {
+                font-size: clamp(1.4rem, 5vw, 1.85rem) !important;
+                line-height: 1.16 !important;
+                margin-bottom: 2px !important;
+            }
+            .hero-desc {
+                font-size: 0.78rem !important;
+                line-height: 1.38 !important;
+            }
+            .hero-actions {
+                gap: 8px !important;
+                margin-top: 4px !important;
+            }
+            .btn-primary {
+                padding: 8px 14px !important;
+                font-size: 0.78rem !important;
+                border-radius: 8px !important;
+            }
+            .btn-secondary {
+                padding: 7px 12px !important;
+                font-size: 0.78rem !important;
+                border-radius: 8px !important;
+            }
+            .hero-features {
+                display: none !important;
+            }
+            .hero-card-3d {
+                max-width: 250px !important;
+                border-radius: 16px !important;
+            }
+            .hero-card-3d .product-tag {
+                top: 8px !important;
+                left: 8px !important;
+                font-size: 0.58rem !important;
+                padding: 3px 8px !important;
+                border-radius: 12px !important;
+            }
+            .hero-slider-nav {
+                top: 8px !important;
+                right: 8px !important;
+                font-size: 0.62rem !important;
+                padding: 2px 6px !important;
+            }
+            .hero-slider-nav button {
+                width: 16px !important;
+                height: 16px !important;
+                font-size: 0.75rem !important;
+            }
+            .hero-card-footer {
+                padding: 8px 10px 10px !important;
+                gap: 6px !important;
+            }
+            .hero-card-title {
+                font-size: 0.8rem !important;
+            }
+            .hero-card-price {
+                font-size: 0.88rem !important;
+            }
+            .hero-card-old-price {
+                font-size: 0.72rem !important;
+            }
+            .hero-card-cta {
+                padding: 4px 8px !important;
+                font-size: 0.68rem !important;
+            }
+            .section-padding {
+                padding: 16px 12px !important;
+            }
+            #catalog.section-padding {
+                padding-top: 6px !important;
+                padding-bottom: 24px !important;
+            }
+            .section-header {
+                margin-bottom: 12px !important;
+            }
+            .section-title {
+                font-size: 1.2rem !important;
+            }
+            .section-subtitle {
+                font-size: 0.72rem !important;
+            }
+            .catalog-filters {
+                gap: 6px !important;
+                margin-bottom: 12px !important;
+                padding: 2px 4px 8px 4px !important;
+            }
+            .filter-btn {
+                padding: 6px 12px !important;
+                font-size: 0.75rem !important;
+                border-radius: 20px !important;
+            }
+            .product-modal {
+                width: 95% !important;
+                max-height: 90vh !important;
+                border-radius: 16px !important;
+            }
+            .modal-grid {
+                padding: 14px 12px 18px !important;
+                gap: 12px !important;
+            }
+            .modal-main-img-wrap {
+                border-radius: 12px !important;
+                padding: 4px !important;
+            }
+            .modal-thumb {
+                width: 44px !important;
+                height: 44px !important;
+                border-radius: 8px !important;
+            }
+            .modal-thumbs {
+                gap: 6px !important;
+            }
+            .modal-options-row {
+                padding: 8px 10px !important;
+                gap: 10px !important;
+                margin: 8px 0 !important;
+                border-radius: 12px !important;
+            }
+            .option-group label {
+                font-size: 0.68rem !important;
+            }
+            .color-circle-big {
+                width: 18px !important;
+                height: 18px !important;
+            }
+            .spec-box {
+                padding: 6px 8px !important;
+                font-size: 0.74rem !important;
+            }
+            .spec-box span {
+                font-size: 0.66rem !important;
+            }
+            .spec-box strong {
+                font-size: 0.72rem !important;
+            }
+            .advantages-section {
+                padding: 16px 12px !important;
+            }
+            .advantage-card {
+                padding: 12px 10px !important;
+                gap: 10px !important;
+                border-radius: 10px !important;
+            }
+            .advantage-icon {
+                width: 32px !important;
+                height: 32px !important;
+                border-radius: 8px !important;
+            }
+            .advantage-text h4 {
+                font-size: 0.82rem !important;
+            }
+            .advantage-text p {
+                font-size: 0.72rem !important;
+            }
+            footer {
+                padding: 20px 12px 16px !important;
+            }
+            .footer-grid {
+                gap: 14px !important;
+                margin-bottom: 14px !important;
+            }
+            .footer-col h4 {
+                font-size: 0.72rem !important;
+                margin-bottom: 6px !important;
+            }
+            .footer-col a {
+                font-size: 0.75rem !important;
+            }
+            .footer-bottom {
+                font-size: 0.68rem !important;
+                padding-top: 10px !important;
+            }
+        }
     </style>
 </head>
 <body data-theme="light">
@@ -3095,7 +3339,7 @@
                         <span class="hero-card-title" id="hero-prod-title">Attack Shark X3 Wireless</span>
                         <div class="hero-card-price-wrap">
                             <span class="hero-card-price" id="hero-prod-price">1 599 <span class="currency">₴</span></span>
-                            <span class="hero-card-old-price" id="hero-prod-old-price">1 899 ₴</span>
+                            <span class="hero-card-old-price" id="hero-prod-old-price" style="display: none;"></span>
                         </div>
                     </div>
                     <div class="hero-card-cta">
@@ -4197,7 +4441,9 @@
 
             renderCatalog();
             if (products && products.length > 0) {
-                setHeroProduct(products[0]);
+                if (!heroCurrentProduct || !products.some(x => x.id === heroCurrentProduct.id)) {
+                    setHeroProduct(products[0]);
+                }
             }
         }
 
@@ -4412,8 +4658,9 @@
                     if (priceEl) priceEl.innerHTML = formatPrice(p.price);
                     
                     if (oldPriceEl) {
-                        if (p.oldPrice || p.old_price) {
-                            oldPriceEl.innerText = `${p.oldPrice || p.old_price} ₴`;
+                        const oldP = p.oldPrice || p.old_price;
+                        if (oldP && Number(oldP) > Number(p.price)) {
+                            oldPriceEl.innerText = `${Number(oldP).toLocaleString('uk-UA')} ₴`;
                             oldPriceEl.style.display = 'inline';
                         } else {
                             oldPriceEl.style.display = 'none';
@@ -4464,7 +4711,7 @@
 
         function restartHeroTimer() {
             if (heroTimer) clearInterval(heroTimer);
-            heroTimer = setInterval(updateHeroBanner, 4500);
+            heroTimer = setInterval(updateHeroBanner, 5000);
         }
 
         function openHeroProductModal() {
@@ -4610,11 +4857,34 @@
             document.getElementById('backdrop').classList.remove('active');
         }
 
-        function renderCatalog() {
+        let lastRenderedCatalogSignature = '';
+        function renderCatalog(force = false) {
             const container = document.getElementById('catalog-container');
             if (!container) return;
 
             const filteredProducts = getFilteredProducts();
+
+            const currentSignature = JSON.stringify({
+                cat: activeCategoryFilter,
+                brand: activeBrandFilter,
+                search: (document.getElementById('catalog-search-input') ? document.getElementById('catalog-search-input').value : ''),
+                sort: (document.getElementById('sort-select') ? document.getElementById('sort-select').value : ''),
+                wishlistIds: wishlist.map(x => x.id),
+                prods: filteredProducts.map(p => ({
+                    id: p.id,
+                    title: p.title,
+                    price: p.price,
+                    old_price: p.old_price,
+                    tag: p.tag,
+                    img: p.img,
+                    colors: p.colors
+                }))
+            });
+
+            if (!force && currentSignature === lastRenderedCatalogSignature) {
+                return;
+            }
+            lastRenderedCatalogSignature = currentSignature;
 
             if (filteredProducts.length === 0) {
                 container.innerHTML = `<p style="color: var(--text-secondary); grid-column: span 12; text-align: center; padding: 30px;">Товарів за цими фільтрами не знайдено</p>`;
@@ -6686,15 +6956,6 @@
                 if (svg) {
                     svg.setAttribute('fill', isAdding ? '#FF3B30' : 'none');
                     svg.setAttribute('stroke', isAdding ? '#FF3B30' : 'currentColor');
-                }
-                const cardEl = wishBtn.closest('.product-card');
-                if (cardEl) {
-                    cardEl.classList.remove('liked-pulse');
-                    void cardEl.offsetWidth; // trigger reflow
-                    cardEl.classList.add('liked-pulse');
-                    setTimeout(() => {
-                        cardEl.classList.remove('liked-pulse');
-                    }, 900);
                 }
             }
         }
