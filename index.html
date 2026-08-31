@@ -3377,32 +3377,33 @@
                 font-size: 0.8rem !important;
                 border-radius: 20px !important;
             }
-            /* MOBILE PRODUCT MODAL FIX (Zero Overlaps, Clean Single Column) */
+            /* MOBILE PRODUCT MODAL FIX (Full-width Bottom Sheet with 1st-Screen Purchase Block) */
             .product-modal {
-                width: calc(100% - 8px) !important;
-                max-width: calc(100vw - 8px) !important;
-                height: auto !important;
-                max-height: calc(98vh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)) !important;
-                top: max(8px, env(safe-area-inset-top, 8px)) !important;
-                bottom: max(4px, env(safe-area-inset-bottom, 4px)) !important;
-                left: 4px !important;
-                right: 4px !important;
-                margin: 0 auto !important;
-                transform: translateY(15px) scale(0.98) !important;
-                border-radius: 18px !important;
+                width: 100% !important;
+                max-width: 100vw !important;
+                height: 95vh !important;
+                max-height: 95vh !important;
+                top: auto !important;
+                bottom: 0 !important;
+                left: 0 !important;
+                right: 0 !important;
+                margin: 0 !important;
+                transform: translateY(100%) !important;
+                border-radius: 20px 20px 0 0 !important;
                 overflow-y: auto !important;
                 overflow-x: hidden !important;
                 -webkit-overflow-scrolling: touch !important;
-                box-shadow: 0 16px 50px rgba(0, 0, 0, 0.32), 0 0 0 1px var(--border-light) !important;
+                box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.3) !important;
+                transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.28s ease !important;
             }
             .product-modal.active {
                 opacity: 1 !important;
                 visibility: visible !important;
-                transform: translateY(0) scale(1) !important;
+                transform: translateY(0) !important;
             }
             .modal-inner-container {
-                padding: 10px 12px 16px !important;
-                gap: 6px !important;
+                padding: 16px 16px 32px !important;
+                gap: 12px !important;
                 display: flex !important;
                 flex-direction: column !important;
                 justify-content: flex-start !important;
@@ -3414,24 +3415,25 @@
                 display: flex !important;
                 flex-direction: column !important;
                 padding: 0 !important;
-                gap: 6px !important;
+                gap: 10px !important;
                 width: 100% !important;
                 align-items: stretch !important;
             }
             .modal-gallery {
                 display: flex !important;
                 flex-direction: column !important;
-                gap: 6px !important;
+                gap: 8px !important;
                 align-items: center !important;
                 width: 100% !important;
                 position: static !important;
             }
             .modal-main-img-wrap {
                 width: 100% !important;
-                height: 160px !important;
-                max-height: 180px !important;
+                height: 38vh !important;
+                max-height: 280px !important;
+                min-height: 200px !important;
                 aspect-ratio: auto !important;
-                border-radius: 12px !important;
+                border-radius: 14px !important;
                 padding: 0 !important;
                 margin: 0 !important;
                 display: flex !important;
@@ -3465,60 +3467,61 @@
             }
             .modal-thumbs {
                 display: flex !important;
-                gap: 4px !important;
+                gap: 6px !important;
                 justify-content: center !important;
                 width: 100% !important;
             }
             .modal-thumb {
-                width: 38px !important;
-                height: 38px !important;
-                border-radius: 6px !important;
+                width: 44px !important;
+                height: 44px !important;
+                border-radius: 8px !important;
                 object-fit: cover !important;
                 flex-shrink: 0 !important;
             }
             .modal-details {
                 display: flex !important;
                 flex-direction: column !important;
-                gap: 6px !important;
+                gap: 10px !important;
                 width: 100% !important;
                 position: static !important;
             }
             .modal-header-block {
                 order: 1 !important;
-                gap: 2px !important;
+                gap: 4px !important;
                 margin: 0 !important;
             }
             .modal-product-title {
-                font-size: 1.1rem !important;
-                line-height: 1.25 !important;
+                font-size: 1.25rem !important;
+                line-height: 1.3 !important;
                 font-weight: 700 !important;
                 margin: 0 !important;
             }
             .modal-color-block {
                 order: 2 !important;
-                gap: 4px !important;
+                gap: 6px !important;
                 margin: 0 !important;
             }
             .modal-field-label {
-                font-size: 0.78rem !important;
+                font-size: 0.85rem !important;
+                font-weight: 600 !important;
                 margin-bottom: 2px !important;
             }
             .color-selector-clean {
-                gap: 6px !important;
+                gap: 8px !important;
             }
             .modal-price-stock-row {
                 order: 3 !important;
                 padding-bottom: 0 !important;
                 margin: 0 !important;
-                gap: 6px !important;
+                gap: 8px !important;
             }
             .modal-price-wrap .product-price {
-                font-size: 1.2rem !important;
+                font-size: 1.35rem !important;
                 font-weight: 800 !important;
             }
             .stock-status {
-                font-size: 0.76rem !important;
-                padding: 3px 8px !important;
+                font-size: 0.78rem !important;
+                padding: 4px 10px !important;
             }
             .modal-buy-section {
                 order: 4 !important;
@@ -3527,64 +3530,64 @@
             }
             .modal-qty-and-cart {
                 display: flex !important;
-                gap: 6px !important;
+                gap: 8px !important;
                 width: 100% !important;
                 align-items: center !important;
             }
             .quantity-controls.compact-qty {
-                height: 38px !important;
-                padding: 0 4px !important;
+                height: 42px !important;
+                padding: 0 6px !important;
             }
             .modal-cart-submit-btn {
-                height: 38px !important;
-                font-size: 0.86rem !important;
+                height: 44px !important;
+                font-size: 0.92rem !important;
                 font-weight: 700 !important;
                 flex: 1 !important;
-                border-radius: 10px !important;
+                border-radius: 12px !important;
             }
             .modal-wish-btn {
-                width: 38px !important;
-                height: 38px !important;
+                width: 44px !important;
+                height: 44px !important;
                 flex-shrink: 0 !important;
-                border-radius: 10px !important;
+                border-radius: 12px !important;
             }
             .modal-desc-section {
                 order: 5 !important;
-                margin-top: 4px !important;
+                margin-top: 10px !important;
                 border-top: 1px solid var(--border-light) !important;
-                padding-top: 6px !important;
+                padding-top: 10px !important;
             }
             .modal-section-heading {
-                font-size: 0.82rem !important;
+                font-size: 0.92rem !important;
                 font-weight: 700 !important;
-                margin-bottom: 4px !important;
+                margin-bottom: 6px !important;
             }
             .modal-desc-text {
-                font-size: 0.82rem !important;
-                line-height: 1.45 !important;
+                font-size: 0.85rem !important;
+                line-height: 1.5 !important;
             }
             .modal-specs-section {
                 order: 6 !important;
-                margin-top: 4px !important;
+                margin-top: 8px !important;
             }
             .modal-specs-list {
-                gap: 4px !important;
-                font-size: 0.78rem !important;
+                gap: 6px !important;
+                font-size: 0.82rem !important;
             }
             .modal-close-circle {
                 position: absolute !important;
-                top: 8px !important;
-                right: 8px !important;
-                z-index: 50 !important;
-                width: 28px !important;
-                height: 28px !important;
-                font-size: 0.8rem !important;
-                background: rgba(255, 255, 255, 0.9) !important;
+                top: 12px !important;
+                right: 12px !important;
+                z-index: 100 !important;
+                width: 32px !important;
+                height: 32px !important;
+                font-size: 0.88rem !important;
+                background: rgba(255, 255, 255, 0.92) !important;
                 border: 1px solid var(--border-light) !important;
-                box-shadow: 0 2px 6px rgba(0,0,0,0.12) !important;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.15) !important;
             }
             [data-theme="dark"] .modal-close-circle {
-                background: rgba(30, 41, 59, 0.9) !important;
+                background: rgba(30, 41, 59, 0.92) !important;
             }
             .advantages-section {
                 padding: 20px 14px !important;
