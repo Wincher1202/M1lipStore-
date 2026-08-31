@@ -3349,32 +3349,39 @@
                 font-size: 0.8rem !important;
                 border-radius: 20px !important;
             }
-            /* MOBILE PRODUCT MODAL FIX (Full-width card with 1:1 Square Photo and 1st-Screen Purchase Block) */
+            /* MOBILE PRODUCT MODAL FIX (Telegram Mini App Responsive Mobile Card) */
             .product-modal {
                 width: calc(100% - 8px) !important;
                 max-width: calc(100vw - 8px) !important;
                 height: auto !important;
-                max-height: calc(98vh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)) !important;
+                max-height: calc(96vh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)) !important;
                 top: max(8px, env(safe-area-inset-top, 8px)) !important;
                 bottom: max(4px, env(safe-area-inset-bottom, 4px)) !important;
                 left: 4px !important;
                 right: 4px !important;
                 margin: 0 auto !important;
-                transform: translateY(15px) scale(0.98) !important;
+                transform: translateY(15px) !important;
                 border-radius: 20px !important;
                 overflow-y: auto !important;
                 overflow-x: hidden !important;
                 -webkit-overflow-scrolling: touch !important;
+                scrollbar-width: none !important;
+                -ms-overflow-style: none !important;
                 box-shadow: 0 16px 50px rgba(0, 0, 0, 0.32), 0 0 0 1px var(--border-light) !important;
-                transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.28s ease !important;
+                transition: opacity 0.25s ease !important;
+            }
+            .product-modal::-webkit-scrollbar {
+                display: none !important;
+                width: 0 !important;
+                height: 0 !important;
             }
             .product-modal.active {
                 opacity: 1 !important;
                 visibility: visible !important;
-                transform: translateY(0) scale(1) !important;
+                transform: translateY(0) !important;
             }
             .modal-inner-container {
-                padding: 12px 14px 20px !important;
+                padding: 12px 14px 24px !important;
                 gap: 8px !important;
                 display: flex !important;
                 flex-direction: column !important;
@@ -3401,12 +3408,14 @@
             }
             .modal-main-img-wrap {
                 width: 100% !important;
-                max-width: 220px !important;
-                height: auto !important;
-                aspect-ratio: 1 / 1 !important;
+                max-width: 100% !important;
+                height: 38vh !important;
+                max-height: 250px !important;
+                min-height: 160px !important;
+                aspect-ratio: auto !important;
                 border-radius: 16px !important;
                 border: 1px solid var(--border-light) !important;
-                padding: 0 !important;
+                padding: 4px !important;
                 margin: 0 auto !important;
                 display: flex !important;
                 align-items: center !important;
@@ -3428,7 +3437,7 @@
                 object-position: center !important;
                 display: block !important;
                 position: static !important;
-                border-radius: 0 !important;
+                border-radius: 12px !important;
                 transform: none !important;
             }
             .modal-thumbs-wrapper {
@@ -3437,6 +3446,10 @@
                 padding: 2px 0 !important;
                 margin: 0 !important;
                 flex-shrink: 0 !important;
+                scrollbar-width: none !important;
+            }
+            .modal-thumbs-wrapper::-webkit-scrollbar {
+                display: none !important;
             }
             .modal-thumbs {
                 display: flex !important;
@@ -3445,8 +3458,8 @@
                 width: 100% !important;
             }
             .modal-thumb {
-                width: 40px !important;
-                height: 40px !important;
+                width: 38px !important;
+                height: 38px !important;
                 border-radius: 8px !important;
                 object-fit: cover !important;
                 flex-shrink: 0 !important;
@@ -3482,7 +3495,7 @@
             .color-selector-clean {
                 gap: 8px !important;
             }
-            .color-option-clean {
+            .color-circle-big {
                 width: 28px !important;
                 height: 28px !important;
             }
@@ -3493,7 +3506,7 @@
                 gap: 6px !important;
             }
             .modal-price-wrap .product-price {
-                font-size: 1.28rem !important;
+                font-size: 1.25rem !important;
                 font-weight: 800 !important;
             }
             .stock-status {
@@ -3512,12 +3525,12 @@
                 align-items: center !important;
             }
             .quantity-controls.compact-qty {
-                height: 40px !important;
+                height: 42px !important;
                 padding: 0 4px !important;
             }
             .modal-cart-submit-btn {
                 height: 42px !important;
-                font-size: 0.9rem !important;
+                font-size: 0.88rem !important;
                 font-weight: 700 !important;
                 flex: 1 !important;
                 border-radius: 12px !important;
@@ -3530,9 +3543,9 @@
             }
             .modal-desc-section {
                 order: 5 !important;
-                margin-top: 8px !important;
+                margin-top: 10px !important;
                 border-top: 1px solid var(--border-light) !important;
-                padding-top: 8px !important;
+                padding-top: 10px !important;
             }
             .modal-section-heading {
                 font-size: 0.88rem !important;
