@@ -3559,7 +3559,7 @@
                 transform: translateY(0) !important;
             }
             .modal-inner-container {
-                padding: 12px 14px 24px !important;
+                padding: 46px 12px 24px !important;
                 gap: 6px !important;
                 display: flex !important;
                 flex-direction: column !important;
@@ -3745,18 +3745,24 @@
             }
             .modal-close-circle {
                 position: absolute !important;
-                top: 12px !important;
-                right: 12px !important;
+                top: 8px !important;
+                right: 8px !important;
                 z-index: 100 !important;
                 width: 32px !important;
                 height: 32px !important;
-                font-size: 0.88rem !important;
-                background: rgba(255, 255, 255, 0.92) !important;
+                font-size: 0.9rem !important;
+                font-weight: 700 !important;
+                border-radius: 50% !important;
+                background: var(--bg-surface) !important;
                 border: 1px solid var(--border-light) !important;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.15) !important;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.12) !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
             }
             [data-theme="dark"] .modal-close-circle {
-                background: rgba(30, 41, 59, 0.92) !important;
+                background: var(--bg-surface) !important;
+                color: #FFFFFF !important;
             }
             .advantages-section {
                 padding: 20px 14px !important;
