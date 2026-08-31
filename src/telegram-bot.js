@@ -1,10 +1,43 @@
 import { db, ORDER_STATUSES } from './db.js';
 
+process.env.TZ = 'Europe/Kyiv';
+
 export const BOT_TOKEN = process.env.BOT_TOKEN || '';
 export const ADMIN_IDS = (process.env.ADMIN_IDS || '1929165295,1248134309,invinciblee,wincher,Invinciblee,Wincher').split(',').map(s => s.trim()).filter(Boolean);
 export const PAYMENT_PROVIDER_TOKEN = process.env.PAYMENT_PROVIDER_TOKEN || '1877036958:TEST:3ee3e1f439bade2f14881b4f9a87c61392fa6ec6';
 
 const TELEGRAM_API_BASE = 'https://api.telegram.org';
+
+export function formatKyivDateTime(dateInput) {
+  if (!dateInput) return '';
+  try {
+    const d = new Date(dateInput);
+    return d.toLocaleString('uk-UA', {
+      timeZone: 'Europe/Kyiv',
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  } catch (e) {
+    return new Date(dateInput).toLocaleString('uk-UA');
+  }
+}
+
+export function formatKyivTime(dateInput = new Date()) {
+  try {
+    const d = new Date(dateInput);
+    return d.toLocaleTimeString('uk-UA', {
+      timeZone: 'Europe/Kyiv',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    });
+  } catch (e) {
+    return new Date().toLocaleTimeString('uk-UA');
+  }
+}
 
 function escapeHtml(str) {
   if (str === null || str === undefined) return '';
@@ -747,7 +780,7 @@ export class TelegramBotService {
         parse_mode: 'HTML'
       });
       const res = await db.syncWithCloud('https://m1lipstore.onrender.com');
-      const timeStr = new Date().toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      const timeStr = formatKyivTime();
       let resText = `☁️ <b>Синхронізація з хмарою MILIPSTORE</b>\n\n`;
       if (res.ok) {
         resText += `✅ <b>Статус: Успішно збережено та синхронізовано</b>\n`;
@@ -914,7 +947,7 @@ export class TelegramBotService {
     if (data === 'admin_cloud_sync') {
       await this.safeEditOrSend(chatId, msgId, '🔄 <i>Виконується зʼєднання та синхронізація з хмарою...</i>');
       const res = await db.syncWithCloud('https://m1lipstore.onrender.com');
-      const timeStr = new Date().toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      const timeStr = formatKyivTime();
       let resText = `☁️ <b>Синхронізація з хмарою MILIPSTORE</b>\n\n`;
       if (res.ok) {
         resText += `✅ <b>Статус: База синхронізована та збережена</b>\n`;
@@ -1327,7 +1360,7 @@ export class TelegramBotService {
       text += `💡 <i>Для продовження оформлення та переходу до оплати скористайтеся кнопками нижче або перейдіть до розділу «🛍 Мої замовлення».</i>\n\n`;
     }
     text += `📊 <b>Статус:</b> ${statusEmoji} <b>${statusName}</b>\n`;
-    text += `📅 <b>Дата створення:</b> ${new Date(order.created_at || Date.now()).toLocaleString('uk-UA')}\n`;
+    text += `📅 <b>Дата створення:</b> ${formatKyivDateTime(order.created_at || Date.now())} (за Києвом)\n`;
     if (order.tracking_number) {
       text += `🚚 <b>Номер ТТН:</b> <code>${order.tracking_number}</code>\n`;
     }
@@ -1690,7 +1723,7 @@ export class TelegramBotService {
 
     let text = `👑 <b>ЗАМОВЛЕННЯ #${order.order_id}</b>\n\n`;
     text += `📊 <b>Статус:</b> ${statusEmoji} <b>${statusName}</b>\n`;
-    text += `📅 <b>Дата створення:</b> ${new Date(order.created_at || Date.now()).toLocaleString('uk-UA')}\n`;
+    text += `📅 <b>Дата створення:</b> ${formatKyivDateTime(order.created_at || Date.now())} (Київ)\n`;
     if (order.tracking_number) {
       text += `🚚 <b>Номер ТТН:</b> <code>${order.tracking_number}</code>\n`;
     }

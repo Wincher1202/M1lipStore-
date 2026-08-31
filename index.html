@@ -5216,6 +5216,24 @@
             })
             .catch(() => {});
 
+        function formatKyivDateTime(dateStr, options = { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) {
+            if (!dateStr) return '';
+            try {
+                return new Date(dateStr).toLocaleString('uk-UA', { timeZone: 'Europe/Kyiv', ...options });
+            } catch (e) {
+                return new Date(dateStr).toLocaleString('uk-UA');
+            }
+        }
+
+        function formatKyivDate(dateStr) {
+            if (!dateStr) return '';
+            try {
+                return new Date(dateStr).toLocaleDateString('uk-UA', { timeZone: 'Europe/Kyiv', day: '2-digit', month: '2-digit', year: 'numeric' });
+            } catch (e) {
+                return new Date(dateStr).toLocaleDateString('uk-UA');
+            }
+        }
+
         if (tg) {
             try {
                 tg.expand();
@@ -8159,7 +8177,7 @@
                 const custName = `${order.customer?.first_name || ''} ${order.customer?.last_name || ''}`.trim() || 'Клієнт';
                 const prov = PROVIDER_LABELS[order.delivery?.provider] || 'Нова Пошта';
                 const itemsCount = (order.items || []).reduce((c, i) => c + (i.qty || 1), 0);
-                const createdDate = order.created_at ? new Date(order.created_at).toLocaleString('uk-UA', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : '';
+                const createdDate = order.created_at ? formatKyivDateTime(order.created_at, { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : '';
                 const isPaid = order.payment?.status === 'PAID' || order.status === 'CONFIRMED' || order.status === 'SHIPPED';
 
                 return `
@@ -8211,7 +8229,7 @@
                 badgeEl.innerText = conf.label;
             }
 
-            const createdDate = order.created_at ? new Date(order.created_at).toLocaleString('uk-UA', { dateStyle: 'long', timeStyle: 'short' }) : '';
+            const createdDate = order.created_at ? formatKyivDateTime(order.created_at, { dateStyle: 'long', timeStyle: 'short' }) : '';
             document.getElementById('adm-detail-date').innerText = createdDate;
 
             // Status select
@@ -8423,7 +8441,7 @@
                 container.innerHTML = found.map(order => {
                     const orderId = order.id || order.order_id;
                     const prov = PROVIDER_LABELS[order.delivery?.provider] || 'Нова Пошта';
-                    const createdDate = order.created_at ? new Date(order.created_at).toLocaleDateString('uk-UA', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '';
+                    const createdDate = order.created_at ? formatKyivDateTime(order.created_at, { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
                     return `
                         <div class="review-card" style="margin-bottom: 12px; background: var(--bg-surface); border: 1.5px solid var(--border-light);">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
@@ -8707,7 +8725,7 @@
                         </div>
                         <div class="order-meta">
                             <div>Сума: <strong>${formatPrice(o.total || 0)}</strong></div>
-                            <div>Дата: ${o.created_at ? new Date(o.created_at).toLocaleDateString('uk-UA') : 'Сьогодні'}</div>
+                            <div>Дата: ${o.created_at ? formatKyivDateTime(o.created_at, { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Сьогодні'}</div>
                         </div>
                     </div>
                 `).join('');

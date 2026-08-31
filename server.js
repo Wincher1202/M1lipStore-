@@ -6,6 +6,9 @@ import { db, ORDER_STATUSES } from './src/db.js';
 import { botService, PAYMENT_PROVIDER_TOKEN } from './src/telegram-bot.js';
 import { searchCities, searchWarehouses } from './src/delivery.js';
 
+// Enforce Kyiv / Ukraine Timezone globally
+process.env.TZ = 'Europe/Kyiv';
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
