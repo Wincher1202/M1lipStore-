@@ -1195,22 +1195,57 @@
             max-width: 125px !important;
         }
 
+        .modal-color-brand-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin: 2px 0 8px 0;
+            padding-right: 4px;
+        }
+
+        .modal-color-block {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            flex: 1;
+        }
+
         #modal-brand {
-            background: #FFFFFF;
-            border: 1px solid var(--border-light);
-            border-radius: 10px;
-            padding: 4px 12px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            background: transparent;
+            border: none;
+            border-radius: 0;
+            padding: 0;
+            box-shadow: none;
             display: inline-flex;
             align-items: center;
-            justify-content: center;
-            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            justify-content: flex-end;
+            margin-right: 6px;
+            flex-shrink: 0;
+            transition: transform 0.2s ease;
+        }
+
+        #modal-brand:hover {
+            transform: scale(1.05);
+        }
+
+        #modal-brand img {
+            max-height: 24px !important;
+            max-width: 100px !important;
+            object-fit: contain;
+            display: block;
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: high-quality;
         }
 
         [data-theme="dark"] #modal-brand {
-            background: #FFFFFF;
-            border-color: rgba(87, 100, 226, 0.4);
-            box-shadow: 0 0 14px rgba(87, 100, 226, 0.25);
+            background: transparent;
+            border: none;
+            box-shadow: none;
+        }
+
+        [data-theme="dark"] #modal-brand img {
+            filter: drop-shadow(0 2px 8px rgba(255, 255, 255, 0.14));
         }
 
         #modal-brand .logo-vgn {
@@ -1219,23 +1254,23 @@
         }
 
         #modal-brand .logo-attack-shark {
-            max-height: 30px !important;
-            max-width: 115px !important;
+            max-height: 24px !important;
+            max-width: 95px !important;
         }
 
         #modal-brand .logo-ajazz {
-            max-height: 29px !important;
-            max-width: 112px !important;
+            max-height: 24px !important;
+            max-width: 95px !important;
         }
 
         #modal-brand .logo-aula {
-            max-height: 28px !important;
-            max-width: 108px !important;
+            max-height: 24px !important;
+            max-width: 90px !important;
         }
 
         #modal-brand .logo-mchose {
-            max-height: 37px !important;
-            max-width: 140px !important;
+            max-height: 28px !important;
+            max-width: 105px !important;
         }
 
         .partner-brand-tile:hover {
@@ -3717,7 +3752,7 @@
                 font-size: 0.8rem !important;
                 border-radius: 20px !important;
             }
-            /* MOBILE PRODUCT MODAL FIX (Spacious Vertical Card with Centered Contain Photo & Below-Fold Description) */
+            /* MOBILE PRODUCT MODAL (Optimized Sheet with Clear Close Button, Gallery Below Photo, Brand Next to Color) */
             .product-modal {
                 width: calc(100% - 16px) !important;
                 max-width: 480px !important;
@@ -3728,15 +3763,15 @@
                 left: 8px !important;
                 right: 8px !important;
                 margin: 0 auto !important;
-                transform: translateY(10px) !important;
+                transform: translateY(16px) scale(0.98) !important;
                 border-radius: 24px !important;
                 overflow-y: auto !important;
                 overflow-x: hidden !important;
                 -webkit-overflow-scrolling: touch !important;
                 scrollbar-width: none !important;
                 -ms-overflow-style: none !important;
-                box-shadow: 0 16px 40px rgba(0, 0, 0, 0.22), 0 0 0 1px var(--border-light) !important;
-                transition: opacity 0.25s ease, transform 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+                box-shadow: 0 16px 48px rgba(0, 0, 0, 0.28), 0 0 0 1px var(--border-light) !important;
+                transition: opacity 0.28s cubic-bezier(0.16, 1, 0.3, 1), transform 0.28s cubic-bezier(0.16, 1, 0.3, 1) !important;
             }
             .product-modal::-webkit-scrollbar {
                 display: none !important;
@@ -3746,11 +3781,45 @@
             .product-modal.active {
                 opacity: 1 !important;
                 visibility: visible !important;
-                transform: translateY(0) !important;
+                transform: translateY(0) scale(1) !important;
+            }
+            .modal-sheet-handle {
+                width: 38px !important;
+                height: 4px !important;
+                border-radius: 999px !important;
+                background: var(--border-hover) !important;
+                margin: 8px auto 2px auto !important;
+                display: block !important;
+            }
+            .modal-close-circle {
+                position: absolute !important;
+                top: 10px !important;
+                right: 12px !important;
+                z-index: 130 !important;
+                width: 32px !important;
+                height: 32px !important;
+                font-size: 0.88rem !important;
+                font-weight: 800 !important;
+                border-radius: 50% !important;
+                background: var(--bg-surface) !important;
+                border: 1px solid var(--border-light) !important;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12) !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                cursor: pointer !important;
+                transition: transform 0.15s ease, background-color 0.15s ease !important;
+            }
+            .modal-close-circle:active {
+                transform: scale(0.9) !important;
+            }
+            [data-theme="dark"] .modal-close-circle {
+                background: var(--bg-surface) !important;
+                color: #FFFFFF !important;
             }
             .modal-inner-container {
-                padding: 14px 14px 20px !important;
-                gap: 12px !important;
+                padding: 10px 14px 28px !important;
+                gap: 10px !important;
                 display: flex !important;
                 flex-direction: column !important;
                 justify-content: flex-start !important;
@@ -3762,7 +3831,7 @@
                 display: flex !important;
                 flex-direction: column !important;
                 padding: 0 !important;
-                gap: 12px !important;
+                gap: 10px !important;
                 width: 100% !important;
                 align-items: stretch !important;
             }
@@ -3773,6 +3842,7 @@
                 align-items: center !important;
                 width: 100% !important;
                 position: static !important;
+                margin-top: 6px !important; /* Space below close button */
             }
             .modal-main-img-wrap {
                 width: 100% !important;
@@ -3791,6 +3861,8 @@
                 flex-shrink: 0 !important;
                 background: #FAFAFA !important;
                 overflow: hidden !important;
+                box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04) !important;
+                transition: border-color 0.2s ease !important;
             }
             [data-theme="dark"] .modal-main-img-wrap {
                 background: #111827 !important;
@@ -3808,6 +3880,7 @@
                 position: static !important;
                 border-radius: 18px !important;
                 transform: none !important;
+                transition: opacity 0.2s ease, transform 0.2s ease !important;
             }
             .modal-zoom-hint, .gallery-zoom-hint {
                 display: none !important;
@@ -3819,80 +3892,138 @@
                 margin: 0 !important;
                 flex-shrink: 0 !important;
                 scrollbar-width: none !important;
+                -webkit-overflow-scrolling: touch !important;
             }
             .modal-thumbs-wrapper::-webkit-scrollbar {
                 display: none !important;
             }
             .modal-thumbs {
                 display: flex !important;
-                gap: 5px !important;
+                gap: 6px !important;
                 justify-content: center !important;
                 width: 100% !important;
                 padding: 2px 0 !important;
             }
             .modal-thumb {
-                width: 34px !important;
-                height: 34px !important;
-                border-radius: 6px !important;
+                width: 36px !important;
+                height: 36px !important;
+                border-radius: 8px !important;
                 object-fit: cover !important;
                 padding: 0 !important;
                 box-sizing: border-box !important;
                 flex-shrink: 0 !important;
                 border: 1px solid var(--border-light) !important;
+                transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+            }
+            .modal-thumb:active {
+                transform: scale(0.92) !important;
             }
             .modal-thumb.active {
                 border-color: var(--accent) !important;
-                box-shadow: 0 0 0 1.5px var(--accent) !important;
+                box-shadow: 0 0 0 2px var(--accent) !important;
+                transform: scale(1.05) !important;
             }
             .modal-details {
                 display: flex !important;
                 flex-direction: column !important;
-                gap: 12px !important;
+                gap: 10px !important;
                 width: 100% !important;
                 position: static !important;
-                margin-top: 4px !important;
+                margin-top: 2px !important;
             }
             .modal-header-block {
                 order: 1 !important;
-                gap: 6px !important;
+                gap: 0 !important;
                 margin: 0 !important;
             }
             .modal-product-title {
-                font-size: 1.4rem !important;
+                font-size: 1.35rem !important;
                 line-height: 1.25 !important;
                 font-weight: 800 !important;
-                margin: 4px 0 0 0 !important;
+                margin: 2px 0 0 0 !important;
+                color: var(--text-primary) !important;
+            }
+            .modal-color-brand-row {
+                order: 2 !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: space-between !important;
+                gap: 10px !important;
+                margin: 2px 0 4px 0 !important;
+                padding-right: 4px !important;
             }
             .modal-color-block {
-                order: 2 !important;
-                gap: 6px !important;
-                margin: 0 !important;
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 4px !important;
+                flex: 1 !important;
             }
             .modal-field-label {
-                font-size: 0.85rem !important;
+                font-size: 0.82rem !important;
                 font-weight: 600 !important;
                 margin-bottom: 2px !important;
             }
+            .modal-color-val {
+                font-weight: 800 !important;
+                color: var(--accent) !important;
+            }
             .color-selector-clean {
-                gap: 12px !important;
+                gap: 10px !important;
+                display: flex !important;
+                align-items: center !important;
             }
             .color-circle-big, .color-option-clean {
-                width: 26px !important;
-                height: 26px !important;
+                width: 24px !important;
+                height: 24px !important;
+                border-radius: 50% !important;
+                transition: transform 0.15s ease, box-shadow 0.15s ease !important;
+            }
+            .color-circle-big:active {
+                transform: scale(0.9) !important;
             }
             .color-circle-big.active {
                 box-shadow: 0 0 0 1.5px var(--bg-surface), 0 0 0 3px var(--accent) !important;
+                transform: scale(1.08) !important;
+            }
+            #modal-brand {
+                display: inline-flex !important;
+                align-items: center !important;
+                justify-content: flex-end !important;
+                background: transparent !important;
+                border: none !important;
+                box-shadow: none !important;
+                padding: 0 !important;
+                flex-shrink: 0 !important;
+                margin-right: 4px !important;
+            }
+            #modal-brand img {
+                max-height: 24px !important;
+                max-width: 90px !important;
+                object-fit: contain !important;
+                display: block !important;
             }
             .modal-price-stock-row {
                 order: 3 !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: space-between !important;
                 padding: 8px 12px !important;
                 margin: 0 !important;
                 gap: 8px !important;
                 border-radius: 12px !important;
+                background: var(--bg-primary) !important;
+                border: 1px solid var(--border-light) !important;
             }
             .modal-price-wrap .product-price {
                 font-size: 1.25rem !important;
                 font-weight: 800 !important;
+            }
+            .modal-old-price {
+                font-size: 0.9rem !important;
+            }
+            .modal-discount-badge {
+                font-size: 0.72rem !important;
+                padding: 2px 6px !important;
             }
             .stock-status {
                 font-size: 0.75rem !important;
@@ -3900,12 +4031,12 @@
             }
             .modal-buy-section {
                 order: 4 !important;
-                margin: 4px 0 !important;
+                margin: 2px 0 !important;
                 width: 100% !important;
             }
             .modal-qty-and-cart {
                 display: flex !important;
-                gap: 10px !important;
+                gap: 8px !important;
                 width: 100% !important;
                 align-items: center !important;
             }
@@ -3919,12 +4050,20 @@
                 font-weight: 800 !important;
                 flex: 1 !important;
                 border-radius: 12px !important;
+                transition: transform 0.15s ease, background 0.15s ease !important;
+            }
+            .modal-cart-submit-btn:active {
+                transform: scale(0.98) !important;
             }
             .modal-wish-btn {
                 width: 44px !important;
                 height: 44px !important;
                 flex-shrink: 0 !important;
                 border-radius: 12px !important;
+                transition: transform 0.15s ease !important;
+            }
+            .modal-wish-btn:active {
+                transform: scale(0.92) !important;
             }
             .modal-desc-section {
                 order: 5 !important;
@@ -3950,27 +4089,6 @@
             .modal-specs-list {
                 gap: 0 !important;
                 font-size: 0.82rem !important;
-            }
-            .modal-close-circle {
-                position: absolute !important;
-                top: 10px !important;
-                right: 10px !important;
-                z-index: 130 !important;
-                width: 32px !important;
-                height: 32px !important;
-                font-size: 0.88rem !important;
-                font-weight: 800 !important;
-                border-radius: 50% !important;
-                background: var(--bg-surface) !important;
-                border: 1px solid var(--border-light) !important;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.12) !important;
-                display: flex !important;
-                align-items: center !important;
-                justify-content: center !important;
-            }
-            [data-theme="dark"] .modal-close-circle {
-                background: var(--bg-surface) !important;
-                color: #FFFFFF !important;
             }
             .advantages-section {
                 padding: 20px 14px !important;
@@ -4198,12 +4316,12 @@
 
             <button class="icon-btn" id="wishlist-open-btn" aria-label="Обране">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-                <span class="badge-count" id="wishlist-count">0</span>
+                <span class="badge-count" id="wishlist-count" style="display: none;">0</span>
             </button>
 
             <button class="icon-btn" id="cart-open-btn" aria-label="Кошик">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-                <span class="badge-count" id="cart-count">0</span>
+                <span class="badge-count" id="cart-count" style="display: none;">0</span>
             </button>
         </div>
     </header>
@@ -4899,13 +5017,21 @@
 
                 <!-- RIGHT COLUMN: Clean Details (Exact Order) -->
                 <div class="modal-details">
-                    <!-- 1. Brand & Title -->
+                    <!-- 1. Title -->
                     <div class="modal-header-block">
-                        <div id="modal-brand" class="modal-brand-badge"></div>
                         <h1 id="modal-title" class="modal-product-title"></h1>
                     </div>
 
-                    <!-- 2. Price + Stock Status -->
+                    <!-- 2. Color Selection (Left) + Brand Logo (Right) -->
+                    <div class="modal-color-brand-row">
+                        <div class="modal-color-block">
+                            <div class="modal-field-label">Колір: <span id="modal-color-name" class="modal-color-val">не вибрано</span></div>
+                            <div class="color-selector-clean" id="modal-color-selector"></div>
+                        </div>
+                        <div id="modal-brand" class="modal-brand-badge"></div>
+                    </div>
+
+                    <!-- 3. Price + Stock Status -->
                     <div class="modal-price-stock-row">
                         <div class="modal-price-wrap">
                             <div class="modal-price-row">
@@ -4918,12 +5044,6 @@
                             <span class="status-dot in-stock-dot"></span>
                             <span>В наявності</span>
                         </div>
-                    </div>
-
-                    <!-- 3. Color Selection -->
-                    <div class="modal-color-block">
-                        <div class="modal-field-label">Колір: <span id="modal-color-name" class="modal-color-val">не вибрано</span></div>
-                        <div class="color-selector-clean" id="modal-color-selector"></div>
                     </div>
 
                     <!-- 4. Quantity + Add to Cart Button + Wishlist -->
@@ -6270,8 +6390,13 @@
                 wishBtn.querySelector('svg').style.stroke = isFav ? '#FF3B30' : 'currentColor';
             }
 
-            document.getElementById('product-modal').classList.add('active');
+            const modalEl = document.getElementById('product-modal');
+            if (modalEl) {
+                modalEl.scrollTop = 0;
+                modalEl.classList.add('active');
+            }
             document.getElementById('backdrop').classList.add('active');
+            triggerHaptic('light');
         }
 
         function getHighResImageUrl(url) {
@@ -6407,6 +6532,7 @@
             const colors = currentModalProduct?.colors || [];
             if (colors[idx] && colors[idx].isOut) return;
 
+            triggerHaptic('light');
             // If the user clicks the ALREADY selected color circle, toggle off and revert to general product gallery
             if (selectedColorIndex === idx) {
                 selectedColorIndex = null;
@@ -6607,12 +6733,14 @@
         }
 
         function closeProductModal() {
+            triggerHaptic('light');
             document.getElementById('product-modal').classList.remove('active');
             document.getElementById('backdrop').classList.remove('active');
             currentModalProduct = null;
         }
 
         function adjustModalQty(delta) {
+            triggerHaptic('light');
             modalQty += delta;
             if (modalQty < 1) modalQty = 1;
             const qtyEl = document.getElementById('modal-qty');
@@ -6621,6 +6749,7 @@
 
         function addCurrentProductToCart() {
             if (!currentModalProduct || selectedColorIndex === null) return;
+            triggerHaptic('success');
             const colors = currentModalProduct.colors || [];
             let originalColorName = colors[selectedColorIndex].name;
 
@@ -8274,6 +8403,7 @@
         function toggleWishlist(productId, forcedColor = null, forcedImg = null) {
             const product = products.find(p => p.id === productId);
             if (!product) return;
+            triggerHaptic('medium');
 
             const index = wishlist.findIndex(item => item.id === productId);
             const isAdding = index === -1;
@@ -8520,23 +8650,43 @@
             openProductModal(product, colIdx);
         }
 
+        function triggerHaptic(style = 'light') {
+            try {
+                if (window.Telegram?.WebApp?.HapticFeedback) {
+                    if (style === 'light' || style === 'medium' || style === 'heavy') {
+                        window.Telegram.WebApp.HapticFeedback.impactOccurred(style);
+                    } else if (style === 'success' || style === 'error' || style === 'warning') {
+                        window.Telegram.WebApp.HapticFeedback.notificationOccurred(style);
+                    }
+                }
+            } catch(e) {}
+        }
+
         function updateBadges() {
             const cartCountEl = document.getElementById('cart-count');
             const wishlistCountEl = document.getElementById('wishlist-count');
             const bottomCartCountEl = document.getElementById('bottom-cart-count');
             const bottomWishlistCountEl = document.getElementById('bottom-wishlist-count');
             
-            const totalCartItems = cart.reduce((sum, item) => sum + item.qty, 0);
-            if (cartCountEl) cartCountEl.innerText = totalCartItems;
-            if (wishlistCountEl) wishlistCountEl.innerText = wishlist.length;
+            const totalCartItems = cart.reduce((sum, item) => sum + (Number(item.qty) || 1), 0);
+            const totalWishlistItems = wishlist.length;
+
+            if (cartCountEl) {
+                cartCountEl.innerText = totalCartItems;
+                cartCountEl.style.display = totalCartItems > 0 ? 'flex' : 'none';
+            }
+            if (wishlistCountEl) {
+                wishlistCountEl.innerText = totalWishlistItems;
+                wishlistCountEl.style.display = totalWishlistItems > 0 ? 'flex' : 'none';
+            }
 
             if (bottomCartCountEl) {
                 bottomCartCountEl.innerText = totalCartItems;
                 bottomCartCountEl.style.display = totalCartItems > 0 ? 'flex' : 'none';
             }
             if (bottomWishlistCountEl) {
-                bottomWishlistCountEl.innerText = wishlist.length;
-                bottomWishlistCountEl.style.display = wishlist.length > 0 ? 'flex' : 'none';
+                bottomWishlistCountEl.innerText = totalWishlistItems;
+                bottomWishlistCountEl.style.display = totalWishlistItems > 0 ? 'flex' : 'none';
             }
         }
 
@@ -8618,6 +8768,7 @@
 
         /* ---- MOBILE BOTTOM TAB NAVIGATION ---- */
         function handleBottomTabClick(tab) {
+            triggerHaptic('light');
             if (tab === 'home') {
                 toggleCart(false);
                 toggleWishlistDrawer(false);
