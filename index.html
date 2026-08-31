@@ -193,29 +193,7 @@
         }
 
         .tooltip {
-            position: absolute;
-            bottom: -36px;
-            left: 50%;
-            transform: translateX(-50%) translateY(4px);
-            background: var(--text-primary);
-            color: var(--bg-secondary);
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-size: 0.7rem;
-            font-weight: 600;
-            white-space: nowrap;
-            opacity: 0;
-            visibility: hidden;
-            pointer-events: none;
-            transition: var(--transition-smooth);
-            box-shadow: var(--shadow-subtle);
-            z-index: 1010;
-        }
-
-        .icon-btn-wrapper:hover .tooltip {
-            opacity: 1;
-            visibility: visible;
-            transform: translateX(-50%) translateY(0);
+            display: none !important;
         }
 
         .icon-btn {
@@ -1160,25 +1138,12 @@
         }
 
         .partner-brand-tile:active {
-            transform: scale(0.95);
-        }
-
-        .partner-brand-tile.just-clicked {
-            animation: brandTilePop 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-            border-color: var(--accent) !important;
-        }
-
-        @keyframes brandTilePop {
-            0% { transform: scale(0.90); }
-            45% { transform: scale(1.12) translateY(-5px); box-shadow: 0 12px 28px rgba(87, 100, 226, 0.45); }
-            100% { transform: scale(1.03); }
+            transform: scale(0.97);
         }
 
         .partner-brand-tile.active {
             border-color: var(--accent) !important;
-            box-shadow: 0 0 26px rgba(87, 100, 226, 0.55), 0 0 0 2px var(--accent) !important;
-            transform: translateY(-3px) scale(1.03);
-            animation: brandGlowPulse 2.4s infinite ease-in-out;
+            box-shadow: 0 0 16px rgba(87, 100, 226, 0.35), 0 0 0 1.5px var(--accent) !important;
         }
 
         .brand-logo-svg {
@@ -1196,31 +1161,8 @@
             object-fit: contain;
         }
 
-        @keyframes brandGlowPulse {
-            0%, 100% {
-                box-shadow: 0 0 0 3px var(--accent), 0 8px 22px rgba(87, 100, 226, 0.3);
-            }
-            50% {
-                box-shadow: 0 0 0 4.5px var(--accent), 0 12px 30px rgba(87, 100, 226, 0.55);
-            }
-        }
-
         #active-brand-indicator {
-            animation: indicatorPop 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
-        }
-
-        @keyframes indicatorPop {
-            0% { transform: scale(0.85) translateY(-3px); opacity: 0; }
-            100% { transform: scale(1) translateY(0); opacity: 1; }
-        }
-
-        .catalog-card {
-            animation: catalogCardEntrance 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
-        }
-
-        @keyframes catalogCardEntrance {
-            0% { opacity: 0; transform: translateY(12px) scale(0.98); }
-            100% { opacity: 1; transform: translateY(0) scale(1); }
+            transition: opacity 0.2s ease;
         }
 
         .partner-brand-tile img {
@@ -1386,54 +1328,66 @@
         @media(max-width: 767px) {
             .catalog-grid {
                 grid-template-columns: repeat(2, 1fr) !important;
-                gap: 8px !important;
+                gap: 12px !important;
             }
             .product-card {
-                padding: 7px 7px 9px 7px !important;
+                padding: 10px 10px 12px 10px !important;
                 min-height: auto !important;
-                border-radius: 12px !important;
+                border-radius: 16px !important;
             }
             .product-card-top-bar {
-                margin-bottom: 4px !important;
+                margin-bottom: 6px !important;
+                min-height: 32px !important;
+                display: flex !important;
+                justify-content: space-between !important;
+                align-items: center !important;
             }
             .product-tag {
-                font-size: 0.52rem !important;
-                padding: 2px 5px !important;
-                border-radius: 4px !important;
+                font-size: 0.62rem !important;
+                padding: 3px 8px !important;
+                border-radius: 6px !important;
             }
             .wishlist-btn {
-                width: 26px !important;
-                height: 26px !important;
-                top: 6px !important;
-                right: 6px !important;
+                width: 32px !important;
+                height: 32px !important;
+                position: static !important;
+                box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08) !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                flex-shrink: 0 !important;
             }
             .wishlist-btn svg {
-                width: 12px !important;
-                height: 12px !important;
+                width: 14px !important;
+                height: 14px !important;
+                display: block !important;
+                margin: 0 auto !important;
             }
             .product-img-wrap {
-                border-radius: 8px !important;
-                margin-bottom: 4px !important;
+                border-radius: 12px !important;
+                margin-bottom: 6px !important;
+                aspect-ratio: 1 / 1 !important;
             }
             .color-picker-preview {
-                min-height: 14px !important;
-                margin: 2px 0 4px 0 !important;
-                gap: 3px !important;
+                min-height: 16px !important;
+                margin: 3px 0 6px 0 !important;
+                gap: 5px !important;
             }
             .color-dot {
-                width: 9px !important;
-                height: 9px !important;
+                width: 11px !important;
+                height: 11px !important;
             }
             .product-info {
                 padding-top: 4px !important;
-                gap: 2px !important;
+                gap: 3px !important;
             }
             .product-price {
-                font-size: 0.88rem !important;
+                font-size: 1.02rem !important;
+                font-weight: 800 !important;
             }
             .product-title-group h3 {
-                font-size: 0.72rem !important;
-                line-height: 1.22 !important;
+                font-size: 0.82rem !important;
+                line-height: 1.25 !important;
                 display: -webkit-box;
                 -webkit-line-clamp: 2;
                 -webkit-box-orient: vertical;
@@ -1476,45 +1430,42 @@
             box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3);
         }
 
-        @keyframes heartBeatAnim {
-            0% { transform: scale(1); }
-            20% { transform: scale(1.35); }
-            40% { transform: scale(0.92); }
-            60% { transform: scale(1.18); }
-            100% { transform: scale(1); }
-        }
-
         .wishlist-btn {
-            position: absolute;
-            top: 12px;
-            right: 12px;
             background: var(--bg-surface);
             border: 1px solid var(--border-light);
-            width: 38px;
-            height: 38px;
+            width: 34px;
+            height: 34px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             z-index: 10;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            transition: var(--transition-smooth);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+            transition: border-color 0.25s ease, background 0.25s ease;
+            flex-shrink: 0;
+            padding: 0;
         }
 
         .wishlist-btn:hover {
-            transform: scale(1.08);
-            border-color: var(--border-hover);
+            border-color: var(--accent);
         }
 
         .wishlist-btn svg {
-            transition: fill 0.3s ease, stroke 0.3s ease;
+            display: block;
+            margin: 0 auto;
+            transform-origin: center center;
+            transition: fill 0.25s ease, stroke 0.25s ease;
         }
 
-        .wishlist-btn.active svg {
-            animation: heartBeatAnim 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
-            fill: #FF3B30 !important;
-            stroke: #FF3B30 !important;
+        .wishlist-btn.pulse-slow svg {
+            animation: slowHeartPulse 0.65s cubic-bezier(0.25, 1, 0.5, 1) both;
+        }
+
+        @keyframes slowHeartPulse {
+            0% { transform: scale(1); }
+            45% { transform: scale(1.32); }
+            100% { transform: scale(1); }
         }
 
         .product-img-wrap {
@@ -1538,11 +1489,11 @@
             object-position: center;
             display: block;
             border-radius: var(--radius-md);
-            transition: opacity 0.3s ease-in-out, transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
         }
 
         .product-card:hover .product-img-wrap img { 
-            transform: scale(1.05); 
+            transform: scale(1.04); 
         }
 
         .color-picker-preview {
@@ -3024,194 +2975,227 @@
                 font-size: 1.22rem !important;
             }
             .icon-btn {
-                width: 32px !important;
-                height: 32px !important;
+                width: 36px !important;
+                height: 36px !important;
             }
             .icon-btn svg {
-                width: 14px !important;
-                height: 14px !important;
+                width: 16px !important;
+                height: 16px !important;
             }
             .badge-count {
-                width: 14px !important;
-                height: 14px !important;
-                font-size: 0.55rem !important;
+                width: 15px !important;
+                height: 15px !important;
+                font-size: 0.6rem !important;
                 top: 0px !important;
                 right: 0px !important;
             }
             .hero {
-                padding: 62px 12px 14px !important;
-                gap: 14px !important;
+                padding: 72px 16px 20px !important;
+                gap: 18px !important;
             }
             .hero-content {
-                gap: 8px !important;
+                gap: 10px !important;
             }
             .hero-badge-group {
                 gap: 6px !important;
             }
             .hero-badge {
-                padding: 4px 10px !important;
-                font-size: 0.62rem !important;
+                padding: 5px 12px !important;
+                font-size: 0.68rem !important;
             }
             .store-status {
-                padding: 3px 8px !important;
-                font-size: 0.65rem !important;
+                padding: 4px 10px !important;
+                font-size: 0.7rem !important;
             }
             .hero h1 {
-                font-size: clamp(1.4rem, 5vw, 1.85rem) !important;
-                line-height: 1.16 !important;
+                font-size: clamp(1.45rem, 5.5vw, 1.85rem) !important;
+                line-height: 1.22 !important;
                 margin-bottom: 2px !important;
             }
             .hero-desc {
-                font-size: 0.78rem !important;
-                line-height: 1.38 !important;
+                font-size: 0.86rem !important;
+                line-height: 1.45 !important;
             }
             .hero-actions {
-                gap: 8px !important;
-                margin-top: 4px !important;
+                gap: 10px !important;
+                margin-top: 6px !important;
             }
             .btn-primary {
-                padding: 8px 14px !important;
-                font-size: 0.78rem !important;
-                border-radius: 8px !important;
+                padding: 10px 18px !important;
+                font-size: 0.85rem !important;
+                border-radius: 10px !important;
             }
             .btn-secondary {
-                padding: 7px 12px !important;
-                font-size: 0.78rem !important;
-                border-radius: 8px !important;
+                padding: 9px 16px !important;
+                font-size: 0.85rem !important;
+                border-radius: 10px !important;
             }
             .hero-features {
                 display: none !important;
             }
             .hero-card-3d {
-                max-width: 250px !important;
-                border-radius: 16px !important;
+                max-width: 310px !important;
+                border-radius: 18px !important;
             }
             .hero-card-3d .product-tag {
-                top: 8px !important;
-                left: 8px !important;
-                font-size: 0.58rem !important;
-                padding: 3px 8px !important;
+                top: 10px !important;
+                left: 10px !important;
+                font-size: 0.62rem !important;
+                padding: 4px 9px !important;
                 border-radius: 12px !important;
             }
             .hero-slider-nav {
-                top: 8px !important;
-                right: 8px !important;
-                font-size: 0.62rem !important;
-                padding: 2px 6px !important;
+                top: 10px !important;
+                right: 10px !important;
+                font-size: 0.68rem !important;
+                padding: 3px 8px !important;
             }
             .hero-slider-nav button {
-                width: 16px !important;
-                height: 16px !important;
-                font-size: 0.75rem !important;
-            }
-            .hero-card-footer {
-                padding: 8px 10px 10px !important;
-                gap: 6px !important;
-            }
-            .hero-card-title {
+                width: 18px !important;
+                height: 18px !important;
                 font-size: 0.8rem !important;
             }
-            .hero-card-price {
+            .hero-card-footer {
+                padding: 10px 12px 12px !important;
+                gap: 8px !important;
+            }
+            .hero-card-title {
                 font-size: 0.88rem !important;
             }
+            .hero-card-price {
+                font-size: 0.98rem !important;
+            }
             .hero-card-old-price {
-                font-size: 0.72rem !important;
+                font-size: 0.76rem !important;
             }
             .hero-card-cta {
-                padding: 4px 8px !important;
-                font-size: 0.68rem !important;
+                padding: 5px 10px !important;
+                font-size: 0.72rem !important;
+                border-radius: 8px !important;
             }
             .section-padding {
-                padding: 16px 12px !important;
+                padding: 22px 14px !important;
             }
             #catalog.section-padding {
-                padding-top: 6px !important;
-                padding-bottom: 24px !important;
+                padding-top: 10px !important;
+                padding-bottom: 28px !important;
             }
             .section-header {
-                margin-bottom: 12px !important;
+                margin-bottom: 14px !important;
             }
             .section-title {
-                font-size: 1.2rem !important;
+                font-size: 1.35rem !important;
             }
             .section-subtitle {
-                font-size: 0.72rem !important;
+                font-size: 0.8rem !important;
             }
             .catalog-filters {
-                gap: 6px !important;
-                margin-bottom: 12px !important;
+                gap: 8px !important;
+                margin-bottom: 14px !important;
                 padding: 2px 4px 8px 4px !important;
             }
             .filter-btn {
-                padding: 6px 12px !important;
-                font-size: 0.75rem !important;
+                padding: 7px 14px !important;
+                font-size: 0.8rem !important;
                 border-radius: 20px !important;
             }
             .product-modal {
-                width: 95% !important;
-                max-height: 90vh !important;
-                border-radius: 16px !important;
+                width: 92% !important;
+                max-width: 440px !important;
+                max-height: 88vh !important;
+                border-radius: 20px !important;
+                overflow-y: auto !important;
+                overflow-x: hidden !important;
+                -webkit-overflow-scrolling: touch !important;
             }
             .modal-grid {
-                padding: 14px 12px 18px !important;
-                gap: 12px !important;
+                display: flex !important;
+                flex-direction: column !important;
+                padding: 18px 16px 24px !important;
+                gap: 14px !important;
+            }
+            .modal-gallery {
+                position: relative !important;
+                top: auto !important;
+                width: 100% !important;
+                flex-shrink: 0 !important;
             }
             .modal-main-img-wrap {
-                border-radius: 12px !important;
-                padding: 4px !important;
+                width: 100% !important;
+                height: 240px !important;
+                max-height: 240px !important;
+                border-radius: 14px !important;
+                padding: 6px !important;
+                aspect-ratio: auto !important;
+            }
+            .modal-main-img {
+                width: 100% !important;
+                height: 100% !important;
+                object-fit: contain !important;
+            }
+            .modal-thumbs {
+                display: flex !important;
+                flex-wrap: wrap !important;
+                gap: 6px !important;
+                justify-content: flex-start !important;
+                margin-top: 4px !important;
             }
             .modal-thumb {
                 width: 44px !important;
                 height: 44px !important;
                 border-radius: 8px !important;
+                flex-shrink: 0 !important;
             }
-            .modal-thumbs {
-                gap: 6px !important;
+            .modal-details {
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 12px !important;
+                width: 100% !important;
             }
             .modal-options-row {
-                padding: 8px 10px !important;
-                gap: 10px !important;
-                margin: 8px 0 !important;
+                padding: 10px 12px !important;
+                gap: 12px !important;
+                margin: 6px 0 !important;
                 border-radius: 12px !important;
             }
             .option-group label {
-                font-size: 0.68rem !important;
+                font-size: 0.72rem !important;
             }
             .color-circle-big {
-                width: 18px !important;
-                height: 18px !important;
+                width: 20px !important;
+                height: 20px !important;
             }
             .spec-box {
-                padding: 6px 8px !important;
-                font-size: 0.74rem !important;
+                padding: 7px 10px !important;
+                font-size: 0.78rem !important;
             }
             .spec-box span {
-                font-size: 0.66rem !important;
+                font-size: 0.7rem !important;
             }
             .spec-box strong {
-                font-size: 0.72rem !important;
+                font-size: 0.76rem !important;
             }
             .advantages-section {
-                padding: 16px 12px !important;
+                padding: 20px 14px !important;
             }
             .advantage-card {
-                padding: 12px 10px !important;
-                gap: 10px !important;
-                border-radius: 10px !important;
+                padding: 14px 12px !important;
+                gap: 12px !important;
+                border-radius: 12px !important;
             }
             .advantage-icon {
-                width: 32px !important;
-                height: 32px !important;
-                border-radius: 8px !important;
+                width: 36px !important;
+                height: 36px !important;
+                border-radius: 10px !important;
             }
             .advantage-text h4 {
-                font-size: 0.82rem !important;
+                font-size: 0.88rem !important;
             }
             .advantage-text p {
-                font-size: 0.72rem !important;
+                font-size: 0.76rem !important;
             }
             footer {
-                padding: 20px 12px 16px !important;
+                padding: 24px 14px 20px !important;
             }
             .footer-grid {
                 gap: 14px !important;
@@ -3241,36 +3225,24 @@
             </div>
         </a>
         <div class="nav-right">
-            <div class="icon-btn-wrapper">
-                <button class="icon-btn" id="theme-toggle-btn" aria-label="Змінити тему">
-                    <svg class="theme-icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-                    <svg class="theme-icon-sun" style="display: none;" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
-                </button>
-                <span class="tooltip">Змінити тему</span>
-            </div>
+            <button class="icon-btn" id="theme-toggle-btn" aria-label="Змінити тему">
+                <svg class="theme-icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                <svg class="theme-icon-sun" style="display: none;" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+            </button>
 
-            <div class="icon-btn-wrapper">
-                <button class="icon-btn" id="search-open-btn" aria-label="Пошук">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-                </button>
-                <span class="tooltip">Пошук</span>
-            </div>
+            <button class="icon-btn" id="search-open-btn" aria-label="Пошук">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            </button>
 
-            <div class="icon-btn-wrapper">
-                <button class="icon-btn" id="wishlist-open-btn" aria-label="Обране">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-                    <span class="badge-count" id="wishlist-count">0</span>
-                </button>
-                <span class="tooltip">Обране</span>
-            </div>
+            <button class="icon-btn" id="wishlist-open-btn" aria-label="Обране">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                <span class="badge-count" id="wishlist-count">0</span>
+            </button>
 
-            <div class="icon-btn-wrapper">
-                <button class="icon-btn" id="cart-open-btn" aria-label="Кошик">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-                    <span class="badge-count" id="cart-count">0</span>
-                </button>
-                <span class="tooltip">Кошик</span>
-            </div>
+            <button class="icon-btn" id="cart-open-btn" aria-label="Кошик">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                <span class="badge-count" id="cart-count">0</span>
+            </button>
         </div>
     </header>
 
@@ -4433,17 +4405,22 @@
             }
 
             if (successFetch && backendData !== null && Array.isArray(backendData)) {
-                products = parseRawProductsList(backendData);
-                try {
-                    localStorage.setItem('m1lip_cached_products', JSON.stringify(backendData));
-                } catch(e) {}
-            }
-
-            renderCatalog(true);
-            if (products && products.length > 0) {
-                if (!heroCurrentProduct || !products.some(x => x.id === heroCurrentProduct.id)) {
-                    setHeroProduct(products[0]);
+                const newProducts = parseRawProductsList(backendData);
+                const isDiff = JSON.stringify(newProducts) !== JSON.stringify(products);
+                if (isDiff || products.length === 0) {
+                    products = newProducts;
+                    try {
+                        localStorage.setItem('m1lip_cached_products', JSON.stringify(backendData));
+                    } catch(e) {}
+                    renderCatalog(true);
+                    if (products && products.length > 0) {
+                        if (!heroCurrentProduct || !products.some(x => x.id === heroCurrentProduct.id)) {
+                            setHeroProduct(products[0]);
+                        }
+                    }
                 }
+            } else if (products.length === 0) {
+                renderCatalog(true);
             }
         }
 
@@ -4495,8 +4472,8 @@
             }
         }
 
-        // Auto live sync with Telegram Bot every 8 seconds & on window focus
-        setInterval(syncLiveStoreData, 8000);
+        // Auto live sync with Telegram Bot every 10 seconds & on window focus
+        setInterval(syncLiveStoreData, 10000);
         window.addEventListener('focus', syncLiveStoreData);
         document.addEventListener('visibilitychange', () => {
             if (document.visibilityState === 'visible') {
@@ -4555,22 +4532,6 @@
                 const isActive = currentBrandFilter !== 'All' && alt.toLowerCase().includes(currentBrandFilter.toLowerCase());
                 tile.classList.toggle('active', isActive);
             });
-
-            if (el) {
-                el.classList.add('just-clicked');
-                setTimeout(() => el.classList.remove('just-clicked'), 600);
-            }
-
-            const heroCard = document.getElementById('hero-card');
-            const heroImg = document.getElementById('hero-img');
-            const heroTag = document.getElementById('hero-tag');
-
-            if (heroCard) {
-                heroCard.classList.remove('brand-focus');
-                void heroCard.offsetWidth;
-                heroCard.classList.add('brand-focus');
-                setTimeout(() => heroCard.classList.remove('brand-focus'), 800);
-            }
 
             if (currentBrandFilter !== 'All') {
                 const brandProducts = products.filter(p => (p.brand || '').toLowerCase().includes(currentBrandFilter.toLowerCase()));
@@ -4770,24 +4731,7 @@
             updateBadges();
             renderRecentSearches();
 
-            // Auto-sync when user returns to the tab or periodically
-            document.addEventListener('visibilitychange', () => {
-                if (document.visibilityState === 'visible') {
-                    fetchProducts();
-                    fetchCategories();
-                    fetchBrands();
-                }
-            });
-            window.addEventListener('focus', () => {
-                fetchProducts();
-                fetchCategories();
-                fetchBrands();
-            });
-            setInterval(() => {
-                if (document.visibilityState === 'visible') {
-                    fetchProducts();
-                }
-            }, 10000);
+            // Auto-sync is handled by syncLiveStoreData
 
             if (products && products.length > 0) {
                 setHeroProduct(products[0]);
@@ -6958,14 +6902,32 @@
             saveCart();
         }
 
-        function toggleWishlist(productId) {
+        function toggleWishlist(productId, forcedColor = null, forcedImg = null) {
             const product = products.find(p => p.id === productId);
             if (!product) return;
 
             const index = wishlist.findIndex(item => item.id === productId);
             const isAdding = index === -1;
             if (isAdding) {
-                wishlist.push(product);
+                let chosenColor = forcedColor;
+                let chosenImg = forcedImg;
+
+                if (!chosenColor && product.colors && product.colors.length > 0) {
+                    const inStockColor = product.colors.find(c => !c.isOut) || product.colors[0];
+                    if (inStockColor) {
+                        chosenColor = inStockColor.name;
+                        chosenImg = inStockColor.image || product.img;
+                    }
+                }
+
+                wishlist.push({
+                    id: product.id,
+                    title: product.title,
+                    brand: product.brand || '',
+                    price: product.price,
+                    img: chosenImg || product.img,
+                    color: chosenColor || ''
+                });
             } else {
                 wishlist.splice(index, 1);
             }
@@ -6982,19 +6944,63 @@
                     svg.setAttribute('fill', isAdding ? '#FF3B30' : 'none');
                     svg.setAttribute('stroke', isAdding ? '#FF3B30' : 'currentColor');
                 }
+                if (isAdding) {
+                    wishBtn.classList.remove('pulse-slow');
+                    void wishBtn.offsetWidth;
+                    wishBtn.classList.add('pulse-slow');
+                    setTimeout(() => wishBtn.classList.remove('pulse-slow'), 700);
+                }
+            }
+
+            const modalWishBtn = document.getElementById('modal-wishlist-btn');
+            if (modalWishBtn && currentModalProduct && currentModalProduct.id === productId) {
+                modalWishBtn.classList.toggle('active', isAdding);
+                const svg = modalWishBtn.querySelector('svg');
+                if (svg) {
+                    svg.style.fill = isAdding ? '#FF3B30' : 'none';
+                    svg.style.stroke = isAdding ? '#FF3B30' : 'currentColor';
+                }
+                if (isAdding) {
+                    modalWishBtn.classList.remove('pulse-slow');
+                    void modalWishBtn.offsetWidth;
+                    modalWishBtn.classList.add('pulse-slow');
+                    setTimeout(() => modalWishBtn.classList.remove('pulse-slow'), 700);
+                }
             }
         }
 
         function toggleCurrentWishlist() {
             if (!currentModalProduct) return;
-            toggleWishlist(currentModalProduct.id);
-            const isFav = wishlist.some(item => item.id === currentModalProduct.id);
-            const wishBtn = document.getElementById('modal-wishlist-btn');
-            if (wishBtn) {
-                wishBtn.classList.toggle('active', isFav);
-                wishBtn.querySelector('svg').style.fill = isFav ? '#FF3B30' : 'none';
-                wishBtn.querySelector('svg').style.stroke = isFav ? '#FF3B30' : 'currentColor';
+
+            let chosenColor = null;
+            let chosenImg = null;
+            if (selectedColorIndex !== null && currentModalProduct.colors && currentModalProduct.colors[selectedColorIndex]) {
+                const col = currentModalProduct.colors[selectedColorIndex];
+                chosenColor = col.name;
+                chosenImg = col.image || currentModalProduct.img;
             }
+
+            const existingIndex = wishlist.findIndex(item => item.id === currentModalProduct.id);
+            if (existingIndex > -1) {
+                // If already in favorites and user selected a different color, update the color & image
+                if (chosenColor && wishlist[existingIndex].color !== chosenColor) {
+                    wishlist[existingIndex].color = chosenColor;
+                    if (chosenImg) wishlist[existingIndex].img = chosenImg;
+                    localStorage.setItem('m1lip_wishlist', JSON.stringify(wishlist));
+                    renderWishlistItems();
+                    
+                    const wishBtn = document.getElementById('modal-wishlist-btn');
+                    if (wishBtn) {
+                        wishBtn.classList.remove('pulse-slow');
+                        void wishBtn.offsetWidth;
+                        wishBtn.classList.add('pulse-slow');
+                        setTimeout(() => wishBtn.classList.remove('pulse-slow'), 700);
+                    }
+                    return;
+                }
+            }
+
+            toggleWishlist(currentModalProduct.id, chosenColor, chosenImg);
         }
 
         function toggleProfileDrawer(open) {
@@ -7111,17 +7117,38 @@
                 return;
             }
 
-            container.innerHTML = wishlist.map((item) => `
-                <div class="wishlist-item-card">
-                    <img src="${item.img}" alt="${item.title}" onclick="openProductModal(products.find(x => x.id === '${item.id}'))">
-                    <div style="flex-grow: 1; overflow: hidden;" onclick="openProductModal(products.find(x => x.id === '${item.id}'))" style="cursor: pointer;">
-                        <h4 style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase;">${item.brand}</h4>
-                        <h3 style="font-size: 0.9rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${item.title}</h3>
-                        <div class="product-price" style="font-size: 0.85rem; margin-top: 2px;">${formatPrice(item.price)}</div>
+            container.innerHTML = wishlist.map((item) => {
+                const colorHtml = item.color ? `
+                    <div style="font-size: 0.76rem; color: var(--text-muted); margin-top: 3px; display: flex; align-items: center; gap: 5px;">
+                        <span class="color-dot" style="background-color: ${getColorHex(item.color)}; width: 9px; height: 9px; border-radius: 50%; display: inline-block; flex-shrink: 0; border: 1px solid rgba(0,0,0,0.15);"></span>
+                        <span>Колір: <strong style="color: var(--text-primary); font-weight: 600;">${formatColorEnglish(item.color)}</strong></span>
                     </div>
-                    <button class="close-drawer" style="font-size: 0.85rem;" onclick="toggleWishlist('${item.id}')">✕</button>
-                </div>
-            `).join('');
+                ` : '';
+
+                return `
+                    <div class="wishlist-item-card" style="display: flex; align-items: center; gap: 12px; padding: 10px 12px; background: var(--bg-primary); border-radius: var(--radius-sm); border: 1px solid var(--border-light); margin-bottom: 8px;">
+                        <img src="${item.img || 'shark.jpg'}" alt="${item.title}" style="width: 52px; height: 52px; object-fit: cover; border-radius: 8px; flex-shrink: 0; cursor: pointer;" onclick="openWishlistItemModal('${item.id}', '${(item.color || '').replace(/'/g, "\\'")}')">
+                        <div style="flex-grow: 1; min-width: 0; cursor: pointer;" onclick="openWishlistItemModal('${item.id}', '${(item.color || '').replace(/'/g, "\\'")}')">
+                            ${item.brand ? `<div style="font-size: 0.68rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.03em;">${item.brand}</div>` : ''}
+                            <div style="font-size: 0.88rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-primary); margin-top: 1px;">${item.title}</div>
+                            <div class="product-price" style="font-size: 0.92rem; font-weight: 800; color: var(--accent); margin-top: 2px;">${formatPrice(item.price)}</div>
+                            ${colorHtml}
+                        </div>
+                        <button class="close-drawer" style="font-size: 0.85rem; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border: none; background: transparent; cursor: pointer; color: var(--text-muted); border-radius: 50%; transition: all 0.2s;" onclick="toggleWishlist('${item.id}')" title="Видалити з обраного">✕</button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function openWishlistItemModal(productId, colorName) {
+            const product = products.find(x => x.id === productId);
+            if (!product) return;
+            let colIdx = null;
+            if (colorName && product.colors && product.colors.length > 0) {
+                const foundIdx = product.colors.findIndex(c => (c.name || '').toLowerCase() === colorName.toLowerCase());
+                if (foundIdx !== -1) colIdx = foundIdx;
+            }
+            openProductModal(product, colIdx);
         }
 
         function updateBadges() {
