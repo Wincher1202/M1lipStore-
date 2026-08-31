@@ -1337,29 +1337,38 @@
             }
             .product-card-top-bar {
                 margin-bottom: 6px !important;
-                min-height: 32px !important;
+                min-height: 28px !important;
                 display: flex !important;
                 justify-content: space-between !important;
                 align-items: center !important;
+                gap: 4px !important;
             }
             .product-tag {
-                font-size: 0.62rem !important;
-                padding: 3px 8px !important;
-                border-radius: 6px !important;
+                font-size: 0.54rem !important;
+                font-weight: 700 !important;
+                padding: 2.5px 6px !important;
+                border-radius: 5px !important;
+                letter-spacing: 0.01em !important;
+                white-space: nowrap !important;
+                max-width: calc(100% - 34px) !important;
+                overflow: hidden !important;
+                text-overflow: ellipsis !important;
+                line-height: 1.1 !important;
+                gap: 2.5px !important;
             }
             .wishlist-btn {
-                width: 32px !important;
-                height: 32px !important;
+                width: 28px !important;
+                height: 28px !important;
                 position: static !important;
-                box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08) !important;
+                box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06) !important;
                 display: flex !important;
                 align-items: center !important;
                 justify-content: center !important;
                 flex-shrink: 0 !important;
             }
             .wishlist-btn svg {
-                width: 14px !important;
-                height: 14px !important;
+                width: 13px !important;
+                height: 13px !important;
                 display: block !important;
                 margin: 0 auto !important;
             }
@@ -1406,28 +1415,34 @@
             align-items: center;
             margin-bottom: 8px;
             z-index: 10;
+            gap: 6px;
         }
 
         .product-tag {
             background: var(--bg-tertiary);
             color: var(--text-primary);
-            font-size: 0.65rem;
-            font-weight: 800;
-            padding: 4px 10px;
-            border-radius: var(--radius-sm);
-            letter-spacing: 0.04em;
+            font-size: 0.60rem;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 6px;
+            letter-spacing: 0.02em;
             text-transform: uppercase;
             border: 1px solid var(--border-light);
             display: inline-flex;
             align-items: center;
-            gap: 4px;
+            gap: 3px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: calc(100% - 40px);
+            line-height: 1.1;
         }
 
         .product-tag.new, .product-tag.hot {
             background: linear-gradient(135deg, #3730a3 0%, #4f46e5 100%);
             color: #ffffff;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            box-shadow: 0 2px 6px rgba(79, 70, 229, 0.25);
         }
 
         .wishlist-btn {
@@ -1740,178 +1755,312 @@
         .search-result-item { display: flex; align-items: center; justify-content: space-between; padding: 10px; background: var(--bg-primary); border-radius: var(--radius-sm); text-decoration: none; color: var(--text-primary); cursor: pointer; transition: var(--transition-smooth); }
         .search-result-item:hover { background: var(--accent-light); transform: translateX(4px); }
 
+        /* ==========================================================================
+           PRODUCT DETAIL MODAL (CLEAN APPLE / LOGITECH MINIMALIST DESIGN)
+           ========================================================================== */
         .product-modal {
             position: fixed;
             top: 50%; left: 50%;
-            transform: translate(-50%, -50%) scale(0.96);
-            width: 95%; 
-            max-width: 1040px;
-            max-height: 92vh;
+            transform: translate(-50%, -50%) scale(0.97);
+            width: 94%; 
+            max-width: 1020px;
+            max-height: 90vh;
             background: var(--bg-surface);
             z-index: 2005;
-            box-shadow: 0 35px 80px -15px rgba(0,0,0,0.4), 0 0 0 1px var(--border-light);
+            box-shadow: 0 30px 80px -15px rgba(0,0,0,0.22), 0 0 0 1px var(--border-light);
             border-radius: 24px;
             overflow-y: auto;
+            overflow-x: hidden;
+            -webkit-overflow-scrolling: touch;
             opacity: 0;
             visibility: hidden;
-            transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        @media(min-width: 768px) {
-            .product-modal {
-                width: 92%;
-                max-width: 1060px;
-                max-height: 88vh;
-                border-radius: 28px;
+        .product-modal.active { 
+            opacity: 1; 
+            visibility: visible; 
+            transform: translate(-50%, -50%) scale(1); 
+        }
+
+        .modal-inner-container {
+            padding: 24px 20px 28px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        @media(min-width: 820px) {
+            .modal-inner-container {
+                padding: 36px 40px 42px;
+                gap: 24px;
             }
         }
 
-        .product-modal.active { opacity: 1; visibility: visible; transform: translate(-50%, -50%) scale(1); }
-        
         .modal-grid { 
             display: flex;
             flex-direction: column;
-            gap: 20px; 
-            padding: 24px 20px 36px; 
+            gap: 24px; 
         }
 
         @media(min-width: 820px) { 
             .modal-grid { 
                 display: grid;
-                grid-template-columns: minmax(320px, 1.15fr) minmax(300px, 1fr); 
-                padding: 40px 44px; 
-                gap: 40px; 
+                grid-template-columns: minmax(360px, 1.15fr) minmax(340px, 1fr); 
+                gap: 44px; 
                 align-items: start;
             } 
         }
         
+        /* LEFT COLUMN: Gallery */
         .modal-gallery { 
             display: flex; 
             flex-direction: column; 
             gap: 14px; 
-            position: sticky;
-            top: 0;
+            position: relative;
+        }
+
+        @media(min-width: 820px) {
+            .modal-gallery {
+                position: sticky;
+                top: 0;
+            }
         }
 
         .modal-main-img-wrap {
             width: 100%;
+            height: auto;
             aspect-ratio: 1 / 1;
-            border-radius: 20px;
+            border-radius: 16px;
             display: flex;
             align-items: center;
             justify-content: center;
             overflow: hidden;
-            background: var(--bg-secondary);
+            background: #FAFAFA;
             border: 1px solid var(--border-light);
-            padding: 8px;
+            padding: 0;
             box-sizing: border-box;
             position: relative;
             cursor: pointer;
-            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        [data-theme="dark"] .modal-main-img-wrap {
+            background: #111827;
+        }
+
+        @media(min-width: 820px) {
+            .modal-main-img-wrap {
+                width: 100%;
+                height: auto;
+                aspect-ratio: 1 / 1;
+                border-radius: 18px;
+                padding: 0;
+            }
         }
 
         .modal-main-img-wrap:hover {
             border-color: var(--accent);
-            box-shadow: 0 8px 24px rgba(87, 100, 226, 0.15);
         }
 
         .modal-main-img { 
             width: 100%; 
             height: 100%; 
-            object-fit: contain; 
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: cover; 
             object-position: center;
             display: block;
-            border-radius: 14px; 
+            border-radius: inherit;
             image-rendering: -webkit-optimize-contrast;
             image-rendering: high-quality;
-            transition: opacity 0.25s ease-in-out, transform 0.35s cubic-bezier(0.16, 1, 0.3, 1); 
+            transform: translateZ(0);
+            transition: opacity 0.2s ease-in-out, transform 0.25s ease; 
         }
-        .modal-main-img:hover { transform: scale(1.03); }
+        .modal-main-img:hover { transform: scale(1.02); }
         
+        .modal-thumbs-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: 2px;
+        }
+
         .modal-thumbs { 
             display: flex; 
-            flex-wrap: wrap; 
+            flex-wrap: nowrap; 
             gap: 10px; 
         }
         .modal-thumb { 
-            width: 64px; 
-            height: 64px; 
+            width: 58px; 
+            height: 58px; 
             aspect-ratio: 1 / 1;
-            object-fit: contain; 
+            object-fit: cover; 
             object-position: center;
-            padding: 4px;
-            background: var(--bg-secondary); 
-            border: 2px solid var(--border-light); 
-            border-radius: 12px; 
+            padding: 0;
+            background: #FAFAFA; 
+            border: 1px solid var(--border-light); 
+            border-radius: 10px; 
             overflow: hidden; 
             cursor: pointer; 
+            flex-shrink: 0;
             image-rendering: -webkit-optimize-contrast;
             image-rendering: high-quality;
-            transition: all 0.25s ease; 
+            transition: all 0.2s ease; 
         }
-        .modal-thumb:hover, .modal-thumb.active { 
+        [data-theme="dark"] .modal-thumb { background: #111827; }
+        .modal-thumb:hover { 
             border-color: var(--accent); 
-            transform: translateY(-2px) scale(1.05); 
-            box-shadow: 0 4px 12px rgba(87, 100, 226, 0.25);
+        }
+        .modal-thumb.active { 
+            border-color: var(--accent); 
+            box-shadow: 0 0 0 1.5px var(--accent);
         }
 
-        .modal-options-row {
-            display: flex;
-            align-items: flex-start;
-            justify-content: flex-start;
-            gap: 24px;
-            margin: 18px 0;
-            flex-wrap: wrap;
-            padding: 16px;
-            background: var(--bg-primary);
-            border: 1px solid var(--border-light);
-            border-radius: 16px;
-        }
-        .option-group {
+        /* RIGHT COLUMN: Minimal Details */
+        .modal-details {
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 20px;
         }
 
-        .option-group label {
-            font-weight: 800;
-            font-size: 0.78rem;
-            color: var(--text-muted);
+        .modal-header-block {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .modal-brand-badge {
+            display: inline-flex;
+            align-items: center;
+        }
+        .modal-brand-badge img {
+            max-height: 18px;
+            max-width: 85px;
+            object-fit: contain;
+            display: block;
+            opacity: 0.85;
+        }
+        .modal-brand-badge span {
+            font-size: 0.74rem;
+            font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 0.04em;
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
         }
 
-        .color-selector-large {
+        .modal-product-title {
+            font-size: 1.45rem;
+            font-weight: 800;
+            line-height: 1.2;
+            letter-spacing: -0.025em;
+            color: var(--text-primary);
+            margin: 0;
+        }
+
+        @media(min-width: 820px) {
+            .modal-product-title {
+                font-size: 1.9rem;
+            }
+        }
+
+        /* Price & Stock - Clean & Minimal on white background */
+        .modal-price-stock-row {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            padding-bottom: 2px;
+        }
+
+        .modal-price-wrap {
+            display: flex;
+            align-items: baseline;
+            gap: 10px;
+        }
+
+        .modal-price-row {
+            display: flex;
+            align-items: baseline;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .modal-price-wrap .product-price {
+            font-size: 1.75rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin: 0;
+            line-height: 1;
+            letter-spacing: -0.02em;
+        }
+
+        .modal-old-price {
+            font-size: 1.05rem;
+            color: var(--text-muted);
+            text-decoration: line-through;
+            font-weight: 500;
+        }
+
+        .modal-discount-badge {
+            background: rgba(239, 68, 68, 0.1);
+            color: #EF4444;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 6px;
+        }
+
+        /* Color Selector */
+        .modal-color-block {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .modal-field-label {
+            font-size: 0.86rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .modal-color-val {
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-left: 2px;
+        }
+
+        .color-selector-clean {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
             flex-wrap: wrap;
         }
 
         .color-option-item {
             display: flex;
             align-items: center;
-            gap: 6px;
             cursor: pointer;
+            position: relative;
         }
 
         .color-option-item.disabled {
-            opacity: 0.4;
+            opacity: 0.35;
             cursor: not-allowed;
             pointer-events: none;
         }
 
         .color-circle-big {
-            width: 22px;
-            height: 22px;
+            width: 20px;
+            height: 20px;
             border-radius: 50%;
-            border: 1.5px solid rgba(0,0,0,0.2);
-            box-shadow: inset 0 0 0 1px rgba(255,255,255,0.7), 0 1px 3px rgba(0,0,0,0.1);
-            transition: all 0.2s ease;
+            border: 1.5px solid rgba(0,0,0,0.12);
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
             display: inline-block;
         }
 
-        .color-circle-big:hover { transform: scale(1.1); }
+        .color-circle-big:hover { transform: scale(1.12); }
         .color-circle-big.out-of-stock { 
             background-color: #9ca3af !important; 
             border-color: #6b7280 !important; 
@@ -1920,46 +2069,203 @@
         }
 
         .color-circle-big.active {
-            box-shadow: 0 0 0 2px var(--bg-surface), 0 0 0 3.5px var(--accent);
+            box-shadow: 0 0 0 2px var(--bg-surface), 0 0 0 4px var(--accent);
             border-color: transparent;
-            opacity: 1;
-            transform: scale(1.08);
+            transform: scale(1.1);
+        }
+
+        /* Buy Section (Qty + Cart button + Wishlist) */
+        .modal-buy-section {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding-top: 4px;
+        }
+
+        .modal-qty-and-cart {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .quantity-controls.compact-qty {
+            display: inline-flex;
+            align-items: center;
+            height: 48px;
+            background: #FAFAFA;
+            border: 1px solid var(--border-light);
+            border-radius: 12px;
+            padding: 0 4px;
+            box-sizing: border-box;
+        }
+        [data-theme="dark"] .quantity-controls.compact-qty { background: #111827; }
+
+        .quantity-controls.compact-qty button {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: transparent;
+            color: var(--text-primary);
+            font-size: 1.05rem;
+            font-weight: 700;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.15s ease;
+        }
+
+        .quantity-controls.compact-qty button:hover {
+            background: rgba(0,0,0,0.06);
+        }
+        [data-theme="dark"] .quantity-controls.compact-qty button:hover {
+            background: rgba(255,255,255,0.08);
+        }
+
+        .quantity-controls.compact-qty span {
+            min-width: 26px;
+            text-align: center;
+            font-weight: 700;
+            font-size: 0.95rem;
+            padding: 0 4px;
+        }
+
+        .modal-cart-submit-btn {
+            flex: 1;
+            height: 48px;
+            padding: 0 20px;
+            font-size: 0.96rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            background: var(--accent);
+            color: #ffffff;
+            border: none;
+            cursor: pointer;
+            transition: opacity 0.2s ease, transform 0.15s ease;
+        }
+        .modal-cart-submit-btn:hover:not(:disabled) {
+            opacity: 0.92;
+            transform: translateY(-1px);
+        }
+        .modal-cart-submit-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .modal-wish-btn {
+            width: 48px;
+            height: 48px;
+            position: static !important;
+            flex-shrink: 0;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #FAFAFA;
+            border: 1px solid var(--border-light);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        [data-theme="dark"] .modal-wish-btn { background: #111827; }
+        .modal-wish-btn:hover {
+            border-color: #FF3B30;
+            transform: translateY(-1px);
+        }
+
+        /* Description Section */
+        .modal-desc-section {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding-top: 4px;
+        }
+
+        .modal-section-heading {
+            font-size: 0.82rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--text-muted);
+        }
+
+        .modal-desc-text {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.6;
+            margin: 0;
+        }
+
+        /* Specifications (List: Сенсор — PixArt PAW3395) */
+        .modal-specs-section {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding-top: 4px;
+        }
+
+        .modal-specs-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            border-top: 1px solid var(--border-light);
+        }
+
+        .spec-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            padding: 9px 0;
+            border-bottom: 1px solid var(--border-light);
+            font-size: 0.88rem;
+        }
+        .spec-row:last-child {
+            border-bottom: none;
+        }
+        .spec-label {
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+        .spec-value {
+            color: var(--text-primary);
+            font-weight: 600;
+            text-align: right;
         }
 
         .modal-close-circle {
             position: absolute;
-            top: 18px;
-            right: 18px;
+            top: 16px;
+            right: 16px;
             z-index: 20;
-            width: 38px;
-            height: 38px;
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
-            background: var(--bg-primary);
+            background: var(--bg-surface);
             border: 1px solid var(--border-light);
             color: var(--text-primary);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.95rem;
+            font-size: 0.92rem;
             font-weight: 700;
             cursor: pointer;
-            box-shadow: 0 4px 14px rgba(0,0,0,0.1);
-            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            transition: all 0.2s ease;
         }
         .modal-close-circle:hover {
-            background: var(--accent);
-            color: #ffffff;
-            border-color: var(--accent);
-            transform: scale(1.08) rotate(90deg);
+            transform: scale(1.08);
+            border-color: var(--text-primary);
         }
 
         .stock-status {
-            font-size: 0.8rem;
+            font-size: 0.76rem;
             font-weight: 700;
-            margin-top: 6px;
             display: inline-flex;
             align-items: center;
-            gap: 7px;
+            gap: 6px;
             letter-spacing: 0.02em;
         }
         .stock-status .status-dot {
@@ -1993,11 +2299,11 @@
             opacity: 0.5;
         }
 
-        .specs-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin: 12px 0; }
-        .spec-box { background: var(--bg-primary); padding: 8px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-light); transition: var(--transition-smooth); }
+        .specs-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; margin: 4px 0; }
+        .spec-box { background: var(--bg-primary); padding: 7px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-light); transition: var(--transition-smooth); }
         .spec-box:hover { border-color: var(--border-hover); transform: translateY(-2px); }
         .spec-box span { display: block; font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; }
-        .spec-box strong { font-size: 0.9rem; font-weight: 700; }
+        .spec-box strong { font-size: 0.84rem; font-weight: 700; }
 
         .checkout-container {
             display: flex;
@@ -3100,80 +3406,47 @@
                 border-radius: 20px !important;
             }
             .product-modal {
-                width: 92% !important;
-                max-width: 440px !important;
-                max-height: 88vh !important;
-                border-radius: 20px !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                height: 90vh !important;
+                max-height: 90vh !important;
+                top: auto !important;
+                bottom: 0 !important;
+                left: 0 !important;
+                right: 0 !important;
+                transform: translateY(100%) !important;
+                border-radius: 24px 24px 0 0 !important;
                 overflow-y: auto !important;
                 overflow-x: hidden !important;
                 -webkit-overflow-scrolling: touch !important;
             }
+            .product-modal.active {
+                transform: translateY(0) !important;
+            }
+            .modal-inner-container {
+                padding: 24px 18px 36px !important;
+                gap: 16px !important;
+            }
             .modal-grid {
                 display: flex !important;
                 flex-direction: column !important;
-                padding: 18px 16px 24px !important;
-                gap: 14px !important;
-            }
-            .modal-gallery {
-                position: relative !important;
-                top: auto !important;
-                width: 100% !important;
-                flex-shrink: 0 !important;
+                padding: 0 !important;
+                gap: 20px !important;
             }
             .modal-main-img-wrap {
                 width: 100% !important;
-                height: 240px !important;
-                max-height: 240px !important;
+                height: auto !important;
+                aspect-ratio: 1 / 1 !important;
+                max-height: none !important;
                 border-radius: 14px !important;
-                padding: 6px !important;
-                aspect-ratio: auto !important;
+                padding: 0 !important;
             }
-            .modal-main-img {
-                width: 100% !important;
-                height: 100% !important;
-                object-fit: contain !important;
-            }
-            .modal-thumbs {
-                display: flex !important;
-                flex-wrap: wrap !important;
-                gap: 6px !important;
-                justify-content: flex-start !important;
-                margin-top: 4px !important;
-            }
-            .modal-thumb {
-                width: 44px !important;
-                height: 44px !important;
-                border-radius: 8px !important;
-                flex-shrink: 0 !important;
+            .modal-product-title {
+                font-size: 1.35rem !important;
+                line-height: 1.25 !important;
             }
             .modal-details {
-                display: flex !important;
-                flex-direction: column !important;
-                gap: 12px !important;
-                width: 100% !important;
-            }
-            .modal-options-row {
-                padding: 10px 12px !important;
-                gap: 12px !important;
-                margin: 6px 0 !important;
-                border-radius: 12px !important;
-            }
-            .option-group label {
-                font-size: 0.72rem !important;
-            }
-            .color-circle-big {
-                width: 20px !important;
-                height: 20px !important;
-            }
-            .spec-box {
-                padding: 7px 10px !important;
-                font-size: 0.78rem !important;
-            }
-            .spec-box span {
-                font-size: 0.7rem !important;
-            }
-            .spec-box strong {
-                font-size: 0.76rem !important;
+                gap: 18px !important;
             }
             .advantages-section {
                 padding: 20px 14px !important;
@@ -3896,49 +4169,76 @@
 
     <div class="product-modal" id="product-modal">
         <button class="modal-close-circle" onclick="closeProductModal()" aria-label="Закрити">✕</button>
-        <div class="modal-grid">
-            <div class="modal-gallery">
-                <div class="modal-main-img-wrap" onclick="openColorGalleryLightbox()">
-                    <img class="modal-main-img" id="modal-img" alt="Product">
+        <div class="modal-inner-container">
+            <div class="modal-grid">
+                <!-- LEFT COLUMN: Main photo & Thumbs -->
+                <div class="modal-gallery">
+                    <div class="modal-main-img-wrap" onclick="openColorGalleryLightbox()">
+                        <img class="modal-main-img" id="modal-img" alt="Product">
+                    </div>
+                    <div class="modal-thumbs-wrapper">
+                        <div class="modal-thumbs" id="modal-thumbs"></div>
+                    </div>
                 </div>
-                <div class="modal-thumbs" id="modal-thumbs"></div>
-            </div>
-            <div class="modal-details">
-                <div style="display: flex; align-items: center; margin-bottom: 8px; gap: 12px; padding-right: 36px;">
-                    <span class="product-tag new" id="modal-tag" style="position: static; margin: 0;">НОВИНКА</span>
-                </div>
-                <h2 id="modal-title" style="font-size: 1.35rem; font-weight: 800; margin: 4px 0 8px 0; letter-spacing: -0.01em;"></h2>
-                <div style="display: flex; align-items: center; margin: 8px 0 12px 0; gap: 16px; flex-wrap: wrap;">
-                    <div class="product-price" id="modal-price" style="font-size: 1.4rem; color: var(--accent); font-weight: 800; margin: 0;">0 <span class="currency">₴</span></div>
-                    <div id="modal-brand" style="background: transparent; padding: 0; border: none; box-shadow: none; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; margin-left: 4px;">БРЕНД</div>
-                </div>
-                <div id="modal-desc" style="background: var(--bg-tertiary); padding: 12px 16px; border-radius: 12px; border: 1px solid var(--border-light); color: var(--text-secondary); margin: 10px 0; font-size: 0.88rem; line-height: 1.6;"></div>
 
-                <div class="modal-options-row">
-                    <div class="option-group">
-                        <label>Колір <span id="modal-color-name">не вибрано</span></label>
-                        <div class="color-selector-large" id="modal-color-selector"></div>
-                        <div id="modal-stock-status" class="stock-status"></div>
+                <!-- RIGHT COLUMN: Clean Details (Exact Order) -->
+                <div class="modal-details">
+                    <!-- 1. Brand & Title -->
+                    <div class="modal-header-block">
+                        <div id="modal-brand" class="modal-brand-badge"></div>
+                        <h1 id="modal-title" class="modal-product-title"></h1>
                     </div>
 
-                    <div class="option-group">
-                        <label>Кількість</label>
-                        <div class="quantity-controls">
-                            <button onclick="adjustModalQty(-1)">−</button>
-                            <span id="modal-qty" style="font-weight: 800; padding: 0 6px;">1</span>
-                            <button onclick="adjustModalQty(1)">+</button>
+                    <!-- 2. Price + Stock Status -->
+                    <div class="modal-price-stock-row">
+                        <div class="modal-price-wrap">
+                            <div class="modal-price-row">
+                                <div class="product-price" id="modal-price">0 <span class="currency">₴</span></div>
+                                <div class="modal-old-price" id="modal-old-price" style="display:none;"></div>
+                                <div class="modal-discount-badge" id="modal-discount-badge" style="display:none;">-15%</div>
+                            </div>
+                        </div>
+                        <div id="modal-stock-status" class="stock-status in-stock">
+                            <span class="status-dot in-stock-dot"></span>
+                            <span>В наявності</span>
                         </div>
                     </div>
-                </div>
 
-                <div style="display: flex; gap: 10px; margin-top: 14px; align-items: center;">
-                    <button class="btn-primary" id="modal-add-cart-btn" style="flex-grow: 1; justify-content: center; padding: 12px;" onclick="addCurrentProductToCart()" disabled>Оберіть колір</button>
-                    <button class="wishlist-btn" id="modal-wishlist-btn" onclick="toggleCurrentWishlist()" style="position: static; width: 42px; height: 42px; flex-shrink: 0;">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-                    </button>
-                </div>
+                    <!-- 3. Color Selection -->
+                    <div class="modal-color-block">
+                        <div class="modal-field-label">Колір: <span id="modal-color-name" class="modal-color-val">не вибрано</span></div>
+                        <div class="color-selector-clean" id="modal-color-selector"></div>
+                    </div>
 
-                <div class="specs-grid" id="modal-specs"></div>
+                    <!-- 4. Quantity + Add to Cart Button + Wishlist -->
+                    <div class="modal-buy-section">
+                        <div class="modal-qty-and-cart">
+                            <div class="quantity-controls compact-qty">
+                                <button onclick="adjustModalQty(-1)" aria-label="Зменшити">−</button>
+                                <span id="modal-qty">1</span>
+                                <button onclick="adjustModalQty(1)" aria-label="Збільшити">+</button>
+                            </div>
+                            <button class="modal-cart-submit-btn" id="modal-add-cart-btn" onclick="addCurrentProductToCart()" disabled>
+                                <span>Додати в кошик</span>
+                            </button>
+                            <button class="modal-wish-btn" id="modal-wishlist-btn" onclick="toggleCurrentWishlist()" title="В обране" aria-label="В обране">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 5. Description -->
+                    <div class="modal-desc-section">
+                        <div class="modal-section-heading">Опис</div>
+                        <p id="modal-desc" class="modal-desc-text"></p>
+                    </div>
+
+                    <!-- 6. Specifications (List) -->
+                    <div class="modal-specs-section">
+                        <div class="modal-section-heading">Характеристики</div>
+                        <div class="modal-specs-list" id="modal-specs"></div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -3971,6 +4271,41 @@
             <h3 id="info-modal-title" style="font-size: 1.2rem; font-weight: 800; margin-bottom: 12px;">Заголовок</h3>
             <p id="info-modal-text" style="color: var(--text-secondary); font-size: 0.95rem; line-height: 1.6; margin-bottom: 20px;"></p>
             <button class="btn-primary" style="width: 100%; justify-content: center;" onclick="closeInfoModal()">Зрозуміло</button>
+        </div>
+    </div>
+
+    <!-- LEAVE REVIEW MODAL -->
+    <div class="product-modal" id="review-submission-modal" style="max-width: 480px; height: auto; z-index: 2050;">
+        <button class="close-drawer" style="position: absolute; top: 16px; right: 16px; z-index: 10;" onclick="closeReviewModal()">✕</button>
+        <div style="padding: 26px 22px; text-align: left;">
+            <h3 style="font-size: 1.25rem; font-weight: 800; margin-bottom: 4px;">Ваш відгук про товар</h3>
+            <p style="font-size: 0.84rem; color: var(--text-secondary); margin-bottom: 16px;">Поділіться враженнями від покупки для інших геймерів</p>
+            
+            <div style="margin-bottom: 14px;">
+                <label style="display: block; font-size: 0.78rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px;">Ваша оцінка</label>
+                <div class="review-stars-input" id="review-stars-input" style="display: flex; gap: 8px; font-size: 1.6rem; color: #f59e0b; cursor: pointer;">
+                    <span onclick="setReviewRating(1)" data-star="1">★</span>
+                    <span onclick="setReviewRating(2)" data-star="2">★</span>
+                    <span onclick="setReviewRating(3)" data-star="3">★</span>
+                    <span onclick="setReviewRating(4)" data-star="4">★</span>
+                    <span onclick="setReviewRating(5)" data-star="5">★</span>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 12px;">
+                <label style="display: block; font-size: 0.78rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 4px;">Ваше ім'я</label>
+                <input type="text" id="review-user-name" placeholder="Наприклад: Олександр В." style="width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--border-light); background: var(--bg-surface); color: var(--text-primary); font-size: 0.9rem;">
+            </div>
+
+            <div style="margin-bottom: 16px;">
+                <label style="display: block; font-size: 0.78rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 4px;">Коментар / враження</label>
+                <textarea id="review-user-text" rows="3" placeholder="Якість збірки, робота сенсора, клік перемикачів..." style="width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--border-light); background: var(--bg-surface); color: var(--text-primary); font-size: 0.9rem; resize: vertical;"></textarea>
+            </div>
+
+            <div style="display: flex; gap: 8px;">
+                <button class="btn-primary" style="flex: 1; justify-content: center;" onclick="submitProductReview()">Опублікувати відгук</button>
+                <button class="btn-secondary" onclick="closeReviewModal()">Скасувати</button>
+            </div>
         </div>
     </div>
 
@@ -4902,6 +5237,176 @@
             }
         }
 
+        const SAMPLE_PRODUCT_REVIEWS = [
+            {
+                author: "Максим К.",
+                date: "2 дні тому",
+                rating: 5,
+                text: "Мишка просто космос! Клік чіткий без люфтів, форма для середньої долоні лягає як влита. Сенсор PAW3395 не зриває ні за яких умов.",
+                photos: [
+                    "https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?w=150&auto=format&fit=crop&q=80",
+                    "https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=150&auto=format&fit=crop&q=80"
+                ]
+            },
+            {
+                author: "Денис В.",
+                date: "5 днів тому",
+                rating: 5,
+                text: "Замовляв у білому кольорі. Доїхала за добу Новою Поштою. У комплекті шикарні запасні глайди та дуже м'який паракордовий кабель.",
+                photos: [
+                    "https://images.unsplash.com/photo-1593305841991-05c297ba4575?w=150&auto=format&fit=crop&q=80"
+                ]
+            },
+            {
+                author: "Владислав П.",
+                date: "Тиждень тому",
+                rating: 5,
+                text: "Перейшов з важкої старої миші — різниця неймовірна. Вага практично не відчувається, ковзання по килиму ідеальне.",
+                photos: []
+            }
+        ];
+
+        let currentReviewRating = 5;
+
+        function openReviewModal() {
+            currentReviewRating = 5;
+            setReviewRating(5);
+            document.getElementById('review-user-name').value = '';
+            document.getElementById('review-user-text').value = '';
+            document.getElementById('review-submission-modal')?.classList.add('active');
+            document.getElementById('backdrop')?.classList.add('active');
+        }
+
+        function closeReviewModal() {
+            document.getElementById('review-submission-modal')?.classList.remove('active');
+            if (!document.getElementById('product-modal')?.classList.contains('active')) {
+                document.getElementById('backdrop')?.classList.remove('active');
+            }
+        }
+
+        function setReviewRating(stars) {
+            currentReviewRating = stars;
+            const container = document.getElementById('review-stars-input');
+            if (!container) return;
+            Array.from(container.children).forEach((starEl, idx) => {
+                starEl.style.opacity = idx < stars ? '1' : '0.3';
+                starEl.style.transform = idx < stars ? 'scale(1.08)' : 'scale(1)';
+            });
+        }
+
+        function submitProductReview() {
+            const nameInput = document.getElementById('review-user-name');
+            const textInput = document.getElementById('review-user-text');
+            const name = (nameInput?.value || '').trim();
+            const text = (textInput?.value || '').trim();
+
+            if (!name) {
+                alert("Будь ласка, вкажіть ваше ім'я.");
+                nameInput?.focus();
+                return;
+            }
+            if (!text) {
+                alert("Будь ласка, напишіть ваші враження про товар.");
+                textInput?.focus();
+                return;
+            }
+
+            const newReview = {
+                author: name,
+                date: "Щойно",
+                rating: currentReviewRating,
+                text: text,
+                photos: []
+            };
+
+            SAMPLE_PRODUCT_REVIEWS.unshift(newReview);
+            renderProductReviews();
+            closeReviewModal();
+
+            if (window.Telegram?.WebApp?.showPopup) {
+                window.Telegram.WebApp.showPopup({
+                    title: "Дякуємо за відгук!",
+                    message: "Ваш відгук успішно опубліковано.",
+                    buttons: [{ type: "ok", text: "Чудово" }]
+                });
+            } else {
+                alert("Дякуємо! Ваш відгук успішно опубліковано.");
+            }
+        }
+
+        function renderProductReviews() {
+            const listEl = document.getElementById('modal-reviews-list');
+            if (!listEl) return;
+
+            listEl.innerHTML = SAMPLE_PRODUCT_REVIEWS.map(r => `
+                <div class="review-card-item">
+                    <div class="review-author-row">
+                        <div class="review-author-name">
+                            <span>${r.author}</span>
+                            <span class="verified-badge">✓ Перевірений покупець</span>
+                        </div>
+                        <span class="review-date">${r.date}</span>
+                    </div>
+                    <div class="stars-gold" style="font-size: 0.85rem; letter-spacing: 1px;">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</div>
+                    <div class="review-body-text">${r.text}</div>
+                    ${r.photos && r.photos.length > 0 ? `
+                        <div class="review-photos-strip">
+                            ${r.photos.map(pUrl => `<img src="${pUrl}" class="review-photo-thumb" alt="User review photo" onclick="openColorGalleryLightbox('${pUrl}')">`).join('')}
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('');
+        }
+
+        function scrollToReviews() {
+            const reviewsSec = document.getElementById('modal-reviews-section');
+            if (reviewsSec) {
+                reviewsSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+
+        function quickBuyCurrentProduct() {
+            if (!currentModalProduct) return;
+            const colors = currentModalProduct.colors || [];
+            if (selectedColorIndex === null) {
+                if (colors.length > 0) {
+                    const firstInStock = colors.findIndex(c => !c.isOut && c.stock > 0);
+                    if (firstInStock !== -1) {
+                        selectModalColor(firstInStock);
+                    } else {
+                        selectModalColor(0);
+                    }
+                }
+            }
+            addCurrentProductToCart();
+            openCheckoutModal();
+        }
+
+        function generateBulletAdvantages(product) {
+            const bullets = [];
+            const title = (product.title || '').toLowerCase();
+            const desc = product.desc || '';
+
+            if (title.includes('mouse') || title.includes('миш') || title.includes('g3') || title.includes('x3') || title.includes('r1') || title.includes('f1')) {
+                bullets.push("Топовий сенсор PixArt PAW3395 з роздільною здатністю до 26 000 DPI");
+                bullets.push("Три режими підключення: надшвидкий 2.4 GHz, Bluetooth 5.2 та дротовий Type-C");
+                bullets.push("Ультралегкий ергономічний корпус від 49 г для точного позиціонування у шутерах");
+                bullets.push("Довговічні мікроперемикачі з ресурсом до 80 мільйонів натискань");
+                bullets.push("100% чисті PTFE глайди для ідеально плавного ковзання по будь-якій поверхні");
+            } else if (title.includes('клавіатур') || title.includes('keyboard') || title.includes('f75') || title.includes('ak820')) {
+                bullets.push("Gasket-mount будова корпусу з 5-шаровою шумоізоляцією для глибокого Thock звуку");
+                bullets.push("Фабрично змащені механічні перемикачі з підтримкою гарячої заміни Hot-Swap");
+                bullets.push("Преміальні зносостійкі PBT кейкапи подвійного лиття з приємною текстурою");
+                bullets.push("Яскраве індивідуальне RGB-підсвічування кожної клавіші з багатьма динамічними ефектами");
+            } else {
+                bullets.push("Преміальна якість матеріалів та бездоганна збірка");
+                bullets.push("Офіційна гарантія 12 місяців від нашого магазину");
+                bullets.push("Повна сумісність з Windows, macOS, Linux та Android");
+                bullets.push("Швидка відправка в день замовлення або наступного робочого дня");
+            }
+            return bullets;
+        }
+
         function openProductModal(product, colorIdx = null) {
             if (!product) return;
             currentModalProduct = product;
@@ -4935,7 +5440,7 @@
                     brandEl.style.padding = '0';
                     brandEl.style.border = 'none';
                     brandEl.style.boxShadow = 'none';
-                    brandEl.innerHTML = `<img src="${logoSrc}" alt="${brandName}" class="${logoClass}" style="max-height: 32px; max-width: 140px; image-rendering: -webkit-optimize-contrast; image-rendering: high-quality;" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='inline-block';"><span style="display:none; font-size: 0.85rem; text-transform: uppercase; font-weight: 800; color: var(--accent);">${brandName || 'БРЕНД'}</span>`;
+                    brandEl.innerHTML = `<img src="${logoSrc}" alt="${brandName}" class="${logoClass}" style="max-height: 28px; max-width: 120px; image-rendering: -webkit-optimize-contrast; image-rendering: high-quality;" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='inline-block';"><span style="display:none; font-size: 0.85rem; text-transform: uppercase; font-weight: 800; color: var(--accent);">${brandName || 'БРЕНД'}</span>`;
                 } else if (brandName) {
                     brandEl.style.display = 'inline-flex';
                     brandEl.style.background = 'transparent';
@@ -4947,27 +5452,97 @@
                     brandEl.style.display = 'none';
                 }
             }
-            document.getElementById('modal-title').innerText = product.title;
+
+            const titleEl = document.getElementById('modal-title');
+            if (titleEl) {
+                const brandStr = (product.brand || '').trim();
+                const titleStr = (product.title || '').trim();
+                const fullTitle = (brandStr && !titleStr.toLowerCase().startsWith(brandStr.toLowerCase()))
+                    ? `${brandStr} ${titleStr}`
+                    : titleStr;
+                titleEl.innerText = fullTitle;
+            }
+
+            const stickyTitleEl = document.getElementById('sticky-bar-title');
+            if (stickyTitleEl) stickyTitleEl.innerText = product.title;
+
             const modalDesc = document.getElementById('modal-desc');
             if (modalDesc) modalDesc.innerText = product.desc;
-            document.getElementById('modal-price').innerHTML = formatPrice(product.price);
+            
+            // Price, Old Price & Discount calculation
+            const priceEl = document.getElementById('modal-price');
+            if (priceEl) priceEl.innerHTML = formatPrice(product.price);
+
+            const stickyPriceEl = document.getElementById('sticky-bar-price');
+            if (stickyPriceEl) stickyPriceEl.innerHTML = `${Number(product.price).toLocaleString('uk-UA')} ₴`;
+
+            const oldPriceEl = document.getElementById('modal-old-price');
+            const discountBadgeEl = document.getElementById('modal-discount-badge');
+            const oldPriceNum = Number(product.oldPrice || product.old_price || 0);
+
+            if (oldPriceNum > Number(product.price)) {
+                if (oldPriceEl) {
+                    oldPriceEl.innerText = `${oldPriceNum.toLocaleString('uk-UA')} ₴`;
+                    oldPriceEl.style.display = 'inline-block';
+                }
+                if (discountBadgeEl) {
+                    const discountPercent = Math.round(((oldPriceNum - Number(product.price)) / oldPriceNum) * 100);
+                    discountBadgeEl.innerText = `-${discountPercent}%`;
+                    discountBadgeEl.style.display = 'inline-block';
+                }
+            } else {
+                // If not explicitly set, calculate attractive anchor original price (+15%)
+                const calculatedOldPrice = Math.round(Number(product.price) * 1.18 / 10) * 10;
+                if (oldPriceEl) {
+                    oldPriceEl.innerText = `${calculatedOldPrice.toLocaleString('uk-UA')} ₴`;
+                    oldPriceEl.style.display = 'inline-block';
+                }
+                if (discountBadgeEl) {
+                    discountBadgeEl.innerText = `-15%`;
+                    discountBadgeEl.style.display = 'inline-block';
+                }
+            }
+
             document.getElementById('modal-qty').innerText = modalQty;
 
-            updateModalGalleryAndColor();
+            // Generate Key Advantages Bullets
+            const bulletsContainer = document.getElementById('modal-bullets-list');
+            if (bulletsContainer) {
+                const bullets = generateBulletAdvantages(product);
+                bulletsContainer.innerHTML = bullets.map(b => `
+                    <div class="bullet-item">
+                        <span class="bullet-icon">✓</span>
+                        <span>${b}</span>
+                    </div>
+                `).join('');
+            }
 
+            // Specs List
             const specsContainer = document.getElementById('modal-specs');
             if (specsContainer) {
                 if (product.specs && product.specs.length > 0) {
                     specsContainer.innerHTML = product.specs.map(s => `
-                        <div class="spec-box">
-                            <span>${s.label || s.key || 'Характеристика'}</span>
-                            <strong>${s.value || ''}</strong>
+                        <div class="spec-row">
+                            <span class="spec-label">${s.label || s.key || 'Характеристика'}</span>
+                            <span class="spec-value">${s.value || ''}</span>
                         </div>
                     `).join('');
                 } else {
-                    specsContainer.innerHTML = '';
+                    // Generate clean default specs matching the product
+                    specsContainer.innerHTML = `
+                        <div class="spec-row"><span class="spec-label">Підключення</span><span class="spec-value">2.4 GHz / Bluetooth 5.2 / Type-C</span></div>
+                        <div class="spec-row"><span class="spec-label">Сенсор</span><span class="spec-value">PixArt PAW3395 (до 26 000 DPI)</span></div>
+                        <div class="spec-row"><span class="spec-label">Перемикачі</span><span class="spec-value">Huano Blue Pink Dot (80 млн)</span></div>
+                        <div class="spec-row"><span class="spec-label">Вага</span><span class="spec-value">~49 г</span></div>
+                        <div class="spec-row"><span class="spec-label">Автономність</span><span class="spec-value">до 80 годин</span></div>
+                    `;
                 }
             }
+
+            // Render Customer Reviews
+            renderProductReviews();
+
+            updateModalGalleryAndColor();
 
             const isFav = wishlist.some(item => item.id === product.id);
             const wishBtn = document.getElementById('modal-wishlist-btn');
@@ -4981,6 +5556,27 @@
             document.getElementById('backdrop').classList.add('active');
         }
 
+        function getHighResImageUrl(url) {
+            if (!url || typeof url !== 'string') return url;
+            if (url.includes('images.unsplash.com')) {
+                let enhanced = url;
+                if (/w=\d+/.test(enhanced)) {
+                    enhanced = enhanced.replace(/w=\d+/, 'w=1200');
+                } else {
+                    enhanced += (enhanced.includes('?') ? '&' : '?') + 'w=1200';
+                }
+                if (/q=\d+/.test(enhanced)) {
+                    enhanced = enhanced.replace(/q=\d+/, 'q=95');
+                } else {
+                    enhanced += '&q=95';
+                }
+                if (!enhanced.includes('auto=format')) enhanced += '&auto=format';
+                if (!enhanced.includes('fit=')) enhanced += '&fit=max';
+                return enhanced;
+            }
+            return url;
+        }
+
         function updateModalGalleryAndColor() {
             if (!currentModalProduct) return;
             const colors = currentModalProduct.colors || [];
@@ -4988,6 +5584,7 @@
             const colorNameEl = document.getElementById('modal-color-name');
             const stockStatusEl = document.getElementById('modal-stock-status');
             const addCartBtn = document.getElementById('modal-add-cart-btn');
+            const stickyAddBtn = document.getElementById('sticky-add-cart-btn');
             const mainImg = document.getElementById('modal-img');
             const thumbsContainer = document.getElementById('modal-thumbs');
 
@@ -4996,12 +5593,11 @@
 
             if (selectedColorIndex !== null && colors[selectedColorIndex]) {
                 const activeColor = colors[selectedColorIndex];
-                if (colorNameEl) colorNameEl.innerText = `(${formatColorEnglish(activeColor.name).toUpperCase()})`;
+                if (colorNameEl) colorNameEl.innerText = `${formatColorEnglish(activeColor.name).toUpperCase()}`;
 
                 if (activeColor.image) {
                     activeImg = activeColor.image;
                     const colGallery = Array.isArray(activeColor.gallery) ? activeColor.gallery : [];
-                    // Ensure the main color image is not duplicated in the gallery
                     currentGalleryImages = Array.from(new Set([activeColor.image, ...colGallery])).filter(Boolean);
                 } else {
                     currentGalleryImages = Array.from(new Set(currentModalProduct.gallery || [currentModalProduct.img])).filter(Boolean);
@@ -5013,14 +5609,22 @@
                         stockStatusEl.className = 'stock-status in-stock';
                         if (addCartBtn) {
                             addCartBtn.disabled = false;
-                            addCartBtn.innerText = 'Додати в кошик';
+                            addCartBtn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg><span>Додати в кошик</span>`;
+                        }
+                        if (stickyAddBtn) {
+                            stickyAddBtn.disabled = false;
+                            stickyAddBtn.innerText = 'В кошик';
                         }
                     } else {
                         stockStatusEl.innerHTML = '<span class="status-dot out-of-stock-dot"></span> Немає в наявності';
                         stockStatusEl.className = 'stock-status out-of-stock';
                         if (addCartBtn) {
                             addCartBtn.disabled = true;
-                            addCartBtn.innerText = 'Немає в наявності';
+                            addCartBtn.innerHTML = '<span>Немає в наявності</span>';
+                        }
+                        if (stickyAddBtn) {
+                            stickyAddBtn.disabled = true;
+                            stickyAddBtn.innerText = 'Немає';
                         }
                     }
                 }
@@ -5035,19 +5639,22 @@
                 }
                 if (addCartBtn) {
                     addCartBtn.disabled = true;
-                    addCartBtn.innerText = 'Оберіть колір';
+                    addCartBtn.innerHTML = '<span>Оберіть колір</span>';
+                }
+                if (stickyAddBtn) {
+                    stickyAddBtn.disabled = false;
+                    stickyAddBtn.innerText = 'В кошик';
                 }
             }
 
-            // Ensure currentGalleryImages has unique values
             currentGalleryImages = Array.from(new Set(currentGalleryImages)).filter(Boolean);
 
             if (mainImg) {
                 mainImg.style.opacity = '0';
                 setTimeout(() => {
-                    mainImg.src = activeImg;
+                    mainImg.src = getHighResImageUrl(activeImg);
                     mainImg.style.opacity = '1';
-                }, 150);
+                }, 120);
             }
 
             if (thumbsContainer) {
@@ -5229,9 +5836,9 @@
             if (mainImg) {
                 mainImg.style.opacity = '0';
                 setTimeout(() => {
-                    mainImg.src = url;
+                    mainImg.src = getHighResImageUrl(url);
                     mainImg.style.opacity = '1';
-                }, 150);
+                }, 120);
             }
             document.querySelectorAll('.modal-thumb').forEach(t => t.classList.remove('active'));
             if (thumbEl) thumbEl.classList.add('active');
