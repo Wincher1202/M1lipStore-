@@ -1199,7 +1199,7 @@
             display: flex;
             align-items: center;
             justify-content: flex-start;
-            gap: 24px;
+            gap: 28px;
             margin: 2px 0 8px 0;
             padding-right: 4px;
         }
@@ -1211,6 +1211,14 @@
             flex-shrink: 0;
         }
 
+        .modal-brand-warranty-group {
+            display: inline-flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 18px;
+            margin-left: 10px;
+        }
+
         #modal-brand {
             background: transparent;
             border: none;
@@ -1220,22 +1228,55 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            flex: 1;
+            flex-shrink: 0;
             margin: 0;
             transition: transform 0.2s ease;
         }
 
         #modal-brand:hover {
-            transform: scale(1.05);
+            transform: scale(1.04);
         }
 
         #modal-brand img {
-            max-height: 32px !important;
-            max-width: 140px !important;
+            max-height: 28px !important;
+            max-width: 115px !important;
             object-fit: contain;
             display: block;
             image-rendering: -webkit-optimize-contrast;
             image-rendering: high-quality;
+        }
+
+        .modal-warranty-pill-top {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 10px;
+            background: rgba(99, 102, 241, 0.08);
+            border: 1px solid rgba(99, 102, 241, 0.22);
+            border-radius: 999px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: var(--accent);
+            white-space: nowrap;
+            letter-spacing: -0.01em;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .modal-warranty-pill-top svg {
+            color: var(--accent);
+            flex-shrink: 0;
+        }
+
+        .modal-warranty-pill-top:hover {
+            background: rgba(99, 102, 241, 0.13);
+            border-color: rgba(99, 102, 241, 0.38);
+        }
+
+        [data-theme="dark"] .modal-warranty-pill-top {
+            background: rgba(99, 102, 241, 0.12);
+            border-color: rgba(99, 102, 241, 0.32);
+            color: #818cf8;
         }
 
         [data-theme="dark"] #modal-brand {
@@ -1522,13 +1563,29 @@
                 aspect-ratio: 1 / 1 !important;
             }
             .color-picker-preview {
-                min-height: 12px !important;
-                margin: 3px 0 6px 0 !important;
-                gap: 4px !important;
+                min-height: 13px !important;
+                margin: 2px 0 4px 0 !important;
+                padding: 1.5px 5px !important;
+                gap: 3.5px !important;
+                background: rgba(15, 23, 42, 0.04) !important;
+                border: 1px solid rgba(15, 23, 42, 0.08) !important;
+                border-radius: 999px !important;
+                display: inline-flex !important;
+                align-items: center !important;
+                width: fit-content !important;
             }
             .color-dot {
-                width: 8px !important;
-                height: 8px !important;
+                width: 7px !important;
+                height: 7px !important;
+                border: 1.2px solid rgba(0, 0, 0, 0.16) !important;
+            }
+            .color-dot.color-dot-white,
+            .color-dot[style*="#ffffff"],
+            .color-dot[style*="#fff"],
+            .color-dot[style*="white"] {
+                background-color: #ffffff !important;
+                border: 1.5px solid #94a3b8 !important;
+                box-shadow: 0 1px 3px rgba(0,0,0,0.22), inset 0 0 0 1px rgba(0,0,0,0.06) !important;
             }
             .product-info {
                 padding-top: 4px !important;
@@ -1655,24 +1712,44 @@
         }
 
         .color-picker-preview {
-            display: flex;
-            gap: 5px;
-            margin: 4px 0 8px 0;
+            display: inline-flex;
+            gap: 4px;
+            margin: 2px 0 5px 0;
             align-items: center;
-            min-height: 14px;
+            min-height: 15px;
+            padding: 2px 6px;
+            background: rgba(15, 23, 42, 0.04);
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            border-radius: 999px;
+            width: fit-content;
+            transition: all 0.2s ease;
+        }
+
+        .color-picker-preview:empty {
+            display: none !important;
         }
 
         .color-dot {
-            width: 10px;
-            height: 10px;
+            width: 8px;
+            height: 8px;
             border-radius: 50%;
-            border: 1px solid rgba(0,0,0,0.2);
-            box-shadow: inset 0 0 0 1px rgba(255,255,255,0.4), 0 1px 2px rgba(0,0,0,0.12);
+            border: 1.2px solid rgba(0, 0, 0, 0.16);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
             display: inline-block;
             cursor: pointer;
+            flex-shrink: 0;
+            transition: transform 0.15s ease;
         }
         .color-dot:hover {
-            /* no scale jump */
+            transform: scale(1.25);
+        }
+        .color-dot.color-dot-white,
+        .color-dot[style*="#ffffff"],
+        .color-dot[style*="#fff"],
+        .color-dot[style*="white"] {
+            background-color: #ffffff !important;
+            border: 1.5px solid #94a3b8 !important;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.22), inset 0 0 0 1px rgba(0, 0, 0, 0.06) !important;
         }
         .color-dot.out-of-stock { 
             background-color: #9ca3af !important; 
@@ -2239,10 +2316,15 @@
         }
 
         .color-selector-clean {
-            display: flex;
+            display: inline-flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
             flex-wrap: wrap;
+            padding: 4px 10px;
+            background: rgba(15, 23, 42, 0.04);
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            border-radius: 999px;
+            width: fit-content;
         }
 
         .color-option-item {
@@ -2262,13 +2344,22 @@
             width: 18px;
             height: 18px;
             border-radius: 50%;
-            border: 1.5px solid var(--border-light);
+            border: 1.2px solid rgba(0, 0, 0, 0.16);
             transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
             display: inline-block;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+            box-shadow: 0 1.5px 4px rgba(0, 0, 0, 0.08);
         }
 
-        .color-circle-big:hover { transform: scale(1.12); }
+        .color-circle-big.color-white,
+        .color-circle-big[style*="#ffffff"],
+        .color-circle-big[style*="#fff"],
+        .color-circle-big[style*="white"] {
+            background-color: #ffffff !important;
+            border: 1.2px solid #94a3b8 !important;
+            box-shadow: 0 1.5px 4px rgba(0, 0, 0, 0.15), inset 0 0 0 1px rgba(0, 0, 0, 0.06) !important;
+        }
+
+        .color-circle-big:hover { transform: scale(1.15); }
         .color-circle-big.out-of-stock { 
             background-color: #9ca3af !important; 
             border-color: #6b7280 !important; 
@@ -2277,9 +2368,9 @@
         }
 
         .color-circle-big.active {
-            box-shadow: 0 0 0 1.5px var(--bg-surface), 0 0 0 3px var(--accent);
-            border-color: transparent;
-            transform: scale(1.12);
+            box-shadow: 0 0 0 2px var(--bg-surface), 0 0 0 3.5px var(--accent) !important;
+            border-color: transparent !important;
+            transform: scale(1.15);
         }
 
         /* Buy Section (Qty + Cart button + Wishlist) */
@@ -2488,6 +2579,17 @@
             color: var(--text-primary);
             font-weight: 700;
             text-align: right;
+        }
+
+        /* Warranty Section (Matching Description & Specs) */
+        .modal-warranty-section {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding: 14px 16px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-light);
+            border-radius: 14px;
         }
 
         .modal-close-circle {
@@ -3989,7 +4091,8 @@
                 justify-content: flex-start !important;
                 gap: 16px !important;
                 margin: 2px 0 6px 0 !important;
-                padding-right: 4px !important;
+                padding-right: 2px !important;
+                flex-wrap: wrap !important;
             }
             .modal-color-block {
                 display: flex !important;
@@ -4024,6 +4127,14 @@
                 box-shadow: 0 0 0 1.5px var(--bg-surface), 0 0 0 3px var(--accent) !important;
                 transform: scale(1.08) !important;
             }
+            .modal-brand-warranty-group {
+                display: inline-flex !important;
+                align-items: center !important;
+                justify-content: flex-start !important;
+                gap: 14px !important;
+                margin-left: 0 !important;
+                flex-shrink: 0 !important;
+            }
             #modal-brand {
                 display: inline-flex !important;
                 align-items: center !important;
@@ -4032,14 +4143,25 @@
                 border: none !important;
                 box-shadow: none !important;
                 padding: 0 !important;
-                flex: 1 !important;
+                flex: 0 0 auto !important;
                 margin: 0 !important;
             }
             #modal-brand img {
-                max-height: 30px !important;
-                max-width: 130px !important;
+                max-height: 22px !important;
+                max-width: 90px !important;
                 object-fit: contain !important;
                 display: block !important;
+            }
+            .modal-warranty-pill-top {
+                font-size: 0.72rem !important;
+                padding: 3px 8px !important;
+                gap: 4px !important;
+                border-radius: 999px !important;
+                white-space: nowrap !important;
+            }
+            .modal-warranty-pill-top svg {
+                width: 12px !important;
+                height: 12px !important;
             }
             .modal-price-stock-row {
                 order: 3 !important;
@@ -4121,6 +4243,12 @@
             }
             .modal-specs-section {
                 order: 6 !important;
+                margin-top: 4px !important;
+                padding: 12px 14px !important;
+                border-radius: 12px !important;
+            }
+            .modal-warranty-section {
+                order: 7 !important;
                 margin-top: 4px !important;
                 padding: 12px 14px !important;
                 border-radius: 12px !important;
@@ -4601,7 +4729,7 @@
                     <li><a href="https://t.me/milipmanager" target="_blank">Менеджер: @milipmanager</a></li>
                     <li><a href="https://t.me/+vyhe-i9vGwAwNjAy" target="_blank">Telegram канал: M1lipStore</a></li>
                     <li><a href="https://www.instagram.com/m1lip.store" target="_blank">Instagram: @m1lip.store</a></li>
-                    <li><a href="https://www.tiktok.com/@m1lipstore" target="_blank">TikTok: @m1lipstore</a></li>
+                    <li><a href="https://www.tiktok.com/@m1lip.setup" target="_blank">TikTok: @m1lip.setup</a></li>
                 </ul>
             </div>
         </div>
@@ -5076,13 +5204,19 @@
                         <h1 id="modal-title" class="modal-product-title"></h1>
                     </div>
 
-                    <!-- 2. Color Selection (Left) + Brand Logo (Right) -->
+                    <!-- 2. Color Selection (Left) + Brand Logo & Warranty (Right) -->
                     <div class="modal-color-brand-row">
                         <div class="modal-color-block">
                             <div class="modal-field-label">Колір: <span id="modal-color-name" class="modal-color-val">не вибрано</span></div>
                             <div class="color-selector-clean" id="modal-color-selector"></div>
                         </div>
-                        <div id="modal-brand" class="modal-brand-badge"></div>
+                        <div class="modal-brand-warranty-group">
+                            <div id="modal-brand" class="modal-brand-badge"></div>
+                            <div class="modal-warranty-pill-top" id="modal-warranty-badge-top" title="Офіційна гарантія">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                                <span id="modal-warranty-top-text">Гарантія 1 місяць</span>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- 3. Price + Stock Status -->
@@ -5127,6 +5261,17 @@
                     <div class="modal-specs-section">
                         <div class="modal-section-heading">Характеристики</div>
                         <div class="modal-specs-list" id="modal-specs"></div>
+                    </div>
+
+                    <!-- 7. Official Warranty (Clean matching section) -->
+                    <div class="modal-warranty-section">
+                        <div class="modal-section-heading">Гарантія</div>
+                        <div class="modal-specs-list">
+                            <div class="spec-row" style="border-bottom: none;">
+                                <span class="spec-label">Гарантія</span>
+                                <span class="spec-value" id="modal-warranty-val">1 місяць</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -5262,7 +5407,7 @@
                 title: "Attack Shark X3 Wireless",
                 brand: "Attack Shark",
                 price: 1599,
-                old_price: 1899,
+                old_price: null,
                 sku: "AS-X3-W",
                 category: "Мишки",
                 tag: "🔥 ТОП ПРОДАЖІВ",
@@ -5289,7 +5434,7 @@
                 title: "VGN Dragonfly F1 Pro Max",
                 brand: "VGN",
                 price: 1999,
-                old_price: 2399,
+                old_price: null,
                 sku: "VGN-F1-MAX",
                 category: "Мишки",
                 tag: "⚡ ХІТ СЕЗОНУ",
@@ -5315,7 +5460,7 @@
                 title: "AULA F75 Wireless Gasket",
                 brand: "AULA",
                 price: 2499,
-                old_price: 2899,
+                old_price: null,
                 sku: "AULA-F75-W",
                 category: "Клавіатури",
                 tag: "🌟 ВИБІР ПРОФІ",
@@ -5342,7 +5487,7 @@
                 title: "Ajazz AK820 Pro TFT Screen",
                 brand: "Ajazz",
                 price: 2299,
-                old_price: 2699,
+                old_price: null,
                 sku: "AJ-AK820-PRO",
                 category: "Клавіатури",
                 tag: "🔥 ТОП ПРОДАЖІВ",
@@ -5369,7 +5514,7 @@
                 title: "Mchose A5 Ultra Light Wireless",
                 brand: "Mchose",
                 price: 1699,
-                old_price: 1999,
+                old_price: null,
                 sku: "MCH-A5-ULTRA",
                 category: "Мишки",
                 tag: "⚡ ХІТ СЕЗОНУ",
@@ -6151,7 +6296,11 @@
                 const colorDotsHtml = p.colors && p.colors.length > 0 ? p.colors.map((c, idx) => {
                     const bgHex = getColorHex(c.name);
                     const isOut = c.isOut;
-                    const dotClass = isOut ? 'out-of-stock' : '';
+                    const isWhite = (c.name || '').toLowerCase().includes('біл') || (c.name || '').toLowerCase().includes('white') || bgHex === '#ffffff' || bgHex === '#fff';
+                    const dotClass = [
+                        isOut ? 'out-of-stock' : '',
+                        isWhite ? 'color-dot-white' : ''
+                    ].filter(Boolean).join(' ');
                     const styleAttr = isOut ? '' : `background-color: ${bgHex};`;
                     return `<span class="color-dot ${dotClass}" style="${styleAttr}" title="${c.name}" ${isOut ? '' : `onclick="event.stopPropagation(); openProductModal(products.find(x => x.id === '${p.id}'), ${idx})"`}></span>`;
                 }).join('') : '';
@@ -6341,21 +6490,22 @@
             const bullets = [];
             const title = (product.title || '').toLowerCase();
             const desc = product.desc || '';
+            const warrantyText = product.warranty || '1 місяць';
 
             if (title.includes('mouse') || title.includes('миш') || title.includes('g3') || title.includes('x3') || title.includes('r1') || title.includes('f1')) {
                 bullets.push("Топовий сенсор PixArt PAW3395 з роздільною здатністю до 26 000 DPI");
                 bullets.push("Три режими підключення: надшвидкий 2.4 GHz, Bluetooth 5.2 та дротовий Type-C");
                 bullets.push("Ультралегкий ергономічний корпус від 49 г для точного позиціонування у шутерах");
-                bullets.push("Довговічні мікроперемикачі з ресурсом до 80 мільйонів натискань");
+                bullets.push(`Офіційна гарантія ${warrantyText} від нашого магазину`);
                 bullets.push("100% чисті PTFE глайди для ідеально плавного ковзання по будь-якій поверхні");
             } else if (title.includes('клавіатур') || title.includes('keyboard') || title.includes('f75') || title.includes('ak820')) {
                 bullets.push("Gasket-mount будова корпусу з 5-шаровою шумоізоляцією для глибокого Thock звуку");
                 bullets.push("Фабрично змащені механічні перемикачі з підтримкою гарячої заміни Hot-Swap");
                 bullets.push("Преміальні зносостійкі PBT кейкапи подвійного лиття з приємною текстурою");
-                bullets.push("Яскраве індивідуальне RGB-підсвічування кожної клавіші з багатьма динамічними ефектами");
+                bullets.push(`Офіційна гарантія ${warrantyText} від нашого магазину`);
             } else {
                 bullets.push("Преміальна якість матеріалів та бездоганна збірка");
-                bullets.push("Офіційна гарантія 12 місяців від нашого магазину");
+                bullets.push(`Офіційна гарантія ${warrantyText} від нашого магазину`);
                 bullets.push("Повна сумісність з Windows, macOS, Linux та Android");
                 bullets.push("Швидка відправка в день замовлення або наступного робочого дня");
             }
@@ -6376,6 +6526,21 @@
             const modalTag = document.getElementById('modal-tag');
             if (modalTag) {
                 modalTag.innerText = product.tag || 'ТОП ПРОДАЖІВ';
+            }
+
+            // Set Warranty in dedicated boxes (top header and bottom card)
+            const rawWarranty = product.warranty || '1 місяць';
+            const warrantyPillEl = document.getElementById('modal-warranty-badge-text');
+            if (warrantyPillEl) {
+                warrantyPillEl.innerText = rawWarranty;
+            }
+            const warrantyTopTextEl = document.getElementById('modal-warranty-top-text');
+            if (warrantyTopTextEl) {
+                warrantyTopTextEl.innerText = rawWarranty.toLowerCase().includes('гарант') ? rawWarranty : `Гарантія ${rawWarranty}`;
+            }
+            const warrantyValEl = document.getElementById('modal-warranty-val');
+            if (warrantyValEl) {
+                warrantyValEl.innerText = rawWarranty;
             }
             const brandEl = document.getElementById('modal-brand');
             if (brandEl) {
@@ -6446,15 +6611,13 @@
                     discountBadgeEl.style.display = 'inline-block';
                 }
             } else {
-                // If not explicitly set, calculate attractive anchor original price (+15%)
-                const calculatedOldPrice = Math.round(Number(product.price) * 1.18 / 10) * 10;
                 if (oldPriceEl) {
-                    oldPriceEl.innerText = `${calculatedOldPrice.toLocaleString('uk-UA')} ₴`;
-                    oldPriceEl.style.display = 'inline-block';
+                    oldPriceEl.style.display = 'none';
+                    oldPriceEl.innerText = '';
                 }
                 if (discountBadgeEl) {
-                    discountBadgeEl.innerText = `-15%`;
-                    discountBadgeEl.style.display = 'inline-block';
+                    discountBadgeEl.style.display = 'none';
+                    discountBadgeEl.innerText = '';
                 }
             }
 
@@ -6472,11 +6635,12 @@
                 `).join('');
             }
 
-            // Specs List
+            // Specs List (Technical characteristics only)
             const specsContainer = document.getElementById('modal-specs');
             if (specsContainer) {
                 if (product.specs && product.specs.length > 0) {
-                    specsContainer.innerHTML = product.specs.map(s => `
+                    const specsList = product.specs.filter(s => !(s.key || s.label || '').toLowerCase().includes('гарант'));
+                    specsContainer.innerHTML = specsList.map(s => `
                         <div class="spec-row">
                             <span class="spec-label">${s.label || s.key || 'Характеристика'}</span>
                             <span class="spec-value">${s.value || ''}</span>
@@ -6489,7 +6653,6 @@
                         <div class="spec-row"><span class="spec-label">Сенсор</span><span class="spec-value">PixArt PAW3395 (до 26 000 DPI)</span></div>
                         <div class="spec-row"><span class="spec-label">Перемикачі</span><span class="spec-value">Huano Blue Pink Dot (80 млн)</span></div>
                         <div class="spec-row"><span class="spec-label">Вага</span><span class="spec-value">~49 г</span></div>
-                        <div class="spec-row"><span class="spec-label">Автономність</span><span class="spec-value">до 80 годин</span></div>
                     `;
                 }
             }
@@ -6630,12 +6793,16 @@
                 colorSelector.innerHTML = colors.map((c, idx) => {
                     const bgHex = getColorHex(c.name);
                     const isOut = c.isOut;
-                    const circleClass = isOut ? 'out-of-stock' : '';
-                    const activeClass = idx === selectedColorIndex ? 'active' : '';
+                    const isWhite = (c.name || '').toLowerCase().includes('біл') || (c.name || '').toLowerCase().includes('white') || bgHex === '#ffffff' || bgHex === '#fff';
+                    const circleClass = [
+                        isOut ? 'out-of-stock' : '',
+                        idx === selectedColorIndex ? 'active' : '',
+                        isWhite ? 'color-white' : ''
+                    ].filter(Boolean).join(' ');
                     const styleAttr = isOut ? '' : `background-color: ${bgHex};`;
                     return `
                         <div class="color-option-item ${isOut ? 'disabled' : ''}" ${isOut ? '' : `onclick="selectModalColor(${idx})"`}>
-                            <span class="color-circle-big ${circleClass} ${activeClass}" style="${styleAttr}" title="${c.name}"></span>
+                            <span class="color-circle-big ${circleClass}" style="${styleAttr}" title="${c.name}"></span>
                         </div>
                     `;
                 }).join('');
@@ -7675,7 +7842,8 @@
                         ${cart.map(item => {
                             const prod = products.find(p => p.id === item.id) || item;
                             const lineTotal = item.price * item.qty;
-                            const colorChip = item.color ? `<span style="display:inline-block; width:9px; height:9px; border-radius:50%; background:${getColorHex(item.color)}; border:1px solid rgba(0,0,0,0.15);"></span>` : '';
+                            const isWhiteColor = (item.color || '').toLowerCase().includes('біл') || (item.color || '').toLowerCase().includes('white');
+                            const colorChip = item.color ? `<span style="display:inline-block; width:9px; height:9px; border-radius:50%; background:${getColorHex(item.color)}; border:1.5px solid ${isWhiteColor ? '#94a3b8' : 'rgba(0,0,0,0.18)'}; box-shadow: 0 1px 2px rgba(0,0,0,0.12);"></span>` : '';
                             return `
                                 <div class="review-item-row">
                                     <img src="${item.img || prod.img}" alt="${item.title}" class="review-item-thumb">
@@ -8762,9 +8930,10 @@
             }
 
             container.innerHTML = wishlist.map((item) => {
+                const isWhite = (item.color || '').toLowerCase().includes('біл') || (item.color || '').toLowerCase().includes('white');
                 const colorHtml = item.color ? `
                     <div style="font-size: 0.76rem; color: var(--text-muted); margin-top: 3px; display: flex; align-items: center; gap: 5px;">
-                        <span class="color-dot" style="background-color: ${getColorHex(item.color)}; width: 9px; height: 9px; border-radius: 50%; display: inline-block; flex-shrink: 0; border: 1px solid rgba(0,0,0,0.15);"></span>
+                        <span class="color-dot ${isWhite ? 'color-dot-white' : ''}" style="background-color: ${getColorHex(item.color)}; width: 10px; height: 10px; border-radius: 50%; display: inline-block; flex-shrink: 0; border: 1.5px solid ${isWhite ? '#94a3b8' : 'rgba(0,0,0,0.18)'};"></span>
                         <span>Колір: <strong style="color: var(--text-primary); font-weight: 600;">${formatColorEnglish(item.color)}</strong></span>
                     </div>
                 ` : '';

@@ -27,11 +27,12 @@ export const INITIAL_PRODUCTS = [
     brand: 'Attack Shark',
     title: 'Attack Shark X3 Wireless',
     price: 1599,
-    old_price: 1899,
+    old_price: null,
     sku: 'SHARK-X3-W',
     popular: true,
     tag: '🔥 ТОП ПРОДАЖІВ',
     category: 'Мишки',
+    warranty: '1 місяць',
     description: 'Флагманська ультралегка бездротова ігрова мишка вагою всього 49 грамів з топовим оптичним сенсором PixArt PAW3395 (до 26 000 DPI), надійними мікроперемикачами TTC Gold та потрійним режимом підключення (2.4G, Bluetooth 5.2, Type-C).',
     img: '/attack-shark-x3-black.jpg',
     gallery: ['/attack-shark-x3-black.jpg', '/attack-shark-x3-white.jpg', '/attack-shark-x3-box.jpg'],
@@ -55,11 +56,12 @@ export const INITIAL_PRODUCTS = [
     brand: 'VGN',
     title: 'VGN Dragonfly F1 Pro Max',
     price: 1999,
-    old_price: 2399,
+    old_price: null,
     sku: 'VGN-F1-PRO',
     popular: true,
     tag: '⚡ ХІТ СЕЗОНУ',
     category: 'Мишки',
+    warranty: '1 місяць',
     description: 'Кіберспортивна бездротова мишка вагою 55г з топовим сенсором PAW3395, чіпом Nordic 52840 та підтримкою частоти опитування до 4000Hz (при використанні 4K Dongle).',
     img: '/photo_2026-08-25_15-32-13.jpg',
     gallery: ['/photo_2026-08-25_15-32-13.jpg', '/photo_2026-08-25_15-32-17.jpg', '/photo_2026-08-25_15-32-36.jpg'],
@@ -82,11 +84,12 @@ export const INITIAL_PRODUCTS = [
     brand: 'AULA',
     title: 'AULA F75 Wireless Gasket',
     price: 2499,
-    old_price: 2899,
+    old_price: null,
     sku: 'AULA-F75',
     popular: true,
     tag: '⭐ ВИБІР ГРАВЦІВ',
     category: 'Клавіатури',
+    warranty: '3 місяці',
     description: 'Преміальна 75% бездротова механічна клавіатура з багатошаровою Gasket Mount шумоізоляцією (5 шарів поглинання звуку), металевим коліщатком гучності, фабрично змащеними перемикачами LEOBOG Reaper та RGB-підсвіткою.',
     img: '/photo_2026-08-25_15-32-57.jpg',
     gallery: ['/photo_2026-08-25_15-32-57.jpg', '/photo_2026-08-25_15-32-59.jpg', '/photo_2026-08-25_15-33-02.jpg'],
@@ -110,11 +113,12 @@ export const INITIAL_PRODUCTS = [
     brand: 'Ajazz',
     title: 'Ajazz AK820 Pro TFT Screen',
     price: 2299,
-    old_price: 2699,
+    old_price: null,
     sku: 'AJAZZ-AK820',
     popular: true,
     tag: '✨ НОВИНКА',
     category: 'Клавіатури',
+    warranty: '3 місяці',
     description: 'Бездротова механічна клавіатура з вбудованим кольоровим TFT-дисплеєм для GIF-анімацій та статусу системи, зручним регулятором гучності та приємним глибоким звуком (creamy sound).',
     img: '/350954572_1917991488535350_2141770078765880809_n_2.webp',
     gallery: ['/350954572_1917991488535350_2141770078765880809_n_2.webp', '/photo_2026-08-25_15-33-42.jpg', '/photo_2026-08-25_15-33-43.jpg'],
@@ -138,11 +142,12 @@ export const INITIAL_PRODUCTS = [
     brand: 'Mchose',
     title: 'Mchose A5 Ultra Light Wireless',
     price: 1699,
-    old_price: 1999,
+    old_price: null,
     sku: 'MCHOSE-A5',
     popular: false,
     tag: '🎯 РЕКОМЕНДУЄМО',
     category: 'Мишки',
+    warranty: '1 місяць',
     description: 'Ультраергономічна мишка для геймерів та професіоналів. Сенсор PixArt 3395, вага 59г, перемикачі Huano Blue Pink Dot на 80 млн натискань та до 130 годин безперервної гри.',
     img: '/48c2868a-928a-46f4-8b76-9e4d4fd6a7dc.jpg',
     gallery: ['/48c2868a-928a-46f4-8b76-9e4d4fd6a7dc.jpg', '/photo_2026-08-25_15-31-22.jpg', '/photo_2026-08-25_15-31-28.jpg'],
@@ -236,6 +241,13 @@ class Database {
           let existingProducts = Array.isArray(parsed.products) && parsed.products.length > 0
             ? parsed.products.filter(p => !deletedProdIds.includes(p.id))
             : INITIAL_PRODUCTS.filter(p => !deletedProdIds.includes(p.id));
+
+          // Ensure all products have warranty field
+          existingProducts.forEach(p => {
+            if (!p.warranty) {
+              p.warranty = (p.price && Number(p.price) >= 2200) ? '3 місяці' : '1 місяць';
+            }
+          });
           
           let existingCategories = Array.isArray(parsed.categories) && parsed.categories.length > 0
             ? parsed.categories.filter(c => !deletedCatIds.includes(c.id))
@@ -522,6 +534,9 @@ class Database {
   addProduct(product) {
     if (!product.id) {
       product.id = `prod-${Date.now()}`;
+    }
+    if (!product.warranty) {
+      product.warranty = (product.price && Number(product.price) >= 2200) ? '3 місяці' : '1 місяць';
     }
     // If it was previously marked deleted, un-delete it
     if (this.data.deleted_product_ids) {

@@ -2308,19 +2308,27 @@ export class TelegramBotService {
       if (!session.data.specs || session.data.specs.length === 0) {
         session.data.specs = this.getDefaultSpecs(session.data.category || 'мишки');
       }
-      await this.promptWizardPrice(chatId);
+      await this.promptWizardWarranty(chatId);
       return;
     }
 
     if (data === 'wiz_specs_skip') {
       session.data.specs = this.getDefaultSpecs(session.data.category || 'мишки');
-      await this.promptWizardPrice(chatId);
+      await this.promptWizardWarranty(chatId);
       return;
     }
 
     if (data === 'wiz_specs_clear') {
       session.data.specs = [];
       await this.promptWizardSpecs(chatId);
+      return;
+    }
+
+    // STEP 5: WARRANTY ACTIONS
+    if (data.startsWith('wiz_warranty:')) {
+      const wVal = data.replace('wiz_warranty:', '').trim();
+      session.data.warranty = wVal || '1 місяць';
+      await this.promptWizardPrice(chatId);
       return;
     }
 
@@ -2536,7 +2544,7 @@ export class TelegramBotService {
         if (!session.data.specs || session.data.specs.length === 0) {
           session.data.specs = this.getDefaultSpecs(session.data.category || 'мишки');
         }
-        await this.promptWizardPrice(chatId);
+        await this.promptWizardWarranty(chatId);
         return;
       }
 
@@ -2558,16 +2566,29 @@ export class TelegramBotService {
         }
       }
 
-      // If reached 10 specs, automatically advance to price
+      // If reached 10 specs, automatically advance to warranty
       if (session.data.specs.length >= 10) {
-        await this.promptWizardPrice(chatId);
+        await this.promptWizardWarranty(chatId);
       } else {
         await this.promptWizardSpecs(chatId);
       }
       return;
     }
 
-    // 5. Price Input (Manual Only)
+    // 5. Warranty Input
+    if (session.step === 'warranty') {
+      let wVal = text;
+      if (text === '1' || text.toLowerCase().includes('1') || text.toLowerCase().includes('один')) {
+        wVal = '1 місяць';
+      } else if (text === '3' || text.toLowerCase().includes('3') || text.toLowerCase().includes('три')) {
+        wVal = '3 місяці';
+      }
+      session.data.warranty = wVal || '1 місяць';
+      await this.promptWizardPrice(chatId);
+      return;
+    }
+
+    // 6. Price Input (Manual Only)
     if (session.step === 'price') {
       const num = parseInt(text.replace(/[^\d]/g, ''), 10);
       if (isNaN(num) || num <= 0) {
@@ -2784,7 +2805,7 @@ export class TelegramBotService {
     }
 
     const text = `🏷 <b>Товар:</b> ${fullTitle}\n\n` +
-      `<b>Крок 4/8: Характеристики та переваги товару (до 10 шт.):</b>\n\n` +
+      `<b>Крок 4/9: Характеристики та переваги товару (до 10 шт.):</b>\n\n` +
       `<i>Формат введення (кожна з нового рядка або по одній):</i>\n` +
       `<code>Сенсор (Paw3395)</code>\n` +
       `<code>Вага (49г)</code>\n` +
@@ -2807,6 +2828,33 @@ export class TelegramBotService {
     });
   }
 
+  async promptWizardWarranty(chatId) {
+    const session = this.adminSessions[chatId];
+    if (!session) return;
+    session.step = 'warranty';
+
+    const fullTitle = `${session.data.brand} ${session.data.title}`.trim();
+    const currentWarranty = session.data.warranty || '1 місяць';
+
+    const buttons = [
+      [
+        { text: currentWarranty === '1 місяць' ? '🛡 1 місяць (Стандарт)' : '🛡 1 місяць', callback_data: 'wiz_warranty:1 місяць' },
+        { text: currentWarranty === '3 місяці' ? '🛡 3 місяці (Розширена)' : '🛡 3 місяці', callback_data: 'wiz_warranty:3 місяці' }
+      ],
+      [
+        { text: '❌ Скасувати', callback_data: 'wiz_cancel' }
+      ]
+    ];
+
+    await this.safeEditOrSend(chatId, session.cardMsgId, `🏷 <b>Товар:</b> ${fullTitle}\n\n` +
+      `🛡 <b>Крок 5/9: Оберіть термін гарантії на товар:</b>\n\n` +
+      `• <b>1 місяць</b> — стандартна гарантія для більшості товарів.\n` +
+      `• <b>3 місяці</b> — розширена гарантія для дорогих / преміальних девайсів.\n\n` +
+      `<i>Оберіть потрібний варіант кнопкою:</i>`, {
+      reply_markup: { inline_keyboard: buttons }
+    });
+  }
+
   async promptWizardPrice(chatId) {
     const session = this.adminSessions[chatId];
     if (!session) return;
@@ -2814,7 +2862,7 @@ export class TelegramBotService {
 
     const fullTitle = `${session.data.brand} ${session.data.title}`.trim();
     await this.safeEditOrSend(chatId, session.cardMsgId, `🏷 <b>Товар:</b> ${fullTitle}\n\n` +
-      `<b>Крок 5/8: Вкажіть ціну товару (у гривнях):</b>\n\n` +
+      `<b>Крок 6/9: Вкажіть ціну товару (у гривнях):</b>\n\n` +
       `<i>Введіть число текстом (наприклад: <code>1499</code>):</i>`, {
       reply_markup: {
         inline_keyboard: [[{ text: '❌ Скасувати', callback_data: 'wiz_cancel' }]]
@@ -2836,7 +2884,7 @@ export class TelegramBotService {
     ];
 
     await this.safeEditOrSend(chatId, session.cardMsgId, `💰 <b>Ціна:</b> ${session.data.price} ₴\n\n` +
-      `<b>Крок 6/9: Оберіть категорію товару:</b>\n` +
+      `<b>Крок 7/9: Оберіть категорію товару:</b>\n` +
       `<i>Категорія одразу відобразиться у фільтрах вітрини магазину:</i>`, {
       reply_markup: { inline_keyboard: catButtons }
     });
@@ -2857,7 +2905,7 @@ export class TelegramBotService {
     ];
 
     await this.safeEditOrSend(chatId, session.cardMsgId, `🏷 <b>Товар:</b> ${fullTitle}\n\n` +
-      `<b>Крок 7/9: Оберіть або введіть позначку / бейдж товару:</b>\n\n` +
+      `<b>Крок 8/9: Оберіть або введіть позначку / бейдж товару:</b>\n\n` +
       `<i>Оберіть популярний бейдж кнопкою або надішліть свій текст повідомленням у чат (або натисніть «⏩ Пропустити»):</i>`, {
       reply_markup: { inline_keyboard: tagButtons }
     });
@@ -2913,7 +2961,7 @@ export class TelegramBotService {
     const selectedText = selected.length > 0 ? selected.join(', ') : 'Поки не обрано (натисніть на кнопки кольорів)';
 
     await this.safeEditOrSend(chatId, session.cardMsgId, `🗂 <b>Категорія:</b> ${session.data.category}\n\n` +
-      `<b>Крок 7/8: Оберіть кольори товару (однією плашкою з галочками):</b>\n\n` +
+      `<b>Крок 9/9: Оберіть кольори товару (однією плашкою з галочками):</b>\n\n` +
       `Обрані: <b>${selectedText}</b>\n\n` +
       `<i>Натискайте на кнопки потрібних кольорів, щоб увімкнути/вимкнути галочку [✅]:</i>`, {
       reply_markup: { inline_keyboard: keyboard }
@@ -3072,7 +3120,8 @@ export class TelegramBotService {
     const text = `✨ <b>ПЕРЕВІРКА НОВОГО ТОВАРУ</b> ✨\n\n` +
       `🏷 <b>Бренд:</b> ${d.brand}\n` +
       `🎮 <b>Назва:</b> <b>${d.title}</b>\n` +
-      `💰 <b>Ціна:</b> <b>${d.price} ₴</b> (стара ціна: ${Math.round(d.price * 1.15)} ₴)\n` +
+      `💰 <b>Ціна:</b> <b>${d.price} ₴</b>\n` +
+      `🛡 <b>Гарантія:</b> <b>${d.warranty || '1 місяць'}</b>\n` +
       `🗂 <b>Категорія:</b> ${d.category}\n` +
       `🏷 <b>Позначка / Бейдж:</b> <b>${d.tag || 'Без бейджа'}</b>\n` +
       `📝 <b>Опис:</b> <i>${(d.description || '').slice(0, 100)}${(d.description || '').length > 100 ? '...' : ''}</i>\n` +
@@ -3162,6 +3211,7 @@ export class TelegramBotService {
       title: fullTitle,
       price,
       old_price: d.old_price !== undefined ? d.old_price : null,
+      warranty: d.warranty || '1 місяць',
       tag: d.tag !== undefined ? d.tag : 'НОВИНКА',
       category,
       quantity: totalQuantity,
@@ -3246,7 +3296,7 @@ export class TelegramBotService {
     }
     return [
       { key: 'Тип', value: 'Оригінальний геймерський аксесуар' },
-      { key: 'Гарантія', value: 'Офіційна гарантія від виробника' }
+      { key: 'Матеріали', value: 'Преміальні зносостійкі матеріали' }
     ];
   }
 
@@ -3347,21 +3397,25 @@ export class TelegramBotService {
       ? prod.quantity
       : (prod.color_quantities ? Object.values(prod.color_quantities).reduce((a, b) => a + Number(b || 0), 0) : 0);
 
-    const oldPriceStr = (prod.old_price && Number(prod.old_price) > Number(prod.price))
-      ? ` (стара: ${prod.old_price} ₴)`
-      : '';
+    const oldPriceNum = (prod.old_price && Number(prod.old_price) > Number(prod.price)) ? Number(prod.old_price) : 0;
+    const discountPct = oldPriceNum ? Math.round(((oldPriceNum - Number(prod.price)) / oldPriceNum) * 100) : 0;
+    const priceDisplay = oldPriceNum
+      ? `<b>${prod.price} ₴</b> <s>${oldPriceNum} ₴</s> (🔥 Знижка: <b>-${discountPct}%</b>)`
+      : `<b>${prod.price} ₴</b>`;
+
     let text = `🎮 <b>КЕРУВАННЯ ТОВАРОМ</b>\n\n`;
     text += `🏷 <b>1. Бренд:</b> <b>${brandSafe}</b>\n`;
     text += `🎮 <b>2. Назва / модель:</b> <b>${titleSafe}</b>\n`;
     text += `📝 <b>3. Опис:</b> <i>${descSafe || 'Не вказано'}</i>\n`;
-    text += `💰 <b>4. Ціна:</b> <b>${prod.price} ₴</b>${oldPriceStr}\n`;
+    text += `💰 <b>4. Ціна:</b> ${priceDisplay}\n`;
+    text += `🛡 <b>5. Гарантія:</b> <b>${escapeHtml(prod.warranty || '1 місяць')}</b>\n`;
     text += `🗂 <b>Категорія:</b> <b>${catSafe}</b> | Артикул: <code>${skuSafe}</code>\n`;
     text += `🏷 <b>Позначка / Бейдж:</b> <b>${tagSafe}</b>\n\n`;
-    text += `🎨 <b>5. Кольори та склад (${colorsList.length}):</b>\n${colorsFormatted || '  • Black'}\n`;
+    text += `🎨 <b>6. Кольори та склад (${colorsList.length}):</b>\n${colorsFormatted || '  • Black'}\n`;
     text += `📦 <b>Загальний залишок:</b> <b>${prodTotalQty} шт.</b>\n\n`;
-    text += `📋 <b>6. Характеристики (${specsList.length}/10):</b>\n${specsFormatted}\n\n`;
-    text += `📸 <b>7. Головне фото каталогу:</b> ${prod.img ? '✅ Встановлено (1 фото)' : '⚙️ Стандартне'}\n`;
-    text += `🖼 <b>8. Фото кольорів:</b> Налаштовано окремо для кожного кольору\n\n`;
+    text += `📋 <b>7. Характеристики (${specsList.length}/10):</b>\n${specsFormatted}\n\n`;
+    text += `📸 <b>8. Головне фото каталогу:</b> ${prod.img ? '✅ Встановлено (1 фото)' : '⚙️ Стандартне'}\n`;
+    text += `🖼 <b>9. Фото кольорів:</b> Налаштовано окремо для кожного кольору\n\n`;
     text += `<i>Натисніть на параметр нижче, щоб швидко відредагувати його:</i>`;
 
     const buttons = [
@@ -3374,15 +3428,16 @@ export class TelegramBotService {
         { text: '💰 4. Ціна', callback_data: `edit_prod_field:${prod.id}:price` }
       ],
       [
-        { text: '🎨 5. Кольори', callback_data: `edit_prod_field:${prod.id}:colors` },
-        { text: '📋 6. Характеристики', callback_data: `edit_prod_field:${prod.id}:specs` }
+        { text: '🛡 5. Гарантія', callback_data: `edit_prod_field:${prod.id}:warranty` },
+        { text: '🏷 6. Позначка / Бейдж', callback_data: `edit_prod_field:${prod.id}:tag` }
       ],
       [
-        { text: '📸 7. Головне фото', callback_data: `edit_prod_field:${prod.id}:main_photo` },
-        { text: '🖼 8. Фото кольорів', callback_data: `edit_prod_field:${prod.id}:color_photos` }
+        { text: '🎨 7. Кольори', callback_data: `edit_prod_field:${prod.id}:colors` },
+        { text: '📋 8. Характеристики', callback_data: `edit_prod_field:${prod.id}:specs` }
       ],
       [
-        { text: '🏷 9. Позначка / Бейдж', callback_data: `edit_prod_field:${prod.id}:tag` }
+        { text: '📸 9. Головне фото', callback_data: `edit_prod_field:${prod.id}:main_photo` },
+        { text: '🖼 10. Фото кольорів', callback_data: `edit_prod_field:${prod.id}:color_photos` }
       ],
       [
         { text: '🗑 Видалити товар з каталогу', callback_data: `admin_delete_prod_prompt:${prod.id}` }
@@ -3462,16 +3517,65 @@ export class TelegramBotService {
       return;
     }
 
-    // 4. PRICE
+    // 4. PRICE & DISCOUNTS
     if (field === 'price') {
-      await this.safeEditOrSend(chatId, cardId, `💰 <b>Редагування ціни товару:</b>\n` +
-        `Поточна ціна: <b>${prod.price} ₴</b>\n\n` +
-        `<i>Введіть нову ціну (лише число, наприклад: <code>1899</code>):</i>`, {
+      const curOldPrice = (prod.old_price && Number(prod.old_price) > Number(prod.price)) ? Number(prod.old_price) : null;
+      const discountPct = curOldPrice ? Math.round(((curOldPrice - Number(prod.price)) / curOldPrice) * 100) : 0;
+      
+      const priceStatusText = curOldPrice
+        ? `🔥 <b>Активна акційна ціна:</b> <b>${prod.price} ₴</b>\n` +
+          `🏷 <b>Стара базова ціна:</b> <s>${curOldPrice} ₴</s> (Знижка: <b>-${discountPct}%</b>)`
+        : `💰 <b>Поточна ціна:</b> <b>${prod.price} ₴</b> (без знижки)`;
+
+      const inlineKeyboard = [
+        [
+          { text: '🏷 Знижка -10%', callback_data: `edit_prod_cb:${prodId}:price_discount:10` },
+          { text: '🏷 Знижка -15%', callback_data: `edit_prod_cb:${prodId}:price_discount:15` },
+          { text: '🏷 Знижка -20%', callback_data: `edit_prod_cb:${prodId}:price_discount:20` }
+        ],
+        [
+          { text: '🏷 Знижка -25%', callback_data: `edit_prod_cb:${prodId}:price_discount:25` },
+          { text: '🎯 Вказати акційну ціну', callback_data: `edit_prod_cb:${prodId}:price_discount:custom_promo` }
+        ]
+      ];
+
+      if (curOldPrice) {
+        inlineKeyboard.push([
+          { text: '❌ Прибрати знижку (скинути стару ціну)', callback_data: `edit_prod_cb:${prodId}:price_discount:clear` }
+        ]);
+      }
+
+      inlineKeyboard.push([
+        { text: '🔙 Скасувати та повернутися', callback_data: `admin_prod_view:${prodId}` }
+      ]);
+
+      await this.safeEditOrSend(chatId, cardId, `💰 <b>Редагування ціни та акцій товару:</b>\n\n` +
+        `🏷 Товар: <b>${escapeHtml(prod.brand)} ${escapeHtml(prod.title)}</b>\n` +
+        `${priceStatusText}\n\n` +
+        `<i>Щоб встановити чисту базову ціну, надішліть число у чат (наприклад: <code>1899</code>).\nАбо скористайтеся кнопками швидкої знижки / акції нижче:</i>`, {
         reply_markup: {
-          inline_keyboard: [
-            [{ text: '🔙 Скасувати та повернутися', callback_data: `admin_prod_view:${prodId}` }]
-          ]
+          inline_keyboard: inlineKeyboard
         }
+      });
+      return;
+    }
+
+    // 5. WARRANTY
+    if (field === 'warranty') {
+      const curW = prod.warranty || '1 місяць';
+      const warrantyButtons = [
+        [
+          { text: curW === '1 місяць' ? '🛡 ✅ 1 місяць (Поточна)' : '🛡 1 місяць', callback_data: `edit_prod_cb:${prodId}:warranty:1 місяць` },
+          { text: curW === '3 місяці' ? '🛡 ✅ 3 місяці (Поточна)' : '🛡 3 місяці', callback_data: `edit_prod_cb:${prodId}:warranty:3 місяці` }
+        ],
+        [{ text: '🔙 Назад до товару', callback_data: `admin_prod_view:${prodId}` }]
+      ];
+
+      await this.safeEditOrSend(chatId, cardId, `🛡 <b>Редагування гарантії для товару:</b>\n\n` +
+        `Товар: <b>${escapeHtml(prod.brand)} ${escapeHtml(prod.title)}</b>\n` +
+        `Поточна гарантія: <b>${escapeHtml(curW)}</b>\n\n` +
+        `<i>Оберіть термін гарантії кнопкою:</i>`, {
+        reply_markup: { inline_keyboard: warrantyButtons }
       });
       return;
     }
@@ -3653,6 +3757,60 @@ export class TelegramBotService {
     // 3. Description auto
     if (action === 'desc_auto') {
       prod.description = `${prod.brand} ${prod.title} — якісний ігровий девайс з офіційною гарантією від MILIPSTORE.`;
+      db.save();
+      delete this.adminSessions[chatId];
+      await this.sendAdminProductView(chatId, prodId, messageId);
+      return;
+    }
+
+    // 4. Price discounts & promo presets
+    if (action === 'price_discount') {
+      if (param === 'clear') {
+        if (prod.old_price && Number(prod.old_price) > Number(prod.price)) {
+          prod.price = Number(prod.old_price);
+        }
+        prod.old_price = null;
+        db.save();
+        delete this.adminSessions[chatId];
+        await this.sendAdminProductView(chatId, prodId, messageId);
+        return;
+      }
+
+      if (param === 'custom_promo') {
+        session.isCustomPromo = true;
+        await this.safeEditOrSend(chatId, messageId, `🎯 <b>Встановлення акційної ціни:</b>\n\n` +
+          `Товар: <b>${escapeHtml(prod.brand)} ${escapeHtml(prod.title)}</b>\n` +
+          `Поточна базова ціна: <b>${prod.price} ₴</b>\n\n` +
+          `<i>Введіть нову знижену ціну (лише число, наприклад: <code>1499</code>):</i>\n\n` +
+          `• Поточна ціна (${prod.price} ₴) стане закресленою старою ціною.\n` +
+          `• Відсоток знижки буде вирахувано автоматично!`, {
+          reply_markup: {
+            inline_keyboard: [
+              [{ text: '🔙 Скасувати та повернутися', callback_data: `edit_prod_field:${prodId}:price` }]
+            ]
+          }
+        });
+        return;
+      }
+
+      const percent = parseInt(param, 10);
+      if (!isNaN(percent) && percent > 0) {
+        const basePrice = (prod.old_price && Number(prod.old_price) > Number(prod.price))
+          ? Number(prod.old_price)
+          : Number(prod.price);
+        const discountedPrice = Math.round((basePrice * (100 - percent) / 100) / 10) * 10;
+        prod.old_price = basePrice;
+        prod.price = discountedPrice;
+        db.save();
+        delete this.adminSessions[chatId];
+        await this.sendAdminProductView(chatId, prodId, messageId);
+        return;
+      }
+    }
+
+    // 5. Warranty preset chosen
+    if (action === 'warranty') {
+      prod.warranty = param || '1 місяць';
       db.save();
       delete this.adminSessions[chatId];
       await this.sendAdminProductView(chatId, prodId, messageId);
@@ -3877,13 +4035,22 @@ export class TelegramBotService {
     if (field === 'price') {
       const num = parseInt(text.replace(/[^\d]/g, ''), 10);
       if (!isNaN(num) && num > 0) {
-        const oldVal = prod.price;
-        if (oldVal && num < oldVal) {
-          prod.old_price = oldVal;
-        } else if (num >= oldVal) {
+        if (session.isCustomPromo) {
+          const basePrice = (prod.old_price && Number(prod.old_price) > Number(prod.price))
+            ? Number(prod.old_price)
+            : Number(prod.price);
+          if (num < basePrice) {
+            prod.old_price = basePrice;
+            prod.price = num;
+          } else {
+            prod.price = num;
+            prod.old_price = null;
+          }
+        } else {
+          // Standard clean base price setting
+          prod.price = num;
           prod.old_price = null;
         }
-        prod.price = num;
         db.save();
         delete this.adminSessions[chatId];
         await this.sendAdminProductView(chatId, prodId, cardId);
@@ -3893,7 +4060,24 @@ export class TelegramBotService {
       return;
     }
 
-    // 5. COLORS - Custom text input
+    // 5. WARRANTY
+    if (field === 'warranty') {
+      if (text) {
+        let wVal = text;
+        if (text === '1' || text.toLowerCase().includes('1') || text.toLowerCase().includes('один')) {
+          wVal = '1 місяць';
+        } else if (text === '3' || text.toLowerCase().includes('3') || text.toLowerCase().includes('три')) {
+          wVal = '3 місяці';
+        }
+        prod.warranty = wVal;
+        db.save();
+        delete this.adminSessions[chatId];
+        await this.sendAdminProductView(chatId, prodId, cardId);
+      }
+      return;
+    }
+
+    // 6. COLORS - Custom text input
     if (field === 'colors' && session.customColorPrompt) {
       if (text) {
         if (!session.data.tempColors) session.data.tempColors = [];
