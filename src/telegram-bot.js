@@ -382,6 +382,61 @@ export class TelegramBotService {
       }
     }
 
+    // START / WELCOME / DEEP LINK - Clean Single Message & Always resets sessions
+    if (text.startsWith('/start')) {
+      delete this.adminSessions[chatId];
+
+      const parts = text.split(' ');
+      const startParam = parts[1] || '';
+
+      // Check if deep link for order payment or tracking: /start order_MLP-XXXXXX
+      if (startParam.startsWith('order_')) {
+        const orderId = startParam.replace('order_', '').trim();
+        const order = db.getOrderById(orderId);
+
+        if (order) {
+          // Link customer telegram id to order
+          order.customer.telegram_id = from.id;
+          if (from.username) order.customer.telegram_username = from.username;
+          db.linkOrderToTelegramUser(from.id, order.order_id, order.customer);
+          db.save();
+
+          await this.callApi('sendMessage', {
+            chat_id: chatId,
+            text: `👋 Вітаємо, <b>${from.first_name || 'клієнт'}</b>!\nВаше замовлення <b>#${order.order_id}</b> знайдено в системі.`,
+            parse_mode: 'HTML',
+            reply_markup: this.getReplyKeyboard(from)
+          });
+
+          // Present order card and payment prompt
+          await this.sendCustomerOrderWithPayment(chatId, order);
+          return;
+        }
+      }
+
+      const welcomeText = `👋 <b>Вітаємо в офіційному боті MILIPSTORE!</b>\n\n` +
+        `🎮 <b>MILIPSTORE</b> — преміальні ігрові девайси та техніка для сетапу:\n` +
+        `• Ультралегкі бездротові мишки\n` +
+        `• Кастомні механічні клавіатури з Gasket Mount\n` +
+        `• Професійні ігрові поверхні Cordura Control\n\n` +
+        `У цьому боті ви можете:\n` +
+        `💳 Оплачувати замовлення онлайн безпосередньо в чаті\n` +
+        `📦 Відстежувати статус замовлення та номер ТТН\n` +
+        `🛍 Переглядати історію покупок\n\n` +
+        `👇 <i>Оберіть потрібну дію на панелі кнопок внизу екрана:</i>`;
+
+      const sendRes = await this.callApi('sendMessage', {
+        chat_id: chatId,
+        text: welcomeText,
+        parse_mode: 'HTML',
+        reply_markup: this.getReplyKeyboard(from)
+      });
+      if (sendRes.ok && sendRes.result?.message_id) {
+        this.trackMessage(chatId, sendRes.result.message_id);
+      }
+      return;
+    }
+
     // Cancel wizard or action on /cancel
     if (text === '/cancel' || text === '❌ Скасувати' || text === 'Скасувати') {
       if (this.adminSessions[chatId]) {
@@ -457,64 +512,6 @@ export class TelegramBotService {
       if (order) {
         await this.sendCustomerPaymentSuccess(order);
         await this.sendAdminPaymentSuccess(order);
-      }
-      return;
-    }
-
-    // START / WELCOME / DEEP LINK - Clean Single Message
-    if (text.startsWith('/start')) {
-      const parts = text.split(' ');
-      const startParam = parts[1] || '';
-
-      // Check if deep link for order payment or tracking: /start order_MLP-XXXXXX
-      if (startParam.startsWith('order_')) {
-        const orderId = startParam.replace('order_', '').trim();
-        const order = db.getOrderById(orderId);
-
-        if (order) {
-          // Link customer telegram id to order
-          order.customer.telegram_id = from.id;
-          if (from.username) order.customer.telegram_username = from.username;
-          db.linkOrderToTelegramUser(from.id, order.order_id, order.customer);
-          db.save();
-
-          await this.callApi('sendMessage', {
-            chat_id: chatId,
-            text: `👋 Вітаємо, <b>${from.first_name || 'клієнт'}</b>!\nВаше замовлення <b>#${order.order_id}</b> знайдено в системі.`,
-            parse_mode: 'HTML',
-            reply_markup: this.getReplyKeyboard(from)
-          });
-
-          // Present order card and payment prompt
-          await this.sendCustomerOrderWithPayment(chatId, order);
-          return;
-        }
-      }
-
-      // Clean up previous clutter in chat on /start so only one clean welcome message remains
-      if (msg.message_id) {
-        await this.cleanupChat(chatId, msg.message_id);
-      }
-
-      const welcomeText = `👋 <b>Вітаємо в офіційному боті MILIPSTORE!</b>\n\n` +
-        `🎮 <b>MILIPSTORE</b> — преміальні ігрові девайси та техніка для сетапу:\n` +
-        `• Ультралегкі бездротові мишки\n` +
-        `• Кастомні механічні клавіатури з Gasket Mount\n` +
-        `• Професійні ігрові поверхні Cordura Control\n\n` +
-        `У цьому боті ви можете:\n` +
-        `💳 Оплачувати замовлення онлайн безпосередньо в чаті\n` +
-        `📦 Відстежувати статус замовлення та номер ТТН\n` +
-        `🛍 Переглядати історію покупок\n\n` +
-        `👇 <i>Оберіть потрібну дію на панелі кнопок внизу екрана:</i>`;
-
-      const sendRes = await this.callApi('sendMessage', {
-        chat_id: chatId,
-        text: welcomeText,
-        parse_mode: 'HTML',
-        reply_markup: this.getReplyKeyboard(from)
-      });
-      if (sendRes.ok && sendRes.result?.message_id) {
-        this.trackMessage(chatId, sendRes.result.message_id);
       }
       return;
     }
@@ -2516,12 +2513,18 @@ export class TelegramBotService {
     const session = this.adminSessions[chatId];
     if (!session || session.action !== 'wizard_add_product') return;
 
+    const text = (msg.text || '').trim();
+
+    // If command or cancel text, cancel wizard session gracefully
+    if (text.startsWith('/') || text === '❌ Скасувати' || text === 'Скасувати') {
+      delete this.adminSessions[chatId];
+      return;
+    }
+
     // Delete user's incoming message to keep the chat clean
     if (msg.message_id) {
       await this.safeDeleteMessage(chatId, msg.message_id);
     }
-
-    const text = (msg.text || '').trim();
 
     // 1. Custom Brand Input
     if (session.step === 'custom_brand') {
@@ -4075,10 +4078,17 @@ export class TelegramBotService {
     const session = this.adminSessions[chatId];
     if (!session || session.action !== 'edit_product_field') return;
 
+    const text = (msg.text || '').trim();
+
+    // If command or cancel text, cancel field edit session gracefully
+    if (text.startsWith('/') || text === '❌ Скасувати' || text === 'Скасувати') {
+      delete this.adminSessions[chatId];
+      return;
+    }
+
     const prodId = session.prodId;
     const field = session.field;
     const cardId = session.cardMsgId;
-    const text = (msg.text || '').trim();
 
     // Clean user message immediately
     if (msg.message_id) {
@@ -4483,11 +4493,17 @@ export class TelegramBotService {
     const session = this.adminSessions[chatId];
     if (!session) return;
 
+    const text = (msg.text || '').trim();
+
+    // If command or cancel text, cancel brand edit session gracefully
+    if (text.startsWith('/') || text === '❌ Скасувати' || text === 'Скасувати') {
+      delete this.adminSessions[chatId];
+      return;
+    }
+
     if (msg.message_id) {
       await this.safeDeleteMessage(chatId, msg.message_id);
     }
-
-    const text = (msg.text || '').trim();
 
     // 1. Edit brand photo
     if (session.action === 'brand_edit_photo') {
