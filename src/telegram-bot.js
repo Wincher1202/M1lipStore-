@@ -2432,6 +2432,26 @@ export class TelegramBotService {
       return;
     }
 
+    if (data.startsWith('wiz_main_color:')) {
+      const colVal = data.replace('wiz_main_color:', '').trim();
+      if (colVal !== 'SKIP' && colVal) {
+        session.data.main_color = colVal;
+        if (!session.data.color_images) session.data.color_images = {};
+        if (!session.data.color_images[colVal]) {
+          session.data.color_images[colVal] = { main: session.data.img, gallery: [session.data.img] };
+        } else {
+          session.data.color_images[colVal].main = session.data.img;
+          if (!session.data.color_images[colVal].gallery) session.data.color_images[colVal].gallery = [];
+          if (!session.data.color_images[colVal].gallery.includes(session.data.img)) {
+            session.data.color_images[colVal].gallery.unshift(session.data.img);
+          }
+        }
+      }
+      session.data.currentColorIndex = 0;
+      await this.promptWizardColorPhotos(chatId);
+      return;
+    }
+
     if (data === 'wiz_color_photo_auto' || data === 'wiz_color_photo_skip' || data === 'wiz_color_photo_skip_all') {
       await this.safeEditOrSend(chatId, session.cardMsgId, `⚠️ <b>Фото для кольору «${curColor}» є обов'язковим!</b>\n\nПропуск фото для кольорів вимкнено. Будь ласка, надішліть фото для «${curColor}» у чат:`, {
         reply_markup: {
@@ -2652,8 +2672,13 @@ export class TelegramBotService {
 
       if (photoUrl) {
         session.data.img = photoUrl;
-        session.data.currentColorIndex = 0;
-        await this.promptWizardColorPhotos(chatId);
+        const colors = session.data.colors || ['Black'];
+        if (colors.length > 0) {
+          await this.promptWizardMainPhotoColor(chatId);
+        } else {
+          session.data.currentColorIndex = 0;
+          await this.promptWizardColorPhotos(chatId);
+        }
         return;
       }
 
@@ -2985,6 +3010,26 @@ export class TelegramBotService {
     });
   }
 
+  async promptWizardMainPhotoColor(chatId) {
+    const session = this.adminSessions[chatId];
+    if (!session) return;
+    session.step = 'catalog_photo_color';
+
+    const colors = session.data.colors || ['Black'];
+    const buttons = [];
+    colors.forEach(c => {
+      buttons.push([{ text: `🎨 ${c}`, callback_data: `wiz_main_color:${c}` }]);
+    });
+    buttons.push([{ text: '⏩ Без прив\'язки до кольору', callback_data: 'wiz_main_color:SKIP' }]);
+    buttons.push([{ text: '❌ Скасувати створення', callback_data: 'wiz_cancel' }]);
+
+    await this.safeEditOrSend(chatId, session.cardMsgId, `📸 <b>Головне фото успішно завантажено!</b>\n\n` +
+      `🎨 <b>Оберіть колір, який зображений на цьому головному фото:</b>\n\n` +
+      `<i>Це фото стане першим у галереї цього кольору, а в каталозі при перегляді товару буде автоматично вибрано цей колір.</i>`, {
+      reply_markup: { inline_keyboard: buttons }
+    });
+  }
+
   async promptWizardColorPhotos(chatId) {
     const session = this.adminSessions[chatId];
     if (!session) return;
@@ -3222,6 +3267,7 @@ export class TelegramBotService {
       specs: d.specs && d.specs.length > 0 ? d.specs : this.getDefaultSpecs(category),
       color_images,
       color_quantities,
+      main_color: d.main_color || null,
       sku: `${brand.toUpperCase().slice(0, 3)}-${Math.random().toString(36).slice(2, 7).toUpperCase()}`,
       featured: false,
       popular: true,
@@ -3414,7 +3460,8 @@ export class TelegramBotService {
     text += `🎨 <b>6. Кольори та склад (${colorsList.length}):</b>\n${colorsFormatted || '  • Black'}\n`;
     text += `📦 <b>Загальний залишок:</b> <b>${prodTotalQty} шт.</b>\n\n`;
     text += `📋 <b>7. Характеристики (${specsList.length}/10):</b>\n${specsFormatted}\n\n`;
-    text += `📸 <b>8. Головне фото каталогу:</b> ${prod.img ? '✅ Встановлено (1 фото)' : '⚙️ Стандартне'}\n`;
+    const mainColStr = prod.main_color ? ` (Колір: <b>${escapeHtml(prod.main_color)}</b>)` : '';
+    text += `📸 <b>8. Головне фото каталогу:</b> ${prod.img ? '✅ Встановлено' : '⚙️ Стандартне'}${mainColStr}\n`;
     text += `🖼 <b>9. Фото кольорів:</b> Налаштовано окремо для кожного кольору\n\n`;
     text += `<i>Натисніть на параметр нижче, щоб швидко відредагувати його:</i>`;
 
@@ -3594,13 +3641,33 @@ export class TelegramBotService {
 
     // 7. MAIN PHOTO
     if (field === 'main_photo') {
-      await this.safeEditOrSend(chatId, cardId, `📸 <b>Головне фото для каталогу (1 фото):</b>\n\n` +
-        `Поточне фото: <code>${escapeHtml(prod.img || 'немає')}</code>\n\n` +
-        `<i>Надішліть нове фото файлом зображення або прямим посиланням на картинку в цей чат:</i>`, {
+      const colorsList = this.normalizeColorsList(prod.colors);
+      const colorBtns = [];
+      colorsList.forEach(c => {
+        const isSelected = prod.main_color === c;
+        colorBtns.push([{
+          text: `🎨 Прив'язати до кольору: ${c} ${isSelected ? '✅' : ''}`,
+          callback_data: `edit_prod_cb:${prodId}:main_photo_color:${c}`
+        }]);
+      });
+
+      if (prod.main_color) {
+        colorBtns.push([{
+          text: '❌ Зняти прив\'язку до кольору',
+          callback_data: `edit_prod_cb:${prodId}:main_photo_color:CLEAR`
+        }]);
+      }
+
+      colorBtns.push([{ text: '🔙 Скасувати та повернутися', callback_data: `admin_prod_view:${prodId}` }]);
+
+      const mainColText = prod.main_color ? `<b>${escapeHtml(prod.main_color)}</b>` : '<i>Не прив\'язано</i>';
+
+      await this.safeEditOrSend(chatId, cardId, `📸 <b>Головне фото каталогу та його колір:</b>\n\n` +
+        `• Поточне фото: <code>${escapeHtml(prod.img || 'немає')}</code>\n` +
+        `• Прив'язаний колір: ${mainColText}\n\n` +
+        `<i>Оберіть кнопкою нижче колір, який зображений на цьому головному фото (щоб при відкритті товару з каталогу автоматично відкривався саме цей колір):\nАбо надішліть нове фото файлом чи посиланням у цей чат:</i>`, {
         reply_markup: {
-          inline_keyboard: [
-            [{ text: '🔙 Скасувати та повернутися', callback_data: `admin_prod_view:${prodId}` }]
-          ]
+          inline_keyboard: colorBtns
         }
       });
       return;
@@ -3916,7 +3983,30 @@ export class TelegramBotService {
       return;
     }
 
-    // 7. Main Photo Auto
+    // 7. Main Photo Auto & Main Photo Color Binding
+    if (action === 'main_photo_color') {
+      const selectedColor = param;
+      if (selectedColor === 'CLEAR') {
+        prod.main_color = null;
+      } else {
+        prod.main_color = selectedColor;
+        if (!prod.color_images) prod.color_images = {};
+        if (!prod.color_images[selectedColor]) {
+          prod.color_images[selectedColor] = { main: prod.img, gallery: [prod.img] };
+        } else {
+          if (prod.img) {
+            prod.color_images[selectedColor].main = prod.img;
+            if (!prod.color_images[selectedColor].gallery) prod.color_images[selectedColor].gallery = [];
+            const filteredGal = prod.color_images[selectedColor].gallery.filter(g => g !== prod.img);
+            prod.color_images[selectedColor].gallery = [prod.img, ...filteredGal];
+          }
+        }
+      }
+      db.save();
+      await this.startEditProductField(chatId, prodId, 'main_photo', messageId);
+      return;
+    }
+
     if (action === 'main_photo_auto') {
       const autoImg = this.getDefaultProductImage(prod.brand, prod.category);
       prod.img = autoImg;
@@ -4137,6 +4227,19 @@ export class TelegramBotService {
         prod.img = photoUrl;
         if (!prod.gallery) prod.gallery = [];
         if (!prod.gallery.includes(photoUrl)) prod.gallery.unshift(photoUrl);
+
+        if (prod.main_color) {
+          if (!prod.color_images) prod.color_images = {};
+          if (!prod.color_images[prod.main_color]) {
+            prod.color_images[prod.main_color] = { main: photoUrl, gallery: [photoUrl] };
+          } else {
+            prod.color_images[prod.main_color].main = photoUrl;
+            if (!prod.color_images[prod.main_color].gallery) prod.color_images[prod.main_color].gallery = [];
+            const filteredGal = prod.color_images[prod.main_color].gallery.filter(g => g !== photoUrl);
+            prod.color_images[prod.main_color].gallery = [photoUrl, ...filteredGal];
+          }
+        }
+
         db.save();
         delete this.adminSessions[chatId];
         await this.sendAdminProductView(chatId, prodId, cardId);
