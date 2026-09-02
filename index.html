@@ -5357,6 +5357,61 @@
         let tg = window.Telegram?.WebApp;
         let botUsername = 'payments_jobbot';
 
+        function getTelegramUser() {
+            try {
+                const tw = window.Telegram?.WebApp || tg;
+                if (tw?.initDataUnsafe?.user?.id) {
+                    const u = tw.initDataUnsafe.user;
+                    try { localStorage.setItem('m1lip_tg_user', JSON.stringify(u)); } catch(e) {}
+                    return u;
+                }
+                if (tw?.initData) {
+                    const sp = new URLSearchParams(tw.initData);
+                    const rawUser = sp.get('user');
+                    if (rawUser) {
+                        const u = JSON.parse(rawUser);
+                        if (u && u.id) {
+                            try { localStorage.setItem('m1lip_tg_user', JSON.stringify(u)); } catch(e) {}
+                            return u;
+                        }
+                    }
+                }
+                if (window.location.hash) {
+                    const h = window.location.hash.replace(/^#/, '');
+                    const hp = new URLSearchParams(h);
+                    const tgData = hp.get('tgWebAppData');
+                    if (tgData) {
+                        const sub = new URLSearchParams(tgData);
+                        const rawUser = sub.get('user');
+                        if (rawUser) {
+                            const u = JSON.parse(rawUser);
+                            if (u && u.id) {
+                                try { localStorage.setItem('m1lip_tg_user', JSON.stringify(u)); } catch(e) {}
+                                return u;
+                            }
+                        }
+                    }
+                }
+                const saved = localStorage.getItem('m1lip_tg_user');
+                if (saved) {
+                    const u = JSON.parse(saved);
+                    if (u && u.id) return u;
+                }
+            } catch (e) {
+                console.warn('[getTelegramUser]', e);
+            }
+            return null;
+        }
+
+        // Initialize Telegram WebApp view
+        try {
+            if (window.Telegram?.WebApp) {
+                window.Telegram.WebApp.ready();
+                window.Telegram.WebApp.expand();
+            }
+            getTelegramUser();
+        } catch (e) {}
+
         const API_BASE = (window.location.hostname.includes('github.io')) 
             ? "https://m1lipstore.onrender.com/api" 
             : "/api";
@@ -8053,14 +8108,18 @@
             const codFee = isCod ? Math.round(20 + subtotal * 0.02) : 0;
             const grandTotal = subtotal + codFee;
 
+            const tgUser = getTelegramUser();
+            const customerTgId = tgUser?.id || null;
+            const customerTgUsername = tgUser?.username || null;
+
             const payload = {
                 customer: {
                     first_name: name,
                     last_name: surname,
                     middle_name: patronymic,
                     phone: phone,
-                    telegram_id: tg?.initDataUnsafe?.user?.id || null,
-                    telegram_username: tg?.initDataUnsafe?.user?.username || null
+                    telegram_id: customerTgId,
+                    telegram_username: customerTgUsername
                 },
                 delivery: {
                     provider: checkoutDelivery.provider || 'nova_poshta',
@@ -8098,7 +8157,8 @@
 
             try {
                 const headers = { 'Content-Type': 'application/json' };
-                if (tg?.initData) headers['X-Telegram-Init-Data'] = tg.initData;
+                const tw = window.Telegram?.WebApp || tg;
+                if (tw?.initData) headers['X-Telegram-Init-Data'] = tw.initData;
 
                 let data = null;
                 try {
@@ -8118,7 +8178,7 @@
                     console.warn('[Order API network fallback]', fetchErr);
                 }
 
-                if (!data || !data.order_id && !data.id) {
+                if (!data || (!data.order_id && !data.id)) {
                     const randomNum = Math.floor(100000 + Math.random() * 900000);
                     data = {
                         status: 'success',
@@ -8140,7 +8200,7 @@
                 }
 
                 const orderObj = data.order || data;
-                const orderIdStr = orderObj.order_id || orderObj.id || data.order_id || data.id;
+                const orderIdStr = (orderObj.order_id || orderObj.id || data.order_id || data.id || '').replace(/^#/, '');
 
                 // Empty cart immediately
                 cart = [];
@@ -8151,22 +8211,17 @@
                 localStorage.setItem('m1lip_last_phone', phone);
                 localStorage.setItem('m1lip_last_order_id', orderIdStr);
 
+                // Hide checkout drawer
                 toggleCheckoutDrawer(false);
 
-                // If inside Telegram WebApp, close the WebApp cleanly without calling tg.sendData
-                // (calling tg.sendData generates Telegram's unwanted service message "Ви успішно передали дані боту...")
-                if (window.Telegram?.WebApp && window.Telegram.WebApp.initData) {
-                    try {
-                        setTimeout(() => {
-                            window.Telegram.WebApp.close();
-                        }, 250);
-                    } catch (e) {
-                        console.warn('[Telegram WebApp close]', e);
-                    }
-                }
-
-                // Show success modal with direct Telegram bot action
+                // Show success confirmation screen
                 showOrderSuccessModal(orderObj, paymentMethod);
+
+                // Automatically redirect to Telegram bot
+                const targetBotUrl = `https://t.me/${botUsername}?start=order_${orderIdStr}`;
+                setTimeout(() => {
+                    goToTelegramBot(targetBotUrl);
+                }, 350);
 
                 updateAdminNewBadge();
             } catch (err) {
@@ -8185,6 +8240,11 @@
                 localStorage.setItem('m1lip_last_order_id', fallbackOrder.order_id);
                 toggleCheckoutDrawer(false);
                 showOrderSuccessModal(fallbackOrder, paymentMethod);
+
+                const targetBotUrl = `https://t.me/${botUsername}?start=order_${fallbackOrder.order_id}`;
+                setTimeout(() => {
+                    goToTelegramBot(targetBotUrl);
+                }, 350);
             } finally {
                 if (submitBtn) {
                     submitBtn.disabled = false;
@@ -8194,7 +8254,7 @@
         }
 
         function showOrderSuccessModal(order, paymentType = 'online') {
-            const orderIdStr = order.order_id || order.id;
+            const orderIdStr = (order.order_id || order.id || '').replace(/^#/, '');
             const customer = order.customer || {};
             const delivery = order.delivery || {};
             const provName = delivery.provider === 'ukrposhta' ? 'Укрпошта' : 'Нова пошта';
@@ -8236,12 +8296,12 @@
 
             if (isCod) {
                 if (bannerTitle) bannerTitle.innerText = 'Сплата авансу 200 ₴ — у Telegram-боті';
-                if (bannerDesc) bannerDesc.innerHTML = `Для підтвердження та відправки замовлення необхідно сплатити страховий аванс <strong>200 ₴</strong> (аванс за зворотну доставку). Перейдіть у бот для зручної онлайн-оплати авансу.`;
-                if (tgBtnLabel) tgBtnLabel.innerText = '💳 Оплатити аванс 200 ₴ в Telegram →';
+                if (bannerDesc) bannerDesc.innerHTML = `Для підтвердження та відправки замовлення необхідно сплатити страховий аванс <strong>200 ₴</strong>. Переходимо в Telegram-бот для зручної оплати та відстеження.`;
+                if (tgBtnLabel) tgBtnLabel.innerText = '📱 Відкрити замовлення в боті →';
             } else {
                 if (bannerTitle) bannerTitle.innerText = 'Оплата та підтвердження — у Telegram-боті!';
-                if (bannerDesc) bannerDesc.innerHTML = `Рахунок на оплату <strong>${formatPrice(order.total || 0)}</strong> надіслано вам у чат з ботом. Відкрийте бот для безпечної оплати та відстеження ТТН.`;
-                if (tgBtnLabel) tgBtnLabel.innerText = '💳 Перейти до оплати в Telegram →';
+                if (bannerDesc) bannerDesc.innerHTML = `Рахунок на оплату <strong>${formatPrice(order.total || 0)}</strong> сформовано. Переходимо в Telegram-бот для безпечної оплати та отримання чека.`;
+                if (tgBtnLabel) tgBtnLabel.innerText = '📱 Відкрити замовлення в боті →';
             }
 
             cart = [];
@@ -8258,23 +8318,56 @@
             if (backdrop) backdrop.classList.add('active');
         }
 
+        function goToTelegramBot(targetUrl) {
+            if (!targetUrl) {
+                const lastOrderId = (localStorage.getItem('m1lip_last_order_id') || '').replace(/^#/, '');
+                targetUrl = `https://t.me/${botUsername}?start=order_${lastOrderId}`;
+            }
+
+            const tw = window.Telegram?.WebApp;
+            let opened = false;
+
+            // 1. Primary: Telegram WebApp native deep-link navigation
+            if (tw && typeof tw.openTelegramLink === 'function') {
+                try {
+                    tw.openTelegramLink(targetUrl);
+                    opened = true;
+                } catch (e) {
+                    console.warn('[openTelegramLink error]', e);
+                }
+            }
+
+            // 2. Secondary: Telegram WebApp openLink
+            if (!opened && tw && typeof tw.openLink === 'function') {
+                try {
+                    tw.openLink(targetUrl);
+                    opened = true;
+                } catch (e) {
+                    console.warn('[openLink error]', e);
+                }
+            }
+
+            // 3. Fallback: window navigation
+            if (!opened) {
+                try {
+                    window.location.href = targetUrl;
+                } catch (e) {
+                    try { window.open(targetUrl, '_blank'); } catch(e2) {}
+                }
+            }
+
+            // Cleanly close the Mini App so user is directly in the Telegram Bot chat
+            if (tw && typeof tw.close === 'function') {
+                setTimeout(() => {
+                    try { tw.close(); } catch (e) {}
+                }, 500);
+            }
+        }
+
         function handleSuccessOpenTelegram() {
-            closeSuccessModal();
             const lastOrderId = (localStorage.getItem('m1lip_last_order_id') || '').replace(/^#/, '');
             const targetUrl = `https://t.me/${botUsername}?start=order_${lastOrderId}`;
-
-            if (window.Telegram?.WebApp && window.Telegram.WebApp.initData) {
-                try {
-                    if (window.Telegram.WebApp.openTelegramLink) {
-                        window.Telegram.WebApp.openTelegramLink(targetUrl);
-                    }
-                    window.Telegram.WebApp.close();
-                } catch (e) {
-                    window.location.href = targetUrl;
-                }
-            } else {
-                window.open(targetUrl, '_blank');
-            }
+            goToTelegramBot(targetUrl);
         }
 
         /* ---- ADMIN PANEL: ЗАМОВЛЕННЯ ---- */
@@ -8802,13 +8895,16 @@
         }
 
         function closeAllDrawers() {
+            // Do not dismiss order success modal on background click
+            if (document.getElementById('success-modal')?.classList.contains('active')) {
+                return;
+            }
             toggleCart(false);
             toggleWishlistDrawer(false);
             toggleCheckoutDrawer(false);
             toggleProfileDrawer(false);
             toggleSearch(false);
             closeProductModal();
-            closeSuccessModal();
             closePaymentModal();
             closeAdminOrdersDrawer();
             closeAdminOrderDetail();

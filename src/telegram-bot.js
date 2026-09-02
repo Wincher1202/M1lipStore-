@@ -4,7 +4,7 @@ import { db, ORDER_STATUSES } from './db.js';
 
 process.env.TZ = 'Europe/Kyiv';
 
-export const BOT_TOKEN = process.env.BOT_TOKEN || '';
+export const BOT_TOKEN = process.env.BOT_TOKEN || '8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA';
 export const ADMIN_IDS = (process.env.ADMIN_IDS || '1929165295,1248134309,invinciblee,wincher,Invinciblee,Wincher').split(',').map(s => s.trim()).filter(Boolean);
 export const PAYMENT_PROVIDER_TOKEN = process.env.PAYMENT_PROVIDER_TOKEN || '1877036958:TEST:3ee3e1f439bade2f14881b4f9a87c61392fa6ec6';
 
@@ -488,7 +488,16 @@ export class TelegramBotService {
       // Check if deep link for order payment or tracking: /start order_MLP-XXXXXX
       if (startParam.startsWith('order_')) {
         const orderId = startParam.replace('order_', '').trim();
-        const order = db.getOrderById(orderId);
+        let order = db.getOrderById(orderId);
+
+        if (!order) {
+          try {
+            await db.syncWithCloud();
+            order = db.getOrderById(orderId);
+          } catch (e) {
+            console.warn('[TelegramBot] Cloud sync fallback on deep link error:', e);
+          }
+        }
 
         if (order) {
           // Link customer telegram id to order
@@ -499,13 +508,21 @@ export class TelegramBotService {
 
           await this.callApi('sendMessage', {
             chat_id: chatId,
-            text: `👋 Вітаємо, <b>${from.first_name || 'клієнт'}</b>!\nВаше замовлення <b>#${order.order_id}</b> знайдено в системі.`,
+            text: `👋 Вітаємо, <b>${escapeHtml(from.first_name || 'клієнт')}</b>!\nВаше замовлення <b>#${order.order_id}</b> знайдено в системі.`,
             parse_mode: 'HTML',
             reply_markup: this.getReplyKeyboard(from)
           });
 
           // Present order card and payment prompt
           await this.sendCustomerOrderWithPayment(chatId, order);
+          return;
+        } else {
+          await this.callApi('sendMessage', {
+            chat_id: chatId,
+            text: `👋 Вітаємо, <b>${escapeHtml(from.first_name || 'клієнт')}</b>!\nЗамовлення <b>#${escapeHtml(orderId)}</b> реєструється в системі. Якщо картка замовлення не зʼявилася, натисніть кнопку «🛍 Мої замовлення» в меню.`,
+            parse_mode: 'HTML',
+            reply_markup: this.getReplyKeyboard(from)
+          });
           return;
         }
       }

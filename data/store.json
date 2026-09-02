@@ -538,6 +538,282 @@
   ],
   "orders": [
     {
+      "order_id": "MLP-248997",
+      "id": "MLP-248997",
+      "status": "PENDING_PAYMENT",
+      "status_name": "Очікує оплати",
+      "tracking_number": null,
+      "subtotal": 2899,
+      "delivery_fee": 0,
+      "cod_fee": 0,
+      "total": 2899,
+      "dispatch_timeline": "1-2 дні",
+      "shipping_note": "Відправлення замовлення протягом 1-2 робочих днів з моменту оформлення",
+      "created_at": "2026-09-02T18:55:04.111Z",
+      "updated_at": "2026-09-02T18:55:04.111Z",
+      "customer": {
+        "first_name": "Тест",
+        "last_name": "Тестенко",
+        "middle_name": "Тестович",
+        "phone": "+380991234567",
+        "email": "",
+        "telegram_id": null,
+        "telegram_username": null
+      },
+      "delivery": {
+        "provider": "nova_poshta",
+        "provider_name": "Нова Пошта",
+        "type": "branch",
+        "type_name": "Відділення",
+        "city": "Київ",
+        "city_ref": "",
+        "warehouse_ref": "",
+        "warehouse_number": "Відділення №1",
+        "department": "Відділення №1",
+        "address": "Відділення №1"
+      },
+      "payment": {
+        "method": "online",
+        "provider": "Smart Glocal Test (Telegram Payments)",
+        "status": "PENDING",
+        "transaction_id": null,
+        "paid_at": null,
+        "is_cod": false,
+        "cod_fee": 0,
+        "comment": ""
+      },
+      "items": [
+        {
+          "id": 1,
+          "title": "Scyrox V8",
+          "brand": "MILIPSTORE",
+          "sku": "SKU-1",
+          "color": "",
+          "img": "/images.png",
+          "price": 2899,
+          "qty": 1,
+          "total": 2899
+        }
+      ],
+      "history": [
+        {
+          "status": "PENDING_PAYMENT",
+          "status_name": "Очікує оплати",
+          "timestamp": "2026-09-02T18:55:04.111Z",
+          "note": "Замовлення створено (очікує оплати)",
+          "actor": "Customer"
+        }
+      ],
+      "admin_comment": ""
+    },
+    {
+      "order_id": "MLP-770790",
+      "id": "MLP-770790",
+      "status": "PENDING_PAYMENT",
+      "status_name": "Очікує оплати",
+      "tracking_number": null,
+      "subtotal": 2945,
+      "delivery_fee": 0,
+      "cod_fee": 0,
+      "total": 2945,
+      "dispatch_timeline": "1-2 дні",
+      "shipping_note": "Відправлення замовлення протягом 1-2 робочих днів з моменту оформлення",
+      "created_at": "2026-09-02T18:50:35.513Z",
+      "updated_at": "2026-09-02T18:50:35.513Z",
+      "customer": {
+        "first_name": "Test",
+        "last_name": "User",
+        "middle_name": "",
+        "phone": "+380501112233",
+        "email": "",
+        "telegram_id": 1929165295,
+        "telegram_username": null
+      },
+      "delivery": {
+        "provider": "nova_poshta",
+        "provider_name": "Нова Пошта",
+        "type": "branch",
+        "type_name": "Відділення",
+        "city": "Київ",
+        "city_ref": "",
+        "warehouse_ref": "",
+        "warehouse_number": "Відділення №1",
+        "department": "Відділення №1",
+        "address": "Відділення №1"
+      },
+      "payment": {
+        "method": "online",
+        "provider": "Smart Glocal Test (Telegram Payments)",
+        "status": "PENDING",
+        "transaction_id": null,
+        "paid_at": null,
+        "is_cod": false,
+        "cod_fee": 0,
+        "comment": ""
+      },
+      "items": [
+        {
+          "id": "p_att_v0b2_btia",
+          "title": "Attack Shark ATTACK SHARK R5 ULTRA",
+          "brand": "Attack Shark",
+          "sku": "ATT-RU7YB",
+          "color": "",
+          "img": "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_47.jpg",
+          "price": 2945,
+          "qty": 1,
+          "total": 2945
+        }
+      ],
+      "history": [
+        {
+          "status": "PENDING_PAYMENT",
+          "status_name": "Очікує оплати",
+          "timestamp": "2026-09-02T18:50:35.513Z",
+          "note": "Замовлення створено (очікує оплати)",
+          "actor": "Customer"
+        }
+      ],
+      "admin_comment": ""
+    },
+    {
+      "order_id": "MLP-604401",
+      "id": "MLP-604401",
+      "status": "PENDING_PAYMENT",
+      "status_name": "Очікує оплати",
+      "tracking_number": null,
+      "subtotal": 2799,
+      "delivery_fee": 0,
+      "cod_fee": 0,
+      "total": 2799,
+      "dispatch_timeline": "1-2 дні",
+      "shipping_note": "Відправлення замовлення протягом 1-2 робочих днів з моменту оформлення",
+      "created_at": "2026-09-02T18:47:17.399Z",
+      "updated_at": "2026-09-02T18:47:17.399Z",
+      "customer": {
+        "first_name": "афаф",
+        "last_name": "афаф",
+        "middle_name": "фапфа",
+        "phone": "+380 51 515 15 15",
+        "email": "",
+        "telegram_id": null,
+        "telegram_username": null
+      },
+      "delivery": {
+        "provider": "nova_poshta",
+        "provider_name": "Нова Пошта",
+        "type": "branch",
+        "type_name": "Відділення",
+        "city": "Львів",
+        "city_ref": "db5c88f5-391c-11dd-90d9-001a92567626",
+        "warehouse_ref": "5a39e577-e1c2-11e3-8c4a-0050568002cf",
+        "warehouse_number": "Відділення №7 (до 30 кг): вул. Личаківська, 15",
+        "department": "Відділення №7 (до 30 кг): вул. Личаківська, 15",
+        "address": "Відділення №7 (до 30 кг): вул. Личаківська, 15"
+      },
+      "payment": {
+        "method": "online",
+        "provider": "Smart Glocal Test (Telegram Payments)",
+        "status": "PENDING",
+        "transaction_id": null,
+        "paid_at": null,
+        "is_cod": false,
+        "cod_fee": 0,
+        "comment": "уц"
+      },
+      "items": [
+        {
+          "id": "p_mch_7t3i_9viu",
+          "title": "Mchose MCHOSE V9 PRO",
+          "brand": "Mchose",
+          "sku": "MCH-RHE5W",
+          "color": "White",
+          "img": "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_42.jpg",
+          "price": 2799,
+          "qty": 1,
+          "total": 2799
+        }
+      ],
+      "history": [
+        {
+          "status": "PENDING_PAYMENT",
+          "status_name": "Очікує оплати",
+          "timestamp": "2026-09-02T18:47:17.399Z",
+          "note": "Замовлення створено (очікує оплати)",
+          "actor": "Customer"
+        }
+      ],
+      "admin_comment": ""
+    },
+    {
+      "order_id": "MLP-420099",
+      "id": "MLP-420099",
+      "status": "PENDING_PAYMENT",
+      "status_name": "Очікує оплати",
+      "tracking_number": null,
+      "subtotal": 2799,
+      "delivery_fee": 0,
+      "cod_fee": 0,
+      "total": 2799,
+      "dispatch_timeline": "1-2 дні",
+      "shipping_note": "Відправлення замовлення протягом 1-2 робочих днів з моменту оформлення",
+      "created_at": "2026-09-02T18:46:11.878Z",
+      "updated_at": "2026-09-02T18:46:11.878Z",
+      "customer": {
+        "first_name": "аіапфіа",
+        "last_name": "афа",
+        "middle_name": "фафа",
+        "phone": "+380 55 252 52 52",
+        "email": "",
+        "telegram_id": null,
+        "telegram_username": null
+      },
+      "delivery": {
+        "provider": "nova_poshta",
+        "provider_name": "Нова Пошта",
+        "type": "branch",
+        "type_name": "Відділення",
+        "city": "Львів",
+        "city_ref": "db5c88f5-391c-11dd-90d9-001a92567626",
+        "warehouse_ref": "5a39e577-e1c2-11e3-8c4a-0050568002cf",
+        "warehouse_number": "Відділення №7 (до 30 кг): вул. Личаківська, 15",
+        "department": "Відділення №7 (до 30 кг): вул. Личаківська, 15",
+        "address": "Відділення №7 (до 30 кг): вул. Личаківська, 15"
+      },
+      "payment": {
+        "method": "online",
+        "provider": "Smart Glocal Test (Telegram Payments)",
+        "status": "PENDING",
+        "transaction_id": null,
+        "paid_at": null,
+        "is_cod": false,
+        "cod_fee": 0,
+        "comment": ""
+      },
+      "items": [
+        {
+          "id": "p_mch_7t3i_9viu",
+          "title": "Mchose MCHOSE V9 PRO",
+          "brand": "Mchose",
+          "sku": "MCH-RHE5W",
+          "color": "Black",
+          "img": "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_37.jpg",
+          "price": 2799,
+          "qty": 1,
+          "total": 2799
+        }
+      ],
+      "history": [
+        {
+          "status": "PENDING_PAYMENT",
+          "status_name": "Очікує оплати",
+          "timestamp": "2026-09-02T18:46:11.878Z",
+          "note": "Замовлення створено (очікує оплати)",
+          "actor": "Customer"
+        }
+      ],
+      "admin_comment": ""
+    },
+    {
       "order_id": "MLP-931388",
       "id": "MLP-931388",
       "status": "PENDING_PAYMENT",
@@ -892,7 +1168,17 @@
     "Invinciblee",
     "Wincher"
   ],
-  "notifications": [],
+  "notifications": [
+    {
+      "id": "notif-1788375304222-518",
+      "timestamp": "2026-09-02T18:55:04.223Z",
+      "type": "ORDER_CREATED",
+      "order_id": "MLP-248997",
+      "total": 2899,
+      "customer": "Тестенко Тест Тестович",
+      "status": "PENDING_PAYMENT"
+    }
+  ],
   "deleted_product_ids": [
     "prod-mchose-a5",
     "prod-ajazz-ak820",
@@ -905,5 +1191,5 @@
   ],
   "deleted_brand_ids": [],
   "deleted_category_ids": [],
-  "last_cloud_sync": "2026-09-02T18:36:49.388Z"
+  "last_cloud_sync": "2026-09-02T18:55:03.431Z"
 }
