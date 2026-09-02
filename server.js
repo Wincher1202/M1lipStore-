@@ -232,8 +232,23 @@ app.post('/api/orders', async (req, res) => {
 
   // Extract Telegram user if present
   const tgUser = extractTelegramUser(req) || {};
-  const telegramId = customer?.telegram_id || tgUser.id || null;
-  const telegramUsername = customer?.telegram_username || tgUser.username || null;
+  let telegramId = customer?.telegram_id || tgUser.id || null;
+  let telegramUsername = customer?.telegram_username || tgUser.username || null;
+
+  // Fallback: match by phone if telegramId is not in request
+  if (!telegramId && phone) {
+    const cleanPhone = phone.replace(/\D/g, '');
+    for (const [tid, u] of Object.entries(db.data.telegram_users || {})) {
+      const uPhone = (u.phone || '').replace(/\D/g, '');
+      if (uPhone && (uPhone === cleanPhone || (cleanPhone.length >= 9 && cleanPhone.endsWith(uPhone.slice(-9))))) {
+        telegramId = tid;
+        if (!telegramUsername && u.telegram_username) {
+          telegramUsername = u.telegram_username;
+        }
+        break;
+      }
+    }
+  }
 
   try {
     const order = db.createOrder({
@@ -277,6 +292,14 @@ app.post('/api/orders', async (req, res) => {
       } catch (err) {
         console.warn('[Orders] Could not generate Telegram invoice link:', err.message);
       }
+    }
+
+    // Link order to Telegram user and phone in database
+    if (order.customer?.telegram_id) {
+      db.linkOrderToTelegramUser(order.customer.telegram_id, order.order_id, order.customer);
+    }
+    if (phone) {
+      db.linkOrderToPhone(phone, order.order_id);
     }
 
     // Send notifications to Admin and Customer

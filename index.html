@@ -4920,8 +4920,11 @@
         <button class="close-drawer" style="position: absolute; top: 16px; right: 16px; z-index: 10;" onclick="closeSuccessModal()">✕</button>
         <div style="padding: 30px 22px; text-align: center;">
             <div style="font-size: 3.2rem; margin-bottom: 8px;">🎉</div>
-            <h3 style="font-size: 1.4rem; font-weight: 800; margin-bottom: 6px; letter-spacing: -0.5px;">ЗАМОВЛЕННЯ ОФОРМЛЕНО!</h3>
-            <p style="color: var(--text-secondary); font-size: 0.88rem; margin-bottom: 16px;">Дякуємо за покупку в M1lipStore. Ми вже почали комплектувати ваше замовлення.</p>
+            <h3 style="font-size: 1.4rem; font-weight: 800; margin-bottom: 6px; letter-spacing: -0.5px;">ДЯКУЄМО ЗА ЗАМОВЛЕННЯ! 🎉</h3>
+            <p id="success-lead-text" style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 16px; line-height: 1.5;">
+                Ваше замовлення успішно оформлено. Щоб завершити оформлення, перейдіть до оплати за кнопкою нижче.<br>
+                Після успішної оплати ваше замовлення буде передано в обробку.
+            </p>
             
             <div style="background: var(--bg-primary); padding: 14px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border-light); margin-bottom: 16px; text-align: left;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; border-bottom: 1px dashed var(--border-light); padding-bottom: 8px;">
@@ -4957,6 +4960,7 @@
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="m20.665 3.717-17.73 6.837c-1.21.486-1.203 1.161-.222 1.462l4.552 1.42 10.532-6.645c.498-.303.953-.14.579.192l-8.533 7.701h-.002l-.313 4.674c.457 0 .66-.21.916-.457l2.199-2.138 4.574 3.379c.843.465 1.452.226 1.662-.782l3-14.131c.307-1.23-.47-1.787-1.284-1.424z"/></svg>
                     <span id="success-tg-btn-label">Відкрити в Telegram-боті →</span>
                 </button>
+                <button class="btn-secondary" style="width: 100%; justify-content: center; font-weight: 700;" onclick="closeSuccessModal(); openMyOrdersModal();">🛍 Мої замовлення</button>
                 <button class="btn-secondary" style="width: 100%; justify-content: center;" onclick="closeSuccessModal()">Продовжити покупки</button>
             </div>
         </div>
@@ -8138,19 +8142,28 @@
                 const orderObj = data.order || data;
                 const orderIdStr = orderObj.order_id || orderObj.id || data.order_id || data.id;
 
-                // If inside Telegram WebApp, transmit payload directly to bot chat if supported
-                if (tg?.sendData) {
-                    try {
-                        tg.sendData(JSON.stringify({ ...payload, order_id: orderIdStr }));
-                    } catch (tgErr) {
-                        console.warn('[Telegram sendData fallback]', tgErr);
-                    }
-                }
+                // Empty cart immediately
+                cart = [];
+                saveCart();
+                renderCart();
+                updateBadges();
 
                 localStorage.setItem('m1lip_last_phone', phone);
                 localStorage.setItem('m1lip_last_order_id', orderIdStr);
 
                 toggleCheckoutDrawer(false);
+
+                // If inside Telegram WebApp, close the WebApp cleanly without calling tg.sendData
+                // (calling tg.sendData generates Telegram's unwanted service message "Ви успішно передали дані боту...")
+                if (window.Telegram?.WebApp && window.Telegram.WebApp.initData) {
+                    try {
+                        setTimeout(() => {
+                            window.Telegram.WebApp.close();
+                        }, 250);
+                    } catch (e) {
+                        console.warn('[Telegram WebApp close]', e);
+                    }
+                }
 
                 // Show success modal with direct Telegram bot action
                 showOrderSuccessModal(orderObj, paymentMethod);
@@ -8713,19 +8726,62 @@
                     const orderId = order.id || order.order_id;
                     const prov = PROVIDER_LABELS[order.delivery?.provider] || 'Нова Пошта';
                     const createdDate = order.created_at ? formatKyivDateTime(order.created_at, { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
+                    const firstItem = (order.items && order.items[0]) || {};
+                    const itemColor = (firstItem.color || '').trim();
+
+                    let itemPhoto = '';
+                    if (itemColor && firstItem.color_images?.[itemColor]?.main) {
+                        itemPhoto = firstItem.color_images[itemColor].main;
+                    } else {
+                        const prod = (typeof products !== 'undefined' && Array.isArray(products)) ? products.find(p => p.id === (firstItem.product_id || firstItem.id)) : null;
+                        if (itemColor && prod?.color_images) {
+                            if (prod.color_images[itemColor]?.main) {
+                                itemPhoto = prod.color_images[itemColor].main;
+                            } else {
+                                const mk = Object.keys(prod.color_images).find(k => k.toLowerCase() === itemColor.toLowerCase());
+                                if (mk) itemPhoto = prod.color_images[mk].main;
+                            }
+                        }
+                        if (!itemPhoto) itemPhoto = firstItem.img || prod?.img || '';
+                    }
+
+                    const isPaid = order.payment?.status === 'PAID';
+                    const isCod = order.payment?.is_cod || order.payment?.method === 'cod';
+
                     return `
-                        <div class="review-card" style="margin-bottom: 12px; background: var(--bg-surface); border: 1.5px solid var(--border-light);">
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <div class="review-card" style="margin-bottom: 12px; background: var(--bg-surface); border: 1.5px solid var(--border-light); padding: 14px; border-radius: var(--radius-md);">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                                 <span style="font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 0.95rem; color: var(--accent);">${orderId}</span>
                                 ${getStatusBadge(order.status)}
                             </div>
-                            <div style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.4; margin-bottom: 8px;">
-                                <div>📅 <strong>Дата:</strong> ${createdDate}</div>
-                                <div>📍 <strong>Доставка:</strong> ${prov}, м. ${order.delivery?.city || ''} (${order.delivery?.department || ''})</div>
-                                ${order.ttn ? `<div style="margin-top: 4px; color: #2E7D32; font-weight: 800; font-family:'JetBrains Mono', monospace;">🚀 ТТН: ${order.ttn}</div>` : '<div style="margin-top: 2px; color: var(--text-muted);">⚡ Очікується відправка (1–2 дні)</div>'}
+                            
+                            <div style="display: flex; gap: 12px; align-items: flex-start; margin-bottom: 10px;">
+                                ${itemPhoto ? `
+                                    <div style="width: 60px; height: 60px; border-radius: 8px; border: 1px solid var(--border-light); overflow: hidden; background: var(--bg-tertiary); flex-shrink: 0;">
+                                        <img src="${itemPhoto}" alt="${firstItem.title || 'Товар'}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.style.display='none'">
+                                    </div>
+                                ` : ''}
+                                <div style="flex: 1; min-width: 0;">
+                                    <div style="font-weight: 700; font-size: 0.88rem; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                        ${firstItem.title || 'Товар'}
+                                    </div>
+                                    <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 2px;">
+                                        ${itemColor ? `🎨 Колір: <strong style="color:var(--text-secondary);">${itemColor}</strong>` : ''} 
+                                        ${firstItem.qty ? `• ${firstItem.qty} шт.` : ''}
+                                    </div>
+                                    ${order.items && order.items.length > 1 ? `<div style="font-size: 0.75rem; color: var(--accent); margin-top: 2px;">+ ще ${order.items.length - 1} поз.</div>` : ''}
+                                </div>
                             </div>
+
+                            <div style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.4; margin-bottom: 8px; background: var(--bg-tertiary); padding: 8px 10px; border-radius: 6px;">
+                                <div>📅 <strong>Дата:</strong> ${createdDate}</div>
+                                <div>📍 <strong>Доставка:</strong> ${prov}, м. ${order.delivery?.city || ''} (${order.delivery?.department || order.delivery?.address || 'Відділення'})</div>
+                                <div>💳 <strong>Оплата:</strong> ${isPaid ? 'Оплачено ✅' : (isCod ? 'При отриманні (накладений платіж) 📦' : 'Очікує оплати ⏳')}</div>
+                                ${order.tracking_number || order.ttn ? `<div style="margin-top: 4px; color: #2E7D32; font-weight: 800; font-family:'JetBrains Mono', monospace;">🚀 ТТН: ${order.tracking_number || order.ttn}</div>` : '<div style="margin-top: 2px; color: var(--text-muted);">⚡ Очікується відправка зі складу</div>'}
+                            </div>
+
                             <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px dashed var(--border-light); padding-top: 8px; font-weight: 800;">
-                                <span style="font-size: 0.8rem; color: var(--text-muted);">До сплати:</span>
+                                <span style="font-size: 0.8rem; color: var(--text-muted);">Сума:</span>
                                 <span style="font-family: 'JetBrains Mono', monospace; font-size: 1rem; color: var(--text-primary);">${formatPrice(order.total || 0)}</span>
                             </div>
                         </div>

@@ -1,329 +1,458 @@
 {
   "products": [
     {
-      "id": "prod-shark-x3",
-      "brand": "Attack Shark",
-      "title": "Attack Shark X3 Wireless",
-      "price": 1599,
-      "old_price": 1899,
-      "sku": "SHARK-X3-W",
+      "id": "p_mch_7t3i_9viu",
+      "brand": "Mchose",
+      "title": "Mchose MCHOSE V9 PRO",
+      "price": 2799,
+      "old_price": null,
+      "tag": "🔥 ТОП ПРОДАЖІВ",
+      "category": "Навушники",
+      "quantity": 100,
+      "colors": "Blue, Red, White, Black",
+      "description": "MCHOSE V9 PRO - бездротові навушники для ігор, музики та спілкування",
+      "img": "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_25.jpg",
+      "gallery": [
+        "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_25.jpg",
+        "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_29.jpg",
+        "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_30.jpg",
+        "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_31.jpg",
+        "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_32.jpg",
+        "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_33.jpg",
+        "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_34.jpg",
+        "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_35.jpg",
+        "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_36.jpg",
+        "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_26.jpg",
+        "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_27.jpg",
+        "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_28.jpg",
+        "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_37.jpg",
+        "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_38.jpg",
+        "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_39.jpg",
+        "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_40.jpg",
+        "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_41.jpg"
+      ],
+      "specs": [
+        {
+          "key": "Характеристика",
+          "value": "/done"
+        },
+        {
+          "key": "Підключення",
+          "value": "2.4G/Bluetooth/USB-TPC"
+        },
+        {
+          "key": "Акумулятор: 2000 mAh",
+          "value": "до 250 годин роботи"
+        },
+        {
+          "key": "Драйвери",
+          "value": "53 мм з біоцелюлозною діафрагмою"
+        },
+        {
+          "key": "Мікрофон",
+          "value": "AI-мікрофон з шумоподавленням, охоплення 360°"
+        },
+        {
+          "key": "Вага",
+          "value": "275 г"
+        }
+      ],
+      "color_images": {
+        "Blue": {
+          "main": "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_29.jpg",
+          "gallery": [
+            "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_29.jpg",
+            "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_30.jpg",
+            "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_31.jpg",
+            "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_32.jpg",
+            "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_33.jpg"
+          ]
+        },
+        "Red": {
+          "main": "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_34.jpg",
+          "gallery": [
+            "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_34.jpg",
+            "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_35.jpg",
+            "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_36.jpg"
+          ]
+        },
+        "Black": {
+          "main": "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_37.jpg",
+          "gallery": [
+            "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_37.jpg",
+            "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_38.jpg",
+            "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_39.jpg",
+            "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_40.jpg",
+            "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_41.jpg"
+          ]
+        },
+        "White": {
+          "main": "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_42.jpg",
+          "gallery": [
+            "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_42.jpg",
+            "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_27.jpg",
+            "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_28.jpg"
+          ]
+        }
+      },
+      "color_quantities": {
+        "Blue": 25,
+        "Red": 25,
+        "White": 25,
+        "Black": 25
+      },
+      "sku": "MCH-RHE5W",
+      "featured": false,
       "popular": true,
+      "hidden": false,
+      "created_at": "2026-09-01T09:12:07.182Z",
+      "warranty": "3 місяці"
+    },
+    {
+      "id": "p_att_v0b2_btia",
+      "brand": "Attack Shark",
+      "title": "Attack Shark ATTACK SHARK R5 ULTRA",
+      "price": 2945,
+      "old_price": null,
+      "warranty": "1 місяць",
       "tag": "🔥 ТОП ПРОДАЖІВ",
       "category": "Мишки",
-      "description": "Флагманська ультралегка бездротова ігрова мишка вагою всього 49 грамів з топовим оптичним сенсором PixArt PAW3395 (до 26 000 DPI), надійними мікроперемикачами TTC Gold та потрійним режимом підключення (2.4G, Bluetooth 5.2, Type-C).",
-      "img": "attack-shark-x3-black.jpg",
+      "quantity": 50,
+      "colors": "White, Black",
+      "description": "ATTACK SHARK R5 ULTRA — ультралегка бездротова ігрова мишка вагою всього 39 г із сенсором PAW3950MAX, частотою опитування до 8000 Гц та DPI до 42 000. Карбоновий корпус та три режими підключення.",
+      "img": "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_47.jpg",
       "gallery": [
-        "attack-shark-x3-black.jpg",
-        "attack-shark-x3-white.jpg",
-        "attack-shark-x3-box.jpg"
+        "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_47.jpg",
+        "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_48.jpg",
+        "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_49.jpg",
+        "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_50.jpg",
+        "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_51.jpg",
+        "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_52.jpg"
       ],
       "specs": [
         {
           "key": "Сенсор",
-          "value": "PixArt PAW3395 (26 000 DPI)"
+          "value": "PAW3950"
         },
         {
           "key": "Вага",
-          "value": "49 грамів"
+          "value": "39г"
         },
         {
           "key": "Підключення",
-          "value": "2.4GHz / Bluetooth 5.2 / USB-C"
+          "value": "2.4G / Bluetooth / Type-C"
         },
         {
-          "key": "Автономність",
-          "value": "до 65 годин"
+          "key": "Характеристика",
+          "value": "42 000 DP"
         }
       ],
-      "colors": [
-        "Black",
-        "White",
-        "Pink"
-      ],
-      "color_quantities": {
-        "Black": 25,
-        "White": 25,
-        "Pink": 15
-      },
       "color_images": {
-        "Black": {
-          "main": "attack-shark-x3-black.jpg",
+        "White": {
+          "main": "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_47.jpg",
           "gallery": [
-            "attack-shark-x3-black.jpg",
-            "attack-shark-x3-box.jpg"
+            "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_47.jpg",
+            "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_48.jpg",
+            "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_49.jpg"
           ]
         },
-        "White": {
-          "main": "attack-shark-x3-white.jpg",
+        "Black": {
+          "main": "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_50.jpg",
           "gallery": [
-            "attack-shark-x3-white.jpg",
-            "attack-shark-x3-box.jpg"
+            "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_50.jpg",
+            "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_51.jpg",
+            "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_52.jpg"
+          ]
+        }
+      },
+      "color_quantities": {
+        "White": 25,
+        "Black": 25
+      },
+      "main_color": "White",
+      "sku": "ATT-RU7YB",
+      "featured": false,
+      "popular": true,
+      "hidden": false,
+      "created_at": "2026-09-01T15:06:05.006Z"
+    },
+    {
+      "id": "p_att_a04f_mumf",
+      "brand": "Attack Shark",
+      "title": "Attack Shark ATTACK SHARK R85HE",
+      "price": 2839,
+      "old_price": null,
+      "warranty": "1 місяць",
+      "tag": "🎯 РЕКОМЕНДУЄМО",
+      "category": "Клавіатури",
+      "quantity": 50,
+      "colors": "White, Black",
+      "description": "ATTACK SHARK R85HE - ігрова магнітна клавіатура з швидким відгуком, магнітними перемикачами та RGB панелю. Компактний формат, якісна збірка та зручне керування — чудовий вибір для ігор і роботи.",
+      "img": "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_43.jpg",
+      "gallery": [
+        "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_43.jpg",
+        "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_44.jpg",
+        "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_45.jpg",
+        "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_46.jpg"
+      ],
+      "specs": [
+        {
+          "key": "Підключення",
+          "value": "дротове USB-C"
+        },
+        {
+          "key": "Rapid Trigger",
+          "value": "чутливість від 0.01 мм до 4 мм"
+        },
+        {
+          "key": "Частота опитування",
+          "value": "8000 Гц"
+        },
+        {
+          "key": "Форм фактор",
+          "value": "75%"
+        },
+        {
+          "key": "Характеристика",
+          "value": "RGB панель"
+        }
+      ],
+      "color_images": {
+        "White": {
+          "main": "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_43.jpg",
+          "gallery": [
+            "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_43.jpg",
+            "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_44.jpg"
+          ]
+        },
+        "Black": {
+          "main": "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_45.jpg",
+          "gallery": [
+            "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_45.jpg",
+            "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_46.jpg"
+          ]
+        }
+      },
+      "color_quantities": {
+        "White": 25,
+        "Black": 25
+      },
+      "main_color": "White",
+      "sku": "ATT-4K1TV",
+      "featured": false,
+      "popular": true,
+      "hidden": false,
+      "created_at": "2026-09-01T14:49:44.991Z"
+    },
+    {
+      "id": "p_iro_ohx6_jmc3",
+      "brand": "IROK",
+      "title": "IROK IROK HE6 Ultra",
+      "price": 2799,
+      "old_price": null,
+      "warranty": "1 місяць",
+      "tag": "✨ НОВИНКА",
+      "category": "Мишки",
+      "quantity": 25,
+      "colors": "Black",
+      "description": "IROK HE6 Ultra — легка ігрова миша з сенсором PAW3950, до 30 000 DPI та частотою опитування до 8000 Гц. Підтримує 2.4G, Bluetooth і дротове підключення",
+      "img": "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_58.jpg",
+      "gallery": [
+        "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_58.jpg",
+        "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_59.jpg"
+      ],
+      "specs": [
+        {
+          "key": "Сенсор",
+          "value": "PAW3950"
+        },
+        {
+          "key": "Характеристика",
+          "value": "Вага 50"
+        },
+        {
+          "key": "Підключення",
+          "value": "2.4G / Bluetooth / Type-C"
+        }
+      ],
+      "color_images": {
+        "Black": {
+          "main": "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_58.jpg",
+          "gallery": [
+            "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_58.jpg",
+            "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_59.jpg"
+          ]
+        }
+      },
+      "color_quantities": {
+        "Black": 25
+      },
+      "main_color": "Black",
+      "sku": "IRO-51O6V",
+      "featured": false,
+      "popular": true,
+      "hidden": false,
+      "created_at": "2026-09-02T15:16:41.274Z"
+    },
+    {
+      "id": "p_aul_2hej_5ue2",
+      "brand": "AULA",
+      "title": "AULA AULA S75 PRO",
+      "price": 2899,
+      "old_price": null,
+      "warranty": "1 місяць",
+      "tag": "✨ НОВИНКА",
+      "category": "Клавіатури",
+      "quantity": 50,
+      "colors": "Black, Pink",
+      "description": "AULA S75 Pro — компактна механічна клавіатура формату 75% з gasket-структурою, RGB-підсвіткою та hot-swap. Підтримує підключення через 2.4G, Bluetooth і USB-C, оснащена дисплеєм та багатофункціональним регулятором.",
+      "img": "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_60.jpg",
+      "gallery": [
+        "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_60.jpg",
+        "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_61.jpg",
+        "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_62.jpg",
+        "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_63.jpg",
+        "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_64.jpg",
+        "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_65.jpg",
+        "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_66.jpg",
+        "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_67.jpg"
+      ],
+      "specs": [
+        {
+          "key": "Підключення",
+          "value": "2.4G / Bluetooth / Type-C"
+        },
+        {
+          "key": "Форм",
+          "value": "фактор: 75%"
+        },
+        {
+          "key": "RGB",
+          "value": "панель"
+        },
+        {
+          "key": "Характеристика",
+          "value": "HOT SWAP"
+        }
+      ],
+      "color_images": {
+        "Black": {
+          "main": "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_60.jpg",
+          "gallery": [
+            "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_60.jpg",
+            "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_61.jpg",
+            "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_62.jpg",
+            "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_63.jpg"
           ]
         },
         "Pink": {
-          "main": "attack-shark-x3-black.jpg",
+          "main": "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_64.jpg",
           "gallery": [
-            "attack-shark-x3-black.jpg"
+            "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_64.jpg",
+            "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_65.jpg",
+            "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_66.jpg",
+            "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_67.jpg"
           ]
         }
       },
-      "hidden": false
+      "color_quantities": {
+        "Black": 25,
+        "Pink": 25
+      },
+      "main_color": "Black",
+      "sku": "AUL-904AM",
+      "featured": false,
+      "popular": true,
+      "hidden": false,
+      "created_at": "2026-09-02T15:27:33.788Z"
     },
     {
-      "id": "prod-vgn-f1",
-      "brand": "VGN",
-      "title": "VGN Dragonfly F1 Pro Max",
-      "price": 1999,
-      "old_price": 2399,
-      "sku": "VGN-F1-PRO",
-      "popular": true,
-      "tag": "⚡ ХІТ СЕЗОНУ",
+      "id": "p_mch_i851_nnxq",
+      "brand": "Mchose",
+      "title": "Mchose MCHOSE A7 V2 PRO",
+      "price": 2449,
+      "old_price": null,
+      "warranty": "1 місяць",
+      "tag": "✨ НОВИНКА",
       "category": "Мишки",
-      "description": "Кіберспортивна бездротова мишка вагою 55г з топовим сенсором PAW3395, чіпом Nordic 52840 та підтримкою частоти опитування до 4000Hz (при використанні 4K Dongle).",
-      "img": "photo_2026-08-25_15-32-13.jpg",
+      "quantity": 75,
+      "colors": "White, Black, Pink",
+      "description": "MCHOSE A7 V2 Pro — легка бездротова ігрова миша вагою 59 г із сенсором PAW3395 до 26 000 DPI. Підтримує 2.4G, Bluetooth та USB-C, а частота опитування — до 8K Гц",
+      "img": "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_68.jpg",
       "gallery": [
-        "photo_2026-08-25_15-32-13.jpg",
-        "photo_2026-08-25_15-32-17.jpg",
-        "photo_2026-08-25_15-32-36.jpg"
+        "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_68.jpg",
+        "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_69.jpg",
+        "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_70.jpg",
+        "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_71.jpg",
+        "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_72.jpg",
+        "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_73.jpg",
+        "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_74.jpg",
+        "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_75.jpg",
+        "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_76.jpg"
       ],
       "specs": [
         {
           "key": "Сенсор",
-          "value": "PAW3395 (до 26 000 DPI)"
-        },
-        {
-          "key": "Контролер",
-          "value": "Nordic 52840 (4K Ready)"
+          "value": "Paw3395"
         },
         {
           "key": "Вага",
-          "value": "55 грамів"
+          "value": "59г"
+        },
+        {
+          "key": "Підключення",
+          "value": "2.4G / Bluetooth / Type-C"
+        },
+        {
+          "key": "DPI",
+          "value": "від 50 до 26 000"
+        },
+        {
+          "key": "Частота опитування",
+          "value": "8000 Гц"
         },
         {
           "key": "Акумулятор",
-          "value": "500 mAh (до 130 год)"
+          "value": "500 mAh"
         }
       ],
-      "colors": [
-        "Black",
-        "White"
-      ],
+      "color_images": {
+        "White": {
+          "main": "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_68.jpg",
+          "gallery": [
+            "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_68.jpg",
+            "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_69.jpg",
+            "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_70.jpg"
+          ]
+        },
+        "Black": {
+          "main": "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_71.jpg",
+          "gallery": [
+            "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_71.jpg",
+            "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_72.jpg",
+            "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_73.jpg"
+          ]
+        },
+        "Pink": {
+          "main": "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_74.jpg",
+          "gallery": [
+            "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_74.jpg",
+            "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_75.jpg",
+            "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_76.jpg"
+          ]
+        }
+      },
       "color_quantities": {
+        "White": 25,
         "Black": 25,
-        "White": 25
+        "Pink": 25
       },
-      "color_images": {
-        "Black": {
-          "main": "photo_2026-08-25_15-32-13.jpg",
-          "gallery": [
-            "photo_2026-08-25_15-32-13.jpg",
-            "photo_2026-08-25_15-32-17.jpg"
-          ]
-        },
-        "White": {
-          "main": "photo_2026-08-25_15-32-36.jpg",
-          "gallery": [
-            "photo_2026-08-25_15-32-36.jpg",
-            "photo_2026-08-25_15-32-38.jpg"
-          ]
-        }
-      },
-      "hidden": false
-    },
-    {
-      "id": "prod-aula-f75",
-      "brand": "AULA",
-      "title": "AULA F75 Wireless Gasket",
-      "price": 2499,
-      "old_price": 2899,
-      "sku": "AULA-F75",
+      "main_color": "White",
+      "sku": "MCH-5AGXK",
+      "featured": false,
       "popular": true,
-      "tag": "⭐ ВИБІР ГРАВЦІВ",
-      "category": "Клавіатури",
-      "description": "Преміальна 75% бездротова механічна клавіатура з багатошаровою Gasket Mount шумоізоляцією (5 шарів поглинання звуку), металевим коліщатком гучності, фабрично змащеними перемикачами LEOBOG Reaper та RGB-підсвіткою.",
-      "img": "photo_2026-08-25_15-32-57.jpg",
-      "gallery": [
-        "photo_2026-08-25_15-32-57.jpg",
-        "photo_2026-08-25_15-32-59.jpg",
-        "photo_2026-08-25_15-33-02.jpg"
-      ],
-      "specs": [
-        {
-          "key": "Конструкція",
-          "value": "Gasket Mount (5 шарів шумоізоляції)"
-        },
-        {
-          "key": "Форм-фактор",
-          "value": "75% (80 клавіш + Knob)"
-        },
-        {
-          "key": "Перемикачі",
-          "value": "LEOBOG Reaper Linear (змащені)"
-        },
-        {
-          "key": "Підключення",
-          "value": "2.4G / BT 5.0 / Type-C"
-        }
-      ],
-      "colors": [
-        "Black",
-        "White",
-        "Blue"
-      ],
-      "color_quantities": {
-        "Black": 20,
-        "White": 20,
-        "Blue": 15
-      },
-      "color_images": {
-        "Black": {
-          "main": "photo_2026-08-25_15-32-57.jpg",
-          "gallery": [
-            "photo_2026-08-25_15-32-57.jpg"
-          ]
-        },
-        "White": {
-          "main": "photo_2026-08-25_15-32-59.jpg",
-          "gallery": [
-            "photo_2026-08-25_15-32-59.jpg"
-          ]
-        },
-        "Blue": {
-          "main": "photo_2026-08-25_15-33-02.jpg",
-          "gallery": [
-            "photo_2026-08-25_15-33-02.jpg"
-          ]
-        }
-      },
-      "hidden": false
-    },
-    {
-      "id": "prod-ajazz-ak820",
-      "brand": "Ajazz",
-      "title": "Ajazz AK820 Pro TFT Screen",
-      "price": 2299,
-      "old_price": 2699,
-      "sku": "AJAZZ-AK820",
-      "popular": true,
-      "tag": "✨ НОВИНКА",
-      "category": "Клавіатури",
-      "description": "Бездротова механічна клавіатура з вбудованим кольоровим TFT-дисплеєм для GIF-анімацій та статусу системи, зручним регулятором гучності та приємним глибоким звуком (creamy sound).",
-      "img": "350954572_1917991488535350_2141770078765880809_n_2.webp",
-      "gallery": [
-        "350954572_1917991488535350_2141770078765880809_n_2.webp",
-        "photo_2026-08-25_15-33-42.jpg",
-        "photo_2026-08-25_15-33-43.jpg"
-      ],
-      "specs": [
-        {
-          "key": "Екран",
-          "value": "0.85\" Color TFT Screen"
-        },
-        {
-          "key": "Будова",
-          "value": "Gasket Mount (PC Plate)"
-        },
-        {
-          "key": "Світчі",
-          "value": "Ajazz Flying Fish Switch"
-        },
-        {
-          "key": "Батарея",
-          "value": "4000 mAh"
-        }
-      ],
-      "colors": [
-        "Grey",
-        "White",
-        "Purple"
-      ],
-      "color_quantities": {
-        "Grey": 20,
-        "White": 20,
-        "Purple": 15
-      },
-      "color_images": {
-        "Grey": {
-          "main": "350954572_1917991488535350_2141770078765880809_n_2.webp",
-          "gallery": [
-            "350954572_1917991488535350_2141770078765880809_n_2.webp",
-            "photo_2026-08-25_15-33-42.jpg"
-          ]
-        },
-        "White": {
-          "main": "photo_2026-08-25_15-33-43.jpg",
-          "gallery": [
-            "photo_2026-08-25_15-33-43.jpg"
-          ]
-        },
-        "Purple": {
-          "main": "photo_2026-08-25_15-33-49.jpg",
-          "gallery": [
-            "photo_2026-08-25_15-33-49.jpg"
-          ]
-        }
-      },
-      "hidden": false
-    },
-    {
-      "id": "prod-mchose-a5",
-      "brand": "Mchose",
-      "title": "Mchose A5 Ultra Light Wireless",
-      "price": 1699,
-      "old_price": 1999,
-      "sku": "MCHOSE-A5",
-      "popular": false,
-      "tag": "🎯 РЕКОМЕНДУЄМО",
-      "category": "Мишки",
-      "description": "Ультраергономічна мишка для геймерів та професіоналів. Сенсор PixArt 3395, вага 59г, перемикачі Huano Blue Pink Dot на 80 млн натискань та до 130 годин безперервної гри.",
-      "img": "48c2868a-928a-46f4-8b76-9e4d4fd6a7dc.jpg",
-      "gallery": [
-        "48c2868a-928a-46f4-8b76-9e4d4fd6a7dc.jpg",
-        "photo_2026-08-25_15-31-22.jpg",
-        "photo_2026-08-25_15-31-28.jpg"
-      ],
-      "specs": [
-        {
-          "key": "Сенсор",
-          "value": "PixArt PAW3395"
-        },
-        {
-          "key": "Світчі",
-          "value": "Huano Transparent Blue Shell Pink Dot (80M)"
-        },
-        {
-          "key": "Вага",
-          "value": "59 грамів"
-        },
-        {
-          "key": "Підключення",
-          "value": "Tri-mode 2.4G / BT / USB"
-        }
-      ],
-      "colors": [
-        "Black",
-        "White"
-      ],
-      "color_quantities": {
-        "Black": 25,
-        "White": 25
-      },
-      "color_images": {
-        "Black": {
-          "main": "48c2868a-928a-46f4-8b76-9e4d4fd6a7dc.jpg",
-          "gallery": [
-            "48c2868a-928a-46f4-8b76-9e4d4fd6a7dc.jpg"
-          ]
-        },
-        "White": {
-          "main": "photo_2026-08-25_15-31-22.jpg",
-          "gallery": [
-            "photo_2026-08-25_15-31-22.jpg",
-            "photo_2026-08-25_15-31-28.jpg"
-          ]
-        }
-      },
-      "hidden": false
+      "hidden": false,
+      "created_at": "2026-09-02T15:39:48.277Z"
     }
   ],
   "categories": [
@@ -353,6 +482,13 @@
       "name": "Аудіо",
       "image": "",
       "position": 3,
+      "hidden": false
+    },
+    {
+      "id": "навушники",
+      "name": "Навушники",
+      "image": "",
+      "position": 4,
       "hidden": false
     }
   ],
@@ -391,9 +527,362 @@
       "logo": "mchose4.png",
       "position": 4,
       "hidden": false
+    },
+    {
+      "id": "brand-irok",
+      "name": "IROK",
+      "logo": "",
+      "position": 5,
+      "hidden": false
     }
   ],
-  "orders": [],
+  "orders": [
+    {
+      "order_id": "MLP-931388",
+      "id": "MLP-931388",
+      "status": "PENDING_PAYMENT",
+      "status_name": "Очікує оплати",
+      "tracking_number": null,
+      "subtotal": 2945,
+      "delivery_fee": 0,
+      "cod_fee": 0,
+      "total": 2945,
+      "dispatch_timeline": "1-2 дні",
+      "shipping_note": "Відправлення замовлення протягом 1-2 робочих днів з моменту оформлення",
+      "created_at": "2026-09-02T18:22:39.179Z",
+      "updated_at": "2026-09-02T18:22:39.179Z",
+      "customer": {
+        "first_name": "ададі",
+        "last_name": "афаф",
+        "middle_name": "афафа",
+        "phone": "+380 23 414 14 41",
+        "email": "",
+        "telegram_id": null,
+        "telegram_username": null
+      },
+      "delivery": {
+        "provider": "nova_poshta",
+        "provider_name": "Нова Пошта",
+        "type": "branch",
+        "type_name": "Відділення",
+        "city": "Львів",
+        "city_ref": "db5c88f5-391c-11dd-90d9-001a92567626",
+        "warehouse_ref": "39931b10-e1c2-11e3-8c4a-0050568002cf",
+        "warehouse_number": "Відділення №3: вул. Угорська, 22 (заїзд із вул. Луганської)",
+        "department": "Відділення №3: вул. Угорська, 22 (заїзд із вул. Луганської)",
+        "address": "Відділення №3: вул. Угорська, 22 (заїзд із вул. Луганської)"
+      },
+      "payment": {
+        "method": "online",
+        "provider": "Smart Glocal Test (Telegram Payments)",
+        "status": "PENDING",
+        "transaction_id": null,
+        "paid_at": null,
+        "is_cod": false,
+        "cod_fee": 0,
+        "comment": "д"
+      },
+      "items": [
+        {
+          "id": "p_att_v0b2_btia",
+          "title": "Attack Shark ATTACK SHARK R5 ULTRA",
+          "brand": "Attack Shark",
+          "sku": "ATT-RU7YB",
+          "color": "Black",
+          "img": "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_50.jpg",
+          "price": 2945,
+          "qty": 1,
+          "total": 2945
+        }
+      ],
+      "history": [
+        {
+          "status": "PENDING_PAYMENT",
+          "status_name": "Очікує оплати",
+          "timestamp": "2026-09-02T18:22:39.179Z",
+          "note": "Замовлення створено (очікує оплати)",
+          "actor": "Customer"
+        }
+      ],
+      "admin_comment": ""
+    },
+    {
+      "order_id": "MLP-354403",
+      "id": "MLP-354403",
+      "status": "PENDING_PAYMENT",
+      "status_name": "Очікує оплати",
+      "tracking_number": null,
+      "subtotal": 2799,
+      "delivery_fee": 0,
+      "cod_fee": 0,
+      "total": 2799,
+      "dispatch_timeline": "1-2 дні",
+      "shipping_note": "Відправлення замовлення протягом 1-2 робочих днів з моменту оформлення",
+      "created_at": "2026-09-02T15:18:28.505Z",
+      "updated_at": "2026-09-02T15:18:28.505Z",
+      "customer": {
+        "first_name": "Денис",
+        "last_name": "Аникієнко",
+        "middle_name": "Юрійович",
+        "phone": "+380 96 370 76 31",
+        "email": "",
+        "telegram_id": null,
+        "telegram_username": null
+      },
+      "delivery": {
+        "provider": "nova_poshta",
+        "provider_name": "Нова Пошта",
+        "type": "branch",
+        "type_name": "Відділення",
+        "city": "Чернігів",
+        "city_ref": "db5c897c-391c-11dd-90d9-001a92567626",
+        "warehouse_ref": "eab850c8-2ba0-11e9-acea-005056b24375",
+        "warehouse_number": "Відділення №19 (до 30 кг на одне місце): вул. Всіхсвятська, 5",
+        "department": "Відділення №19 (до 30 кг на одне місце): вул. Всіхсвятська, 5",
+        "address": "Відділення №19 (до 30 кг на одне місце): вул. Всіхсвятська, 5"
+      },
+      "payment": {
+        "method": "online",
+        "provider": "Smart Glocal Test (Telegram Payments)",
+        "status": "PENDING",
+        "transaction_id": null,
+        "paid_at": null,
+        "is_cod": false,
+        "cod_fee": 0,
+        "comment": ""
+      },
+      "items": [
+        {
+          "id": "p_mch_7t3i_9viu",
+          "title": "Mchose MCHOSE V9 PRO",
+          "brand": "Mchose",
+          "sku": "MCH-RHE5W",
+          "color": "Blue",
+          "img": "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_29.jpg",
+          "price": 2799,
+          "qty": 1,
+          "total": 2799
+        }
+      ],
+      "history": [
+        {
+          "status": "PENDING_PAYMENT",
+          "status_name": "Очікує оплати",
+          "timestamp": "2026-09-02T15:18:28.505Z",
+          "note": "Замовлення створено (очікує оплати)",
+          "actor": "Customer"
+        }
+      ],
+      "admin_comment": ""
+    },
+    {
+      "order_id": "MLP-377278",
+      "id": "MLP-377278",
+      "status": "PENDING_PAYMENT",
+      "status_name": "Очікує оплати",
+      "tracking_number": null,
+      "subtotal": 2945,
+      "delivery_fee": 0,
+      "cod_fee": 0,
+      "total": 2945,
+      "dispatch_timeline": "1-2 дні",
+      "shipping_note": "Відправлення замовлення протягом 1-2 робочих днів з моменту оформлення",
+      "created_at": "2026-09-01T07:38:55.286Z",
+      "updated_at": "2026-09-01T07:38:55.286Z",
+      "customer": {
+        "first_name": "Млалал",
+        "last_name": "Алалад",
+        "middle_name": "Опаоал",
+        "phone": "+380 32 231 32 32",
+        "email": "",
+        "telegram_id": null,
+        "telegram_username": null
+      },
+      "delivery": {
+        "provider": "nova_poshta",
+        "provider_name": "Нова Пошта",
+        "type": "branch",
+        "type_name": "Відділення",
+        "city": "Одеса",
+        "city_ref": "db5c88d0-391c-11dd-90d9-001a92567626",
+        "warehouse_ref": "169227dc-e1c2-11e3-8c4a-0050568002cf",
+        "warehouse_number": "Відділення №3: вул. Дальницька, 23/4",
+        "department": "Відділення №3: вул. Дальницька, 23/4",
+        "address": "Відділення №3: вул. Дальницька, 23/4"
+      },
+      "payment": {
+        "method": "online",
+        "provider": "Smart Glocal Test (Telegram Payments)",
+        "status": "PENDING",
+        "transaction_id": null,
+        "paid_at": null,
+        "is_cod": false,
+        "cod_fee": 0,
+        "comment": "Оо"
+      },
+      "items": [
+        {
+          "id": "p_att_0ije_0dey",
+          "title": "Attack Shark ATTACK SHARK R5 ULTRA",
+          "brand": "Attack Shark",
+          "sku": "ATT-761A5",
+          "color": "White",
+          "img": "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_23.jpg",
+          "price": 2945,
+          "qty": 1,
+          "total": 2945
+        }
+      ],
+      "history": [
+        {
+          "status": "PENDING_PAYMENT",
+          "status_name": "Очікує оплати",
+          "timestamp": "2026-09-01T07:38:55.286Z",
+          "note": "Замовлення створено (очікує оплати)",
+          "actor": "Customer"
+        }
+      ],
+      "admin_comment": ""
+    },
+    {
+      "order_id": "MLP-573857",
+      "id": "MLP-573857",
+      "status": "PENDING_PAYMENT",
+      "status_name": "Очікує оплати",
+      "tracking_number": null,
+      "subtotal": 2945,
+      "delivery_fee": 0,
+      "cod_fee": 0,
+      "total": 2945,
+      "dispatch_timeline": "1-2 дні",
+      "shipping_note": "Відправлення замовлення протягом 1-2 робочих днів з моменту оформлення",
+      "created_at": "2026-09-01T07:37:33.522Z",
+      "updated_at": "2026-09-01T07:37:33.522Z",
+      "customer": {
+        "first_name": "член",
+        "last_name": "наконечний",
+        "middle_name": "шляпович",
+        "phone": "+380 75 423 40 51",
+        "email": "",
+        "telegram_id": null,
+        "telegram_username": null
+      },
+      "delivery": {
+        "provider": "ukrposhta",
+        "provider_name": "Укрпошта",
+        "type": "branch",
+        "type_name": "Відділення",
+        "city": "Одеса",
+        "city_ref": "db5c88d0-391c-11dd-90d9-001a92567626",
+        "warehouse_ref": "up-1",
+        "warehouse_number": "Відділення Укрпошти №01001: вул. Хрещатик, 22",
+        "department": "Відділення Укрпошти №01001: вул. Хрещатик, 22",
+        "address": "Відділення Укрпошти №01001: вул. Хрещатик, 22"
+      },
+      "payment": {
+        "method": "online",
+        "provider": "Smart Glocal Test (Telegram Payments)",
+        "status": "PENDING",
+        "transaction_id": null,
+        "paid_at": null,
+        "is_cod": false,
+        "cod_fee": 0,
+        "comment": ""
+      },
+      "items": [
+        {
+          "id": "p_att_0ije_0dey",
+          "title": "Attack Shark ATTACK SHARK R5 ULTRA",
+          "brand": "Attack Shark",
+          "sku": "ATT-761A5",
+          "color": "Black",
+          "img": "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_22.jpg",
+          "price": 2945,
+          "qty": 1,
+          "total": 2945
+        }
+      ],
+      "history": [
+        {
+          "status": "PENDING_PAYMENT",
+          "status_name": "Очікує оплати",
+          "timestamp": "2026-09-01T07:37:33.522Z",
+          "note": "Замовлення створено (очікує оплати)",
+          "actor": "Customer"
+        }
+      ],
+      "admin_comment": ""
+    },
+    {
+      "order_id": "MLP-266200",
+      "id": "MLP-266200",
+      "status": "PENDING_PAYMENT",
+      "status_name": "Очікує оплати",
+      "tracking_number": null,
+      "subtotal": 2945,
+      "delivery_fee": 0,
+      "cod_fee": 0,
+      "total": 2945,
+      "dispatch_timeline": "1-2 дні",
+      "shipping_note": "Відправлення замовлення протягом 1-2 робочих днів з моменту оформлення",
+      "created_at": "2026-08-31T19:27:06.156Z",
+      "updated_at": "2026-08-31T19:27:06.156Z",
+      "customer": {
+        "first_name": "Дмитро",
+        "last_name": "Лукяш",
+        "middle_name": "Григорович",
+        "phone": "+380 96 164 14 22",
+        "email": "",
+        "telegram_id": null,
+        "telegram_username": null
+      },
+      "delivery": {
+        "provider": "nova_poshta",
+        "provider_name": "Нова Пошта",
+        "type": "branch",
+        "type_name": "Відділення",
+        "city": "Одеса",
+        "city_ref": "db5c88d0-391c-11dd-90d9-001a92567626",
+        "warehouse_ref": "1ec09d63-e1c2-11e3-8c4a-0050568002cf",
+        "warehouse_number": "Відділення №4: вул. Євгена Чикаленка, 86",
+        "department": "Відділення №4: вул. Євгена Чикаленка, 86",
+        "address": "Відділення №4: вул. Євгена Чикаленка, 86"
+      },
+      "payment": {
+        "method": "online",
+        "provider": "Smart Glocal Test (Telegram Payments)",
+        "status": "PENDING",
+        "transaction_id": null,
+        "paid_at": null,
+        "is_cod": false,
+        "cod_fee": 0,
+        "comment": "Жгщ"
+      },
+      "items": [
+        {
+          "id": "p_att_0ije_0dey",
+          "title": "Attack Shark ATTACK SHARK R5 ULTRA",
+          "brand": "Attack Shark",
+          "sku": "ATT-761A5",
+          "color": "White",
+          "img": "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_23.jpg",
+          "price": 2945,
+          "qty": 1,
+          "total": 2945
+        }
+      ],
+      "history": [
+        {
+          "status": "PENDING_PAYMENT",
+          "status_name": "Очікує оплати",
+          "timestamp": "2026-08-31T19:27:06.156Z",
+          "note": "Замовлення створено (очікує оплати)",
+          "actor": "Customer"
+        }
+      ],
+      "admin_comment": ""
+    }
+  ],
   "telegram_users": {},
   "admin_ids": [
     "1929165295",
@@ -403,5 +892,18 @@
     "Invinciblee",
     "Wincher"
   ],
-  "notifications": []
+  "notifications": [],
+  "deleted_product_ids": [
+    "prod-mchose-a5",
+    "prod-ajazz-ak820",
+    "prod-aula-f75",
+    "prod-vgn-f1",
+    "prod-shark-x3",
+    "p_att_0ije_0dey",
+    "p_att_s3p8_g70u",
+    "p_att_wso9_ng7v"
+  ],
+  "deleted_brand_ids": [],
+  "deleted_category_ids": [],
+  "last_cloud_sync": "2026-09-02T18:36:49.388Z"
 }
