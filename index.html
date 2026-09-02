@@ -4769,7 +4769,6 @@
             <div class="checkout-step-dot" data-step="1"><span>Контакти</span><div class="dot-line"></div></div>
             <div class="checkout-step-dot" data-step="2"><span>Доставка</span><div class="dot-line"></div></div>
             <div class="checkout-step-dot" data-step="3"><span>Оплата</span><div class="dot-line"></div></div>
-            <div class="checkout-step-dot" data-step="4"><span>Перевірка</span><div class="dot-line"></div></div>
         </div>
         <div class="drawer-body">
             <div class="checkout-container">
@@ -4846,7 +4845,7 @@
                     </div>
                 </div>
 
-                <!-- STEP 3: payment -->
+                <!-- STEP 3: payment & confirmation -->
                 <div class="checkout-step-panel" data-step-panel="3">
                     <div class="checkout-group">
                         <label>Оберіть спосіб оплати</label>
@@ -4877,22 +4876,20 @@
                     </div>
 
                     <!-- Dispatch time info banner -->
-                    <div style="display: flex; align-items: center; gap: 12px; background: rgba(87, 100, 226, 0.08); border: 1px solid rgba(87, 100, 226, 0.25); border-radius: var(--radius-sm); padding: 12px 14px; margin-top: 8px;">
+                    <div style="display: flex; align-items: center; gap: 12px; background: rgba(87, 100, 226, 0.08); border: 1px solid rgba(87, 100, 226, 0.25); border-radius: var(--radius-sm); padding: 12px 14px; margin-top: 10px;">
                         <span style="font-size: 1.5rem;">⚡</span>
                         <div style="font-size: 0.82rem; color: var(--text-primary); line-height: 1.4;">
                             <strong>Швидка відправка:</strong> Замовлення комплектується та відправляється протягом <strong>1–2 робочих днів</strong>.
                         </div>
                     </div>
 
-                    <div class="checkout-group" style="margin-top: 10px;">
+                    <div class="checkout-group" style="margin-top: 12px;">
                         <label>Коментар або побажання до замовлення</label>
                         <textarea id="chk-comment" rows="2" placeholder="Наприклад: зателефонуйте для уточнення деталей або зручний час відправки"></textarea>
                     </div>
-                </div>
 
-                <!-- STEP 4: review -->
-                <div class="checkout-step-panel" data-step-panel="4">
-                    <div id="review-screen-content"></div>
+                    <!-- Live summary of items and totals -->
+                    <div id="step3-order-summary" style="margin-top: 14px;"></div>
                 </div>
 
             </div>
@@ -4901,7 +4898,7 @@
             <div class="checkout-step-nav">
                 <button class="btn-secondary" id="chk-back-btn" onclick="checkoutStepBack()" style="display:none;">← Назад</button>
                 <button class="btn-primary" id="chk-next-btn" style="flex:1; justify-content: center;" onclick="checkoutStepNext()">Далі →</button>
-                <button class="btn-primary" id="chk-submit-btn" style="flex:1; justify-content: center; display:none;" onclick="submitOrder()">Перейти до оплати →</button>
+                <button class="btn-primary" id="chk-submit-btn" style="flex:1; justify-content: center; display:none;" onclick="submitOrder()">💳 Оформити замовлення →</button>
             </div>
         </div>
     </div>
@@ -7239,7 +7236,7 @@
             renderSavedDeliveriesBlock();
         }
 
-        const CHECKOUT_STEP_COUNT = 4;
+        const CHECKOUT_STEP_COUNT = 3;
 
         function renderCheckoutStep() {
             document.querySelectorAll('.checkout-step-panel').forEach(panel => {
@@ -7254,7 +7251,9 @@
             const isLast = checkoutStepIndex === CHECKOUT_STEP_COUNT;
             document.getElementById('chk-next-btn').style.display = isLast ? 'none' : '';
             document.getElementById('chk-submit-btn').style.display = isLast ? '' : 'none';
-            if (isLast) renderReviewStep();
+            if (checkoutStepIndex === 3) {
+                renderStep3Summary();
+            }
         }
 
         function normalizePhoneDisplay(value) {
@@ -7944,17 +7943,47 @@
             loadDeliveryWarehouses('');
         }
 
-        function renderReviewStep() {
-            const container = document.getElementById('review-screen-content');
+        function selectPaymentMethod(method) {
+            const input = document.getElementById('chk-payment');
+            if (input) input.value = method;
+
+            const onlineCard = document.getElementById('pay-card-online');
+            const codCard = document.getElementById('pay-card-cod');
+            const optOnline = document.getElementById('pay-opt-online');
+            const optCod = document.getElementById('pay-opt-cod');
+
+            if (method === 'cod') {
+                if (onlineCard) {
+                    onlineCard.classList.remove('active');
+                    onlineCard.style.borderColor = 'var(--border-light)';
+                }
+                if (codCard) {
+                    codCard.classList.add('active');
+                    codCard.style.borderColor = 'var(--accent)';
+                }
+                if (optCod) optCod.checked = true;
+                if (optOnline) optOnline.checked = false;
+            } else {
+                if (onlineCard) {
+                    onlineCard.classList.add('active');
+                    onlineCard.style.borderColor = 'var(--accent)';
+                }
+                if (codCard) {
+                    codCard.classList.remove('active');
+                    codCard.style.borderColor = 'var(--border-light)';
+                }
+                if (optOnline) optOnline.checked = true;
+                if (optCod) optCod.checked = false;
+            }
+
+            renderStep3Summary();
+        }
+
+        function renderStep3Summary() {
+            const container = document.getElementById('step3-order-summary');
             if (!container) return;
 
-            const name = (document.getElementById('chk-name')?.value || '').trim();
-            const surname = (document.getElementById('chk-surname')?.value || '').trim();
-            const patronymic = (document.getElementById('chk-patronymic')?.value || '').trim();
-            const phone = (document.getElementById('chk-phone')?.value || '').trim();
             const paymentMethod = document.getElementById('chk-payment')?.value || 'online';
-            const comment = (document.getElementById('chk-comment')?.value || '').trim();
-
             const subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
             const isCod = paymentMethod === 'cod';
             const codFee = isCod ? Math.round(20 + subtotal * 0.02) : 0;
@@ -7962,19 +7991,18 @@
 
             const provLabel = checkoutDelivery.provider === 'ukrposhta' ? 'Укрпошта' : 'Нова пошта';
             const methodLabel = (checkoutDelivery.method === 'postomat' || checkoutDelivery.type === 'postomat') ? 'Поштомат' : 'Відділення';
-
-            const fullName = [surname, name, patronymic].filter(Boolean).join(' ') || [name, surname].filter(Boolean).join(' ') || 'Покупець';
+            const delivPoint = checkoutDelivery.department || checkoutDelivery.city || 'Пункт видачі';
 
             const submitBtn = document.getElementById('chk-submit-btn');
             if (submitBtn) {
-                submitBtn.innerText = '💳 Оплатити в Telegram →';
+                submitBtn.innerHTML = `💳 Оформити замовлення (${formatPrice(grandTotal)}) →`;
             }
 
             container.innerHTML = `
-                <!-- 1. Ordered Products -->
-                <div class="review-card">
+                <!-- Order Items Mini Preview -->
+                <div class="review-card" style="margin-bottom: 10px;">
                     <div class="review-card-title">
-                        <span>🛍 Товари (${cart.reduce((c, i) => c + i.qty, 0)} шт.)</span>
+                        <span>🛍 Обрані товари (${cart.reduce((c, i) => c + i.qty, 0)} шт.)</span>
                         <button type="button" onclick="toggleCheckoutDrawer(false); toggleCart(true);" style="background:none; border:none; color: var(--accent); font-size: 0.72rem; font-weight:700; cursor:pointer;">Змінити</button>
                     </div>
                     <div>
@@ -7984,19 +8012,18 @@
                             const isWhiteColor = (item.color || '').toLowerCase().includes('біл') || (item.color || '').toLowerCase().includes('white');
                             const colorChip = item.color ? `<span style="display:inline-block; width:9px; height:9px; border-radius:50%; background:${getColorHex(item.color)}; border:1.5px solid ${isWhiteColor ? '#94a3b8' : 'rgba(0,0,0,0.18)'}; box-shadow: 0 1px 2px rgba(0,0,0,0.12);"></span>` : '';
                             return `
-                                <div class="review-item-row">
-                                    <img src="${item.img || prod.img}" alt="${item.title}" class="review-item-thumb">
-                                    <div class="review-item-info">
-                                        <div class="review-item-name">${item.title}</div>
-                                        <div class="review-item-meta">
+                                <div class="review-item-row" style="padding: 6px 0;">
+                                    <img src="${item.img || prod.img}" alt="${item.title}" class="review-item-thumb" style="width: 42px; height: 42px; border-radius: 6px; object-fit: contain;">
+                                    <div class="review-item-info" style="flex: 1; min-width: 0;">
+                                        <div class="review-item-name" style="font-size: 0.85rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${item.title}</div>
+                                        <div class="review-item-meta" style="font-size: 0.75rem; color: var(--text-secondary); display: flex; align-items: center; gap: 4px;">
                                             ${colorChip}
                                             <span>Колір: <strong>${item.color || 'Базовий'}</strong></span>
-                                            ${prod.sku ? `<span>• Арт: ${prod.sku}</span>` : ''}
+                                            <span>• ${item.qty} шт.</span>
                                         </div>
-                                        <div class="review-item-calc">${item.qty} шт. × ${formatPrice(item.price)}</div>
                                     </div>
                                     <div class="review-item-pricing">
-                                        <div class="review-item-price">${formatPrice(lineTotal)}</div>
+                                        <div class="review-item-price" style="font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 0.9rem;">${formatPrice(lineTotal)}</div>
                                     </div>
                                 </div>
                             `;
@@ -8004,84 +8031,37 @@
                     </div>
                 </div>
 
-                <!-- 2. Customer Info -->
-                <div class="review-card">
-                    <div class="review-card-title">
-                        <span>👤 Покупець</span>
-                        <button type="button" onclick="checkoutStepIndex = 1; renderCheckoutStep();" style="background:none; border:none; color: var(--accent); font-size: 0.72rem; font-weight:700; cursor:pointer;">Змінити</button>
+                <!-- Delivery Summary Mini Row -->
+                <div class="review-card" style="margin-bottom: 10px; padding: 10px 14px;">
+                    <div style="font-size: 0.8rem; color: var(--text-secondary); display: flex; justify-content: space-between; align-items: center;">
+                        <span>📦 Доставка: <strong>${provLabel} (${methodLabel.toLowerCase()})</strong></span>
+                        <span style="color: var(--accent); font-weight: 600; cursor: pointer;" onclick="checkoutStepIndex = 2; renderCheckoutStep();">Змінити</span>
                     </div>
-                    <div class="review-info-row">
-                        <span class="review-info-label">ПІБ:</span>
-                        <span class="review-info-val"><strong>${fullName}</strong></span>
-                    </div>
-                    <div class="review-info-row">
-                        <span class="review-info-label">Телефон:</span>
-                        <span class="review-info-val" style="font-family:'JetBrains Mono', monospace;">${phone}</span>
-                    </div>
+                    <div style="font-size: 0.82rem; font-weight: 600; color: var(--text-primary); margin-top: 3px;">${checkoutDelivery.city ? 'м. ' + checkoutDelivery.city + ', ' : ''}${delivPoint}</div>
                 </div>
 
-                <!-- 3. Delivery Info -->
-                <div class="review-card">
-                    <div class="review-card-title">
-                        <span>📦 Доставка</span>
-                        <button type="button" onclick="checkoutStepIndex = 2; renderCheckoutStep();" style="background:none; border:none; color: var(--accent); font-size: 0.72rem; font-weight:700; cursor:pointer;">Змінити</button>
+                <!-- Cost Breakdown Summary -->
+                <div class="review-card" style="background: var(--bg-surface); border: 1.5px solid var(--border-light); padding: 12px 14px;">
+                    <div class="review-info-row" style="display: flex; justify-content: space-between; font-size: 0.84rem; margin-bottom: 4px;">
+                        <span class="review-info-label" style="color: var(--text-secondary);">Вартість товарів:</span>
+                        <span class="review-info-val" style="font-weight: 700;">${formatPrice(subtotal)}</span>
                     </div>
-                    <div class="review-info-row">
-                        <span class="review-info-label">Служба:</span>
-                        <span class="review-info-val"><strong>${provLabel} — ${methodLabel.toLowerCase()}</strong></span>
-                    </div>
-                    <div class="review-info-row">
-                        <span class="review-info-label">Місто:</span>
-                        <span class="review-info-val">м. ${checkoutDelivery.city || 'Не обрано'}</span>
-                    </div>
-                    <div class="review-info-row">
-                        <span class="review-info-label">Пункт:</span>
-                        <span class="review-info-val">${checkoutDelivery.department || 'Не обрано'}</span>
-                    </div>
-                    <div class="review-info-row" style="margin-top: 4px;">
-                        <span class="review-info-label">Термін:</span>
-                        <span class="review-info-val" style="color: var(--accent);">⚡ Комплектація та відправка 1–2 робочих дні</span>
-                    </div>
-                </div>
-
-                <!-- 4. Payment Info -->
-                <div class="review-card">
-                    <div class="review-card-title">
-                        <span>💳 Оплата</span>
-                        <button type="button" onclick="checkoutStepIndex = 3; renderCheckoutStep();" style="background:none; border:none; color: var(--accent); font-size: 0.72rem; font-weight:700; cursor:pointer;">Змінити</button>
-                    </div>
-                    <div class="review-info-row">
-                        <span class="review-info-label">Спосіб:</span>
-                        <span class="review-info-val">💳 Онлайн-оплата в Telegram-боті</span>
-                    </div>
-                    <div class="review-info-row" style="margin-top: 4px;">
-                        <span class="review-info-label">Провайдер:</span>
-                        <span class="review-info-val" style="color: var(--accent); font-weight: 600;">Smart Glocal Test (Картка / Apple Pay / Google Pay)</span>
-                    </div>
-                    ${comment ? `
-                    <div class="review-info-row" style="margin-top: 4px;">
-                        <span class="review-info-label">Коментар:</span>
-                        <span class="review-info-val" style="font-style: italic;">"${comment}"</span>
-                    </div>
-                    ` : ''}
-                </div>
-
-                <!-- 5. Cost Summary -->
-                <div class="review-card" style="background: var(--bg-surface); border: 1.5px solid var(--border-light);">
-                    <div class="review-info-row">
-                        <span class="review-info-label">Вартість товарів:</span>
-                        <span class="review-info-val">${formatPrice(subtotal)}</span>
-                    </div>
-                    <div class="review-info-row">
-                        <span class="review-info-label">Доставка:</span>
+                    <div class="review-info-row" style="display: flex; justify-content: space-between; font-size: 0.84rem; margin-bottom: 4px;">
+                        <span class="review-info-label" style="color: var(--text-secondary);">Доставка:</span>
                         <span class="review-info-val" style="color: var(--text-muted);">За тарифами перевізника</span>
                     </div>
-                    <div class="review-info-row">
-                        <span class="review-info-label">Комісія за оплату:</span>
+                    <div class="review-info-row" style="display: flex; justify-content: space-between; font-size: 0.84rem; margin-bottom: 4px;">
+                        <span class="review-info-label" style="color: var(--text-secondary);">Комісія за оплату:</span>
                         <span class="review-info-val" style="color: #2E7D32; font-weight: 700;">0 ₴ (0% комісії)</span>
                     </div>
-                    <div class="review-info-row" style="border-top: 1px solid var(--border-light); margin-top: 8px; padding-top: 8px; font-size: 1.05rem;">
-                        <span style="font-weight: 800; color: var(--text-primary);">Разом:</span>
+                    ${isCod ? `
+                    <div class="review-info-row" style="display: flex; justify-content: space-between; font-size: 0.84rem; margin-bottom: 4px;">
+                        <span class="review-info-label" style="color: var(--text-secondary);">Послуга накладеного платежу:</span>
+                        <span class="review-info-val" style="color: var(--text-primary); font-weight: 700;">+${formatPrice(codFee)}</span>
+                    </div>
+                    ` : ''}
+                    <div class="review-info-row" style="display: flex; justify-content: space-between; border-top: 1px solid var(--border-light); margin-top: 8px; padding-top: 8px; font-size: 1.05rem;">
+                        <span style="font-weight: 800; color: var(--text-primary);">Разом до сплати:</span>
                         <span style="font-family: 'JetBrains Mono', monospace; font-weight: 900; color: var(--accent); font-size: 1.25rem;">${formatPrice(grandTotal)}</span>
                     </div>
                 </div>
@@ -8152,7 +8132,7 @@
             const submitBtn = document.getElementById('chk-submit-btn');
             if (submitBtn) {
                 submitBtn.disabled = true;
-                submitBtn.innerText = 'Оформлюємо замовлення...';
+                submitBtn.innerText = '⏳ Оформлюємо замовлення...';
             }
 
             try {
@@ -8163,7 +8143,7 @@
                 let data = null;
                 try {
                     const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), 4000);
+                    const timeoutId = setTimeout(() => controller.abort(), 4500);
                     const res = await fetch(ORDER_API_URL, {
                         method: 'POST',
                         headers,
@@ -8189,7 +8169,7 @@
                             id: `MLP-${randomNum}`,
                             customer: payload.customer,
                             delivery: payload.delivery,
-                            payment: { method: paymentMethod, status: 'PENDING' },
+                            payment: { method: paymentMethod, status: 'PENDING', comment },
                             items: payload.items,
                             subtotal,
                             cod_fee: codFee,
@@ -8202,7 +8182,7 @@
                 const orderObj = data.order || data;
                 const orderIdStr = (orderObj.order_id || orderObj.id || data.order_id || data.id || '').replace(/^#/, '');
 
-                // Empty cart immediately
+                // Clear cart immediately
                 cart = [];
                 saveCart();
                 renderCart();
@@ -8217,11 +8197,11 @@
                 // Show success confirmation screen
                 showOrderSuccessModal(orderObj, paymentMethod);
 
-                // Automatically redirect to Telegram bot
+                // Redirect to Telegram bot
                 const targetBotUrl = `https://t.me/${botUsername}?start=order_${orderIdStr}`;
                 setTimeout(() => {
                     goToTelegramBot(targetBotUrl);
-                }, 200);
+                }, 150);
 
                 updateAdminNewBadge();
             } catch (err) {
@@ -8232,7 +8212,7 @@
                     id: `MLP-${randomNum}`,
                     customer: payload.customer,
                     delivery: payload.delivery,
-                    payment: { method: paymentMethod, status: 'PENDING' },
+                    payment: { method: paymentMethod, status: 'PENDING', comment },
                     items: payload.items,
                     total: grandTotal
                 };
@@ -8244,11 +8224,11 @@
                 const targetBotUrl = `https://t.me/${botUsername}?start=order_${fallbackOrder.order_id}`;
                 setTimeout(() => {
                     goToTelegramBot(targetBotUrl);
-                }, 200);
+                }, 150);
             } finally {
                 if (submitBtn) {
                     submitBtn.disabled = false;
-                    submitBtn.innerText = '💳 Оплатити в Telegram →';
+                    submitBtn.innerText = '💳 Оформити замовлення →';
                 }
             }
         }
@@ -8325,42 +8305,32 @@
             }
 
             const tw = window.Telegram?.WebApp;
-            let opened = false;
-
-            // 1. Primary: Telegram WebApp native deep-link navigation
-            if (tw && typeof tw.openTelegramLink === 'function') {
+            
+            if (tw) {
                 try {
-                    tw.openTelegramLink(targetUrl);
-                    opened = true;
+                    if (typeof tw.openTelegramLink === 'function') {
+                        tw.openTelegramLink(targetUrl);
+                    }
                 } catch (e) {
                     console.warn('[openTelegramLink error]', e);
                 }
-            }
 
-            // 2. Secondary: Telegram WebApp openLink
-            if (!opened && tw && typeof tw.openLink === 'function') {
+                // Close the Mini App window so the user is directly viewing the Telegram chat with their order & payment button
                 try {
-                    tw.openLink(targetUrl);
-                    opened = true;
-                } catch (e) {
-                    console.warn('[openLink error]', e);
-                }
+                    if (typeof tw.close === 'function') {
+                        setTimeout(() => {
+                            try { tw.close(); } catch (e) {}
+                        }, 300);
+                    }
+                } catch (e) {}
+                return;
             }
 
-            // 3. Fallback: window navigation
-            if (!opened) {
-                try {
-                    window.location.href = targetUrl;
-                } catch (e) {
-                    try { window.open(targetUrl, '_blank'); } catch(e2) {}
-                }
-            }
-
-            // Cleanly close the Mini App so user is directly in the Telegram Bot chat
-            if (tw && typeof tw.close === 'function') {
-                setTimeout(() => {
-                    try { tw.close(); } catch (e) {}
-                }, 500);
+            // Outside Telegram: window navigation
+            try {
+                window.location.href = targetUrl;
+            } catch (e) {
+                try { window.open(targetUrl, '_blank'); } catch(e2) {}
             }
         }
 
