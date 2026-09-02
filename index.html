@@ -1773,6 +1773,7 @@
             margin: 0; 
             line-height: 1.35;
             color: var(--text-primary);
+            text-transform: uppercase;
         }
         
         .product-price { 
@@ -2233,6 +2234,7 @@
             letter-spacing: -0.025em;
             color: var(--text-primary);
             margin: 0;
+            text-transform: uppercase;
         }
 
         @media(min-width: 820px) {
@@ -5279,22 +5281,22 @@
     </div>
 
     <!-- FULLSCREEN LIGHTBOX GALLERY MODAL -->
-    <div class="lightbox-modal" id="lightbox-modal" onclick="if(event.target === this) closeColorGalleryLightbox()">
-        <div class="lightbox-topbar">
+    <div class="lightbox-modal" id="lightbox-modal" onclick="closeColorGalleryLightbox()">
+        <div class="lightbox-topbar" onclick="event.stopPropagation()">
             <div class="lightbox-title-wrap">
                 <span class="lightbox-title" id="lightbox-product-title">Галерея товару</span>
                 <span class="lightbox-color-badge" id="lightbox-color-badge">Колір</span>
             </div>
-            <button class="lightbox-close-btn" onclick="closeColorGalleryLightbox()" aria-label="Закрити">✕</button>
+            <button class="lightbox-close-btn" onclick="event.stopPropagation(); closeColorGalleryLightbox()" aria-label="Закрити">✕</button>
         </div>
 
-        <div class="lightbox-main-view">
+        <div class="lightbox-main-view" onclick="event.stopPropagation()">
             <button class="lightbox-nav-btn lightbox-prev" onclick="prevLightboxImage()" aria-label="Попереднє фото">‹</button>
             <img class="lightbox-main-img" id="lightbox-active-img" src="" alt="Gallery full preview">
             <button class="lightbox-nav-btn lightbox-next" onclick="nextLightboxImage()" aria-label="Наступне фото">›</button>
         </div>
 
-        <div class="lightbox-bottombar">
+        <div class="lightbox-bottombar" onclick="event.stopPropagation()">
             <div class="lightbox-counter" id="lightbox-counter">1 / 1</div>
             <div class="lightbox-thumbs-strip" id="lightbox-thumbs-strip"></div>
         </div>
@@ -6117,6 +6119,26 @@
             }
         }
 
+        function formatDisplayTitle(brand, title) {
+            let b = (brand || '').trim();
+            let t = (title || '').trim();
+            if (!t) return b ? b.toUpperCase() : '';
+
+            if (b) {
+                const bLower = b.toLowerCase();
+                if (t.toLowerCase().startsWith(bLower)) {
+                    const rest = t.slice(b.length).trim();
+                    if (rest.toLowerCase().startsWith(bLower)) {
+                        t = rest;
+                    }
+                } else {
+                    t = `${b} ${t}`;
+                }
+            }
+
+            return t.toUpperCase();
+        }
+
         function formatPrice(price) {
             return `${Number(price).toLocaleString('uk-UA')} <span class="currency">₴</span>`;
         }
@@ -6331,7 +6353,7 @@
                         <div class="product-info">
                             <div class="product-price">${formatPrice(p.price)}</div>
                             <div class="product-title-group">
-                                <h3>${p.title}</h3>
+                                <h3>${formatDisplayTitle(p.brand, p.title)}</h3>
                             </div>
                         </div>
                     </div>
@@ -6600,18 +6622,14 @@
                 }
             }
 
+            const formattedTitle = formatDisplayTitle(product.brand, product.title);
             const titleEl = document.getElementById('modal-title');
             if (titleEl) {
-                const brandStr = (product.brand || '').trim();
-                const titleStr = (product.title || '').trim();
-                const fullTitle = (brandStr && !titleStr.toLowerCase().startsWith(brandStr.toLowerCase()))
-                    ? `${brandStr} ${titleStr}`
-                    : titleStr;
-                titleEl.innerText = fullTitle;
+                titleEl.innerText = formattedTitle;
             }
 
             const stickyTitleEl = document.getElementById('sticky-bar-title');
-            if (stickyTitleEl) stickyTitleEl.innerText = product.title;
+            if (stickyTitleEl) stickyTitleEl.innerText = formattedTitle;
 
             const modalDesc = document.getElementById('modal-desc');
             if (modalDesc) modalDesc.innerText = product.desc;
@@ -6667,12 +6685,20 @@
             if (specsContainer) {
                 if (product.specs && product.specs.length > 0) {
                     const specsList = product.specs.filter(s => !(s.key || s.label || '').toLowerCase().includes('гарант'));
-                    specsContainer.innerHTML = specsList.map(s => `
-                        <div class="spec-row">
-                            <span class="spec-label">${s.label || s.key || 'Характеристика'}</span>
-                            <span class="spec-value">${s.value || ''}</span>
-                        </div>
-                    `).join('');
+                    specsContainer.innerHTML = specsList.map(s => {
+                        let label = s.label || s.key || '';
+                        let val = s.value || '';
+                        if ((!label || label === 'Характеристика' || label === 'Параметр') && val) {
+                            label = val;
+                            val = 'Є';
+                        }
+                        return `
+                            <div class="spec-row">
+                                <span class="spec-label">${label}</span>
+                                <span class="spec-value">${val}</span>
+                            </div>
+                        `;
+                    }).join('');
                 } else {
                     // Generate clean default specs matching the product
                     specsContainer.innerHTML = `
@@ -6916,15 +6942,7 @@
             const modalTitleEl = document.getElementById('lightbox-product-title');
             const colorBadgeEl = document.getElementById('lightbox-color-badge');
             if (modalTitleEl) {
-                const brandStr = (currentModalProduct.brand || '').trim();
-                let rawTitle = (currentModalProduct.title || '').trim();
-                if (brandStr && rawTitle.toLowerCase().startsWith(brandStr.toLowerCase())) {
-                    modalTitleEl.innerText = rawTitle;
-                } else if (brandStr) {
-                    modalTitleEl.innerText = `${brandStr} ${rawTitle}`;
-                } else {
-                    modalTitleEl.innerText = rawTitle;
-                }
+                modalTitleEl.innerText = formatDisplayTitle(currentModalProduct.brand, currentModalProduct.title);
             }
             if (colorBadgeEl) {
                 if (colorName) {
@@ -6936,7 +6954,11 @@
             }
 
             renderLightboxView();
-            document.getElementById('lightbox-modal')?.classList.add('active');
+            const lb = document.getElementById('lightbox-modal');
+            if (lb) {
+                lb.style.pointerEvents = 'auto';
+                lb.classList.add('active');
+            }
         }
 
         function renderLightboxView() {
@@ -6974,8 +6996,9 @@
                              alt="thumb ${idx + 1}">
                     `).join('');
                     const activeThumb = stripEl.querySelector('.lightbox-strip-thumb.active');
-                    if (activeThumb) {
-                        activeThumb.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+                    if (activeThumb && stripEl) {
+                        const scrollPos = activeThumb.offsetLeft - (stripEl.clientWidth / 2) + (activeThumb.clientWidth / 2);
+                        stripEl.scrollTo({ left: scrollPos, behavior: 'auto' });
                     }
                 } else {
                     stripEl.style.display = 'none';
@@ -7001,7 +7024,11 @@
         }
 
         function closeColorGalleryLightbox() {
-            document.getElementById('lightbox-modal')?.classList.remove('active');
+            const lb = document.getElementById('lightbox-modal');
+            if (lb) {
+                lb.classList.remove('active');
+                lb.style.pointerEvents = 'none';
+            }
         }
 
         // Add keyboard & touch swipe navigation for the gallery
@@ -8145,24 +8172,47 @@
             const fullName = [customer.last_name, customer.first_name, customer.middle_name].filter(Boolean).join(' ') ||
                 [customer.first_name, customer.last_name].filter(Boolean).join(' ') || 'Покупець';
 
+            const isCod = paymentType === 'cod' || order.payment?.method === 'cod';
+            const codAdvance = Math.min(200, order.total || 200);
+            const remaining = Math.max(0, (order.total || 0) - codAdvance);
+
             const detailsBox = document.getElementById('success-details-content');
             if (detailsBox) {
-                detailsBox.innerHTML = `
-                    <div><strong>Отримувач (ПІБ):</strong> ${fullName}</div>
-                    <div><strong>Телефон:</strong> ${customer.phone || ''}</div>
-                    <div><strong>Доставка:</strong> ${provName} (${methodType}), м. ${delivery.city || ''}, ${delivery.department || delivery.address || ''}</div>
-                    <div><strong>Оплата:</strong> 💳 Онлайн-оплата в Telegram-боті (Smart Glocal Test)</div>
-                    <div style="font-weight: 800; color: var(--accent); margin-top: 4px; font-size: 0.95rem;"><strong>Сума до сплати:</strong> ${formatPrice(order.total || 0)}</div>
-                `;
+                if (isCod) {
+                    detailsBox.innerHTML = `
+                        <div><strong>Отримувач (ПІБ):</strong> ${fullName}</div>
+                        <div><strong>Телефон:</strong> ${customer.phone || ''}</div>
+                        <div><strong>Доставка:</strong> ${provName} (${methodType}), м. ${delivery.city || ''}, ${delivery.department || delivery.address || ''}</div>
+                        <div><strong>Спосіб оплати:</strong> 📦 Накладений платіж (з авансом)</div>
+                        <div style="margin-top: 6px; padding: 8px 10px; background: rgba(87,100,226,0.08); border-radius: 8px; font-size: 0.82rem; color: var(--text-primary); border: 1px solid rgba(87,100,226,0.2);">
+                            <div>• <strong>Страховий аванс зараз:</strong> <span style="color: var(--accent); font-weight: 800;">${formatPrice(codAdvance)}</span></div>
+                            <div>• <strong>Залишок при отриманні:</strong> <span style="font-weight: 800;">${formatPrice(remaining)}</span></div>
+                        </div>
+                    `;
+                } else {
+                    detailsBox.innerHTML = `
+                        <div><strong>Отримувач (ПІБ):</strong> ${fullName}</div>
+                        <div><strong>Телефон:</strong> ${customer.phone || ''}</div>
+                        <div><strong>Доставка:</strong> ${provName} (${methodType}), м. ${delivery.city || ''}, ${delivery.department || delivery.address || ''}</div>
+                        <div><strong>Спосіб оплати:</strong> 💳 Онлайн-оплата (Smart Glocal)</div>
+                        <div style="font-weight: 800; color: var(--accent); margin-top: 6px; font-size: 0.98rem;"><strong>Сума до сплати:</strong> ${formatPrice(order.total || 0)}</div>
+                    `;
+                }
             }
 
             const bannerTitle = document.getElementById('success-tg-banner-title');
             const bannerDesc = document.getElementById('success-tg-banner-desc');
             const tgBtnLabel = document.getElementById('success-tg-btn-label');
 
-            if (bannerTitle) bannerTitle.innerText = 'Оплата та підтвердження — у Telegram-боті!';
-            if (bannerDesc) bannerDesc.innerHTML = `Рахунок на оплату <strong>${formatPrice(order.total || 0)}</strong> надіслано вам у чат з ботом. Відкрийте бот для безпечної оплати та відстеження ТТН.`;
-            if (tgBtnLabel) tgBtnLabel.innerText = '💬 Відкрити та оплатити в Telegram →';
+            if (isCod) {
+                if (bannerTitle) bannerTitle.innerText = 'Сплата авансу 200 ₴ — у Telegram-боті';
+                if (bannerDesc) bannerDesc.innerHTML = `Для підтвердження та відправки замовлення необхідно сплатити страховий аванс <strong>200 ₴</strong> (аванс за зворотну доставку). Перейдіть у бот для зручної онлайн-оплати авансу.`;
+                if (tgBtnLabel) tgBtnLabel.innerText = '💳 Оплатити аванс 200 ₴ в Telegram →';
+            } else {
+                if (bannerTitle) bannerTitle.innerText = 'Оплата та підтвердження — у Telegram-боті!';
+                if (bannerDesc) bannerDesc.innerHTML = `Рахунок на оплату <strong>${formatPrice(order.total || 0)}</strong> надіслано вам у чат з ботом. Відкрийте бот для безпечної оплати та відстеження ТТН.`;
+                if (tgBtnLabel) tgBtnLabel.innerText = '💳 Перейти до оплати в Telegram →';
+            }
 
             cart = [];
             saveCart();

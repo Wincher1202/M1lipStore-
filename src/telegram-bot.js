@@ -194,12 +194,16 @@ export class TelegramBotService {
     return 'Покупець';
   }
 
-  // Specification string parser supporting "Key (Value)", "Key: Value", "Key - Value"
+  // Specification string parser supporting "Key (Value)", "Key: Value", "Key - Value", "Key Status"
   parseSpecLine(line) {
-    const clean = (line || '').trim();
+    let clean = (line || '').trim();
     if (!clean) return null;
 
-    // Pattern 1: Сенсор (Paw3395) or Сенсор (PixArt PAW3395 26000 DPI)
+    // Strip optional list prefix (e.g., "1. ", "2) ", "3 - ")
+    clean = clean.replace(/^\d+[\.\)\-]\s*/, '').trim();
+    if (!clean) return null;
+
+    // Pattern 1: Key (Value) e.g., Сенсор (Paw3395), Вага (49г), Перемикачі (Huano)
     const parenMatch = clean.match(/^([^()]+)\((.+)\)$/);
     if (parenMatch) {
       const key = parenMatch[1].trim();
@@ -207,15 +211,30 @@ export class TelegramBotService {
       if (key && value) return { key, value };
     }
 
-    // Pattern 2: Сенсор: Paw3395 or Сенсор - Paw3395 or Сенсор — Paw3395
-    const sepMatch = clean.match(/^([^:—\-]+)[:—\-]\s*(.+)$/);
-    if (sepMatch) {
-      const key = sepMatch[1].trim();
-      const value = sepMatch[2].trim();
+    // Pattern 2: Key: Value e.g., Сенсор: Paw3395 or Підключення: Type-C
+    const colonIdx = clean.indexOf(':');
+    if (colonIdx !== -1) {
+      const key = clean.slice(0, colonIdx).trim();
+      const value = clean.slice(colonIdx + 1).trim();
       if (key && value) return { key, value };
     }
 
-    return { key: 'Характеристика', value: clean };
+    // Pattern 3: Key — Value or Key - Value (dash with spaces around it)
+    const dashMatch = clean.match(/^(.+?)\s+[—\–\-]\s+(.+)$/);
+    if (dashMatch) {
+      const key = dashMatch[1].trim();
+      const value = dashMatch[2].trim();
+      if (key && value) return { key, value };
+    }
+
+    // Pattern 4: Key ends with status word (e.g. "RGB-панель Є", "Gasket Mount Так")
+    const statusMatch = clean.match(/^(.+?)\s+(є|так|ні|присутня|присутнє|в наявності|есть|да|нет)$/i);
+    if (statusMatch) {
+      return { key: statusMatch[1].trim(), value: statusMatch[2].trim() };
+    }
+
+    // Pattern 5: Single custom specification name (e.g., "RGB-панель", "Hot-Swap", "OLED-екран")
+    return { key: clean, value: 'Є' };
   }
 
   async init() {
