@@ -8155,55 +8155,101 @@
                 submitBtn.innerText = 'Оформлюємо замовлення...';
             }
 
-            const randomNum = Math.floor(100000 + Math.random() * 900000);
-            const orderIdStr = `MLP-${randomNum}`;
-            payload.order_id = orderIdStr;
-            payload.id = orderIdStr;
-
-            // Empty cart immediately
-            cart = [];
-            saveCart();
-            renderCart();
-            updateBadges();
-
-            localStorage.setItem('m1lip_last_phone', phone);
-            localStorage.setItem('m1lip_last_order_id', orderIdStr);
-
-            const tw = window.Telegram?.WebApp || tg;
-            const isInsideTelegram = !!(tw && (typeof tw.sendData === 'function' || tw.initData || tw.initDataUnsafe?.user));
-
-            // Fire background API sync (best effort)
             try {
                 const headers = { 'Content-Type': 'application/json' };
+                const tw = window.Telegram?.WebApp || tg;
                 if (tw?.initData) headers['X-Telegram-Init-Data'] = tw.initData;
-                fetch(ORDER_API_URL, {
-                    method: 'POST',
-                    headers,
-                    body: JSON.stringify(payload)
-                }).catch(() => {});
-            } catch (fetchErr) {
-                console.warn('[Order API background sync]', fetchErr);
-            }
 
-            // In Telegram WebApp: call sendData which immediately closes the Mini App and transmits order data to the bot!
-            if (isInsideTelegram && typeof tw?.sendData === 'function') {
+                let data = null;
                 try {
-                    tw.sendData(JSON.stringify(payload));
-                    return;
-                } catch (sendErr) {
-                    console.warn('[Telegram WebApp sendData failed, trying close]', sendErr);
-                    try { tw.close(); } catch (e) {}
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 4000);
+                    const res = await fetch(ORDER_API_URL, {
+                        method: 'POST',
+                        headers,
+                        body: JSON.stringify(payload),
+                        signal: controller.signal
+                    });
+                    clearTimeout(timeoutId);
+                    if (res.ok) {
+                        data = await res.json();
+                    }
+                } catch (fetchErr) {
+                    console.warn('[Order API network fallback]', fetchErr);
                 }
-            }
 
-            // Fallback for regular browser or if not in Telegram:
-            toggleCheckoutDrawer(false);
-            showOrderSuccessModal(payload, paymentMethod);
-            updateAdminNewBadge();
+                if (!data || (!data.order_id && !data.id)) {
+                    const randomNum = Math.floor(100000 + Math.random() * 900000);
+                    data = {
+                        status: 'success',
+                        order_id: `MLP-${randomNum}`,
+                        id: `MLP-${randomNum}`,
+                        order: {
+                            order_id: `MLP-${randomNum}`,
+                            id: `MLP-${randomNum}`,
+                            customer: payload.customer,
+                            delivery: payload.delivery,
+                            payment: { method: paymentMethod, status: 'PENDING' },
+                            items: payload.items,
+                            subtotal,
+                            cod_fee: codFee,
+                            total: grandTotal
+                        },
+                        total: grandTotal
+                    };
+                }
 
-            if (submitBtn) {
-                submitBtn.disabled = false;
-                submitBtn.innerText = '💳 Оплатити в Telegram →';
+                const orderObj = data.order || data;
+                const orderIdStr = (orderObj.order_id || orderObj.id || data.order_id || data.id || '').replace(/^#/, '');
+
+                // Empty cart immediately
+                cart = [];
+                saveCart();
+                renderCart();
+                updateBadges();
+
+                localStorage.setItem('m1lip_last_phone', phone);
+                localStorage.setItem('m1lip_last_order_id', orderIdStr);
+
+                // Hide checkout drawer
+                toggleCheckoutDrawer(false);
+
+                // Show success confirmation screen
+                showOrderSuccessModal(orderObj, paymentMethod);
+
+                // Automatically redirect to Telegram bot
+                const targetBotUrl = `https://t.me/${botUsername}?start=order_${orderIdStr}`;
+                setTimeout(() => {
+                    goToTelegramBot(targetBotUrl);
+                }, 200);
+
+                updateAdminNewBadge();
+            } catch (err) {
+                console.error("Order submit exception:", err);
+                const randomNum = Math.floor(100000 + Math.random() * 900000);
+                const fallbackOrder = {
+                    order_id: `MLP-${randomNum}`,
+                    id: `MLP-${randomNum}`,
+                    customer: payload.customer,
+                    delivery: payload.delivery,
+                    payment: { method: paymentMethod, status: 'PENDING' },
+                    items: payload.items,
+                    total: grandTotal
+                };
+                localStorage.setItem('m1lip_last_phone', phone);
+                localStorage.setItem('m1lip_last_order_id', fallbackOrder.order_id);
+                toggleCheckoutDrawer(false);
+                showOrderSuccessModal(fallbackOrder, paymentMethod);
+
+                const targetBotUrl = `https://t.me/${botUsername}?start=order_${fallbackOrder.order_id}`;
+                setTimeout(() => {
+                    goToTelegramBot(targetBotUrl);
+                }, 200);
+            } finally {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerText = '💳 Оплатити в Telegram →';
+                }
             }
         }
 
