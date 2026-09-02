@@ -10,6 +10,29 @@ export const PAYMENT_PROVIDER_TOKEN = process.env.PAYMENT_PROVIDER_TOKEN || '187
 
 const TELEGRAM_API_BASE = 'https://api.telegram.org';
 
+export function getStoreWebUrl() {
+  // Never use internal Google Cloud Run / AI Studio preview URLs for Telegram Web App,
+  // as they require Google account authentication and cause 403 error.
+  if (process.env.PUBLIC_APP_URL && !process.env.PUBLIC_APP_URL.includes('run.app') && !process.env.PUBLIC_APP_URL.includes('localhost')) {
+    return process.env.PUBLIC_APP_URL.replace(/\/$/, '');
+  }
+  if (process.env.APP_URL && !process.env.APP_URL.includes('run.app') && !process.env.APP_URL.includes('localhost')) {
+    return process.env.APP_URL.replace(/\/$/, '');
+  }
+  // Default to public GitHub Pages repository hosting - never triggers Google OAuth login
+  return 'https://wincher1202.github.io/M1lipStore-/';
+}
+
+export function getPublicAssetBaseUrl() {
+  if (process.env.PUBLIC_API_URL && !process.env.PUBLIC_API_URL.includes('run.app') && !process.env.PUBLIC_API_URL.includes('localhost')) {
+    return process.env.PUBLIC_API_URL.replace(/\/$/, '');
+  }
+  if (process.env.APP_URL && !process.env.APP_URL.includes('run.app') && !process.env.APP_URL.includes('localhost')) {
+    return process.env.APP_URL.replace(/\/$/, '');
+  }
+  return 'https://m1lipstore.onrender.com';
+}
+
 export function formatKyivDateTime(dateInput) {
   if (!dateInput) return '';
   try {
@@ -158,7 +181,7 @@ export class TelegramBotService {
         // 2. If it's a web URL (Telegram CDN, external server, etc.)
         let fullPhoto = photoUrl;
         if (!photoUrl.startsWith('http')) {
-          const baseUrl = (process.env.APP_URL || process.env.PUBLIC_APP_URL || 'https://m1lipstore.onrender.com').replace(/\/$/, '');
+          const baseUrl = getPublicAssetBaseUrl();
           fullPhoto = `${baseUrl}/${encodeURI(cleanPath)}`;
         }
 
@@ -322,6 +345,22 @@ export class TelegramBotService {
       if (me.ok) {
         this.botInfo = me.result;
         console.log(`[TelegramBot] Connected as @${me.result.username} (${me.result.first_name})`);
+
+        // Set default Chat Menu Button to open public catalog without Google login
+        try {
+          await this.callApi('setChatMenuButton', {
+            menu_button: {
+              type: 'web_app',
+              text: '🚀 Відкрити каталог',
+              web_app: {
+                url: getStoreWebUrl()
+              }
+            }
+          });
+        } catch (menuErr) {
+          console.warn('[TelegramBot] setChatMenuButton error:', menuErr.message);
+        }
+
         this.startPolling();
       } else {
         console.warn('[TelegramBot] Failed to authenticate with Telegram:', me.description);
@@ -409,7 +448,7 @@ export class TelegramBotService {
 
   getReplyKeyboard(from) {
     const isAdminUser = this.isAdmin(from);
-    const storeUrl = (process.env.APP_URL || process.env.PUBLIC_APP_URL || 'https://wincher1202.github.io/M1lipStore-/').replace(/\/$/, '');
+    const storeUrl = getStoreWebUrl();
     const keyboard = [];
 
     if (isAdminUser) {
@@ -661,7 +700,7 @@ export class TelegramBotService {
         return;
       }
 
-      const appUrl = (process.env.APP_URL || process.env.PUBLIC_APP_URL || 'https://wincher1202.github.io/M1lipStore-/').replace(/\/$/, '');
+      const appUrl = getStoreWebUrl();
       await this.callApi('sendMessage', {
         chat_id: chatId,
         text: `🛒 <b>Каталог MILIPSTORE</b>\n\nОбирайте найкращі ігрові девайси зі швидкою доставкою по всій Україні:\n👉 <a href="${appUrl}">${appUrl}</a>`,
@@ -846,7 +885,7 @@ export class TelegramBotService {
         db.addCategory(category);
         db.addBrand(brand);
 
-        const appUrl = (process.env.APP_URL || 'https://m1lipstore.onrender.com').replace(/\/$/, '');
+        const appUrl = getStoreWebUrl();
         await this.callApi('sendMessage', {
           chat_id: chatId,
           text: `✅ <b>Товар «${newProd.title}» успішно додано до каталогу!</b>\n\n💰 Ціна: <b>${newProd.price} ₴</b>\n🗂 Категорія: <b>${newProd.category}</b>\n📦 Залишок: <b>${newProd.quantity} шт.</b>\n🆔 Артикул: <code>${newProd.sku}</code>`,
@@ -1715,7 +1754,7 @@ export class TelegramBotService {
     const orders = db.getOrdersByTelegramId(telegramUserId || chatId);
 
     if (!orders || orders.length === 0) {
-      const appUrl = (process.env.APP_URL || process.env.PUBLIC_APP_URL || 'https://m1lipstore.onrender.com').replace(/\/$/, '');
+      const appUrl = getStoreWebUrl();
       await this.safeEditOrSend(chatId, messageId, `🛍 <b>Мої замовлення</b>\n\nУ вас поки немає оформлених замовлень.\nОберіть девайси в нашому магазині та оформлюйте замовлення!`, {
         reply_markup: {
           inline_keyboard: [
@@ -3525,7 +3564,7 @@ export class TelegramBotService {
     db.addCategory(category);
     db.addBrand(brand);
 
-    const appUrl = (process.env.APP_URL || 'https://m1lipstore.onrender.com').replace(/\/$/, '');
+    const appUrl = getStoreWebUrl();
 
     await this.safeEditOrSend(chatId, cardId, `🎉 <b>Товар успішно створено та опубліковано!</b>\n\n` +
       `🏷 <b>${newProduct.title}</b>\n` +
