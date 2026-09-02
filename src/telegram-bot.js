@@ -468,6 +468,11 @@ export class TelegramBotService {
         let order = orderData.order_id ? db.getOrderById(orderData.order_id) : null;
         if (!order) {
           order = db.createOrder(orderData);
+        } else {
+          if (!order.customer) order.customer = {};
+          order.customer.telegram_id = from.id;
+          if (from.username) order.customer.telegram_username = from.username;
+          db.save();
         }
         db.linkOrderToTelegramUser(from.id, order.order_id, order.customer);
 
@@ -1544,6 +1549,14 @@ export class TelegramBotService {
     await this.sendPhotoOrMessage(chatId, colorPhoto, text, {
       reply_markup: { inline_keyboard: buttons }
     });
+
+    if (isOnline && !isPaid) {
+      try {
+        await this.sendNativeTelegramInvoice(chatId, order);
+      } catch (e) {
+        console.warn('[TelegramBot] Auto sendNativeTelegramInvoice error:', e);
+      }
+    }
   }
 
   // View full order details with product photo matching chosen color
