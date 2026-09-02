@@ -538,6 +538,351 @@
   ],
   "orders": [
     {
+      "order_id": "MLP-770711",
+      "id": "MLP-770711",
+      "status": "PENDING_PAYMENT",
+      "status_name": "Очікує оплати",
+      "tracking_number": null,
+      "subtotal": 2899,
+      "delivery_fee": 0,
+      "cod_fee": 0,
+      "total": 2899,
+      "dispatch_timeline": "1-2 дні",
+      "shipping_note": "Відправлення замовлення протягом 1-2 робочих днів з моменту оформлення",
+      "created_at": "2026-09-02T19:08:45.675Z",
+      "updated_at": "2026-09-02T19:08:45.675Z",
+      "customer": {
+        "first_name": "Дмитро",
+        "last_name": "Міснік",
+        "middle_name": "Васильович",
+        "phone": "+380961641422",
+        "email": "",
+        "telegram_id": null,
+        "telegram_username": null
+      },
+      "delivery": {
+        "provider": "nova_poshta",
+        "provider_name": "Нова Пошта",
+        "type": "branch",
+        "type_name": "Відділення",
+        "city": "Львів",
+        "city_ref": "",
+        "warehouse_ref": "",
+        "warehouse_number": "Відділення №8",
+        "department": "Відділення №8",
+        "address": "Відділення №8"
+      },
+      "payment": {
+        "method": "online",
+        "provider": "Smart Glocal Test (Telegram Payments)",
+        "status": "PENDING",
+        "transaction_id": null,
+        "paid_at": null,
+        "is_cod": false,
+        "cod_fee": 0,
+        "comment": ""
+      },
+      "items": [
+        {
+          "id": 1,
+          "title": "Scyrox V8",
+          "brand": "MILIPSTORE",
+          "sku": "SKU-1",
+          "color": "",
+          "img": "/images.png",
+          "price": 2899,
+          "qty": 1,
+          "total": 2899
+        }
+      ],
+      "history": [
+        {
+          "status": "PENDING_PAYMENT",
+          "status_name": "Очікує оплати",
+          "timestamp": "2026-09-02T19:08:45.675Z",
+          "note": "Замовлення створено (очікує оплати)",
+          "actor": "Customer"
+        }
+      ],
+      "admin_comment": ""
+    },
+    {
+      "order_id": "MLP-177633",
+      "id": "MLP-177633",
+      "status": "PENDING_PAYMENT",
+      "status_name": "Очікує оплати",
+      "tracking_number": null,
+      "subtotal": 2799,
+      "delivery_fee": 0,
+      "cod_fee": 0,
+      "total": 2799,
+      "dispatch_timeline": "1-2 дні",
+      "shipping_note": "Відправлення замовлення протягом 1-2 робочих днів з моменту оформлення",
+      "created_at": "2026-09-02T19:03:05.911Z",
+      "updated_at": "2026-09-02T19:03:05.911Z",
+      "customer": {
+        "first_name": "сС",
+        "last_name": "Аа",
+        "middle_name": "афафа",
+        "phone": "+380 51 515 15 15",
+        "email": "",
+        "telegram_id": null,
+        "telegram_username": null
+      },
+      "delivery": {
+        "provider": "nova_poshta",
+        "provider_name": "Нова Пошта",
+        "type": "branch",
+        "type_name": "Відділення",
+        "city": "Львів",
+        "city_ref": "db5c88f5-391c-11dd-90d9-001a92567626",
+        "warehouse_ref": "39931b6d-e1c2-11e3-8c4a-0050568002cf",
+        "warehouse_number": "Відділення №9 (до 30 кг): вул. Кульпарківська, 142",
+        "department": "Відділення №9 (до 30 кг): вул. Кульпарківська, 142",
+        "address": "Відділення №9 (до 30 кг): вул. Кульпарківська, 142"
+      },
+      "payment": {
+        "method": "online",
+        "provider": "Smart Glocal Test (Telegram Payments)",
+        "status": "PENDING",
+        "transaction_id": null,
+        "paid_at": null,
+        "is_cod": false,
+        "cod_fee": 0,
+        "comment": "вфвф"
+      },
+      "items": [
+        {
+          "id": "p_iro_ohx6_jmc3",
+          "title": "IROK IROK HE6 Ultra",
+          "brand": "IROK",
+          "sku": "IRO-51O6V",
+          "color": "Black",
+          "img": "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_58.jpg",
+          "price": 2799,
+          "qty": 1,
+          "total": 2799
+        }
+      ],
+      "history": [
+        {
+          "status": "PENDING_PAYMENT",
+          "status_name": "Очікує оплати",
+          "timestamp": "2026-09-02T19:03:05.911Z",
+          "note": "Замовлення створено (очікує оплати)",
+          "actor": "Customer"
+        }
+      ],
+      "admin_comment": ""
+    },
+    {
+      "order_id": "MLP-288186",
+      "id": "MLP-288186",
+      "status": "PENDING_PAYMENT",
+      "status_name": "Очікує оплати",
+      "tracking_number": null,
+      "subtotal": 2799,
+      "delivery_fee": 0,
+      "cod_fee": 0,
+      "total": 2799,
+      "dispatch_timeline": "1-2 дні",
+      "shipping_note": "Відправлення замовлення протягом 1-2 робочих днів з моменту оформлення",
+      "created_at": "2026-09-02T19:02:11.491Z",
+      "updated_at": "2026-09-02T19:02:11.491Z",
+      "customer": {
+        "first_name": "Дмитро",
+        "last_name": "ііяя",
+        "middle_name": "яяя",
+        "phone": "+380 51 515 15 15",
+        "email": "",
+        "telegram_id": null,
+        "telegram_username": null
+      },
+      "delivery": {
+        "provider": "nova_poshta",
+        "provider_name": "Нова Пошта",
+        "type": "branch",
+        "type_name": "Відділення",
+        "city": "Одеса",
+        "city_ref": "db5c88d0-391c-11dd-90d9-001a92567626",
+        "warehouse_ref": "7b422fc4-e1b8-11e3-8c4a-0050568002cf",
+        "warehouse_number": "Відділення №2: вул. Базова, 16 (Промринок, 7 км)",
+        "department": "Відділення №2: вул. Базова, 16 (Промринок, 7 км)",
+        "address": "Відділення №2: вул. Базова, 16 (Промринок, 7 км)"
+      },
+      "payment": {
+        "method": "online",
+        "provider": "Smart Glocal Test (Telegram Payments)",
+        "status": "PENDING",
+        "transaction_id": null,
+        "paid_at": null,
+        "is_cod": false,
+        "cod_fee": 0,
+        "comment": "іі"
+      },
+      "items": [
+        {
+          "id": "p_iro_ohx6_jmc3",
+          "title": "IROK IROK HE6 Ultra",
+          "brand": "IROK",
+          "sku": "IRO-51O6V",
+          "color": "Black",
+          "img": "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_58.jpg",
+          "price": 2799,
+          "qty": 1,
+          "total": 2799
+        }
+      ],
+      "history": [
+        {
+          "status": "PENDING_PAYMENT",
+          "status_name": "Очікує оплати",
+          "timestamp": "2026-09-02T19:02:11.491Z",
+          "note": "Замовлення створено (очікує оплати)",
+          "actor": "Customer"
+        }
+      ],
+      "admin_comment": ""
+    },
+    {
+      "order_id": "MLP-735524",
+      "id": "MLP-735524",
+      "status": "PENDING_PAYMENT",
+      "status_name": "Очікує оплати",
+      "tracking_number": null,
+      "subtotal": 2945,
+      "delivery_fee": 0,
+      "cod_fee": 0,
+      "total": 2945,
+      "dispatch_timeline": "1-2 дні",
+      "shipping_note": "Відправлення замовлення протягом 1-2 робочих днів з моменту оформлення",
+      "created_at": "2026-09-02T18:59:26.681Z",
+      "updated_at": "2026-09-02T18:59:26.681Z",
+      "customer": {
+        "first_name": "афаф",
+        "last_name": "афаф",
+        "middle_name": "фапфа",
+        "phone": "+380 51 515 15 15",
+        "email": "",
+        "telegram_id": null,
+        "telegram_username": null
+      },
+      "delivery": {
+        "provider": "nova_poshta",
+        "provider_name": "Нова Пошта",
+        "type": "branch",
+        "type_name": "Відділення",
+        "city": "Одеса",
+        "city_ref": "db5c88d0-391c-11dd-90d9-001a92567626",
+        "warehouse_ref": "1692286e-e1c2-11e3-8c4a-0050568002cf",
+        "warehouse_number": "Відділення №1: Київське шосе, 27",
+        "department": "Відділення №1: Київське шосе, 27",
+        "address": "Відділення №1: Київське шосе, 27"
+      },
+      "payment": {
+        "method": "online",
+        "provider": "Smart Glocal Test (Telegram Payments)",
+        "status": "PENDING",
+        "transaction_id": null,
+        "paid_at": null,
+        "is_cod": false,
+        "cod_fee": 0,
+        "comment": "уц"
+      },
+      "items": [
+        {
+          "id": "p_att_v0b2_btia",
+          "title": "Attack Shark ATTACK SHARK R5 ULTRA",
+          "brand": "Attack Shark",
+          "sku": "ATT-RU7YB",
+          "color": "White",
+          "img": "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_47.jpg",
+          "price": 2945,
+          "qty": 1,
+          "total": 2945
+        }
+      ],
+      "history": [
+        {
+          "status": "PENDING_PAYMENT",
+          "status_name": "Очікує оплати",
+          "timestamp": "2026-09-02T18:59:26.681Z",
+          "note": "Замовлення створено (очікує оплати)",
+          "actor": "Customer"
+        }
+      ],
+      "admin_comment": ""
+    },
+    {
+      "order_id": "MLP-224228",
+      "id": "MLP-224228",
+      "status": "PENDING_PAYMENT",
+      "status_name": "Очікує оплати",
+      "tracking_number": null,
+      "subtotal": 2799,
+      "delivery_fee": 0,
+      "cod_fee": 0,
+      "total": 2799,
+      "dispatch_timeline": "1-2 дні",
+      "shipping_note": "Відправлення замовлення протягом 1-2 робочих днів з моменту оформлення",
+      "created_at": "2026-09-02T18:59:03.346Z",
+      "updated_at": "2026-09-02T18:59:03.346Z",
+      "customer": {
+        "first_name": "афаф",
+        "last_name": "афаф",
+        "middle_name": "фапфа",
+        "phone": "+380 51 515 15 15",
+        "email": "",
+        "telegram_id": null,
+        "telegram_username": null
+      },
+      "delivery": {
+        "provider": "nova_poshta",
+        "provider_name": "Нова Пошта",
+        "type": "branch",
+        "type_name": "Відділення",
+        "city": "Дніпро",
+        "city_ref": "db5c88f0-391c-11dd-90d9-001a92567626",
+        "warehouse_ref": "7b422fbd-e1b8-11e3-8c4a-0050568002cf",
+        "warehouse_number": "Відділення №2: просп. Богдана Хмельницького, 31Д",
+        "department": "Відділення №2: просп. Богдана Хмельницького, 31Д",
+        "address": "Відділення №2: просп. Богдана Хмельницького, 31Д"
+      },
+      "payment": {
+        "method": "online",
+        "provider": "Smart Glocal Test (Telegram Payments)",
+        "status": "PENDING",
+        "transaction_id": null,
+        "paid_at": null,
+        "is_cod": false,
+        "cod_fee": 0,
+        "comment": "уц"
+      },
+      "items": [
+        {
+          "id": "p_mch_7t3i_9viu",
+          "title": "Mchose MCHOSE V9 PRO",
+          "brand": "Mchose",
+          "sku": "MCH-RHE5W",
+          "color": "White",
+          "img": "https://api.telegram.org/file/bot8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA/photos/file_42.jpg",
+          "price": 2799,
+          "qty": 1,
+          "total": 2799
+        }
+      ],
+      "history": [
+        {
+          "status": "PENDING_PAYMENT",
+          "status_name": "Очікує оплати",
+          "timestamp": "2026-09-02T18:59:03.346Z",
+          "note": "Замовлення створено (очікує оплати)",
+          "actor": "Customer"
+        }
+      ],
+      "admin_comment": ""
+    },
+    {
       "order_id": "MLP-248997",
       "id": "MLP-248997",
       "status": "PENDING_PAYMENT",
@@ -1159,7 +1504,18 @@
       "admin_comment": ""
     }
   ],
-  "telegram_users": {},
+  "telegram_users": {
+    "5941640336": {
+      "telegram_id": "5941640336",
+      "first_name": ".",
+      "last_name": "",
+      "username": "Prorabeer",
+      "phone": "",
+      "order_ids": [
+        ""
+      ]
+    }
+  },
   "admin_ids": [
     "1929165295",
     "1248134309",
@@ -1169,6 +1525,15 @@
     "Wincher"
   ],
   "notifications": [
+    {
+      "id": "notif-1788376125812-531",
+      "timestamp": "2026-09-02T19:08:45.812Z",
+      "type": "ORDER_CREATED",
+      "order_id": "MLP-770711",
+      "total": 2899,
+      "customer": "Міснік Дмитро Васильович",
+      "status": "PENDING_PAYMENT"
+    },
     {
       "id": "notif-1788375304222-518",
       "timestamp": "2026-09-02T18:55:04.223Z",
@@ -1191,5 +1556,5 @@
   ],
   "deleted_brand_ids": [],
   "deleted_category_ids": [],
-  "last_cloud_sync": "2026-09-02T18:55:03.431Z"
+  "last_cloud_sync": "2026-09-02T19:08:45.352Z"
 }

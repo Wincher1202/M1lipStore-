@@ -8214,14 +8214,56 @@
                 // Hide checkout drawer
                 toggleCheckoutDrawer(false);
 
-                // Show success confirmation screen
-                showOrderSuccessModal(orderObj, paymentMethod);
+                // Compact data for Telegram WebApp sendData
+                const compactData = {
+                    action: 'order_created',
+                    order_id: orderIdStr,
+                    customer: payload.customer,
+                    delivery: payload.delivery,
+                    payment: payload.payment,
+                    items: payload.items.map(i => ({
+                        id: i.id,
+                        title: i.title,
+                        color: i.color || '',
+                        price: i.price,
+                        qty: i.qty
+                    })),
+                    total: grandTotal
+                };
 
-                // Automatically redirect to Telegram bot
-                const targetBotUrl = `https://t.me/${botUsername}?start=order_${orderIdStr}`;
-                setTimeout(() => {
-                    goToTelegramBot(targetBotUrl);
-                }, 350);
+                const tw = window.Telegram?.WebApp;
+                let closedInTelegram = false;
+
+                if (tw) {
+                    // 1. Primary: Telegram WebApp sendData closes the Mini App instantly and sends order to bot
+                    try {
+                        if (typeof tw.sendData === 'function') {
+                            tw.sendData(JSON.stringify(compactData));
+                            closedInTelegram = true;
+                        }
+                    } catch (sendErr) {
+                        console.warn('[Telegram WebApp sendData error]', sendErr);
+                    }
+
+                    // 2. Also trigger close() to ensure window closure across all Telegram clients
+                    try {
+                        if (typeof tw.close === 'function') {
+                            tw.close();
+                            closedInTelegram = true;
+                        }
+                    } catch (closeErr) {
+                        console.warn('[Telegram WebApp close error]', closeErr);
+                    }
+                }
+
+                // 3. Fallback for browser outside Telegram or if Mini App remains open
+                if (!closedInTelegram) {
+                    showOrderSuccessModal(orderObj, paymentMethod);
+                    const targetBotUrl = `https://t.me/${botUsername}?start=order_${orderIdStr}`;
+                    setTimeout(() => {
+                        goToTelegramBot(targetBotUrl);
+                    }, 400);
+                }
 
                 updateAdminNewBadge();
             } catch (err) {
@@ -8239,12 +8281,47 @@
                 localStorage.setItem('m1lip_last_phone', phone);
                 localStorage.setItem('m1lip_last_order_id', fallbackOrder.order_id);
                 toggleCheckoutDrawer(false);
-                showOrderSuccessModal(fallbackOrder, paymentMethod);
 
-                const targetBotUrl = `https://t.me/${botUsername}?start=order_${fallbackOrder.order_id}`;
-                setTimeout(() => {
-                    goToTelegramBot(targetBotUrl);
-                }, 350);
+                const compactData = {
+                    action: 'order_created',
+                    order_id: fallbackOrder.order_id,
+                    customer: payload.customer,
+                    delivery: payload.delivery,
+                    payment: payload.payment,
+                    items: payload.items.map(i => ({
+                        id: i.id,
+                        title: i.title,
+                        color: i.color || '',
+                        price: i.price,
+                        qty: i.qty
+                    })),
+                    total: grandTotal
+                };
+
+                const tw = window.Telegram?.WebApp;
+                let closedInTelegram = false;
+                if (tw) {
+                    try {
+                        if (typeof tw.sendData === 'function') {
+                            tw.sendData(JSON.stringify(compactData));
+                            closedInTelegram = true;
+                        }
+                    } catch (e) {}
+                    try {
+                        if (typeof tw.close === 'function') {
+                            tw.close();
+                            closedInTelegram = true;
+                        }
+                    } catch (e) {}
+                }
+
+                if (!closedInTelegram) {
+                    showOrderSuccessModal(fallbackOrder, paymentMethod);
+                    const targetBotUrl = `https://t.me/${botUsername}?start=order_${fallbackOrder.order_id}`;
+                    setTimeout(() => {
+                        goToTelegramBot(targetBotUrl);
+                    }, 400);
+                }
             } finally {
                 if (submitBtn) {
                     submitBtn.disabled = false;

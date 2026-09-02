@@ -467,11 +467,24 @@ export class TelegramBotService {
 
         let order = orderData.order_id ? db.getOrderById(orderData.order_id) : null;
         if (!order) {
+          try {
+            await db.syncWithCloud();
+            order = orderData.order_id ? db.getOrderById(orderData.order_id) : null;
+          } catch (e) {}
+        }
+        if (!order) {
           order = db.createOrder(orderData);
+        } else {
+          if (!order.customer) order.customer = {};
+          order.customer.telegram_id = from.id;
+          if (from.username) order.customer.telegram_username = from.username;
+          if (from.first_name && !order.customer.first_name) order.customer.first_name = from.first_name;
+          if (from.last_name && !order.customer.last_name) order.customer.last_name = from.last_name;
+          db.save();
         }
         db.linkOrderToTelegramUser(from.id, order.order_id, order.customer);
 
-        await this.sendOrderCreatedNotifications(order);
+        await this.sendOrderCreatedNotifications(order, chatId);
         return;
       } catch (err) {
         console.error('[TelegramBot] Failed to parse web_app_data:', err);
@@ -1544,6 +1557,15 @@ export class TelegramBotService {
     await this.sendPhotoOrMessage(chatId, colorPhoto, text, {
       reply_markup: { inline_keyboard: buttons }
     });
+
+    // Directly provide native Telegram payment invoice so customer can proceed immediately
+    if (isOnline && !isPaid) {
+      try {
+        await this.sendNativeTelegramInvoice(chatId, order);
+      } catch (invErr) {
+        console.warn('[TelegramBot] Auto sendNativeTelegramInvoice error:', invErr);
+      }
+    }
   }
 
   // View full order details with product photo matching chosen color
@@ -2261,7 +2283,7 @@ export class TelegramBotService {
   // ----------------------------------------------------
   // Global Event Triggers
   // ----------------------------------------------------
-  async sendOrderCreatedNotifications(order) {
+  async sendOrderCreatedNotifications(order, customerChatId = null) {
     db.addNotification({
       type: 'ORDER_CREATED',
       order_id: order.order_id,
@@ -2271,8 +2293,9 @@ export class TelegramBotService {
     });
 
     // 1. Notify Customer in Telegram (Send order invoice card)
-    if (order.customer?.telegram_id) {
-      await this.sendCustomerOrderWithPayment(order.customer.telegram_id, order);
+    const targetChatId = order.customer?.telegram_id || customerChatId;
+    if (targetChatId) {
+      await this.sendCustomerOrderWithPayment(targetChatId, order);
     }
 
     // 2. Anti-Spam Admin Notification:
