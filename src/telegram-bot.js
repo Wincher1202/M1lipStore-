@@ -1638,6 +1638,23 @@ export class TelegramBotService {
       ]);
     }
 
+    const orderIdStr = (order.order_id || '').replace(/^#/, '');
+    const itemsTextForUrl = (order.items || []).map((it, idx) => `${idx + 1}. ${it.title}${it.color ? ` (${it.color})` : ''} — ${it.qty} шт. × ${it.price} ₴`).join('\n');
+    const provNameClean = delivery.provider === 'ukrposhta' ? 'Укрпошта' : 'Нова пошта';
+    const managerText = `Добрий день! Хочу оформити замовлення #${orderIdStr}:\n\n` +
+      `🎮 Товари:\n${itemsTextForUrl}\n\n` +
+      `💰 Сума: ${order.total} ₴\n` +
+      `👤 Отримувач: ${fullName}\n` +
+      `📞 Телефон: ${customer.phone || ''}\n` +
+      (customer.telegram_username ? `💬 Telegram: @${customer.telegram_username.replace(/^@/, '')}\n` : '') +
+      `📦 Доставка: ${provNameClean}, м. ${delivery.city || ''}, ${delivery.department || delivery.address || ''}`;
+    const managerUrl = `https://t.me/milipmanager?text=${encodeURIComponent(managerText)}`;
+
+    // Primary action: Direct chat with manager with prefilled text!
+    buttons.push([
+      { text: '💬 Написати менеджеру (@milipmanager)', url: managerUrl }
+    ]);
+
     // Required button: «Мої замовлення»
     buttons.push([
       { text: '🛍 Мої замовлення', callback_data: `orders_list:${chatId}` }
@@ -1752,8 +1769,19 @@ export class TelegramBotService {
       { text: '🔄 Оновити', callback_data: `view_order:${order.order_id}` }
     ]);
 
+    const orderIdDetailStr = (order.order_id || '').replace(/^#/, '');
+    const itemsDetailList = (order.items || []).map((it, idx) => `${idx + 1}. ${it.title}${it.color ? ` (${it.color})` : ''} — ${it.qty} шт. × ${it.price} ₴`).join('\n');
+    const provDetailClean = delivery.provider === 'ukrposhta' ? 'Укрпошта' : 'Нова пошта';
+    const managerDetailMsg = `Добрий день! Щодо замовлення #${orderIdDetailStr}:\n\n` +
+      `🎮 Товари:\n${itemsDetailList}\n\n` +
+      `💰 Сума: ${order.total} ₴\n` +
+      `👤 Отримувач: ${fullName}\n` +
+      `📞 Телефон: ${customer.phone || ''}\n` +
+      `📦 Доставка: ${provDetailClean}, м. ${delivery.city || ''}, ${delivery.department || delivery.address || ''}`;
+    const managerDetailUrl = `https://t.me/milipmanager?text=${encodeURIComponent(managerDetailMsg)}`;
+
     buttons.push([
-      { text: '💬 Зв\'язатися з підтримкою', url: 'https://t.me/milipmanager' }
+      { text: '💬 Написати менеджеру (@milipmanager)', url: managerDetailUrl }
     ]);
 
     if (messageId) {
@@ -2359,6 +2387,13 @@ export class TelegramBotService {
         { text: `💳 Оплатити ${order.total} ₴ онлайн`, callback_data: `pay_test:${order.order_id}` }
       ]);
     }
+    const orderIdStatStr = (order.order_id || '').replace(/^#/, '');
+    const statusMsgForUrl = `Добрий день! Щодо замовлення #${orderIdStatStr} (статус: ${ORDER_STATUSES[newStatus]?.name || newStatus}): хочу уточнити інформацію.`;
+    const statusManagerUrl = `https://t.me/milipmanager?text=${encodeURIComponent(statusMsgForUrl)}`;
+
+    custButtons.push([
+      { text: '💬 Написати менеджеру (@milipmanager)', url: statusManagerUrl }
+    ]);
     custButtons.push([
       { text: '🔍 Переглянути замовлення', callback_data: `view_order:${order.order_id}` },
       { text: '🛍 Мої замовлення', callback_data: `orders_list:${targetChatId}` }
@@ -2497,10 +2532,14 @@ export class TelegramBotService {
       `Бажаємо приємного користування девайсом та яскравих перемог! ✨\n` +
       `<i>Якщо у вас виникнуть будь-які запитання — наша підтримка завжди рада допомогти.</i>`;
 
+    const orderIdPaidStr = (order.order_id || '').replace(/^#/, '');
+    const paidSupportMsg = `Добрий день! Щодо оплаченого замовлення #${orderIdPaidStr} (Сума: ${order.total} ₴, Отримувач: ${fullName}): хочу уточнити деталі відправки.`;
+    const paidSupportUrl = `https://t.me/milipmanager?text=${encodeURIComponent(paidSupportMsg)}`;
+
     const buttons = [
       [{ text: '🛍 Мої замовлення', callback_data: `orders_list:${targetChatId}` }],
       [{ text: '🔍 Повні деталі замовлення', callback_data: `view_order:${order.order_id}` }],
-      [{ text: '💬 Зв\'язатися з підтримкою', url: 'https://t.me/milipmanager' }]
+      [{ text: '💬 Написати менеджеру (@milipmanager)', url: paidSupportUrl }]
     ];
 
     if (messageId) {
