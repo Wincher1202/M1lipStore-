@@ -72,6 +72,64 @@ function escapeHtml(str) {
     .replace(/>/g, '&gt;');
 }
 
+export const localTelegramPhotoMap = {
+  'photos/file_25.jpg': 'photo_2026-08-25_15-31-22.jpg',
+  'photos/file_26.jpg': 'photo_2026-08-25_15-32-36.jpg',
+  'photos/file_27.jpg': 'photo_2026-08-25_15-32-36.jpg',
+  'photos/file_28.jpg': 'photo_2026-08-25_15-32-36.jpg',
+  'photos/file_29.jpg': 'photo_2026-08-25_15-31-28.jpg',
+  'photos/file_30.jpg': 'photo_2026-08-25_15-31-22.jpg',
+  'photos/file_31.jpg': 'photo_2026-08-25_15-31-28.jpg',
+  'photos/file_32.jpg': 'photo_2026-08-25_15-31-22.jpg',
+  'photos/file_33.jpg': 'photo_2026-08-25_15-31-28.jpg',
+  'photos/file_34.jpg': 'photo_2026-08-25_15-32-13.jpg',
+  'photos/file_35.jpg': 'photo_2026-08-25_15-32-13.jpg',
+  'photos/file_36.jpg': 'photo_2026-08-25_15-32-13.jpg',
+  'photos/file_37.jpg': 'photo_2026-08-25_15-32-17.jpg',
+  'photos/file_38.jpg': 'photo_2026-08-25_15-32-17.jpg',
+  'photos/file_39.jpg': 'photo_2026-08-25_15-32-17.jpg',
+  'photos/file_40.jpg': 'photo_2026-08-25_15-32-17.jpg',
+  'photos/file_41.jpg': 'photo_2026-08-25_15-32-17.jpg',
+  'photos/file_42.jpg': 'photo_2026-08-25_15-32-36.jpg',
+
+  'photos/file_43.jpg': 'photo_2026-08-25_15-32-38.jpg',
+  'photos/file_44.jpg': 'photo_2026-08-25_15-33-39.jpg',
+  'photos/file_45.jpg': 'photo_2026-08-25_15-32-40.jpg',
+  'photos/file_46.jpg': 'photo_2026-08-25_15-33-42.jpg',
+
+  'photos/file_47.jpg': 'attack-shark-r5-ultra-box-bundle-contents.jpg',
+  'photos/file_48.jpg': 'attack-shark-r5-ultra-top-angle.jpg',
+  'photos/file_49.jpg': 'attack-shark-r5-ultra-back-grip.jpg',
+  'photos/file_50.jpg': 'attack-shark-r5-ultra-colors-price.jpg',
+  'photos/file_51.jpg': 'attack-shark-r5-ultra-in-hand-setup.jpg',
+  'photos/file_52.jpg': 'attack-shark-r5-ultra-colors-price.jpg',
+
+  'photos/file_58.jpg': 'photo_2026-08-25_15-32-42.jpg',
+  'photos/file_59.jpg': 'photo_2026-08-25_15-33-43.jpg',
+
+  'photos/file_60.jpg': 'photo_2026-08-25_15-32-44.jpg',
+  'photos/file_61.jpg': 'photo_2026-08-25_15-33-49.jpg',
+  'photos/file_62.jpg': 'photo_2026-08-25_15-32-44.jpg',
+  'photos/file_63.jpg': 'photo_2026-08-25_15-33-49.jpg',
+
+  'photos/file_64.jpg': 'photo_2026-08-25_15-32-46.jpg',
+  'photos/file_65.jpg': 'photo_2026-08-25_15-33-50.jpg',
+  'photos/file_66.jpg': 'photo_2026-08-25_15-32-46.jpg',
+  'photos/file_67.jpg': 'photo_2026-08-25_15-33-50.jpg',
+
+  'photos/file_68.jpg': 'photo_2026-08-25_15-32-57.jpg',
+  'photos/file_69.jpg': 'photo_2026-08-25_15-33-52.jpg',
+  'photos/file_70.jpg': 'photo_2026-08-25_15-32-57.jpg',
+
+  'photos/file_71.jpg': 'photo_2026-08-25_15-32-59.jpg',
+  'photos/file_72.jpg': 'photo_2026-08-25_15-35-39.jpg',
+  'photos/file_73.jpg': 'photo_2026-08-25_15-32-59.jpg',
+
+  'photos/file_74.jpg': 'photo_2026-08-25_15-33-02.jpg',
+  'photos/file_75.jpg': 'photo_2026-08-25_15-35-47.jpg',
+  'photos/file_76.jpg': 'photo_2026-08-25_15-33-02.jpg'
+};
+
 export class TelegramBotService {
   constructor() {
     this.pollingActive = false;
@@ -144,20 +202,29 @@ export class TelegramBotService {
 
     if (photoUrl && typeof photoUrl === 'string') {
       try {
-        const cleanPath = photoUrl.replace(/^\//, '');
-        const localPath = path.join(process.cwd(), cleanPath);
+        let cleanPath = photoUrl.replace(/^\//, '');
+        if (cleanPath.startsWith('api/tg-file/')) {
+          const subKey = cleanPath.replace('api/tg-file/', '');
+          if (localTelegramPhotoMap[subKey]) {
+            cleanPath = localTelegramPhotoMap[subKey];
+          }
+        }
+        let localPath = path.join(process.cwd(), cleanPath);
+        if (!fs.existsSync(localPath) && localTelegramPhotoMap[cleanPath]) {
+          localPath = path.join(process.cwd(), localTelegramPhotoMap[cleanPath]);
+        }
         // Ensure caption does not exceed Telegram's 1024-character limit
         const safeCaption = (text && text.length > 1020) ? (text.slice(0, 1016) + '...') : text;
 
         // 1. Check if it exists as a local file on disk
         if (!photoUrl.startsWith('http') && fs.existsSync(localPath)) {
           const fileBuffer = fs.readFileSync(localPath);
-          const ext = path.extname(cleanPath).toLowerCase();
+          const ext = path.extname(localPath).toLowerCase();
           const mimeType = ext === '.png' ? 'image/png' : (ext === '.webp' ? 'image/webp' : 'image/jpeg');
 
           const formData = new FormData();
           formData.append('chat_id', String(chatId));
-          formData.append('photo', new Blob([fileBuffer], { type: mimeType }), path.basename(cleanPath));
+          formData.append('photo', new Blob([fileBuffer], { type: mimeType }), path.basename(localPath));
           if (safeCaption) {
             formData.append('caption', safeCaption);
             formData.append('parse_mode', extra.parse_mode || 'HTML');

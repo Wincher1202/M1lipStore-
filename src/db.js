@@ -182,6 +182,32 @@ export const INITIAL_BRANDS = [
   { id: 'brand-vgn', name: 'VGN', logo: '/vgn5.jpg', position: 4, hidden: false }
 ];
 
+export function normalizeProductPhotoUrls(product) {
+  if (!product || typeof product !== 'object') return product;
+  const fixUrl = (url) => {
+    if (typeof url !== 'string') return url;
+    return url.replace(/^https:\/\/api\.telegram\.org\/file\/bot[^\/]+\//, '/api/tg-file/');
+  };
+
+  if (product.img) product.img = fixUrl(product.img);
+  if (Array.isArray(product.gallery)) {
+    product.gallery = product.gallery.map(fixUrl);
+  }
+  if (product.color_images && typeof product.color_images === 'object') {
+    for (const c of Object.keys(product.color_images)) {
+      if (product.color_images[c]) {
+        if (product.color_images[c].main) {
+          product.color_images[c].main = fixUrl(product.color_images[c].main);
+        }
+        if (Array.isArray(product.color_images[c].gallery)) {
+          product.color_images[c].gallery = product.color_images[c].gallery.map(fixUrl);
+        }
+      }
+    }
+  }
+  return product;
+}
+
 class Database {
   constructor() {
     this.data = {
@@ -242,11 +268,12 @@ class Database {
             ? parsed.products.filter(p => !deletedProdIds.includes(p.id))
             : INITIAL_PRODUCTS.filter(p => !deletedProdIds.includes(p.id));
 
-          // Ensure all products have warranty field
+          // Ensure all products have warranty field and clean photo URLs
           existingProducts.forEach(p => {
             if (!p.warranty) {
               p.warranty = (p.price && Number(p.price) >= 2200) ? '3 місяці' : '1 місяць';
             }
+            normalizeProductPhotoUrls(p);
           });
           
           let existingCategories = Array.isArray(parsed.categories) && parsed.categories.length > 0
@@ -387,6 +414,7 @@ class Database {
           const localMap = new Map((this.data.products || []).map(p => [p.id, p]));
           for (const remoteProd of payload.products) {
             if (!deletedProds.has(remoteProd.id)) {
+              normalizeProductPhotoUrls(remoteProd);
               if (!localMap.has(remoteProd.id)) {
                 localMap.set(remoteProd.id, remoteProd);
               }
@@ -436,8 +464,11 @@ class Database {
         const deletedProds = new Set(this.data.deleted_product_ids || []);
         const localMap = new Map((this.data.products || []).map(p => [p.id, p]));
         for (const p of pulledData) {
-          if (!deletedProds.has(p.id) && !localMap.has(p.id)) {
-            localMap.set(p.id, p);
+          if (!deletedProds.has(p.id)) {
+            normalizeProductPhotoUrls(p);
+            if (!localMap.has(p.id)) {
+              localMap.set(p.id, p);
+            }
           }
         }
         this.data.products = Array.from(localMap.values()).filter(p => !deletedProds.has(p.id));
