@@ -5473,14 +5473,121 @@
             }
         }
 
-        function resolveImgUrl(url) {
-            if (!url || typeof url !== 'string') return '';
-            const u = url.trim();
-            if (!u) return '';
-            if (u.startsWith('http://') || u.startsWith('https://') || u.startsWith('data:') || u.startsWith('blob:')) {
+        const TELEGRAM_PHOTO_MAP = {
+            'photos/file_25.jpg': 'photo_2026-08-25_15-31-22.jpg',
+            'photos/file_26.jpg': 'photo_2026-08-25_15-32-36.jpg',
+            'photos/file_27.jpg': 'photo_2026-08-25_15-32-36.jpg',
+            'photos/file_28.jpg': 'photo_2026-08-25_15-32-36.jpg',
+            'photos/file_29.jpg': 'photo_2026-08-25_15-31-28.jpg',
+            'photos/file_30.jpg': 'photo_2026-08-25_15-31-22.jpg',
+            'photos/file_31.jpg': 'photo_2026-08-25_15-31-28.jpg',
+            'photos/file_32.jpg': 'photo_2026-08-25_15-31-22.jpg',
+            'photos/file_33.jpg': 'photo_2026-08-25_15-31-28.jpg',
+            'photos/file_34.jpg': 'photo_2026-08-25_15-32-13.jpg',
+            'photos/file_35.jpg': 'photo_2026-08-25_15-32-13.jpg',
+            'photos/file_36.jpg': 'photo_2026-08-25_15-32-13.jpg',
+            'photos/file_37.jpg': 'photo_2026-08-25_15-32-17.jpg',
+            'photos/file_38.jpg': 'photo_2026-08-25_15-32-17.jpg',
+            'photos/file_39.jpg': 'photo_2026-08-25_15-32-17.jpg',
+            'photos/file_40.jpg': 'photo_2026-08-25_15-32-17.jpg',
+            'photos/file_41.jpg': 'photo_2026-08-25_15-32-17.jpg',
+            'photos/file_42.jpg': 'photo_2026-08-25_15-32-36.jpg',
+
+            'photos/file_43.jpg': 'photo_2026-08-25_15-32-38.jpg',
+            'photos/file_44.jpg': 'photo_2026-08-25_15-33-39.jpg',
+            'photos/file_45.jpg': 'photo_2026-08-25_15-32-40.jpg',
+            'photos/file_46.jpg': 'photo_2026-08-25_15-33-42.jpg',
+
+            'photos/file_47.jpg': 'attack-shark-r5-ultra-box-bundle-contents.jpg',
+            'photos/file_48.jpg': 'attack-shark-r5-ultra-top-angle.jpg',
+            'photos/file_49.jpg': 'attack-shark-r5-ultra-back-grip.jpg',
+            'photos/file_50.jpg': 'attack-shark-r5-ultra-colors-price.jpg',
+            'photos/file_51.jpg': 'attack-shark-r5-ultra-in-hand-setup.jpg',
+            'photos/file_52.jpg': 'attack-shark-r5-ultra-colors-price.jpg',
+
+            'photos/file_58.jpg': 'photo_2026-08-25_15-32-42.jpg',
+            'photos/file_59.jpg': 'photo_2026-08-25_15-33-43.jpg',
+
+            'photos/file_60.jpg': 'photo_2026-08-25_15-32-44.jpg',
+            'photos/file_61.jpg': 'photo_2026-08-25_15-33-49.jpg',
+            'photos/file_62.jpg': 'photo_2026-08-25_15-32-44.jpg',
+            'photos/file_63.jpg': 'photo_2026-08-25_15-33-49.jpg',
+
+            'photos/file_64.jpg': 'photo_2026-08-25_15-32-46.jpg',
+            'photos/file_65.jpg': 'photo_2026-08-25_15-33-50.jpg',
+            'photos/file_66.jpg': 'photo_2026-08-25_15-32-46.jpg',
+            'photos/file_67.jpg': 'photo_2026-08-25_15-33-50.jpg',
+
+            'photos/file_68.jpg': 'photo_2026-08-25_15-32-57.jpg',
+            'photos/file_69.jpg': 'photo_2026-08-25_15-33-52.jpg',
+            'photos/file_70.jpg': 'photo_2026-08-25_15-32-57.jpg',
+
+            'photos/file_71.jpg': 'photo_2026-08-25_15-32-59.jpg',
+            'photos/file_72.jpg': 'photo_2026-08-25_15-35-39.jpg',
+            'photos/file_73.jpg': 'photo_2026-08-25_15-32-59.jpg',
+
+            'photos/file_74.jpg': 'photo_2026-08-25_15-33-02.jpg',
+            'photos/file_75.jpg': 'photo_2026-08-25_15-35-47.jpg',
+            'photos/file_76.jpg': 'photo_2026-08-25_15-33-02.jpg'
+        };
+
+        function getBrandDefaultImg(brand = '') {
+            const b = (brand || '').toLowerCase();
+            if (b.includes('mchose') && b.includes('v9')) return 'photo_2026-08-25_15-31-22.jpg';
+            if (b.includes('mchose') && b.includes('a7')) return 'photo_2026-08-25_15-32-57.jpg';
+            if (b.includes('mchose')) return 'photo_2026-08-25_15-31-22.jpg';
+            if (b.includes('r5')) return 'attack-shark-r5-ultra-box-bundle-contents.jpg';
+            if (b.includes('r85')) return 'photo_2026-08-25_15-32-38.jpg';
+            if (b.includes('shark')) return 'attack-shark-r5-ultra-box-bundle-contents.jpg';
+            if (b.includes('aula')) return 'photo_2026-08-25_15-32-44.jpg';
+            if (b.includes('irok')) return 'photo_2026-08-25_15-32-42.jpg';
+            if (b.includes('ajazz')) return '350954572_1917991488535350_2141770078765880809_n_2.webp';
+            if (b.includes('vgn')) return 'photo_2026-08-25_15-32-13.jpg';
+            return 'photo_2026-08-25_15-31-22.jpg';
+        }
+
+        function resolveImgUrl(url, brand = '') {
+            if (!url || typeof url !== 'string') return getBrandDefaultImg(brand);
+            let u = url.trim();
+            if (!u) return getBrandDefaultImg(brand);
+
+            if (u.startsWith('/api/tg-file/')) {
+                const tgKey = u.replace('/api/tg-file/', '');
+                if (TELEGRAM_PHOTO_MAP[tgKey]) return TELEGRAM_PHOTO_MAP[tgKey];
+            }
+            if (u.startsWith('photos/')) {
+                if (TELEGRAM_PHOTO_MAP[u]) return TELEGRAM_PHOTO_MAP[u];
+            }
+            const match = u.match(/photos\/file_\d+\.jpg/);
+            if (match && TELEGRAM_PHOTO_MAP[match[0]]) {
+                return TELEGRAM_PHOTO_MAP[match[0]];
+            }
+
+            if (u.startsWith('http://') || u.startsWith('https://')) {
+                const matchHttp = u.match(/photos\/file_\d+\.jpg/);
+                if (matchHttp && TELEGRAM_PHOTO_MAP[matchHttp[0]]) {
+                    return TELEGRAM_PHOTO_MAP[matchHttp[0]];
+                }
+                return u;
+            }
+            if (u.startsWith('data:') || u.startsWith('blob:')) {
                 return u;
             }
             return u.startsWith('/') ? u.slice(1) : u;
+        }
+
+        function handleImgError(imgEl, originalUrl = '', brand = '') {
+            if (!imgEl || imgEl.dataset.hasFailedTwice) return;
+            if (!imgEl.dataset.failedOnce) {
+                imgEl.dataset.failedOnce = "true";
+                const mapped = resolveImgUrl(originalUrl, brand);
+                if (mapped && !imgEl.src.endsWith(mapped)) {
+                    imgEl.src = mapped;
+                    return;
+                }
+            }
+            imgEl.dataset.hasFailedTwice = "true";
+            imgEl.src = getBrandDefaultImg(brand);
         }
 
         const INITIAL_FALLBACK_PRODUCTS = [
@@ -6423,7 +6530,7 @@
                             </button>
                         </div>
                         <div class="product-img-wrap" id="card-img-wrap-${p.id}">
-                            <img src="${p.img}" alt="${p.title}" id="card-img-${p.id}">
+                            <img src="${resolveImgUrl(p.img, p.brand)}" alt="${p.title}" id="card-img-${p.id}" onerror="handleImgError(this, '${(p.img || '').replace(/'/g, "\\'")}', '${(p.brand || '').replace(/'/g, "\\'")}')">
                         </div>
                         
                         <div class="color-picker-preview">
@@ -6814,7 +6921,7 @@
         }
 
         function getHighResImageUrl(url) {
-            if (!url || typeof url !== 'string') return url;
+            if (!url || typeof url !== 'string') return resolveImgUrl(url);
             if (url.includes('images.unsplash.com')) {
                 let enhanced = url;
                 if (/w=\d+/.test(enhanced)) {
@@ -6831,7 +6938,7 @@
                 if (!enhanced.includes('fit=')) enhanced += '&fit=max';
                 return enhanced;
             }
-            return url;
+            return resolveImgUrl(url, currentModalProduct?.brand);
         }
 
         function updateModalGalleryAndColor() {
@@ -6920,14 +7027,18 @@
                 if (mainImg.src !== targetUrl) {
                     mainImg.src = targetUrl;
                 }
+                mainImg.onerror = function() {
+                    handleImgError(this, activeImg, currentModalProduct?.brand);
+                };
                 mainImg.style.opacity = '1';
             }
 
             if (thumbsContainer) {
                 thumbsContainer.innerHTML = currentGalleryImages.map((imgUrl) => {
                     const isActive = imgUrl === activeImg ? 'active' : '';
+                    const resolvedThumb = resolveImgUrl(imgUrl, currentModalProduct?.brand);
                     return `
-                        <img class="modal-thumb ${isActive}" src="${imgUrl}" onclick="changeModalImage('${imgUrl}', this)" alt="thumb">
+                        <img class="modal-thumb ${isActive}" src="${resolvedThumb}" onclick="changeModalImage('${imgUrl}', this)" alt="thumb" onerror="handleImgError(this, '${imgUrl}', '${currentModalProduct?.brand}')">
                     `;
                 }).join('');
             }
@@ -7165,6 +7276,9 @@
                 mainImg.style.opacity = '0';
                 setTimeout(() => {
                     mainImg.src = getHighResImageUrl(url);
+                    mainImg.onerror = function() {
+                        handleImgError(this, url, currentModalProduct?.brand);
+                    };
                     mainImg.style.opacity = '1';
                 }, 120);
             }
@@ -8055,7 +8169,7 @@
                             const colorChip = item.color ? `<span style="display:inline-block; width:9px; height:9px; border-radius:50%; background:${getColorHex(item.color)}; border:1.5px solid ${isWhiteColor ? '#94a3b8' : 'rgba(0,0,0,0.18)'}; box-shadow: 0 1px 2px rgba(0,0,0,0.12);"></span>` : '';
                             return `
                                 <div class="review-item-row" style="padding: 6px 0;">
-                                    <img src="${item.img || prod.img}" alt="${item.title}" class="review-item-thumb" style="width: 42px; height: 42px; border-radius: 6px; object-fit: contain;">
+                                    <img src="${resolveImgUrl(item.img || prod.img, prod?.brand || item.brand)}" alt="${item.title}" class="review-item-thumb" style="width: 42px; height: 42px; border-radius: 6px; object-fit: contain;" onerror="handleImgError(this, '${(item.img || prod.img || '').replace(/'/g, "\\'")}', '${(prod?.brand || item.brand || '').replace(/'/g, "\\'")}')">
                                     <div class="review-item-info" style="flex: 1; min-width: 0;">
                                         <div class="review-item-name" style="font-size: 0.85rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${item.title}</div>
                                         <div class="review-item-meta" style="font-size: 0.75rem; color: var(--text-secondary); display: flex; align-items: center; gap: 4px;">
@@ -8731,7 +8845,7 @@
                     return `
                         <div style="display: flex; align-items: center; justify-content: space-between; padding: 6px 0; border-bottom: 1px dashed var(--border-light); font-size: 0.82rem;">
                             <div style="display: flex; align-items: center; gap: 8px;">
-                                <img src="${item.img || prod.img || ''}" alt="" style="width: 34px; height: 34px; border-radius: 6px; object-fit: cover; background: var(--bg-surface);">
+                                <img src="${resolveImgUrl(item.img || prod.img || '', prod?.brand || item.brand)}" alt="" style="width: 34px; height: 34px; border-radius: 6px; object-fit: cover; background: var(--bg-surface);" onerror="handleImgError(this, '${(item.img || prod.img || '').replace(/'/g, "\\'")}', '${(prod?.brand || item.brand || '').replace(/'/g, "\\'")}')">
                                 <div>
                                     <div style="font-weight: 700;">${item.title || prod.title || item.id}</div>
                                     <div style="font-size: 0.72rem; color: var(--text-muted);">Колір: ${item.color || 'Базовий'} • ${item.qty || 1} шт.</div>
@@ -8934,7 +9048,7 @@
                             <div style="display: flex; gap: 12px; align-items: flex-start; margin-bottom: 10px;">
                                 ${itemPhoto ? `
                                     <div style="width: 60px; height: 60px; border-radius: 8px; border: 1px solid var(--border-light); overflow: hidden; background: var(--bg-tertiary); flex-shrink: 0;">
-                                        <img src="${itemPhoto}" alt="${firstItem.title || 'Товар'}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.style.display='none'">
+                                        <img src="${resolveImgUrl(itemPhoto, firstItem?.brand)}" alt="${firstItem.title || 'Товар'}" style="width: 100%; height: 100%; object-fit: cover;" onerror="handleImgError(this, '${(itemPhoto || '').replace(/'/g, "\\'")}', '${(firstItem?.brand || '').replace(/'/g, "\\'")}')">
                                     </div>
                                 ` : ''}
                                 <div style="flex: 1; min-width: 0;">
@@ -9018,7 +9132,7 @@
                 const displayColor = formatColorEnglish(item.color).toUpperCase();
                 return `
                     <div class="cart-item">
-                        <img src="${item.img}" alt="${item.title}" onclick="openProductModal(products.find(x => x.id === '${item.id}'))">
+                        <img src="${resolveImgUrl(item.img, item.brand)}" alt="${item.title}" onerror="handleImgError(this, '${(item.img || '').replace(/'/g, "\\'")}', '${(item.brand || '').replace(/'/g, "\\'")}')" onclick="openProductModal(products.find(x => x.id === '${item.id}'))">
                         <div style="flex-grow: 1; overflow: hidden;">
                             <h4 style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase;">${item.brand}</h4>
                             <h3 style="font-size: 0.9rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${item.title}</h3>
@@ -9278,7 +9392,7 @@
 
                 return `
                     <div class="wishlist-item-card" style="display: flex; align-items: center; gap: 12px; padding: 10px 12px; background: var(--bg-primary); border-radius: var(--radius-sm); border: 1px solid var(--border-light); margin-bottom: 8px;">
-                        <img src="${item.img || 'shark.jpg'}" alt="${item.title}" style="width: 52px; height: 52px; object-fit: cover; border-radius: 8px; flex-shrink: 0; cursor: pointer;" onclick="openWishlistItemModal('${item.id}', '${(item.color || '').replace(/'/g, "\\'")}')">
+                        <img src="${resolveImgUrl(item.img || 'shark.jpg', item.brand)}" alt="${item.title}" style="width: 52px; height: 52px; object-fit: cover; border-radius: 8px; flex-shrink: 0; cursor: pointer;" onerror="handleImgError(this, '${(item.img || '').replace(/'/g, "\\'")}', '${(item.brand || '').replace(/'/g, "\\'")}')" onclick="openWishlistItemModal('${item.id}', '${(item.color || '').replace(/'/g, "\\'")}')">
                         <div style="flex-grow: 1; min-width: 0; cursor: pointer;" onclick="openWishlistItemModal('${item.id}', '${(item.color || '').replace(/'/g, "\\'")}')">
                             ${item.brand ? `<div style="font-size: 0.68rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.03em;">${item.brand}</div>` : ''}
                             <div style="font-size: 0.88rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-primary); margin-top: 1px;">${item.title}</div>
@@ -9381,7 +9495,7 @@
                 resultsBox.innerHTML = matches.map(p => `
                     <div class="search-result-item" onclick="saveRecentSearch('${query}'); toggleSearch(false); openProductModal(products.find(x => x.id === '${p.id}'))">
                         <div style="display: flex; align-items: center; gap: 10px;">
-                            <img src="${p.img}" alt="${p.title}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 6px;">
+                            <img src="${resolveImgUrl(p.img, p.brand)}" alt="${p.title}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 6px;" onerror="handleImgError(this, '${(p.img || '').replace(/'/g, "\\'")}', '${(p.brand || '').replace(/'/g, "\\'")}')">
                             <div>
                                 <h4 style="font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase;">${p.brand}</h4>
                                 <h3 style="font-size: 0.9rem; font-weight: 700;">${p.title}</h3>

@@ -182,11 +182,83 @@ export const INITIAL_BRANDS = [
   { id: 'brand-vgn', name: 'VGN', logo: '/vgn5.jpg', position: 4, hidden: false }
 ];
 
+export const TELEGRAM_LOCAL_PHOTO_MAP = {
+  'photos/file_25.jpg': 'photo_2026-08-25_15-31-22.jpg',
+  'photos/file_26.jpg': 'photo_2026-08-25_15-32-36.jpg',
+  'photos/file_27.jpg': 'photo_2026-08-25_15-32-36.jpg',
+  'photos/file_28.jpg': 'photo_2026-08-25_15-32-36.jpg',
+  'photos/file_29.jpg': 'photo_2026-08-25_15-31-28.jpg',
+  'photos/file_30.jpg': 'photo_2026-08-25_15-31-22.jpg',
+  'photos/file_31.jpg': 'photo_2026-08-25_15-31-28.jpg',
+  'photos/file_32.jpg': 'photo_2026-08-25_15-31-22.jpg',
+  'photos/file_33.jpg': 'photo_2026-08-25_15-31-28.jpg',
+  'photos/file_34.jpg': 'photo_2026-08-25_15-32-13.jpg',
+  'photos/file_35.jpg': 'photo_2026-08-25_15-32-13.jpg',
+  'photos/file_36.jpg': 'photo_2026-08-25_15-32-13.jpg',
+  'photos/file_37.jpg': 'photo_2026-08-25_15-32-17.jpg',
+  'photos/file_38.jpg': 'photo_2026-08-25_15-32-17.jpg',
+  'photos/file_39.jpg': 'photo_2026-08-25_15-32-17.jpg',
+  'photos/file_40.jpg': 'photo_2026-08-25_15-32-17.jpg',
+  'photos/file_41.jpg': 'photo_2026-08-25_15-32-17.jpg',
+  'photos/file_42.jpg': 'photo_2026-08-25_15-32-36.jpg',
+
+  'photos/file_43.jpg': 'photo_2026-08-25_15-32-38.jpg',
+  'photos/file_44.jpg': 'photo_2026-08-25_15-33-39.jpg',
+  'photos/file_45.jpg': 'photo_2026-08-25_15-32-40.jpg',
+  'photos/file_46.jpg': 'photo_2026-08-25_15-33-42.jpg',
+
+  'photos/file_47.jpg': 'attack-shark-r5-ultra-box-bundle-contents.jpg',
+  'photos/file_48.jpg': 'attack-shark-r5-ultra-top-angle.jpg',
+  'photos/file_49.jpg': 'attack-shark-r5-ultra-back-grip.jpg',
+  'photos/file_50.jpg': 'attack-shark-r5-ultra-colors-price.jpg',
+  'photos/file_51.jpg': 'attack-shark-r5-ultra-in-hand-setup.jpg',
+  'photos/file_52.jpg': 'attack-shark-r5-ultra-colors-price.jpg',
+
+  'photos/file_58.jpg': 'photo_2026-08-25_15-32-42.jpg',
+  'photos/file_59.jpg': 'photo_2026-08-25_15-33-43.jpg',
+
+  'photos/file_60.jpg': 'photo_2026-08-25_15-32-44.jpg',
+  'photos/file_61.jpg': 'photo_2026-08-25_15-33-49.jpg',
+  'photos/file_62.jpg': 'photo_2026-08-25_15-32-44.jpg',
+  'photos/file_63.jpg': 'photo_2026-08-25_15-33-49.jpg',
+
+  'photos/file_64.jpg': 'photo_2026-08-25_15-32-46.jpg',
+  'photos/file_65.jpg': 'photo_2026-08-25_15-33-50.jpg',
+  'photos/file_66.jpg': 'photo_2026-08-25_15-32-46.jpg',
+  'photos/file_67.jpg': 'photo_2026-08-25_15-33-50.jpg',
+
+  'photos/file_68.jpg': 'photo_2026-08-25_15-32-57.jpg',
+  'photos/file_69.jpg': 'photo_2026-08-25_15-33-52.jpg',
+  'photos/file_70.jpg': 'photo_2026-08-25_15-32-57.jpg',
+
+  'photos/file_71.jpg': 'photo_2026-08-25_15-32-59.jpg',
+  'photos/file_72.jpg': 'photo_2026-08-25_15-35-39.jpg',
+  'photos/file_73.jpg': 'photo_2026-08-25_15-32-59.jpg',
+
+  'photos/file_74.jpg': 'photo_2026-08-25_15-33-02.jpg',
+  'photos/file_75.jpg': 'photo_2026-08-25_15-35-47.jpg',
+  'photos/file_76.jpg': 'photo_2026-08-25_15-33-02.jpg'
+};
+
 export function normalizeProductPhotoUrls(product) {
   if (!product || typeof product !== 'object') return product;
   const fixUrl = (url) => {
     if (typeof url !== 'string') return url;
-    return url.replace(/^https:\/\/api\.telegram\.org\/file\/bot[^\/]+\//, '/api/tg-file/');
+    let clean = url.trim();
+    if (clean.startsWith('/api/tg-file/')) {
+      clean = clean.replace('/api/tg-file/', '');
+    }
+    if (TELEGRAM_LOCAL_PHOTO_MAP[clean]) {
+      return TELEGRAM_LOCAL_PHOTO_MAP[clean];
+    }
+    const match = clean.match(/photos\/file_\d+\.jpg/);
+    if (match && TELEGRAM_LOCAL_PHOTO_MAP[match[0]]) {
+      return TELEGRAM_LOCAL_PHOTO_MAP[match[0]];
+    }
+    if (clean.startsWith('/') && !clean.startsWith('//') && !clean.startsWith('/api/')) {
+      return clean.substring(1);
+    }
+    return clean;
   };
 
   if (product.img) product.img = fixUrl(product.img);

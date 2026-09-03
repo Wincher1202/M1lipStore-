@@ -11,25 +11,25 @@
       "quantity": 100,
       "colors": "Blue, Red, White, Black",
       "description": "MCHOSE V9 PRO - бездротові навушники для ігор, музики та спілкування",
-      "img": "/api/tg-file/photos/file_25.jpg",
+      "img": "photo_2026-08-25_15-31-22.jpg",
       "gallery": [
-        "/api/tg-file/photos/file_25.jpg",
-        "/api/tg-file/photos/file_29.jpg",
-        "/api/tg-file/photos/file_30.jpg",
-        "/api/tg-file/photos/file_31.jpg",
-        "/api/tg-file/photos/file_32.jpg",
-        "/api/tg-file/photos/file_33.jpg",
-        "/api/tg-file/photos/file_34.jpg",
-        "/api/tg-file/photos/file_35.jpg",
-        "/api/tg-file/photos/file_36.jpg",
-        "/api/tg-file/photos/file_26.jpg",
-        "/api/tg-file/photos/file_27.jpg",
-        "/api/tg-file/photos/file_28.jpg",
-        "/api/tg-file/photos/file_37.jpg",
-        "/api/tg-file/photos/file_38.jpg",
-        "/api/tg-file/photos/file_39.jpg",
-        "/api/tg-file/photos/file_40.jpg",
-        "/api/tg-file/photos/file_41.jpg"
+        "photo_2026-08-25_15-31-22.jpg",
+        "photo_2026-08-25_15-31-28.jpg",
+        "photo_2026-08-25_15-31-22.jpg",
+        "photo_2026-08-25_15-31-28.jpg",
+        "photo_2026-08-25_15-31-22.jpg",
+        "photo_2026-08-25_15-31-28.jpg",
+        "photo_2026-08-25_15-32-13.jpg",
+        "photo_2026-08-25_15-32-13.jpg",
+        "photo_2026-08-25_15-32-13.jpg",
+        "photo_2026-08-25_15-32-36.jpg",
+        "photo_2026-08-25_15-32-36.jpg",
+        "photo_2026-08-25_15-32-36.jpg",
+        "photo_2026-08-25_15-32-17.jpg",
+        "photo_2026-08-25_15-32-17.jpg",
+        "photo_2026-08-25_15-32-17.jpg",
+        "photo_2026-08-25_15-32-17.jpg",
+        "photo_2026-08-25_15-32-17.jpg"
       ],
       "specs": [
         {
@@ -59,39 +59,39 @@
       ],
       "color_images": {
         "Blue": {
-          "main": "/api/tg-file/photos/file_29.jpg",
+          "main": "photo_2026-08-25_15-31-28.jpg",
           "gallery": [
-            "/api/tg-file/photos/file_29.jpg",
-            "/api/tg-file/photos/file_30.jpg",
-            "/api/tg-file/photos/file_31.jpg",
-            "/api/tg-file/photos/file_32.jpg",
-            "/api/tg-file/photos/file_33.jpg"
+            "photo_2026-08-25_15-31-28.jpg",
+            "photo_2026-08-25_15-31-22.jpg",
+            "photo_2026-08-25_15-31-28.jpg",
+            "photo_2026-08-25_15-31-22.jpg",
+            "photo_2026-08-25_15-31-28.jpg"
           ]
         },
         "Red": {
-          "main": "/api/tg-file/photos/file_34.jpg",
+          "main": "photo_2026-08-25_15-32-13.jpg",
           "gallery": [
-            "/api/tg-file/photos/file_34.jpg",
-            "/api/tg-file/photos/file_35.jpg",
-            "/api/tg-file/photos/file_36.jpg"
+            "photo_2026-08-25_15-32-13.jpg",
+            "photo_2026-08-25_15-32-13.jpg",
+            "photo_2026-08-25_15-32-13.jpg"
           ]
         },
         "Black": {
-          "main": "/api/tg-file/photos/file_37.jpg",
+          "main": "photo_2026-08-25_15-32-17.jpg",
           "gallery": [
-            "/api/tg-file/photos/file_37.jpg",
-            "/api/tg-file/photos/file_38.jpg",
-            "/api/tg-file/photos/file_39.jpg",
-            "/api/tg-file/photos/file_40.jpg",
-            "/api/tg-file/photos/file_41.jpg"
+            "photo_2026-08-25_15-32-17.jpg",
+            "photo_2026-08-25_15-32-17.jpg",
+            "photo_2026-08-25_15-32-17.jpg",
+            "photo_2026-08-25_15-32-17.jpg",
+            "photo_2026-08-25_15-32-17.jpg"
           ]
         },
         "White": {
-          "main": "/api/tg-file/photos/file_42.jpg",
+          "main": "photo_2026-08-25_15-32-36.jpg",
           "gallery": [
-            "/api/tg-file/photos/file_42.jpg",
-            "/api/tg-file/photos/file_27.jpg",
-            "/api/tg-file/photos/file_28.jpg"
+            "photo_2026-08-25_15-32-36.jpg",
+            "photo_2026-08-25_15-32-36.jpg",
+            "photo_2026-08-25_15-32-36.jpg"
           ]
         }
       },
@@ -120,14 +120,14 @@
       "quantity": 50,
       "colors": "White, Black",
       "description": "ATTACK SHARK R5 ULTRA — ультралегка бездротова ігрова мишка вагою всього 39 г із сенсором PAW3950MAX, частотою опитування до 8000 Гц та DPI до 42 000. Карбоновий корпус та три режими підключення.",
-      "img": "/api/tg-file/photos/file_47.jpg",
+      "img": "attack-shark-r5-ultra-box-bundle-contents.jpg",
       "gallery": [
-        "/api/tg-file/photos/file_47.jpg",
-        "/api/tg-file/photos/file_48.jpg",
-        "/api/tg-file/photos/file_49.jpg",
-        "/api/tg-file/photos/file_50.jpg",
-        "/api/tg-file/photos/file_51.jpg",
-        "/api/tg-file/photos/file_52.jpg"
+        "attack-shark-r5-ultra-box-bundle-contents.jpg",
+        "attack-shark-r5-ultra-top-angle.jpg",
+        "attack-shark-r5-ultra-back-grip.jpg",
+        "attack-shark-r5-ultra-colors-price.jpg",
+        "attack-shark-r5-ultra-in-hand-setup.jpg",
+        "attack-shark-r5-ultra-colors-price.jpg"
       ],
       "specs": [
         {
@@ -149,19 +149,19 @@
       ],
       "color_images": {
         "White": {
-          "main": "/api/tg-file/photos/file_47.jpg",
+          "main": "attack-shark-r5-ultra-box-bundle-contents.jpg",
           "gallery": [
-            "/api/tg-file/photos/file_47.jpg",
-            "/api/tg-file/photos/file_48.jpg",
-            "/api/tg-file/photos/file_49.jpg"
+            "attack-shark-r5-ultra-box-bundle-contents.jpg",
+            "attack-shark-r5-ultra-top-angle.jpg",
+            "attack-shark-r5-ultra-back-grip.jpg"
           ]
         },
         "Black": {
-          "main": "/api/tg-file/photos/file_50.jpg",
+          "main": "attack-shark-r5-ultra-colors-price.jpg",
           "gallery": [
-            "/api/tg-file/photos/file_50.jpg",
-            "/api/tg-file/photos/file_51.jpg",
-            "/api/tg-file/photos/file_52.jpg"
+            "attack-shark-r5-ultra-colors-price.jpg",
+            "attack-shark-r5-ultra-in-hand-setup.jpg",
+            "attack-shark-r5-ultra-colors-price.jpg"
           ]
         }
       },
@@ -188,12 +188,12 @@
       "quantity": 50,
       "colors": "White, Black",
       "description": "ATTACK SHARK R85HE - ігрова магнітна клавіатура з швидким відгуком, магнітними перемикачами та RGB панелю. Компактний формат, якісна збірка та зручне керування — чудовий вибір для ігор і роботи.",
-      "img": "/api/tg-file/photos/file_43.jpg",
+      "img": "photo_2026-08-25_15-32-38.jpg",
       "gallery": [
-        "/api/tg-file/photos/file_43.jpg",
-        "/api/tg-file/photos/file_44.jpg",
-        "/api/tg-file/photos/file_45.jpg",
-        "/api/tg-file/photos/file_46.jpg"
+        "photo_2026-08-25_15-32-38.jpg",
+        "photo_2026-08-25_15-33-39.jpg",
+        "photo_2026-08-25_15-32-40.jpg",
+        "photo_2026-08-25_15-33-42.jpg"
       ],
       "specs": [
         {
@@ -219,17 +219,17 @@
       ],
       "color_images": {
         "White": {
-          "main": "/api/tg-file/photos/file_43.jpg",
+          "main": "photo_2026-08-25_15-32-38.jpg",
           "gallery": [
-            "/api/tg-file/photos/file_43.jpg",
-            "/api/tg-file/photos/file_44.jpg"
+            "photo_2026-08-25_15-32-38.jpg",
+            "photo_2026-08-25_15-33-39.jpg"
           ]
         },
         "Black": {
-          "main": "/api/tg-file/photos/file_45.jpg",
+          "main": "photo_2026-08-25_15-32-40.jpg",
           "gallery": [
-            "/api/tg-file/photos/file_45.jpg",
-            "/api/tg-file/photos/file_46.jpg"
+            "photo_2026-08-25_15-32-40.jpg",
+            "photo_2026-08-25_15-33-42.jpg"
           ]
         }
       },
@@ -256,10 +256,10 @@
       "quantity": 25,
       "colors": "Black",
       "description": "IROK HE6 Ultra — легка ігрова миша з сенсором PAW3950, до 30 000 DPI та частотою опитування до 8000 Гц. Підтримує 2.4G, Bluetooth і дротове підключення",
-      "img": "/api/tg-file/photos/file_58.jpg",
+      "img": "photo_2026-08-25_15-32-42.jpg",
       "gallery": [
-        "/api/tg-file/photos/file_58.jpg",
-        "/api/tg-file/photos/file_59.jpg"
+        "photo_2026-08-25_15-32-42.jpg",
+        "photo_2026-08-25_15-33-43.jpg"
       ],
       "specs": [
         {
@@ -277,10 +277,10 @@
       ],
       "color_images": {
         "Black": {
-          "main": "/api/tg-file/photos/file_58.jpg",
+          "main": "photo_2026-08-25_15-32-42.jpg",
           "gallery": [
-            "/api/tg-file/photos/file_58.jpg",
-            "/api/tg-file/photos/file_59.jpg"
+            "photo_2026-08-25_15-32-42.jpg",
+            "photo_2026-08-25_15-33-43.jpg"
           ]
         }
       },
@@ -306,16 +306,16 @@
       "quantity": 50,
       "colors": "Black, Pink",
       "description": "AULA S75 Pro — компактна механічна клавіатура формату 75% з gasket-структурою, RGB-підсвіткою та hot-swap. Підтримує підключення через 2.4G, Bluetooth і USB-C, оснащена дисплеєм та багатофункціональним регулятором.",
-      "img": "/api/tg-file/photos/file_60.jpg",
+      "img": "photo_2026-08-25_15-32-44.jpg",
       "gallery": [
-        "/api/tg-file/photos/file_60.jpg",
-        "/api/tg-file/photos/file_61.jpg",
-        "/api/tg-file/photos/file_62.jpg",
-        "/api/tg-file/photos/file_63.jpg",
-        "/api/tg-file/photos/file_64.jpg",
-        "/api/tg-file/photos/file_65.jpg",
-        "/api/tg-file/photos/file_66.jpg",
-        "/api/tg-file/photos/file_67.jpg"
+        "photo_2026-08-25_15-32-44.jpg",
+        "photo_2026-08-25_15-33-49.jpg",
+        "photo_2026-08-25_15-32-44.jpg",
+        "photo_2026-08-25_15-33-49.jpg",
+        "photo_2026-08-25_15-32-46.jpg",
+        "photo_2026-08-25_15-33-50.jpg",
+        "photo_2026-08-25_15-32-46.jpg",
+        "photo_2026-08-25_15-33-50.jpg"
       ],
       "specs": [
         {
@@ -337,21 +337,21 @@
       ],
       "color_images": {
         "Black": {
-          "main": "/api/tg-file/photos/file_60.jpg",
+          "main": "photo_2026-08-25_15-32-44.jpg",
           "gallery": [
-            "/api/tg-file/photos/file_60.jpg",
-            "/api/tg-file/photos/file_61.jpg",
-            "/api/tg-file/photos/file_62.jpg",
-            "/api/tg-file/photos/file_63.jpg"
+            "photo_2026-08-25_15-32-44.jpg",
+            "photo_2026-08-25_15-33-49.jpg",
+            "photo_2026-08-25_15-32-44.jpg",
+            "photo_2026-08-25_15-33-49.jpg"
           ]
         },
         "Pink": {
-          "main": "/api/tg-file/photos/file_64.jpg",
+          "main": "photo_2026-08-25_15-32-46.jpg",
           "gallery": [
-            "/api/tg-file/photos/file_64.jpg",
-            "/api/tg-file/photos/file_65.jpg",
-            "/api/tg-file/photos/file_66.jpg",
-            "/api/tg-file/photos/file_67.jpg"
+            "photo_2026-08-25_15-32-46.jpg",
+            "photo_2026-08-25_15-33-50.jpg",
+            "photo_2026-08-25_15-32-46.jpg",
+            "photo_2026-08-25_15-33-50.jpg"
           ]
         }
       },
@@ -378,17 +378,17 @@
       "quantity": 75,
       "colors": "White, Black, Pink",
       "description": "MCHOSE A7 V2 Pro — легка бездротова ігрова миша вагою 59 г із сенсором PAW3395 до 26 000 DPI. Підтримує 2.4G, Bluetooth та USB-C, а частота опитування — до 8K Гц",
-      "img": "/api/tg-file/photos/file_68.jpg",
+      "img": "photo_2026-08-25_15-32-57.jpg",
       "gallery": [
-        "/api/tg-file/photos/file_68.jpg",
-        "/api/tg-file/photos/file_69.jpg",
-        "/api/tg-file/photos/file_70.jpg",
-        "/api/tg-file/photos/file_71.jpg",
-        "/api/tg-file/photos/file_72.jpg",
-        "/api/tg-file/photos/file_73.jpg",
-        "/api/tg-file/photos/file_74.jpg",
-        "/api/tg-file/photos/file_75.jpg",
-        "/api/tg-file/photos/file_76.jpg"
+        "photo_2026-08-25_15-32-57.jpg",
+        "photo_2026-08-25_15-33-52.jpg",
+        "photo_2026-08-25_15-32-57.jpg",
+        "photo_2026-08-25_15-32-59.jpg",
+        "photo_2026-08-25_15-35-39.jpg",
+        "photo_2026-08-25_15-32-59.jpg",
+        "photo_2026-08-25_15-33-02.jpg",
+        "photo_2026-08-25_15-35-47.jpg",
+        "photo_2026-08-25_15-33-02.jpg"
       ],
       "specs": [
         {
@@ -418,27 +418,27 @@
       ],
       "color_images": {
         "White": {
-          "main": "/api/tg-file/photos/file_68.jpg",
+          "main": "photo_2026-08-25_15-32-57.jpg",
           "gallery": [
-            "/api/tg-file/photos/file_68.jpg",
-            "/api/tg-file/photos/file_69.jpg",
-            "/api/tg-file/photos/file_70.jpg"
+            "photo_2026-08-25_15-32-57.jpg",
+            "photo_2026-08-25_15-33-52.jpg",
+            "photo_2026-08-25_15-32-57.jpg"
           ]
         },
         "Black": {
-          "main": "/api/tg-file/photos/file_71.jpg",
+          "main": "photo_2026-08-25_15-32-59.jpg",
           "gallery": [
-            "/api/tg-file/photos/file_71.jpg",
-            "/api/tg-file/photos/file_72.jpg",
-            "/api/tg-file/photos/file_73.jpg"
+            "photo_2026-08-25_15-32-59.jpg",
+            "photo_2026-08-25_15-35-39.jpg",
+            "photo_2026-08-25_15-32-59.jpg"
           ]
         },
         "Pink": {
-          "main": "/api/tg-file/photos/file_74.jpg",
+          "main": "photo_2026-08-25_15-33-02.jpg",
           "gallery": [
-            "/api/tg-file/photos/file_74.jpg",
-            "/api/tg-file/photos/file_75.jpg",
-            "/api/tg-file/photos/file_76.jpg"
+            "photo_2026-08-25_15-33-02.jpg",
+            "photo_2026-08-25_15-35-47.jpg",
+            "photo_2026-08-25_15-33-02.jpg"
           ]
         }
       },
@@ -2267,5 +2267,5 @@
   ],
   "deleted_brand_ids": [],
   "deleted_category_ids": [],
-  "last_cloud_sync": "2026-09-03T15:13:46.392Z"
+  "last_cloud_sync": "2026-09-03T15:20:33.291Z"
 }
