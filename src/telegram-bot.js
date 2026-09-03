@@ -4,9 +4,9 @@ import { db, ORDER_STATUSES } from './db.js';
 
 process.env.TZ = 'Europe/Kyiv';
 
-export const BOT_TOKEN = process.env.BOT_TOKEN || '8993086388:AAGQiOpnHz53o9C2N0MVg39hTPZsXaRA1kA';
+export const BOT_TOKEN = process.env.BOT_TOKEN || '';
 export const ADMIN_IDS = (process.env.ADMIN_IDS || '1929165295,1248134309,invinciblee,wincher,Invinciblee,Wincher').split(',').map(s => s.trim()).filter(Boolean);
-export const PAYMENT_PROVIDER_TOKEN = process.env.PAYMENT_PROVIDER_TOKEN || '1877036958:TEST:3ee3e1f439bade2f14881b4f9a87c61392fa6ec6';
+export const PAYMENT_PROVIDER_TOKEN = process.env.PAYMENT_PROVIDER_TOKEN || '';
 
 const TELEGRAM_API_BASE = 'https://api.telegram.org';
 

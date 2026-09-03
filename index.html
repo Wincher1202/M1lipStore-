@@ -4795,6 +4795,11 @@
                         <input type="tel" id="chk-phone" autocomplete="tel" inputmode="tel" value="+380" maxlength="17" placeholder="+380 67 123 45 67">
                         <div class="phone-hint">+380 встановлюється автоматично. Введіть 9 цифр номера.</div>
                     </div>
+                    <div class="checkout-group">
+                        <label>Ваш Telegram (@username) <span style="font-size:0.75rem; color:var(--text-muted); font-weight:normal;">(необов'язково)</span></label>
+                        <input type="text" id="chk-username" placeholder="@username" maxlength="40">
+                        <div class="field-hint">Для швидкого зв'язку з менеджером в особистих повідомленнях.</div>
+                    </div>
                 </div>
 
                 <!-- STEP 2: delivery -->
@@ -4840,39 +4845,53 @@
                                 <div class="delivery-search-results" id="warehouse-search-results" style="display:none;"></div>
                             </div>
                         </div>
-
-                        <!-- (Courier delivery removed per user requirement) -->
                     </div>
                 </div>
 
                 <!-- STEP 3: payment & confirmation -->
                 <div class="checkout-step-panel" data-step-panel="3">
                     <div class="checkout-group">
-                        <label>Оберіть спосіб оплати</label>
+                        <label>Оберіть варіант оформлення та оплати</label>
                         <div class="payment-cards-grid" style="display: flex; flex-direction: column; gap: 10px; margin-top: 6px;">
-                            <label class="payment-card active" id="pay-card-online" onclick="selectPaymentMethod('online')" style="display: flex; align-items: flex-start; gap: 12px; padding: 14px; border: 2px solid var(--accent); border-radius: var(--radius-sm); background: var(--card-bg); cursor: pointer;">
-                                <input type="radio" name="pay-method" id="pay-opt-online" value="online" checked style="margin-top: 3px;">
+                            
+                            <!-- 1. MANAGER CHAT (Default) -->
+                            <label class="payment-card active" id="pay-card-manager" onclick="selectPaymentMethod('manager')" style="display: flex; align-items: flex-start; gap: 12px; padding: 14px; border: 2px solid var(--accent); border-radius: var(--radius-sm); background: var(--card-bg); cursor: pointer;">
+                                <input type="radio" name="pay-method" id="pay-opt-manager" value="manager" checked style="margin-top: 3px;">
                                 <div style="flex: 1;">
                                     <div style="font-weight: 700; font-size: 0.95rem; display: flex; align-items: center; justify-content: space-between;">
-                                        <span>💳 Онлайн-оплата (Smart Glocal / Telegram)</span>
-                                        <span style="font-size: 0.75rem; color: #2E7D32; font-weight: 800; background: rgba(46,125,50,0.1); padding: 2px 8px; border-radius: 10px;">0% комісії</span>
+                                        <span>💬 Через менеджера (@milipmanager)</span>
+                                        <span style="font-size: 0.75rem; color: var(--accent); font-weight: 800; background: rgba(87,100,226,0.12); padding: 2px 8px; border-radius: 10px;">Рекомендовано</span>
                                     </div>
-                                    <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px;">Миттєва та безпечна оплата банківською картою, Apple Pay або Google Pay прямо в Telegram.</div>
+                                    <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px;">Прямий зв'язок з менеджером: узгодження деталей, оплата на картку або накладений платіж.</div>
                                 </div>
                             </label>
 
+                            <!-- 2. COD -->
                             <label class="payment-card" id="pay-card-cod" onclick="selectPaymentMethod('cod')" style="display: flex; align-items: flex-start; gap: 12px; padding: 14px; border: 2px solid var(--border-light); border-radius: var(--radius-sm); background: var(--card-bg); cursor: pointer;">
                                 <input type="radio" name="pay-method" id="pay-opt-cod" value="cod" style="margin-top: 3px;">
                                 <div style="flex: 1;">
                                     <div style="font-weight: 700; font-size: 0.95rem; display: flex; align-items: center; justify-content: space-between;">
-                                        <span>📦 Оплата при отриманні (Накладений)</span>
+                                        <span>📦 Накладений платіж (при отриманні)</span>
                                         <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700;">+20 ₴ + 2%</span>
                                     </div>
-                                    <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px;">Сплата готівкою або карткою у відділенні пошти після огляду товару.</div>
+                                    <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px;">Сплата у відділенні пошти після огляду товару (зі сплатою авансу 200 ₴).</div>
                                 </div>
                             </label>
+
+                            <!-- 3. ONLINE PAYMENT -->
+                            <label class="payment-card" id="pay-card-online" onclick="selectPaymentMethod('online')" style="display: flex; align-items: flex-start; gap: 12px; padding: 14px; border: 2px solid var(--border-light); border-radius: var(--radius-sm); background: var(--card-bg); cursor: pointer;">
+                                <input type="radio" name="pay-method" id="pay-opt-online" value="online" style="margin-top: 3px;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 700; font-size: 0.95rem; display: flex; align-items: center; justify-content: space-between;">
+                                        <span>💳 Онлайн-оплата (в Telegram-боті)</span>
+                                        <span style="font-size: 0.75rem; color: #2E7D32; font-weight: 800; background: rgba(46,125,50,0.1); padding: 2px 8px; border-radius: 10px;">0% комісії</span>
+                                    </div>
+                                    <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px;">Миттєва оплата банківською картою, Apple Pay або Google Pay.</div>
+                                </div>
+                            </label>
+
                         </div>
-                        <input type="hidden" id="chk-payment" value="online">
+                        <input type="hidden" id="chk-payment" value="manager">
                     </div>
 
                     <!-- Dispatch time info banner -->
@@ -4898,7 +4917,7 @@
             <div class="checkout-step-nav">
                 <button class="btn-secondary" id="chk-back-btn" onclick="checkoutStepBack()" style="display:none;">← Назад</button>
                 <button class="btn-primary" id="chk-next-btn" style="flex:1; justify-content: center;" onclick="checkoutStepNext()">Далі →</button>
-                <button class="btn-primary" id="chk-submit-btn" style="flex:1; justify-content: center; display:none;" onclick="submitOrder()">💳 Оформити замовлення →</button>
+                <button class="btn-primary" id="chk-submit-btn" style="flex:1; justify-content: center; display:none;" onclick="submitOrder()">💬 Оформити через менеджера →</button>
             </div>
         </div>
     </div>
@@ -4919,8 +4938,7 @@
             <div style="font-size: 3.2rem; margin-bottom: 8px;">🎉</div>
             <h3 style="font-size: 1.4rem; font-weight: 800; margin-bottom: 6px; letter-spacing: -0.5px;">ДЯКУЄМО ЗА ЗАМОВЛЕННЯ! 🎉</h3>
             <p id="success-lead-text" style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 16px; line-height: 1.5;">
-                Ваше замовлення успішно оформлено. Щоб завершити оформлення, перейдіть до оплати за кнопкою нижче.<br>
-                Після успішної оплати ваше замовлення буде передано в обробку.
+                Ваше замовлення успішно збережено в системі. Натисніть кнопку нижче, щоб надіслати готові деталі замовлення менеджеру в Telegram.
             </p>
             
             <div style="background: var(--bg-primary); padding: 14px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border-light); margin-bottom: 16px; text-align: left;">
@@ -4933,7 +4951,7 @@
                 <div style="margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--border-light); display: flex; align-items: center; justify-content: space-between;">
                     <span style="font-size: 0.8rem; font-weight: 700; color: #2E7D32; display: flex; align-items: center; gap: 4px;">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-                        Статус: Прийнято в обробку
+                        Статус: Передано менеджеру
                     </span>
                     <span style="font-size: 0.78rem; font-weight: 700; background: rgba(87,100,226,0.12); color: var(--accent); padding: 2px 8px; border-radius: 12px;">
                         ⚡ Відправка 1-2 дні
@@ -4941,21 +4959,24 @@
                 </div>
             </div>
 
-            <!-- Telegram Bot Order Management & Payment Banner -->
+            <!-- Telegram Action Banner -->
             <div style="background: rgba(87,100,226,0.08); border: 1.5px solid rgba(87,100,226,0.28); border-radius: var(--radius-sm); padding: 14px; margin-bottom: 16px; text-align: left;">
                 <div style="display: flex; align-items: center; gap: 8px; font-weight: 800; color: var(--accent); margin-bottom: 5px; font-size: 0.92rem;">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="m20.665 3.717-17.73 6.837c-1.21.486-1.203 1.161-.222 1.462l4.552 1.42 10.532-6.645c.498-.303.953-.14.579.192l-8.533 7.701h-.002l-.313 4.674c.457 0 .66-.21.916-.457l2.199-2.138 4.574 3.379c.843.465 1.452.226 1.662-.782l3-14.131c.307-1.23-.47-1.787-1.284-1.424z"/></svg>
-                    <span id="success-tg-banner-title">Оплата та керування — у Telegram-боті!</span>
+                    <span id="success-tg-banner-title">Зв'язок з менеджером у Telegram</span>
                 </div>
                 <p id="success-tg-banner-desc" style="font-size: 0.82rem; color: var(--text-secondary); margin: 0; line-height: 1.45;">
-                    Рахунок на оплату та інформацію про замовлення надіслано вам у чат з ботом. Усі деталі, онлайн-оплата та трекінг ТТН доступні безпосередньо у боті.
+                    Повідомлення із замовленням вже підготовлено. Натисніть кнопку, щоб перейти в чат з @milipmanager і надіслати його в один клік.
                 </p>
             </div>
 
             <div style="display: flex; flex-direction: column; gap: 8px;">
-                <button class="btn-primary" id="success-tg-action-btn" style="width: 100%; justify-content: center; background: #229ED9; border-color: #229ED9; font-weight: 800; padding: 13px;" onclick="handleSuccessOpenTelegram()">
+                <button class="btn-primary" id="success-manager-btn" style="width: 100%; justify-content: center; background: #229ED9; border-color: #229ED9; font-weight: 800; padding: 13px;" onclick="handleSuccessOpenManager()">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="m20.665 3.717-17.73 6.837c-1.21.486-1.203 1.161-.222 1.462l4.552 1.42 10.532-6.645c.498-.303.953-.14.579.192l-8.533 7.701h-.002l-.313 4.674c.457 0 .66-.21.916-.457l2.199-2.138 4.574 3.379c.843.465 1.452.226 1.662-.782l3-14.131c.307-1.23-.47-1.787-1.284-1.424z"/></svg>
-                    <span id="success-tg-btn-label">Відкрити в Telegram-боті →</span>
+                    <span id="success-manager-btn-label">💬 Надіслати замовлення менеджеру →</span>
+                </button>
+                <button class="btn-secondary" id="success-tg-action-btn" style="width: 100%; justify-content: center; font-weight: 700;" onclick="handleSuccessOpenTelegram()">
+                    📱 Відкрити в Telegram-боті
                 </button>
                 <button class="btn-secondary" style="width: 100%; justify-content: center; font-weight: 700;" onclick="closeSuccessModal(); openMyOrdersModal();">🛍 Мої замовлення</button>
                 <button class="btn-secondary" style="width: 100%; justify-content: center;" onclick="closeSuccessModal()">Продовжити покупки</button>
@@ -7281,6 +7302,26 @@
             input.value = normalizePhoneDisplay(input.value);
         }
 
+        function prefillContactsFromProfile() {
+            setupPhoneInput();
+            const tgUser = getTelegramUser();
+            const nameEl = document.getElementById('chk-name');
+            const surnameEl = document.getElementById('chk-surname');
+            const phoneEl = document.getElementById('chk-phone');
+            const userEl = document.getElementById('chk-username');
+
+            if (tgUser) {
+                if (nameEl && !nameEl.value && tgUser.first_name) nameEl.value = tgUser.first_name;
+                if (surnameEl && !surnameEl.value && tgUser.last_name) surnameEl.value = tgUser.last_name;
+                if (userEl && !userEl.value && tgUser.username) userEl.value = '@' + tgUser.username.replace(/^@/, '');
+            }
+
+            const savedPhone = localStorage.getItem('m1lip_last_phone');
+            if (phoneEl && (!phoneEl.value || phoneEl.value === '+380') && savedPhone) {
+                phoneEl.value = normalizePhoneDisplay(savedPhone);
+            }
+        }
+
         function validateCheckoutStep(step) {
             if (step === 1) {
                 const name = (document.getElementById('chk-name')?.value || '').trim();
@@ -7947,34 +7988,29 @@
             const input = document.getElementById('chk-payment');
             if (input) input.value = method;
 
-            const onlineCard = document.getElementById('pay-card-online');
+            const managerCard = document.getElementById('pay-card-manager');
             const codCard = document.getElementById('pay-card-cod');
-            const optOnline = document.getElementById('pay-opt-online');
+            const onlineCard = document.getElementById('pay-card-online');
+            const optManager = document.getElementById('pay-opt-manager');
             const optCod = document.getElementById('pay-opt-cod');
+            const optOnline = document.getElementById('pay-opt-online');
 
-            if (method === 'cod') {
-                if (onlineCard) {
-                    onlineCard.classList.remove('active');
-                    onlineCard.style.borderColor = 'var(--border-light)';
-                }
-                if (codCard) {
-                    codCard.classList.add('active');
-                    codCard.style.borderColor = 'var(--accent)';
-                }
-                if (optCod) optCod.checked = true;
-                if (optOnline) optOnline.checked = false;
-            } else {
-                if (onlineCard) {
-                    onlineCard.classList.add('active');
-                    onlineCard.style.borderColor = 'var(--accent)';
-                }
-                if (codCard) {
-                    codCard.classList.remove('active');
-                    codCard.style.borderColor = 'var(--border-light)';
-                }
-                if (optOnline) optOnline.checked = true;
-                if (optCod) optCod.checked = false;
+            if (managerCard) {
+                managerCard.classList.toggle('active', method === 'manager');
+                managerCard.style.borderColor = method === 'manager' ? 'var(--accent)' : 'var(--border-light)';
             }
+            if (codCard) {
+                codCard.classList.toggle('active', method === 'cod');
+                codCard.style.borderColor = method === 'cod' ? 'var(--accent)' : 'var(--border-light)';
+            }
+            if (onlineCard) {
+                onlineCard.classList.toggle('active', method === 'online');
+                onlineCard.style.borderColor = method === 'online' ? 'var(--accent)' : 'var(--border-light)';
+            }
+
+            if (optManager) optManager.checked = (method === 'manager');
+            if (optCod) optCod.checked = (method === 'cod');
+            if (optOnline) optOnline.checked = (method === 'online');
 
             renderStep3Summary();
         }
@@ -7983,7 +8019,7 @@
             const container = document.getElementById('step3-order-summary');
             if (!container) return;
 
-            const paymentMethod = document.getElementById('chk-payment')?.value || 'online';
+            const paymentMethod = document.getElementById('chk-payment')?.value || 'manager';
             const subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
             const isCod = paymentMethod === 'cod';
             const codFee = isCod ? Math.round(20 + subtotal * 0.02) : 0;
@@ -7995,7 +8031,13 @@
 
             const submitBtn = document.getElementById('chk-submit-btn');
             if (submitBtn) {
-                submitBtn.innerHTML = `💳 Оформити замовлення (${formatPrice(grandTotal)}) →`;
+                if (paymentMethod === 'manager') {
+                    submitBtn.innerHTML = `💬 Оформити через менеджера (${formatPrice(grandTotal)}) →`;
+                } else if (paymentMethod === 'cod') {
+                    submitBtn.innerHTML = `📦 Оформити накладеним (${formatPrice(grandTotal)}) →`;
+                } else {
+                    submitBtn.innerHTML = `💳 Оформити замовлення (${formatPrice(grandTotal)}) →`;
+                }
             }
 
             container.innerHTML = `
@@ -8051,7 +8093,7 @@
                         <span class="review-info-val" style="color: var(--text-muted);">За тарифами перевізника</span>
                     </div>
                     <div class="review-info-row" style="display: flex; justify-content: space-between; font-size: 0.84rem; margin-bottom: 4px;">
-                        <span class="review-info-label" style="color: var(--text-secondary);">Комісія за оплату:</span>
+                        <span class="review-info-label" style="color: var(--text-secondary);">Комісія:</span>
                         <span class="review-info-val" style="color: #2E7D32; font-weight: 700;">0 ₴ (0% комісії)</span>
                     </div>
                     ${isCod ? `
@@ -8068,6 +8110,8 @@
             `;
         }
 
+        let lastPlacedOrderObject = null;
+
         async function submitOrder() {
             if (!validateCheckoutStep(1) || !validateCheckoutStep(2)) return;
 
@@ -8075,7 +8119,8 @@
             const surname = (document.getElementById('chk-surname')?.value || '').trim();
             const patronymic = (document.getElementById('chk-patronymic')?.value || '').trim();
             const phone = (document.getElementById('chk-phone')?.value || '').trim();
-            const paymentMethod = document.getElementById('chk-payment')?.value || 'online';
+            const usernameInput = (document.getElementById('chk-username')?.value || '').trim().replace(/^@/, '');
+            const paymentMethod = document.getElementById('chk-payment')?.value || 'manager';
             const comment = (document.getElementById('chk-comment')?.value || '').trim();
 
             if (!cart || cart.length === 0) {
@@ -8090,7 +8135,7 @@
 
             const tgUser = getTelegramUser();
             const customerTgId = tgUser?.id || null;
-            const customerTgUsername = tgUser?.username || null;
+            const customerTgUsername = usernameInput || tgUser?.username || null;
 
             const payload = {
                 customer: {
@@ -8182,6 +8227,7 @@
                 }
 
                 const orderObj = data.order || data;
+                lastPlacedOrderObject = orderObj;
                 const orderIdStr = (orderObj.order_id || orderObj.id || data.order_id || data.id || '').replace(/^#/, '');
 
                 // Clear cart immediately
@@ -8201,6 +8247,14 @@
 
                 triggerHaptic('success');
                 updateAdminNewBadge();
+
+                // If manager method selected, automatically open manager chat if requested
+                if (paymentMethod === 'manager') {
+                    // Pre-generate URL for manager
+                    setTimeout(() => {
+                        handleSuccessOpenManager();
+                    }, 400);
+                }
             } catch (err) {
                 console.error("Order submit exception:", err);
                 const randomNum = Math.floor(100000 + Math.random() * 900000);
@@ -8213,21 +8267,71 @@
                     items: payload.items,
                     total: grandTotal
                 };
+                lastPlacedOrderObject = fallbackOrder;
                 localStorage.setItem('m1lip_last_phone', phone);
                 localStorage.setItem('m1lip_last_order_id', fallbackOrder.order_id);
                 toggleCheckoutDrawer(false);
                 showOrderSuccessModal(fallbackOrder, paymentMethod);
                 triggerHaptic('success');
+                if (paymentMethod === 'manager') {
+                    setTimeout(() => {
+                        handleSuccessOpenManager();
+                    }, 400);
+                }
             } finally {
                 if (submitBtn) {
                     submitBtn.disabled = false;
-                    submitBtn.innerText = '💳 Оформити замовлення →';
+                    renderStep3Summary();
                 }
             }
         }
 
-        function showOrderSuccessModal(order, paymentType = 'online') {
+        function formatManagerOrderText(order) {
+            const ord = order || lastPlacedOrderObject || {};
+            const customer = ord.customer || {};
+            const delivery = ord.delivery || {};
+            const items = ord.items || [];
+            const provName = delivery.provider === 'ukrposhta' ? 'Укрпошта' : 'Нова пошта';
+            const methodType = (delivery.type === 'postomat' || delivery.method === 'postomat') ? 'поштомат' : 'відділення';
+            const fullName = [customer.last_name, customer.first_name, customer.middle_name].filter(Boolean).join(' ') ||
+                [customer.first_name, customer.last_name].filter(Boolean).join(' ') || 'Покупець';
+            
+            const itemsList = items.map((it, idx) => `  ${idx + 1}. ${it.title}${it.color ? ` (Колір: ${it.color})` : ''} — ${it.qty} шт. × ${formatPrice(it.price)}`).join('\n');
+            const orderIdStr = (ord.order_id || ord.id || localStorage.getItem('m1lip_last_order_id') || '').replace(/^#/, '');
+
+            let text = `Добрий день! Хочу оформити замовлення #${orderIdStr}:\n\n`;
+            text += `🎮 Товари:\n${itemsList || '  Обрані товари з каталогу'}\n\n`;
+            text += `💰 Сума: ${formatPrice(ord.total || 0)}\n`;
+            text += `👤 Отримувач: ${fullName}\n`;
+            text += `📞 Телефон: ${customer.phone || ''}\n`;
+            if (customer.telegram_username) text += `💬 Telegram: @${customer.telegram_username.replace(/^@/, '')}\n`;
+            text += `📦 Доставка: ${provName} (${methodType}), м. ${delivery.city || ''}, ${delivery.department || delivery.address || ''}\n`;
+            if (ord.payment?.comment) text += `📝 Коментар: ${ord.payment.comment}\n`;
+            return text;
+        }
+
+        function handleSuccessOpenManager() {
+            const text = formatManagerOrderText(lastPlacedOrderObject);
+            const managerUrl = `https://t.me/milipmanager?text=${encodeURIComponent(text)}`;
+            const tw = window.Telegram?.WebApp;
+            if (tw && typeof tw.openTelegramLink === 'function') {
+                try {
+                    tw.openTelegramLink(managerUrl);
+                    return;
+                } catch(e) {
+                    console.warn('[openTelegramLink manager error]', e);
+                }
+            }
+            try {
+                window.open(managerUrl, '_blank');
+            } catch(e) {
+                window.location.href = managerUrl;
+            }
+        }
+
+        function showOrderSuccessModal(order, paymentType = 'manager') {
             const orderIdStr = (order.order_id || order.id || '').replace(/^#/, '');
+            lastPlacedOrderObject = order;
             const customer = order.customer || {};
             const delivery = order.delivery || {};
             const provName = delivery.provider === 'ukrposhta' ? 'Укрпошта' : 'Нова пошта';
@@ -8235,13 +8339,24 @@
             const fullName = [customer.last_name, customer.first_name, customer.middle_name].filter(Boolean).join(' ') ||
                 [customer.first_name, customer.last_name].filter(Boolean).join(' ') || 'Покупець';
 
-            const isCod = paymentType === 'cod' || order.payment?.method === 'cod';
+            const method = paymentType || order.payment?.method || 'manager';
+            const isCod = method === 'cod';
+            const isManager = method === 'manager';
             const codAdvance = Math.min(200, order.total || 200);
             const remaining = Math.max(0, (order.total || 0) - codAdvance);
 
             const detailsBox = document.getElementById('success-details-content');
             if (detailsBox) {
-                if (isCod) {
+                if (isManager) {
+                    detailsBox.innerHTML = `
+                        <div><strong>Отримувач (ПІБ):</strong> ${fullName}</div>
+                        <div><strong>Телефон:</strong> ${customer.phone || ''}</div>
+                        ${customer.telegram_username ? `<div><strong>Telegram:</strong> @${customer.telegram_username.replace(/^@/, '')}</div>` : ''}
+                        <div><strong>Доставка:</strong> ${provName} (${methodType}), м. ${delivery.city || ''}, ${delivery.department || delivery.address || ''}</div>
+                        <div><strong>Спосіб оформлення:</strong> 💬 Через менеджера (@milipmanager)</div>
+                        <div style="font-weight: 800; color: var(--accent); margin-top: 6px; font-size: 0.98rem;"><strong>Сума замовлення:</strong> ${formatPrice(order.total || 0)}</div>
+                    `;
+                } else if (isCod) {
                     detailsBox.innerHTML = `
                         <div><strong>Отримувач (ПІБ):</strong> ${fullName}</div>
                         <div><strong>Телефон:</strong> ${customer.phone || ''}</div>
@@ -8257,7 +8372,7 @@
                         <div><strong>Отримувач (ПІБ):</strong> ${fullName}</div>
                         <div><strong>Телефон:</strong> ${customer.phone || ''}</div>
                         <div><strong>Доставка:</strong> ${provName} (${methodType}), м. ${delivery.city || ''}, ${delivery.department || delivery.address || ''}</div>
-                        <div><strong>Спосіб оплати:</strong> 💳 Онлайн-оплата (Smart Glocal)</div>
+                        <div><strong>Спосіб оплати:</strong> 💳 Онлайн-оплата</div>
                         <div style="font-weight: 800; color: var(--accent); margin-top: 6px; font-size: 0.98rem;"><strong>Сума до сплати:</strong> ${formatPrice(order.total || 0)}</div>
                     `;
                 }
@@ -8265,16 +8380,20 @@
 
             const bannerTitle = document.getElementById('success-tg-banner-title');
             const bannerDesc = document.getElementById('success-tg-banner-desc');
-            const tgBtnLabel = document.getElementById('success-tg-btn-label');
+            const managerBtn = document.getElementById('success-manager-btn');
 
-            if (isCod) {
+            if (isManager) {
+                if (bannerTitle) bannerTitle.innerText = "Зв'язок з менеджером у Telegram";
+                if (bannerDesc) bannerDesc.innerHTML = `Повідомлення із замовленням вже сформовано. Натисніть кнопку <strong>«💬 Надіслати замовлення менеджеру»</strong>, щоб надіслати його в чат з @milipmanager.`;
+                if (managerBtn) managerBtn.style.display = 'flex';
+            } else if (isCod) {
                 if (bannerTitle) bannerTitle.innerText = 'Сплата авансу 200 ₴ — у Telegram-боті';
-                if (bannerDesc) bannerDesc.innerHTML = `Для підтвердження та відправки замовлення необхідно сплатити страховий аванс <strong>200 ₴</strong>. Перейдіть до Telegram-бота для зручної оплати та відстеження.`;
-                if (tgBtnLabel) tgBtnLabel.innerText = '📱 Відкрити в Telegram-боті →';
+                if (bannerDesc) bannerDesc.innerHTML = `Для підтвердження та відправки замовлення необхідно сплатити страховий аванс <strong>200 ₴</strong>. Перейдіть до Telegram-бота для оплати або напишіть менеджеру.`;
+                if (managerBtn) managerBtn.style.display = 'flex';
             } else {
                 if (bannerTitle) bannerTitle.innerText = 'Оплата та підтвердження — у Telegram-боті!';
-                if (bannerDesc) bannerDesc.innerHTML = `Рахунок на оплату <strong>${formatPrice(order.total || 0)}</strong> сформовано. Перейдіть у Telegram-бот для безпечної оплати та отримання чека.`;
-                if (tgBtnLabel) tgBtnLabel.innerText = '💳 Перейти до оплати в чаті →';
+                if (bannerDesc) bannerDesc.innerHTML = `Рахунок на оплату <strong>${formatPrice(order.total || 0)}</strong> сформовано. Перейдіть у Telegram-бот або напишіть менеджеру.`;
+                if (managerBtn) managerBtn.style.display = 'flex';
             }
 
             cart = [];
@@ -8311,7 +8430,6 @@
                     console.warn('[openTelegramLink error]', e);
                 }
 
-                // Close the Mini App window so the user is directly viewing the Telegram chat with their order & payment button
                 try {
                     if (typeof tw.close === 'function') {
                         setTimeout(() => {
@@ -8322,7 +8440,6 @@
                 return;
             }
 
-            // Outside Telegram: window navigation
             try {
                 window.location.href = targetUrl;
             } catch (e) {
