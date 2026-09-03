@@ -8132,7 +8132,7 @@
             const submitBtn = document.getElementById('chk-submit-btn');
             if (submitBtn) {
                 submitBtn.disabled = true;
-                submitBtn.innerText = '⏳ Оформлюємо замовлення...';
+                submitBtn.innerHTML = '<span class="loading-spinner" style="display:inline-block; width:16px; height:16px; border:2px solid rgba(255,255,255,0.3); border-radius:50%; border-top-color:#fff; animation:spin 0.8s linear infinite; vertical-align:middle; margin-right:6px;"></span> Зберігаємо замовлення...';
             }
 
             try {
@@ -8143,7 +8143,7 @@
                 let data = null;
                 try {
                     const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), 4500);
+                    const timeoutId = setTimeout(() => controller.abort(), 12000);
                     const res = await fetch(ORDER_API_URL, {
                         method: 'POST',
                         headers,
@@ -8153,6 +8153,8 @@
                     clearTimeout(timeoutId);
                     if (res.ok) {
                         data = await res.json();
+                    } else {
+                        console.warn('[Order API error response]', res.status);
                     }
                 } catch (fetchErr) {
                     console.warn('[Order API network fallback]', fetchErr);
@@ -8197,12 +8199,7 @@
                 // Show success confirmation screen
                 showOrderSuccessModal(orderObj, paymentMethod);
 
-                // Redirect to Telegram bot
-                const targetBotUrl = `https://t.me/${botUsername}?start=order_${orderIdStr}`;
-                setTimeout(() => {
-                    goToTelegramBot(targetBotUrl);
-                }, 150);
-
+                triggerHaptic('success');
                 updateAdminNewBadge();
             } catch (err) {
                 console.error("Order submit exception:", err);
@@ -8220,11 +8217,7 @@
                 localStorage.setItem('m1lip_last_order_id', fallbackOrder.order_id);
                 toggleCheckoutDrawer(false);
                 showOrderSuccessModal(fallbackOrder, paymentMethod);
-
-                const targetBotUrl = `https://t.me/${botUsername}?start=order_${fallbackOrder.order_id}`;
-                setTimeout(() => {
-                    goToTelegramBot(targetBotUrl);
-                }, 150);
+                triggerHaptic('success');
             } finally {
                 if (submitBtn) {
                     submitBtn.disabled = false;
@@ -8276,12 +8269,12 @@
 
             if (isCod) {
                 if (bannerTitle) bannerTitle.innerText = 'Сплата авансу 200 ₴ — у Telegram-боті';
-                if (bannerDesc) bannerDesc.innerHTML = `Для підтвердження та відправки замовлення необхідно сплатити страховий аванс <strong>200 ₴</strong>. Переходимо в Telegram-бот для зручної оплати та відстеження.`;
-                if (tgBtnLabel) tgBtnLabel.innerText = '📱 Відкрити замовлення в боті →';
+                if (bannerDesc) bannerDesc.innerHTML = `Для підтвердження та відправки замовлення необхідно сплатити страховий аванс <strong>200 ₴</strong>. Перейдіть до Telegram-бота для зручної оплати та відстеження.`;
+                if (tgBtnLabel) tgBtnLabel.innerText = '📱 Відкрити в Telegram-боті →';
             } else {
                 if (bannerTitle) bannerTitle.innerText = 'Оплата та підтвердження — у Telegram-боті!';
-                if (bannerDesc) bannerDesc.innerHTML = `Рахунок на оплату <strong>${formatPrice(order.total || 0)}</strong> сформовано. Переходимо в Telegram-бот для безпечної оплати та отримання чека.`;
-                if (tgBtnLabel) tgBtnLabel.innerText = '📱 Відкрити замовлення в боті →';
+                if (bannerDesc) bannerDesc.innerHTML = `Рахунок на оплату <strong>${formatPrice(order.total || 0)}</strong> сформовано. Перейдіть у Telegram-бот для безпечної оплати та отримання чека.`;
+                if (tgBtnLabel) tgBtnLabel.innerText = '💳 Перейти до оплати в чаті →';
             }
 
             cart = [];
@@ -8294,7 +8287,10 @@
 
             const modal = document.getElementById('success-modal');
             const backdrop = document.getElementById('backdrop');
-            if (modal) modal.classList.add('active');
+            if (modal) {
+                modal.classList.add('active');
+                modal.scrollTop = 0;
+            }
             if (backdrop) backdrop.classList.add('active');
         }
 
@@ -8320,7 +8316,7 @@
                     if (typeof tw.close === 'function') {
                         setTimeout(() => {
                             try { tw.close(); } catch (e) {}
-                        }, 300);
+                        }, 250);
                     }
                 } catch (e) {}
                 return;

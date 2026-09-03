@@ -2327,18 +2327,9 @@ export class TelegramBotService {
       await this.sendCustomerOrderWithPayment(order.customer.telegram_id, order);
     }
 
-    // 2. Anti-Spam Admin Notification:
-    // Only notify admins immediately if order is Cash-On-Delivery (COD) or already PAID.
-    // For unpaid online orders, admin will only receive notification once payment is completed.
-    const isPaid = order.payment?.status === 'PAID';
-    const isCod = order.payment?.is_cod || order.payment?.method === 'cod';
-
-    if (isPaid || isCod) {
-      if (!order._admin_notified) {
-        order._admin_notified = true;
-        db.save();
-        await this.notifyAdminsNewOrder(order);
-      }
+    // 2. Admin Notification: Send immediate notification to all admins for every new order
+    if (!order._admin_notified) {
+      await this.notifyAdminsNewOrder(order);
     }
   }
 
