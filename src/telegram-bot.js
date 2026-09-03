@@ -1621,26 +1621,19 @@ export class TelegramBotService {
     // Find photo of the 1st ordered item and exact color
     const colorPhoto = this.getOrderColorPhoto(order);
 
-    let text = `🎉 <b>Дякуємо за замовлення!</b>\n\n` +
-      `Ваше замовлення <b>#${order.order_id}</b> успішно оформлено.\n\n`;
-
-    if (isOnline && !isPaid) {
-      text += `Щоб завершити оформлення, перейдіть до оплати за кнопкою нижче.\n\n` +
-        `<i>Після успішної оплати ваше замовлення буде передано в обробку.</i>\n\n`;
-    } else if (isPaid) {
-      text += `✅ <b>Оплату успішно підтверджено!</b>\n` +
-        `<i>Ваше замовлення вже передано в обробку на склад.</i>\n\n`;
-    } else {
-      text += `Ваше замовлення прийнято та передано в обробку.\n` +
-        `<i>Оплата здійснюється при отриманні у відділенні.</i>\n\n`;
-    }
-
-    text += `📦 <b>Інформація про замовлення:</b>\n` +
+    let text = `🎉 <b>Дякуємо за замовлення в MILIPSTORE!</b>\n\n` +
+      `Ваше замовлення <b>#${order.order_id}</b> успішно зареєстровано!\n\n` +
+      `💬 <b>Оформлення через менеджера:</b>\n` +
+      `Для підтвердження наявності товару, уточнення адреси доставки та узгодження зручного способу оплати, будь ласка, напишіть менеджеру <b>@milipmanager</b>.\n\n` +
+      `<i>Ми вже підготували готовий текст вашого замовлення — просто натисніть кнопку «💬 Написати менеджеру» нижче!</i>\n\n` +
+      `📦 <b>Інформація про замовлення:</b>\n` +
       `• <b>Товари:</b>\n${itemsSummary}\n` +
-      `• <b>Сума до сплати:</b> <b>${order.total} ₴</b>\n` +
+      `• <b>Сума:</b> <b>${order.total} ₴</b>\n` +
+      `• <b>Отримувач:</b> ${fullName} (<code>${customer.phone || 'не вказано'}</code>)\n` +
+      (customer.telegram_username ? `• <b>Telegram:</b> @${customer.telegram_username.replace(/^@/, '')}\n` : '') +
       `• <b>Доставка:</b> ${provName} (${delivery.department || delivery.address || delivery.city || 'Відділення'})\n` +
       `• <b>Статус:</b> ${statusEmoji} <b>${statusName}</b>\n` +
-      `• <b>Оплата:</b> <b>${isPaid ? 'Оплачено ✅' : (isOnline ? 'Очікує оплати ⏳' : 'При отриманні 📦')}</b>`;
+      `• <b>Спосіб:</b> 💬 <b>Через менеджера (@milipmanager)</b>`;
 
     if (order.tracking_number) {
       text += `\n• <b>ТТН:</b> <code>${order.tracking_number}</code>`;
@@ -1648,13 +1641,13 @@ export class TelegramBotService {
 
     const buttons = [];
 
-    // If online and unpaid: Show payment action buttons in chat!
-    if (isOnline && !isPaid) {
-      buttons.push([
-        { text: `💳 Оплатити ${order.total} ₴`, callback_data: `send_invoice:${order.order_id}` },
-        { text: `⚡ Сплатити (Smart Glocal Test)`, callback_data: `pay_test:${order.order_id}` }
-      ]);
-    }
+    // [ПРИХОВАНО на майбутнє - для активації онлайн-оплати/ФОП]
+    // if (isOnline && !isPaid) {
+    //   buttons.push([
+    //     { text: `💳 Оплатити ${order.total} ₴`, callback_data: `send_invoice:${order.order_id}` },
+    //     { text: `⚡ Сплатити (Smart Glocal Test)`, callback_data: `pay_test:${order.order_id}` }
+    //   ]);
+    // }
 
     const orderIdStr = (order.order_id || '').replace(/^#/, '');
     const itemsTextForUrl = (order.items || []).map((it, idx) => `🕹 Товар / модель: ${it.title}${it.color ? ` (${it.color})` : ''}\n   Кількість: ${it.qty} шт. × ${it.price} ₴`).join('\n\n');
@@ -1693,13 +1686,14 @@ export class TelegramBotService {
       reply_markup: { inline_keyboard: buttons }
     });
 
-    if (isOnline && !isPaid) {
-      try {
-        await this.sendNativeTelegramInvoice(chatId, order);
-      } catch (e) {
-        console.warn('[TelegramBot] Auto sendNativeTelegramInvoice error:', e);
-      }
-    }
+    // [ПРИХОВАНО на майбутнє - для активації інвойсів в Telegram]
+    // if (isOnline && !isPaid) {
+    //   try {
+    //     await this.sendNativeTelegramInvoice(chatId, order);
+    //   } catch (e) {
+    //     console.warn('[TelegramBot] Auto sendNativeTelegramInvoice error:', e);
+    //   }
+    // }
   }
 
   // View full order details with product photo matching chosen color
@@ -1749,10 +1743,15 @@ export class TelegramBotService {
       }
     }
 
+    const isManagerOrder = payment.method === 'manager' || !payment.method;
+    const paymentLabel = isManagerOrder
+      ? 'Через менеджера (@milipmanager) 💬'
+      : (isPaid ? 'Оплачено ✅' : (isUnpaid ? 'Очікує оплати ⏳' : 'При отриманні (накладений платіж) 📦'));
+
     detailsText += `\n📊 <b>Стан замовлення:</b>\n`;
     detailsText += `• Статус: ${statusEmoji} <b>${statusName}</b>\n`;
-    detailsText += `• Сума до сплати: <b>${order.total} ₴</b>\n`;
-    detailsText += `• Оплата: <b>${isPaid ? 'Оплачено ✅' : (isUnpaid ? 'Очікує оплати ⏳' : 'При отриманні (накладений платіж) 📦')}</b>\n`;
+    detailsText += `• Сума: <b>${order.total} ₴</b>\n`;
+    detailsText += `• Оформлення: <b>${paymentLabel}</b>\n`;
     if (order.tracking_number) {
       detailsText += `• Номер ТТН: <code>${order.tracking_number}</code> 🚚\n`;
     } else {
@@ -1777,17 +1776,13 @@ export class TelegramBotService {
 
     const buttons = [];
 
-    if (isUnpaid) {
-      buttons.push([
-        { text: `💳 Оплатити ${order.total} ₴`, callback_data: `send_invoice:${order.order_id}` },
-        { text: `⚡ Сплатити (Test)`, callback_data: `pay_test:${order.order_id}` }
-      ]);
-    }
-
-    buttons.push([
-      { text: '🛍 До моїх замовлень', callback_data: `orders_list:${chatId}` },
-      { text: '🔄 Оновити', callback_data: `view_order:${order.order_id}` }
-    ]);
+    // [ПРИХОВАНО на майбутнє - для активації онлайн-оплати/ФОП]
+    // if (isUnpaid) {
+    //   buttons.push([
+    //     { text: `💳 Оплатити ${order.total} ₴`, callback_data: `send_invoice:${order.order_id}` },
+    //     { text: `⚡ Сплатити (Test)`, callback_data: `pay_test:${order.order_id}` }
+    //   ]);
+    // }
 
     const orderIdDetailStr = (order.order_id || '').replace(/^#/, '');
     const itemsDetailList = (order.items || []).map((it, idx) => `${idx + 1}. ${it.title}${it.color ? ` (${it.color})` : ''} — ${it.qty} шт. × ${it.price} ₴`).join('\n');
@@ -1797,11 +1792,17 @@ export class TelegramBotService {
       `💰 Сума: ${order.total} ₴\n` +
       `👤 Отримувач: ${fullName}\n` +
       `📞 Телефон: ${customer.phone || ''}\n` +
+      (customer.telegram_username ? `💬 Telegram: @${customer.telegram_username.replace(/^@/, '')}\n` : '') +
       `📦 Доставка: ${provDetailClean}, м. ${delivery.city || ''}, ${delivery.department || delivery.address || ''}`;
     const managerDetailUrl = `https://t.me/milipmanager?text=${encodeURIComponent(managerDetailMsg)}`;
 
     buttons.push([
       { text: '💬 Написати менеджеру (@milipmanager)', url: managerDetailUrl }
+    ]);
+
+    buttons.push([
+      { text: '🛍 До моїх замовлень', callback_data: `orders_list:${chatId}` },
+      { text: '🔄 Оновити', callback_data: `view_order:${order.order_id}` }
     ]);
 
     if (messageId) {
@@ -1921,12 +1922,22 @@ export class TelegramBotService {
       }
 
       const buttons = [];
-      if (isUnpaid) {
-        buttons.push([
-          { text: `💳 Оплатити #${o.order_id} (${o.total} ₴)`, callback_data: `send_invoice:${o.order_id}` },
-          { text: `⚡ Сплатити (Test)`, callback_data: `pay_test:${o.order_id}` }
-        ]);
-      }
+
+      // [ПРИХОВАНО на майбутнє - для активації онлайн-оплати/ФОП]
+      // if (isUnpaid) {
+      //   buttons.push([
+      //     { text: `💳 Оплатити #${o.order_id} (${o.total} ₴)`, callback_data: `send_invoice:${o.order_id}` },
+      //     { text: `⚡ Сплатити (Test)`, callback_data: `pay_test:${o.order_id}` }
+      //   ]);
+      // }
+
+      const oIdStr = (o.order_id || '').replace(/^#/, '');
+      const oManagerMsg = `Добрий день! Щодо мого замовлення #${oIdStr} (${firstItem.title || 'Товар'}, ${o.total} ₴): хочу уточнити статус та деталі.`;
+      const oManagerUrl = `https://t.me/milipmanager?text=${encodeURIComponent(oManagerMsg)}`;
+
+      buttons.push([
+        { text: '💬 Написати менеджеру (@milipmanager)', url: oManagerUrl }
+      ]);
       buttons.push([
         { text: '🔍 Повні деталі замовлення', callback_data: `view_order:${o.order_id}` }
       ]);
@@ -1944,8 +1955,8 @@ export class TelegramBotService {
     const stats = db.getStats();
     const orders = db.getOrders();
 
-    // Only orders that are paid or cash on delivery appear for admin processing
-    const isReadyForAdmin = o => (o.payment?.status === 'PAID' || o.payment?.is_cod || o.payment?.method === 'cod') && o.status !== 'PENDING_PAYMENT';
+    // Only orders that are paid or cash on delivery or manager appear for admin processing
+    const isReadyForAdmin = o => (o.payment?.status === 'PAID' || o.payment?.is_cod || o.payment?.method === 'cod' || o.payment?.method === 'manager' || !o.payment?.method) && o.status !== 'PENDING_PAYMENT';
     const activeOrders = orders.filter(o => !['DELIVERED', 'COMPLETED', 'CANCELLED'].includes(o.status) && isReadyForAdmin(o));
     const archiveOrders = orders.filter(o => ['DELIVERED', 'COMPLETED', 'CANCELLED'].includes(o.status));
 
@@ -1993,7 +2004,7 @@ export class TelegramBotService {
     let orders = [];
     let filterTitle = 'Активні замовлення';
 
-    const isReadyForAdmin = o => (o.payment?.status === 'PAID' || o.payment?.is_cod || o.payment?.method === 'cod') && o.status !== 'PENDING_PAYMENT';
+    const isReadyForAdmin = o => (o.payment?.status === 'PAID' || o.payment?.is_cod || o.payment?.method === 'cod' || o.payment?.method === 'manager' || !o.payment?.method) && o.status !== 'PENDING_PAYMENT';
     const activeCount = allOrders.filter(o => !['DELIVERED', 'COMPLETED', 'CANCELLED'].includes(o.status) && isReadyForAdmin(o)).length;
     const archiveCount = allOrders.filter(o => ['DELIVERED', 'COMPLETED', 'CANCELLED'].includes(o.status)).length;
 

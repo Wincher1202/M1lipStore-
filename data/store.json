@@ -538,6 +538,432 @@
   ],
   "orders": [
     {
+      "order_id": "MLP-547368",
+      "id": "MLP-547368",
+      "status": "NEW",
+      "status_name": "Нові",
+      "tracking_number": null,
+      "subtotal": 2499,
+      "delivery_fee": 0,
+      "cod_fee": 0,
+      "total": 2499,
+      "dispatch_timeline": "1-2 дні",
+      "shipping_note": "Відправлення замовлення протягом 1-2 робочих днів з моменту оформлення",
+      "created_at": "2026-09-03T16:43:45.392Z",
+      "updated_at": "2026-09-03T16:43:45.392Z",
+      "customer": {
+        "first_name": "Олександр",
+        "last_name": "Шевченко",
+        "middle_name": "",
+        "phone": "+380501234567",
+        "email": "",
+        "telegram_id": null,
+        "telegram_username": "@alex_test"
+      },
+      "delivery": {
+        "provider": "novaposhta",
+        "provider_name": "Нова Пошта",
+        "type": "warehouse",
+        "type_name": "Відділення",
+        "city": "Київ",
+        "city_ref": "",
+        "warehouse_ref": "",
+        "warehouse_number": "Відділення №1",
+        "department": "Відділення №1",
+        "address": "Відділення №1"
+      },
+      "payment": {
+        "method": "manager",
+        "provider": "Через менеджера (@milipmanager)",
+        "status": "PENDING_MANAGER",
+        "transaction_id": null,
+        "paid_at": null,
+        "is_cod": false,
+        "cod_fee": 0,
+        "comment": ""
+      },
+      "items": [
+        {
+          "id": "1",
+          "title": "Mchose AX5",
+          "brand": "MILIPSTORE",
+          "sku": "SKU-1",
+          "color": "Чорний",
+          "img": "/images.png",
+          "price": 2499,
+          "qty": 1,
+          "total": 2499
+        }
+      ],
+      "history": [
+        {
+          "status": "NEW",
+          "status_name": "Нові",
+          "timestamp": "2026-09-03T16:43:45.392Z",
+          "note": "Замовлення оформлено (передано менеджеру)",
+          "actor": "Customer"
+        }
+      ],
+      "admin_comment": "",
+      "_admin_notified": true,
+      "_admin_paid_notified": true
+    },
+    {
+      "order_id": "MLP-820117",
+      "id": "MLP-820117",
+      "status": "PENDING_PAYMENT",
+      "status_name": "Очікує оплати",
+      "tracking_number": null,
+      "subtotal": 2945,
+      "delivery_fee": 0,
+      "cod_fee": 0,
+      "total": 2945,
+      "dispatch_timeline": "1-2 дні",
+      "shipping_note": "Відправлення замовлення протягом 1-2 робочих днів з моменту оформлення",
+      "created_at": "2026-09-03T16:34:32.125Z",
+      "updated_at": "2026-09-03T16:34:32.125Z",
+      "customer": {
+        "first_name": "авава",
+        "last_name": "авава",
+        "middle_name": "вава",
+        "phone": "+380 51 515 15 15",
+        "email": "",
+        "telegram_id": null,
+        "telegram_username": null
+      },
+      "delivery": {
+        "provider": "nova_poshta",
+        "provider_name": "Нова Пошта",
+        "type": "branch",
+        "type_name": "Відділення",
+        "city": "Одеса",
+        "city_ref": "db5c88d0-391c-11dd-90d9-001a92567626",
+        "warehouse_ref": "16922801-e1c2-11e3-8c4a-0050568002cf",
+        "warehouse_number": "Відділення №9 (до 30 кг на одне місце): вул. Сегедська, 18",
+        "department": "Відділення №9 (до 30 кг на одне місце): вул. Сегедська, 18",
+        "address": "Відділення №9 (до 30 кг на одне місце): вул. Сегедська, 18"
+      },
+      "payment": {
+        "method": "manager",
+        "provider": "Оплата при отриманні (Накладений платіж)",
+        "status": "PENDING",
+        "transaction_id": null,
+        "paid_at": null,
+        "is_cod": false,
+        "cod_fee": 0,
+        "comment": ""
+      },
+      "items": [
+        {
+          "id": "p_att_v0b2_btia",
+          "title": "Attack Shark ATTACK SHARK R5 ULTRA",
+          "brand": "Attack Shark",
+          "sku": "ATT-RU7YB",
+          "color": "Black",
+          "img": "attack-shark-r5-ultra-colors-price.jpg",
+          "price": 2945,
+          "qty": 1,
+          "total": 2945
+        }
+      ],
+      "history": [
+        {
+          "status": "PENDING_PAYMENT",
+          "status_name": "Очікує оплати",
+          "timestamp": "2026-09-03T16:34:32.125Z",
+          "note": "Замовлення створено (очікує оплати)",
+          "actor": "Customer"
+        }
+      ],
+      "admin_comment": "",
+      "_admin_notified": true,
+      "_admin_paid_notified": true
+    },
+    {
+      "order_id": "MLP-249941",
+      "id": "MLP-249941",
+      "status": "PENDING_PAYMENT",
+      "status_name": "Очікує оплати",
+      "tracking_number": null,
+      "subtotal": 2839,
+      "delivery_fee": 0,
+      "cod_fee": 0,
+      "total": 2839,
+      "dispatch_timeline": "1-2 дні",
+      "shipping_note": "Відправлення замовлення протягом 1-2 робочих днів з моменту оформлення",
+      "created_at": "2026-09-03T16:07:44.520Z",
+      "updated_at": "2026-09-03T16:07:44.520Z",
+      "customer": {
+        "first_name": "ааіа",
+        "last_name": "аіаа",
+        "middle_name": "аіаі",
+        "phone": "+380 51 515 15 15",
+        "email": "",
+        "telegram_id": null,
+        "telegram_username": null
+      },
+      "delivery": {
+        "provider": "nova_poshta",
+        "provider_name": "Нова Пошта",
+        "type": "branch",
+        "type_name": "Відділення",
+        "city": "Львів",
+        "city_ref": "db5c88f5-391c-11dd-90d9-001a92567626",
+        "warehouse_ref": "16922858-e1c2-11e3-8c4a-0050568002cf",
+        "warehouse_number": "Відділення №6 (до 10 кг): вул. Сихівська, 8",
+        "department": "Відділення №6 (до 10 кг): вул. Сихівська, 8",
+        "address": "Відділення №6 (до 10 кг): вул. Сихівська, 8"
+      },
+      "payment": {
+        "method": "manager",
+        "provider": "Оплата при отриманні (Накладений платіж)",
+        "status": "PENDING",
+        "transaction_id": null,
+        "paid_at": null,
+        "is_cod": false,
+        "cod_fee": 0,
+        "comment": ""
+      },
+      "items": [
+        {
+          "id": "p_att_a04f_mumf",
+          "title": "Attack Shark ATTACK SHARK R85HE",
+          "brand": "Attack Shark",
+          "sku": "ATT-4K1TV",
+          "color": "White",
+          "img": "photo_2026-08-25_15-32-38.jpg",
+          "price": 2839,
+          "qty": 1,
+          "total": 2839
+        }
+      ],
+      "history": [
+        {
+          "status": "PENDING_PAYMENT",
+          "status_name": "Очікує оплати",
+          "timestamp": "2026-09-03T16:07:44.520Z",
+          "note": "Замовлення створено (очікує оплати)",
+          "actor": "Customer"
+        }
+      ],
+      "admin_comment": "",
+      "_admin_notified": true,
+      "_admin_paid_notified": true
+    },
+    {
+      "order_id": "MLP-954325",
+      "id": "MLP-954325",
+      "status": "PENDING_PAYMENT",
+      "status_name": "Очікує оплати",
+      "tracking_number": null,
+      "subtotal": 2799,
+      "delivery_fee": 0,
+      "cod_fee": 0,
+      "total": 2799,
+      "dispatch_timeline": "1-2 дні",
+      "shipping_note": "Відправлення замовлення протягом 1-2 робочих днів з моменту оформлення",
+      "created_at": "2026-09-03T16:00:33.518Z",
+      "updated_at": "2026-09-03T16:00:33.518Z",
+      "customer": {
+        "first_name": "ddd",
+        "last_name": "fff",
+        "middle_name": "aaa",
+        "phone": "+380 51 515 15 15",
+        "email": "",
+        "telegram_id": null,
+        "telegram_username": null
+      },
+      "delivery": {
+        "provider": "nova_poshta",
+        "provider_name": "Нова Пошта",
+        "type": "branch",
+        "type_name": "Відділення",
+        "city": "Одеса",
+        "city_ref": "db5c88d0-391c-11dd-90d9-001a92567626",
+        "warehouse_ref": "1692286e-e1c2-11e3-8c4a-0050568002cf",
+        "warehouse_number": "Відділення №1: Київське шосе, 27",
+        "department": "Відділення №1: Київське шосе, 27",
+        "address": "Відділення №1: Київське шосе, 27"
+      },
+      "payment": {
+        "method": "manager",
+        "provider": "Оплата при отриманні (Накладений платіж)",
+        "status": "PENDING",
+        "transaction_id": null,
+        "paid_at": null,
+        "is_cod": false,
+        "cod_fee": 0,
+        "comment": ""
+      },
+      "items": [
+        {
+          "id": "p_mch_7t3i_9viu",
+          "title": "Mchose MCHOSE V9 PRO",
+          "brand": "Mchose",
+          "sku": "MCH-RHE5W",
+          "color": "White",
+          "img": "photo_2026-08-25_15-32-36.jpg",
+          "price": 2799,
+          "qty": 1,
+          "total": 2799
+        }
+      ],
+      "history": [
+        {
+          "status": "PENDING_PAYMENT",
+          "status_name": "Очікує оплати",
+          "timestamp": "2026-09-03T16:00:33.518Z",
+          "note": "Замовлення створено (очікує оплати)",
+          "actor": "Customer"
+        }
+      ],
+      "admin_comment": "",
+      "_admin_notified": true,
+      "_admin_paid_notified": true
+    },
+    {
+      "order_id": "MLP-259701",
+      "id": "MLP-259701",
+      "status": "PENDING_PAYMENT",
+      "status_name": "Очікує оплати",
+      "tracking_number": null,
+      "subtotal": 2799,
+      "delivery_fee": 0,
+      "cod_fee": 0,
+      "total": 2799,
+      "dispatch_timeline": "1-2 дні",
+      "shipping_note": "Відправлення замовлення протягом 1-2 робочих днів з моменту оформлення",
+      "created_at": "2026-09-03T15:57:02.446Z",
+      "updated_at": "2026-09-03T15:57:02.446Z",
+      "customer": {
+        "first_name": "Wincher",
+        "last_name": "ввів",
+        "middle_name": "миША",
+        "phone": "+380 45 234 25 56",
+        "email": "",
+        "telegram_id": 1929165295,
+        "telegram_username": "lnvinciblee"
+      },
+      "delivery": {
+        "provider": "nova_poshta",
+        "provider_name": "Нова Пошта",
+        "type": "branch",
+        "type_name": "Відділення",
+        "city": "Львів",
+        "city_ref": "db5c88f5-391c-11dd-90d9-001a92567626",
+        "warehouse_ref": "39931b6c-e1c2-11e3-8c4a-0050568002cf",
+        "warehouse_number": "Відділення №2: вул. Пластова, 7",
+        "department": "Відділення №2: вул. Пластова, 7",
+        "address": "Відділення №2: вул. Пластова, 7"
+      },
+      "payment": {
+        "method": "manager",
+        "provider": "Оплата при отриманні (Накладений платіж)",
+        "status": "PENDING",
+        "transaction_id": null,
+        "paid_at": null,
+        "is_cod": false,
+        "cod_fee": 0,
+        "comment": ""
+      },
+      "items": [
+        {
+          "id": "p_mch_7t3i_9viu",
+          "title": "Mchose MCHOSE V9 PRO",
+          "brand": "Mchose",
+          "sku": "MCH-RHE5W",
+          "color": "Blue",
+          "img": "photo_2026-08-25_15-31-28.jpg",
+          "price": 2799,
+          "qty": 1,
+          "total": 2799
+        }
+      ],
+      "history": [
+        {
+          "status": "PENDING_PAYMENT",
+          "status_name": "Очікує оплати",
+          "timestamp": "2026-09-03T15:57:02.446Z",
+          "note": "Замовлення створено (очікує оплати)",
+          "actor": "Customer"
+        }
+      ],
+      "admin_comment": "",
+      "_admin_notified": true,
+      "_admin_paid_notified": true
+    },
+    {
+      "order_id": "MLP-778551",
+      "id": "MLP-778551",
+      "status": "PENDING_PAYMENT",
+      "status_name": "Очікує оплати",
+      "tracking_number": null,
+      "subtotal": 2945,
+      "delivery_fee": 0,
+      "cod_fee": 0,
+      "total": 2945,
+      "dispatch_timeline": "1-2 дні",
+      "shipping_note": "Відправлення замовлення протягом 1-2 робочих днів з моменту оформлення",
+      "created_at": "2026-09-03T15:34:08.120Z",
+      "updated_at": "2026-09-03T15:34:08.120Z",
+      "customer": {
+        "first_name": "сссс",
+        "last_name": "ввів",
+        "middle_name": "миША",
+        "phone": "+380 45 234 25 56",
+        "email": "",
+        "telegram_id": 1929165295,
+        "telegram_username": "lnvinciblee"
+      },
+      "delivery": {
+        "provider": "nova_poshta",
+        "provider_name": "Нова Пошта",
+        "type": "branch",
+        "type_name": "Відділення",
+        "city": "Одеса",
+        "city_ref": "db5c88d0-391c-11dd-90d9-001a92567626",
+        "warehouse_ref": "169227dc-e1c2-11e3-8c4a-0050568002cf",
+        "warehouse_number": "Відділення №3: вул. Дальницька, 23/4",
+        "department": "Відділення №3: вул. Дальницька, 23/4",
+        "address": "Відділення №3: вул. Дальницька, 23/4"
+      },
+      "payment": {
+        "method": "manager",
+        "provider": "Оплата при отриманні (Накладений платіж)",
+        "status": "PENDING",
+        "transaction_id": null,
+        "paid_at": null,
+        "is_cod": false,
+        "cod_fee": 0,
+        "comment": ""
+      },
+      "items": [
+        {
+          "id": "p_att_v0b2_btia",
+          "title": "Attack Shark ATTACK SHARK R5 ULTRA",
+          "brand": "Attack Shark",
+          "sku": "ATT-RU7YB",
+          "color": "White",
+          "img": "attack-shark-r5-ultra-box-bundle-contents.jpg",
+          "price": 2945,
+          "qty": 1,
+          "total": 2945
+        }
+      ],
+      "history": [
+        {
+          "status": "PENDING_PAYMENT",
+          "status_name": "Очікує оплати",
+          "timestamp": "2026-09-03T15:34:08.120Z",
+          "note": "Замовлення створено (очікує оплати)",
+          "actor": "Customer"
+        }
+      ],
+      "admin_comment": "",
+      "_admin_notified": true,
+      "_admin_paid_notified": true
+    },
+    {
       "order_id": "MLP-352028",
       "id": "MLP-352028",
       "status": "PENDING_PAYMENT",
@@ -2237,6 +2663,15 @@
   ],
   "notifications": [
     {
+      "id": "notif-1788453825399-83",
+      "timestamp": "2026-09-03T16:43:45.400Z",
+      "type": "ORDER_CREATED",
+      "order_id": "MLP-547368",
+      "total": 2499,
+      "customer": "Шевченко Олександр",
+      "status": "NEW"
+    },
+    {
       "id": "notif-1788376896638-898",
       "timestamp": "2026-09-02T19:21:36.638Z",
       "type": "ORDER_CREATED",
@@ -2267,5 +2702,5 @@
   ],
   "deleted_brand_ids": [],
   "deleted_category_ids": [],
-  "last_cloud_sync": "2026-09-03T15:20:33.291Z"
+  "last_cloud_sync": "2026-09-03T16:43:44.522Z"
 }

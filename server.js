@@ -186,8 +186,8 @@ app.post('/api/orders', async (req, res) => {
     return res.status(400).json({ detail: 'Кошик порожній' });
   }
 
-  const firstName = (customer?.first_name || customer?.firstName || '').trim();
-  const lastName = (customer?.last_name || customer?.lastName || '').trim();
+  const firstName = (customer?.first_name || customer?.firstName || customer?.name || '').trim();
+  const lastName = (customer?.last_name || customer?.lastName || customer?.surname || '').trim();
   const middleName = (customer?.middle_name || customer?.patronymic || customer?.middleName || '').trim();
   const phone = (customer?.phone || '').trim();
   const email = (customer?.email || '').trim().toLowerCase();
@@ -226,7 +226,7 @@ app.post('/api/orders', async (req, res) => {
     });
   }
 
-  const paymentMethod = payment?.method || 'online'; // 'online' | 'cod'
+  const paymentMethod = payment?.method || 'manager'; // 'manager' | 'online' | 'cod'
   const isCod = paymentMethod === 'cod';
   const codFee = isCod ? Math.round(20 + (subtotal * 0.02)) : 0;
   const total = subtotal + codFee;
@@ -278,8 +278,10 @@ app.post('/api/orders', async (req, res) => {
       },
       payment: {
         method: paymentMethod,
-        provider: paymentMethod === 'online' ? 'Smart Glocal Test (Telegram Payments)' : 'Оплата при отриманні (Накладений платіж)',
-        status: isCod ? 'PENDING_ON_DELIVERY' : 'PENDING',
+        provider: paymentMethod === 'manager' 
+          ? 'Через менеджера (@milipmanager)' 
+          : (paymentMethod === 'online' ? 'Smart Glocal Test (Telegram Payments)' : 'Оплата при отриманні (Накладений платіж)'),
+        status: paymentMethod === 'manager' ? 'PENDING_MANAGER' : (isCod ? 'PENDING_ON_DELIVERY' : 'PENDING'),
         comment: (comment || payment?.comment || '').trim()
       },
       items: pricedItems

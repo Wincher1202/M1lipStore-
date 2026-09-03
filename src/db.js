@@ -810,14 +810,14 @@ class Database {
     const orderId = orderData.order_id || `MLP-${randomNum}`;
 
     const now = new Date().toISOString();
-    const initialStatus = orderData.status || (orderData.payment?.method === 'cod' ? 'NEW' : 'PENDING_PAYMENT');
+    const initialStatus = orderData.status || (orderData.payment?.method === 'cod' || orderData.payment?.method === 'manager' || !orderData.payment?.method ? 'NEW' : 'PENDING_PAYMENT');
 
     const history = [
       {
         status: initialStatus,
         status_name: ORDER_STATUSES[initialStatus]?.name || initialStatus,
         timestamp: now,
-        note: initialStatus === 'PENDING_PAYMENT' ? 'Замовлення створено (очікує оплати)' : 'Замовлення оформлено (накладений платіж)',
+        note: initialStatus === 'PENDING_PAYMENT' ? 'Замовлення створено (очікує оплати)' : (orderData.payment?.method === 'manager' ? 'Замовлення оформлено (передано менеджеру)' : 'Замовлення оформлено (накладений платіж)'),
         actor: 'Customer'
       }
     ];
