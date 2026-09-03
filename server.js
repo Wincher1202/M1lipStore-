@@ -633,6 +633,26 @@ app.delete('/api/sync/products/all', (req, res) => {
   }
 });
 
+app.get('/api/tg-file/*', async (req, res) => {
+  const filePath = req.params[0];
+  const token = process.env.BOT_TOKEN;
+  if (!token || !filePath) {
+    return res.status(404).send('File not found');
+  }
+  try {
+    const tgUrl = `https://api.telegram.org/file/bot${token}/${filePath}`;
+    const fileRes = await fetch(tgUrl);
+    if (!fileRes.ok) return res.status(fileRes.status).send('File not found');
+    const contentType = fileRes.headers.get('content-type') || 'image/jpeg';
+    res.setHeader('Content-Type', contentType);
+    res.setHeader('Cache-Control', 'public, max-age=86400');
+    const arrayBuffer = await fileRes.arrayBuffer();
+    res.send(Buffer.from(arrayBuffer));
+  } catch (err) {
+    res.status(500).send('Error loading image');
+  }
+});
+
 app.get('/api/bot-info', (req, res) => {
   res.json({
     username: botService.getBotUsername(),
