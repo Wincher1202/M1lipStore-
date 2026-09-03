@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import path from 'path';
+import fs from 'fs';
 import { fileURLToPath } from 'url';
 import { db, ORDER_STATUSES } from './src/db.js';
 import { botService, PAYMENT_PROVIDER_TOKEN } from './src/telegram-bot.js';

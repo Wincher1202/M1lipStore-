@@ -4791,14 +4791,14 @@
                         <div class="field-hint">Тільки літери, без цифр та символів.</div>
                     </div>
                     <div class="checkout-group">
-                        <label>Номер телефону</label>
+                        <label>Номер телефону <span style="color:red;">*</span></label>
                         <input type="tel" id="chk-phone" autocomplete="tel" inputmode="tel" value="+380" maxlength="17" placeholder="+380 67 123 45 67">
-                        <div class="phone-hint">+380 встановлюється автоматично. Введіть 9 цифр номера.</div>
+                        <div class="phone-hint">+380 встановлюється автоматично. Введіть 9 цифр номера. За цим номером або юзернеймом менеджер напише у Telegram.</div>
                     </div>
                     <div class="checkout-group">
-                        <label>Ваш Telegram (@username) <span style="font-size:0.75rem; color:var(--text-muted); font-weight:normal;">(необов'язково)</span></label>
+                        <label>Ваш Telegram (@username або номер) <span style="font-size:0.75rem; color:var(--accent); font-weight:700;">(для зв'язку з менеджером)</span></label>
                         <input type="text" id="chk-username" placeholder="@username" maxlength="40">
-                        <div class="field-hint">Для швидкого зв'язку з менеджером в особистих повідомленнях.</div>
+                        <div class="field-hint">Вкажіть свій юзернейм або залиште номер, щоб менеджер @milipmanager міг швидко написати вам для підтвердження.</div>
                     </div>
                 </div>
 
@@ -4974,6 +4974,9 @@
                 <button class="btn-primary" id="success-manager-btn" style="width: 100%; justify-content: center; background: #229ED9; border-color: #229ED9; font-weight: 800; padding: 13px;" onclick="handleSuccessOpenManager()">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="m20.665 3.717-17.73 6.837c-1.21.486-1.203 1.161-.222 1.462l4.552 1.42 10.532-6.645c.498-.303.953-.14.579.192l-8.533 7.701h-.002l-.313 4.674c.457 0 .66-.21.916-.457l2.199-2.138 4.574 3.379c.843.465 1.452.226 1.662-.782l3-14.131c.307-1.23-.47-1.787-1.284-1.424z"/></svg>
                     <span id="success-manager-btn-label">💬 Надіслати замовлення менеджеру →</span>
+                </button>
+                <button type="button" class="btn-secondary" style="width: 100%; justify-content: center; font-size: 0.88rem; font-weight: 600;" onclick="copyManagerOrderText()">
+                    📋 Скопіювати текст повідомлення
                 </button>
                 <button class="btn-secondary" id="success-tg-action-btn" style="width: 100%; justify-content: center; font-weight: 700;" onclick="handleSuccessOpenTelegram()">
                     📱 Відкрити в Telegram-боті
@@ -5276,6 +5279,10 @@
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
                             </button>
                         </div>
+                        <button type="button" class="btn-secondary" id="modal-quick-manager-btn" onclick="orderCurrentProductViaManager()" style="width: 100%; margin-top: 8px; justify-content: center; gap: 8px; font-weight: 700; color: #229ED9; border-color: rgba(34, 158, 217, 0.35); background: rgba(34, 158, 217, 0.06); padding: 10px; border-radius: var(--radius-sm);">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m20.665 3.717-17.73 6.837c-1.21.486-1.203 1.161-.222 1.462l4.552 1.42 10.532-6.645c.498-.303.953-.14.579.192l-8.533 7.701h-.002l-.313 4.674c.457 0 .66-.21.916-.457l2.199-2.138 4.574 3.379c.843.465 1.452.226 1.662-.782l3-14.131c.307-1.23-.47-1.787-1.284-1.424z"/></svg>
+                            <span>💬 Замовити у менеджера (@milipmanager)</span>
+                        </button>
                     </div>
 
                     <!-- 5. Description -->
@@ -8410,18 +8417,115 @@
             const fullName = [customer.last_name, customer.first_name, customer.middle_name].filter(Boolean).join(' ') ||
                 [customer.first_name, customer.last_name].filter(Boolean).join(' ') || 'Покупець';
             
-            const itemsList = items.map((it, idx) => `  ${idx + 1}. ${it.title}${it.color ? ` (Колір: ${it.color})` : ''} — ${it.qty} шт. × ${formatPrice(it.price)}`).join('\n');
+            const itemsList = items.map((it, idx) => `🕹 Товар / модель: ${it.title}${it.color ? ` (Колір: ${it.color})` : ''}\n   Кількість: ${it.qty} шт. × ${formatPrice(it.price)}`).join('\n\n');
             const orderIdStr = (ord.order_id || ord.id || localStorage.getItem('m1lip_last_order_id') || '').replace(/^#/, '');
 
-            let text = `Добрий день! Хочу оформити замовлення #${orderIdStr}:\n\n`;
-            text += `🎮 Товари:\n${itemsList || '  Обрані товари з каталогу'}\n\n`;
-            text += `💰 Сума: ${formatPrice(ord.total || 0)}\n`;
+            let text = `Добрий день! Хочу замовити:\n\n`;
+            text += `${itemsList || '🕹 Товар з каталогу MILIPSTORE'}\n\n`;
+            text += `💰 Загальна сума: ${formatPrice(ord.total || 0)}\n`;
             text += `👤 Отримувач: ${fullName}\n`;
             text += `📞 Телефон: ${customer.phone || ''}\n`;
-            if (customer.telegram_username) text += `💬 Telegram: @${customer.telegram_username.replace(/^@/, '')}\n`;
+            if (customer.telegram_username) text += `💬 Мій Telegram: @${customer.telegram_username.replace(/^@/, '')}\n`;
             text += `📦 Доставка: ${provName} (${methodType}), м. ${delivery.city || ''}, ${delivery.department || delivery.address || ''}\n`;
             if (ord.payment?.comment) text += `📝 Коментар: ${ord.payment.comment}\n`;
+            if (orderIdStr) text += `📋 Номер замовлення: #${orderIdStr}\n\n`;
+            text += `Хочу замовити! Підкажіть, будь ласка, деталі оплати та відправки.`;
             return text;
+        }
+
+        function copyManagerOrderText() {
+            const text = formatManagerOrderText(lastPlacedOrderObject);
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(() => {
+                    showNotificationToast('📋 Текст замовлення скопійовано! Вставте його в чат з @milipmanager');
+                }).catch(() => {
+                    fallbackCopyText(text);
+                });
+            } else {
+                fallbackCopyText(text);
+            }
+        }
+
+        function fallbackCopyText(text) {
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            ta.style.position = 'fixed';
+            ta.style.opacity = '0';
+            document.body.appendChild(ta);
+            ta.focus();
+            ta.select();
+            try {
+                document.execCommand('copy');
+                showNotificationToast('📋 Текст замовлення скопійовано!');
+            } catch (e) {
+                showNotificationToast('Будь ласка, надішліть замовлення кнопкою вище');
+            }
+            document.body.removeChild(ta);
+        }
+
+        function orderCurrentProductViaManager() {
+            if (!currentModalProduct) return;
+            const colors = currentModalProduct.colors || [];
+            const selectedColor = (selectedColorIndex !== null && colors[selectedColorIndex]) ? colors[selectedColorIndex].name : (colors[0]?.name || '');
+            const qty = modalQty || 1;
+            const totalPrice = (currentModalProduct.price || 0) * qty;
+
+            let text = `Добрий день! Хочу замовити:\n\n`;
+            text += `🕹 Товар: ${currentModalProduct.title}\n`;
+            if (selectedColor) text += `🎨 Колір: ${selectedColor}\n`;
+            text += `🔢 Кількість: ${qty} шт.\n`;
+            text += `💰 Ціна: ${formatPrice(totalPrice)}\n\n`;
+            text += `Хочу замовити! Підкажіть, будь ласка, наявність та як оформити доставку.`;
+
+            const managerUrl = `https://t.me/milipmanager?text=${encodeURIComponent(text)}`;
+            const tw = window.Telegram?.WebApp;
+            if (tw && typeof tw.openTelegramLink === 'function') {
+                try {
+                    tw.openTelegramLink(managerUrl);
+                    return;
+                } catch(e) {
+                    console.warn('[openTelegramLink error]', e);
+                }
+            }
+            try {
+                window.open(managerUrl, '_blank');
+            } catch(e) {
+                window.location.href = managerUrl;
+            }
+        }
+
+        function showNotificationToast(msg, duration = 3000) {
+            let toast = document.getElementById('floating-toast');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.id = 'floating-toast';
+                toast.style.position = 'fixed';
+                toast.style.bottom = '24px';
+                toast.style.left = '50%';
+                toast.style.transform = 'translateX(-50%) translateY(20px)';
+                toast.style.background = '#111315';
+                toast.style.color = '#FFFFFF';
+                toast.style.padding = '12px 20px';
+                toast.style.borderRadius = '30px';
+                toast.style.fontSize = '0.88rem';
+                toast.style.fontWeight = '600';
+                toast.style.boxShadow = '0 10px 25px rgba(0,0,0,0.35)';
+                toast.style.zIndex = '99999';
+                toast.style.opacity = '0';
+                toast.style.transition = 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)';
+                toast.style.pointerEvents = 'none';
+                toast.style.maxWidth = '90vw';
+                toast.style.textAlign = 'center';
+                document.body.appendChild(toast);
+            }
+            toast.innerText = msg;
+            toast.style.opacity = '1';
+            toast.style.transform = 'translateX(-50%) translateY(0)';
+            if (window._toastTimeout) clearTimeout(window._toastTimeout);
+            window._toastTimeout = setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(-50%) translateY(20px)';
+            }, duration);
         }
 
         function handleSuccessOpenManager() {

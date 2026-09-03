@@ -531,7 +531,7 @@ export class TelegramBotService {
     ]);
     keyboard.push([
       { text: '📦 Відстежити замовлення' },
-      { text: '💬 Підтримка' }
+      { text: '💬 Менеджер (@milipmanager)' }
     ]);
 
     return {
@@ -817,12 +817,30 @@ export class TelegramBotService {
       return;
     }
 
-    // SUPPORT
-    if (text === '💬 Підтримка' || text === '/help') {
+    // SUPPORT & MANAGER CONTACT
+    if (
+      text === '💬 Підтримка' ||
+      text === '/help' ||
+      text === '💬 Менеджер (@milipmanager)' ||
+      text === '💬 Менеджер' ||
+      text === 'Менеджер' ||
+      text === '/manager'
+    ) {
       await this.callApi('sendMessage', {
         chat_id: chatId,
-        text: `💬 <b>Служба підтримки MILIPSTORE</b>\n\nГрафік роботи: Щодня 09:00 — 21:00\nTelegram менеджера: @milipmanager\nКанал магазину: @m1lipstore\n\nМи з радістю відповімо на будь-які ваші запитання!`,
-        parse_mode: 'HTML'
+        text: `💬 <b>Менеджер та підтримка MILIPSTORE</b>\n\n` +
+          `• Telegram менеджера: <b>@milipmanager</b>\n` +
+          `• Графік роботи: Щодня 09:00 — 21:00\n` +
+          `• Канал магазину: @m1lipstore\n\n` +
+          `Ви можете написати менеджеру напряму для швидкого оформлення замовлення, консультації, уточнення наявності чи оплати.\n\n` +
+          `👇 <i>Натисніть кнопку нижче для переходу в особистий чат:</i>`,
+        parse_mode: 'HTML',
+        reply_markup: {
+          inline_keyboard: [
+            [{ text: '💬 Написати менеджеру (@milipmanager)', url: 'https://t.me/milipmanager' }],
+            [{ text: '📢 Канал магазину', url: 'https://t.me/m1lipstore' }]
+          ]
+        }
       });
       return;
     }
@@ -1639,15 +1657,17 @@ export class TelegramBotService {
     }
 
     const orderIdStr = (order.order_id || '').replace(/^#/, '');
-    const itemsTextForUrl = (order.items || []).map((it, idx) => `${idx + 1}. ${it.title}${it.color ? ` (${it.color})` : ''} — ${it.qty} шт. × ${it.price} ₴`).join('\n');
+    const itemsTextForUrl = (order.items || []).map((it, idx) => `🕹 Товар / модель: ${it.title}${it.color ? ` (${it.color})` : ''}\n   Кількість: ${it.qty} шт. × ${it.price} ₴`).join('\n\n');
     const provNameClean = delivery.provider === 'ukrposhta' ? 'Укрпошта' : 'Нова пошта';
-    const managerText = `Добрий день! Хочу оформити замовлення #${orderIdStr}:\n\n` +
-      `🎮 Товари:\n${itemsTextForUrl}\n\n` +
+    const managerText = `Добрий день! Хочу замовити:\n\n` +
+      `${itemsTextForUrl}\n\n` +
       `💰 Сума: ${order.total} ₴\n` +
       `👤 Отримувач: ${fullName}\n` +
       `📞 Телефон: ${customer.phone || ''}\n` +
       (customer.telegram_username ? `💬 Telegram: @${customer.telegram_username.replace(/^@/, '')}\n` : '') +
-      `📦 Доставка: ${provNameClean}, м. ${delivery.city || ''}, ${delivery.department || delivery.address || ''}`;
+      `📦 Доставка: ${provNameClean}, м. ${delivery.city || ''}, ${delivery.department || delivery.address || ''}\n` +
+      `📋 Номер замовлення: #${orderIdStr}\n\n` +
+      `Хочу замовити! Підкажіть, будь ласка, деталі оплати та відправки.`;
     const managerUrl = `https://t.me/milipmanager?text=${encodeURIComponent(managerText)}`;
 
     // Primary action: Direct chat with manager with prefilled text!
@@ -2477,6 +2497,17 @@ export class TelegramBotService {
       const cleanUsername = cust.telegram_username.replace(/^@/, '');
       adminButtons.push([
         { text: `💬 Написати покупцю (@${cleanUsername})`, url: `https://t.me/${cleanUsername}` }
+      ]);
+    } else if (cust.telegram_id) {
+      adminButtons.push([
+        { text: `💬 Написати покупцю в Telegram`, url: `tg://user?id=${cust.telegram_id}` }
+      ]);
+    }
+
+    if (cust.phone) {
+      const cleanPhone = cust.phone.replace(/[^\d+]/g, '');
+      adminButtons.push([
+        { text: `📞 Зателефонувати (${cust.phone})`, url: `tel:${cleanPhone}` }
       ]);
     }
 
