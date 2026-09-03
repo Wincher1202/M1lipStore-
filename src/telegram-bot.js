@@ -2438,6 +2438,13 @@ export class TelegramBotService {
       ]
     ];
 
+    if (cust.telegram_username) {
+      const cleanUsername = cust.telegram_username.replace(/^@/, '');
+      adminButtons.push([
+        { text: `💬 Написати покупцю (@${cleanUsername})`, url: `https://t.me/${cleanUsername}` }
+      ]);
+    }
+
     const adminChatIds = this.getAllAdminChatIds();
     for (const adminId of adminChatIds) {
       await this.callApi('sendMessage', {

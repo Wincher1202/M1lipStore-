@@ -9091,6 +9091,10 @@
             document.getElementById('backdrop')?.classList.remove('active');
         }
 
+        function closePaymentModal() {
+            document.getElementById('payment-modal')?.classList.remove('active');
+        }
+
         function closeAllDrawers() {
             // Do not dismiss order success modal on background click
             if (document.getElementById('success-modal')?.classList.contains('active')) {
@@ -9103,6 +9107,7 @@
             toggleSearch(false);
             closeProductModal();
             closePaymentModal();
+            closeReviewModal?.();
             closeAdminOrdersDrawer();
             closeAdminOrderDetail();
             closeMyOrdersModal();
