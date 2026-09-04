@@ -4775,34 +4775,26 @@
 
                 <!-- STEP 1: contacts -->
                 <div class="checkout-step-panel" data-step-panel="1">
-                    <div id="tg-auto-badge" style="display:none; margin-bottom:12px; background:rgba(87,100,226,0.08); border:1px solid rgba(87,100,226,0.25); border-radius:8px; padding:8px 12px; font-size:0.8rem; color:var(--text-primary); align-items:center; gap:8px;">
-                        <span>✈️</span>
-                        <span id="tg-auto-badge-text">Дані підтягнуто з вашого Telegram-акаунту</span>
-                    </div>
+                    <input type="hidden" id="chk-username" value="">
                     <div class="checkout-group">
-                        <label>Ім'я</label>
+                        <label>Ім'я <span style="color:red;">*</span></label>
                         <input type="text" id="chk-name" autocomplete="given-name" maxlength="40" placeholder="Наприклад: Владислав">
                         <div class="field-hint">Тільки літери, без цифр та символів.</div>
                     </div>
                     <div class="checkout-group">
-                        <label>Прізвище</label>
+                        <label>Прізвище <span style="color:red;">*</span></label>
                         <input type="text" id="chk-surname" autocomplete="family-name" maxlength="40" placeholder="Наприклад: Шевченко">
                         <div class="field-hint">Тільки літери, без цифр та символів.</div>
                     </div>
                     <div class="checkout-group">
                         <label>По батькові</label>
-                        <input type="text" id="chk-patronymic" autocomplete="additional-name" maxlength="40" placeholder="Наприклад: Григорович">
+                        <input type="text" id="chk-patronymic" autocomplete="additional-name" maxlength="40" placeholder="Наприклад: Григорович (необов'язково)">
                         <div class="field-hint">Тільки літери, без цифр та символів.</div>
                     </div>
                     <div class="checkout-group">
                         <label>Номер телефону <span style="color:red;">*</span></label>
                         <input type="tel" id="chk-phone" autocomplete="tel" inputmode="tel" value="+380" maxlength="17" placeholder="+380 67 123 45 67">
                         <div class="phone-hint">+380 встановлюється автоматично. Введіть 9 цифр номера. Обов'язково для пошти (Нова Пошта / Укрпошта).</div>
-                    </div>
-                    <div class="checkout-group">
-                        <label>Ваш Telegram (@username або номер) <span style="font-size:0.75rem; color:var(--accent); font-weight:700;">(для зв'язку з менеджером)</span></label>
-                        <input type="text" id="chk-username" placeholder="@username" maxlength="40">
-                        <div class="field-hint">Підтягується з Telegram автоматично. Менеджер @milipmanager напише вам для підтвердження.</div>
                     </div>
                 </div>
 
@@ -4888,9 +4880,8 @@
                             <label class="payment-card" id="pay-card-online" onclick="selectPaymentMethod('online')" style="display: none !important; align-items: flex-start; gap: 12px; padding: 14px; border: 2px solid var(--border-light); border-radius: var(--radius-sm); background: var(--card-bg); cursor: pointer;">
                                 <input type="radio" name="pay-method" id="pay-opt-online" value="online" style="margin-top: 3px;">
                                 <div style="flex: 1;">
-                                    <div style="font-weight: 700; font-size: 0.95rem; display: flex; align-items: center; justify-content: space-between;">
+                                    <div style="font-weight: 700; font-size: 0.95rem;">
                                         <span>💳 Онлайн-оплата (в Telegram-боті)</span>
-                                        <span style="font-size: 0.75rem; color: #2E7D32; font-weight: 800; background: rgba(46,125,50,0.1); padding: 2px 8px; border-radius: 10px;">0% комісії</span>
                                     </div>
                                     <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px;">Миттєва оплата банківською картою, Apple Pay або Google Pay.</div>
                                 </div>
@@ -5187,10 +5178,25 @@
         <div style="overflow-y: auto; padding: 16px; flex: 1;">
             <!-- Search Lookup by Phone or Order # -->
             <div style="background: var(--bg-primary); border: 1px solid var(--border-light); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 14px;">
-                <label style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); margin-bottom: 6px; display: block;">Швидкий пошук замовлення</label>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                    <label style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); margin: 0;">Швидкий пошук замовлення</label>
+                    <button type="button" id="my-orders-clear-all-btn" onclick="promptClearAllCustomerOrders()" style="background: none; border: none; font-size: 0.75rem; color: #EB5757; font-weight: 700; cursor: pointer; padding: 2px 6px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px;">
+                        🗑 Очистити історію
+                    </button>
+                </div>
                 <div style="display: flex; gap: 8px;">
                     <input type="text" id="my-orders-search-input" placeholder="Введіть +380... або #MLP-..." style="flex: 1; padding: 10px; font-size: 0.85rem; border-radius: var(--radius-sm); border: 1px solid var(--border-light); background: var(--bg-surface); color: var(--text-primary);">
                     <button type="button" class="btn-primary" onclick="searchCustomerOrders()" style="padding: 10px 14px; font-size: 0.82rem;">Знайти</button>
+                </div>
+
+                <!-- Clear All Confirmation Alert Box -->
+                <div id="clear-all-confirm-box" style="display: none; margin-top: 10px; padding: 12px; background: rgba(235, 87, 87, 0.08); border: 1px solid rgba(235, 87, 87, 0.35); border-radius: 8px; text-align: center;">
+                    <div style="font-size: 0.84rem; font-weight: 800; color: #EB5757; margin-bottom: 4px;">⚠️ Очистити історію замовлень?</div>
+                    <div style="font-size: 0.76rem; color: var(--text-secondary); margin-bottom: 8px;">Всі знайдені замовлення будуть безповоротно видалені.</div>
+                    <div style="display: flex; gap: 8px; justify-content: center;">
+                        <button type="button" class="btn-primary" style="background: #EB5757; border-color: #EB5757; font-size: 0.78rem; padding: 6px 14px; font-weight: 700;" onclick="confirmClearAllCustomerOrders()">🗑 Так, очистити все</button>
+                        <button type="button" class="btn-secondary" style="font-size: 0.78rem; padding: 6px 12px;" onclick="cancelClearAllCustomerOrders()">Скасувати</button>
+                    </div>
                 </div>
             </div>
 
@@ -5290,10 +5296,6 @@
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
                             </button>
                         </div>
-                        <button type="button" class="btn-secondary" id="modal-quick-manager-btn" onclick="orderCurrentProductViaManager()" style="width: 100%; margin-top: 8px; justify-content: center; gap: 8px; font-weight: 700; color: #229ED9; border-color: rgba(34, 158, 217, 0.35); background: rgba(34, 158, 217, 0.06); padding: 10px; border-radius: var(--radius-sm);">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m20.665 3.717-17.73 6.837c-1.21.486-1.203 1.161-.222 1.462l4.552 1.42 10.532-6.645c.498-.303.953-.14.579.192l-8.533 7.701h-.002l-.313 4.674c.457 0 .66-.21.916-.457l2.199-2.138 4.574 3.379c.843.465 1.452.226 1.662-.782l3-14.131c.307-1.23-.47-1.787-1.284-1.424z"/></svg>
-                            <span>💬 Замовити у менеджера (@milipmanager)</span>
-                        </button>
                     </div>
 
                     <!-- 5. Description -->
@@ -8193,7 +8195,6 @@
                     </div>
                     <div style="font-size: 0.82rem; color: var(--text-primary); margin-top: 3px;">
                         <span>📞 ${custPhone}</span>
-                        ${custTg ? ` • <span style="color: var(--accent); font-weight: 700;">${custTg}</span>` : ''}
                     </div>
                 </div>
 
@@ -8248,10 +8249,6 @@
                         <span class="review-info-label" style="color: var(--text-secondary);">Доставка:</span>
                         <span class="review-info-val" style="color: var(--text-muted);">За тарифами перевізника</span>
                     </div>
-                    <div class="review-info-row" style="display: flex; justify-content: space-between; font-size: 0.84rem; margin-bottom: 4px;">
-                        <span class="review-info-label" style="color: var(--text-secondary);">Оформлення:</span>
-                        <span class="review-info-val" style="color: var(--accent); font-weight: 700;">Через менеджера (0% комісії)</span>
-                    </div>
                     <div class="review-info-row" style="display: flex; justify-content: space-between; border-top: 1px solid var(--border-light); margin-top: 8px; padding-top: 8px; font-size: 1.05rem;">
                         <span style="font-weight: 800; color: var(--text-primary);">Разом до сплати:</span>
                         <span style="font-family: 'JetBrains Mono', monospace; font-weight: 900; color: var(--accent); font-size: 1.25rem;">${formatPrice(grandTotal)}</span>
@@ -8276,16 +8273,25 @@
             goToTelegramBot();
         }
 
-        function contactManagerForOrder(orderId, itemTitle, total) {
+        function contactManagerForOrder(orderId) {
             const cleanId = String(orderId || '').replace(/^#/, '');
-            const msg = `Добрий день! Щодо мого замовлення #${cleanId} (${itemTitle || 'Товар'}, ${formatPrice(total)}): хочу уточнити статус та деталі.`;
+            let orderObj = null;
+            if (typeof currentCustomerOrdersList !== 'undefined' && Array.isArray(currentCustomerOrdersList)) {
+                orderObj = currentCustomerOrdersList.find(o => String(o.id || o.order_id || '').replace(/^#/, '') === cleanId);
+            }
+            if (!orderObj && lastPlacedOrderObject && String(lastPlacedOrderObject.order_id || lastPlacedOrderObject.id || '').replace(/^#/, '') === cleanId) {
+                orderObj = lastPlacedOrderObject;
+            }
+            const msg = formatManagerOrderText(orderObj || { order_id: cleanId });
             const managerUrl = `https://t.me/milipmanager?text=${encodeURIComponent(msg)}`;
             const tw = window.Telegram?.WebApp;
             if (tw && typeof tw.openTelegramLink === 'function') {
                 try {
                     tw.openTelegramLink(managerUrl);
                     return;
-                } catch(e) {}
+                } catch(e) {
+                    console.warn('[openTelegramLink error]', e);
+                }
             }
             try {
                 window.open(managerUrl, '_blank');
@@ -8460,24 +8466,52 @@
             const customer = ord.customer || {};
             const delivery = ord.delivery || {};
             const items = ord.items || [];
-            const provName = delivery.provider === 'ukrposhta' ? 'Укрпошта' : 'Нова пошта';
-            const methodType = (delivery.type === 'postomat' || delivery.method === 'postomat') ? 'поштомат' : 'відділення';
-            const fullName = [customer.last_name, customer.first_name, customer.middle_name].filter(Boolean).join(' ') ||
-                [customer.first_name, customer.last_name].filter(Boolean).join(' ') || 'Покупець';
+            const provName = delivery.provider === 'ukrposhta' ? 'Укрпошта' : 'Нова Пошта';
+            const delivPoint = delivery.department || delivery.warehouse_number || delivery.address || 'Відділення';
             
-            const itemsList = items.map((it, idx) => `🕹 Товар / модель: ${it.title}${it.color ? ` (Колір: ${it.color})` : ''}\n   Кількість: ${it.qty} шт. × ${formatPrice(it.price)}`).join('\n\n');
-            const orderIdStr = (ord.order_id || ord.id || localStorage.getItem('m1lip_last_order_id') || '').replace(/^#/, '');
+            const surname = customer.last_name || customer.surname || '';
+            const name = customer.first_name || customer.name || '';
+            const patronymic = customer.middle_name || customer.patronymic || '';
+            const pib = [surname, name, patronymic].filter(Boolean).join(' ') || [name, surname].filter(Boolean).join(' ') || 'Покупець';
+            
+            const cleanTg = (customer.telegram_username || '').replace(/^@+/, '');
+            const tgDisplay = cleanTg ? `@${cleanTg}` : '—';
+            const phoneDisplay = customer.phone || '—';
+            const patDisplay = patronymic || '—';
 
-            let text = `Добрий день! Хочу замовити:\n\n`;
-            text += `${itemsList || '🕹 Товар з каталогу MILIPSTORE'}\n\n`;
-            text += `💰 Загальна сума: ${formatPrice(ord.total || 0)}\n`;
-            text += `👤 Отримувач: ${fullName}\n`;
-            text += `📞 Телефон: ${customer.phone || ''}\n`;
-            if (customer.telegram_username) text += `💬 Мій Telegram: @${customer.telegram_username.replace(/^@/, '')}\n`;
-            text += `📦 Доставка: ${provName} (${methodType}), м. ${delivery.city || ''}, ${delivery.department || delivery.address || ''}\n`;
-            if (ord.payment?.comment) text += `📝 Коментар: ${ord.payment.comment}\n`;
-            if (orderIdStr) text += `📋 Номер замовлення: #${orderIdStr}\n\n`;
-            text += `Хочу замовити! Підкажіть, будь ласка, деталі оплати та відправки.`;
+            const orderIdStr = (ord.order_id || ord.id || localStorage.getItem('m1lip_last_order_id') || '').replace(/^#/, '');
+            const dateStr = ord.created_at ? formatKyivDateTime(ord.created_at, { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : formatKyivDateTime(new Date(), { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+            let text = `👑 ЗАМОВЛЕННЯ #${orderIdStr}\n\n`;
+            text += `📊 Статус: 🆕 Нові\n`;
+            text += `📅 Дата створення: ${dateStr} (Київ)\n\n`;
+            text += `👤 Покупець:\n`;
+            text += `• ПІБ: ${pib}\n`;
+            text += `• Прізвище: ${surname || '—'}\n`;
+            text += `• Ім'я: ${name || '—'}\n`;
+            text += `• По батькові: ${patDisplay}\n`;
+            text += `• Телефон: ${phoneDisplay}\n`;
+            text += `• Telegram: ${tgDisplay}\n\n`;
+            text += `🏢 Доставка:\n`;
+            text += `• Перевізник: ${provName}\n`;
+            text += `• Місто: ${delivery.city || '—'}\n`;
+            text += `• Відділення / адреса: ${delivPoint}\n\n`;
+            text += `💳 Оплата:\n`;
+            text += `• Спосіб: Оформлення через менеджера (@milipmanager)\n\n`;
+            text += `🛍 Товари в замовленні:\n`;
+            if (items.length > 0) {
+                items.forEach(it => {
+                    const colorStr = it.color ? ` (${it.color})` : '';
+                    text += `• ${it.title}${colorStr}\n  ${it.qty} шт. × ${it.price} ₴ = ${it.price * it.qty} ₴\n`;
+                });
+            } else {
+                text += `• Товар з каталогу MILIPSTORE\n`;
+            }
+            if (ord.payment?.comment || ord.comment) {
+                text += `\n💬 Коментар до замовлення: ${ord.payment?.comment || ord.comment}\n`;
+            }
+            text += `\n💰 ЗАГАЛЬНА СУМА: ${ord.total || 0} ₴`;
+
             return text;
         }
 
@@ -9107,6 +9141,8 @@
         }
 
         /* ---- CUSTOMER "МОЇ ЗАМОВЛЕННЯ" ---- */
+        let currentCustomerOrdersList = [];
+
         async function openMyOrdersModal() {
             const modal = document.getElementById('my-orders-modal');
             const backdrop = document.getElementById('backdrop');
@@ -9121,12 +9157,83 @@
                 searchInput.value = savedPhone;
             }
 
+            cancelClearAllCustomerOrders();
             searchCustomerOrders();
         }
 
         function closeMyOrdersModal() {
             document.getElementById('my-orders-modal')?.classList.remove('active');
             document.getElementById('backdrop')?.classList.remove('active');
+            cancelClearAllCustomerOrders();
+        }
+
+        function promptClearAllCustomerOrders() {
+            const box = document.getElementById('clear-all-confirm-box');
+            if (box) {
+                box.style.display = box.style.display === 'none' ? 'block' : 'none';
+            }
+        }
+
+        function cancelClearAllCustomerOrders() {
+            const box = document.getElementById('clear-all-confirm-box');
+            if (box) {
+                box.style.display = 'none';
+            }
+        }
+
+        async function confirmClearAllCustomerOrders() {
+            const searchInput = document.getElementById('my-orders-search-input');
+            const q = (searchInput?.value || '').trim();
+            cancelClearAllCustomerOrders();
+            
+            try {
+                let url = `${API_BASE}/orders`;
+                if (q) {
+                    url += `?phone=${encodeURIComponent(q)}`;
+                }
+                const res = await fetch(url, { method: 'DELETE' });
+                if (!res.ok) throw new Error();
+                
+                localStorage.removeItem('m1lip_last_order_id');
+                showNotificationToast('🗑 Історію замовлень успішно очищено');
+                searchCustomerOrders();
+            } catch (e) {
+                showNotificationToast('Помилка при очищенні замовлень');
+            }
+        }
+
+        function promptDeleteCustomerOrder(orderId) {
+            const cleanId = String(orderId || '').replace(/[^a-zA-Z0-9_-]/g, '');
+            const confirmBox = document.getElementById(`delete-confirm-${cleanId}`);
+            if (confirmBox) {
+                confirmBox.style.display = confirmBox.style.display === 'none' ? 'block' : 'none';
+            }
+        }
+
+        function cancelDeleteCustomerOrderPrompt(orderId) {
+            const cleanId = String(orderId || '').replace(/[^a-zA-Z0-9_-]/g, '');
+            const confirmBox = document.getElementById(`delete-confirm-${cleanId}`);
+            if (confirmBox) {
+                confirmBox.style.display = 'none';
+            }
+        }
+
+        async function confirmDeleteCustomerOrder(orderId) {
+            const cleanId = String(orderId || '').replace(/^#/, '');
+            try {
+                const res = await fetch(`${API_BASE}/orders/${encodeURIComponent(cleanId)}`, {
+                    method: 'DELETE'
+                });
+                if (!res.ok) throw new Error();
+                
+                if (localStorage.getItem('m1lip_last_order_id') === cleanId) {
+                    localStorage.removeItem('m1lip_last_order_id');
+                }
+                showNotificationToast(`🗑 Замовлення #${cleanId} успішно видалено`);
+                searchCustomerOrders();
+            } catch (e) {
+                showNotificationToast('Не вдалося видалити замовлення');
+            }
         }
 
         async function searchCustomerOrders() {
@@ -9141,11 +9248,12 @@
                 const res = await fetch(`${API_BASE}/orders`);
                 if (!res.ok) throw new Error();
                 const all = await res.json();
+                currentCustomerOrdersList = Array.isArray(all) ? all : [];
 
-                let found = all;
+                let found = currentCustomerOrdersList;
                 if (q) {
                     const qClean = q.toLowerCase();
-                    found = all.filter(o => {
+                    found = currentCustomerOrdersList.filter(o => {
                         const idStr = String(o.id || o.order_id || '').toLowerCase();
                         const phone = String(o.customer?.phone || '').replace(/\D/g, '');
                         const qDigits = qClean.replace(/\D/g, '');
@@ -9165,7 +9273,8 @@
                 }
 
                 container.innerHTML = found.map(order => {
-                    const orderId = order.id || order.order_id;
+                    const orderId = String(order.id || order.order_id || '').replace(/^#/, '');
+                    const cleanId = orderId.replace(/[^a-zA-Z0-9_-]/g, '');
                     const prov = PROVIDER_LABELS[order.delivery?.provider] || 'Нова Пошта';
                     const createdDate = order.created_at ? formatKyivDateTime(order.created_at, { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
                     const firstItem = (order.items && order.items[0]) || {};
@@ -9197,7 +9306,7 @@
                     return `
                         <div class="review-card" style="margin-bottom: 12px; background: var(--bg-surface); border: 1.5px solid var(--border-light); padding: 14px; border-radius: var(--radius-md);">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                                <span style="font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 0.95rem; color: var(--accent);">${orderId}</span>
+                                <span style="font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 0.95rem; color: var(--accent);">#${orderId}</span>
                                 ${getStatusBadge(order.status)}
                             </div>
                             
@@ -9231,10 +9340,23 @@
                                 <span style="font-family: 'JetBrains Mono', monospace; font-size: 1rem; color: var(--text-primary);">${formatPrice(order.total || 0)}</span>
                             </div>
 
-                            <div style="margin-top: 10px;">
-                                <button type="button" class="btn-primary" style="width: 100%; justify-content: center; font-size: 0.84rem; padding: 9px 12px; background: #229ED9; border-color: #229ED9; font-weight: 700;" onclick="contactManagerForOrder('${orderId}', '${(firstItem.title || '').replace(/'/g, "\\'")}', '${order.total || 0}')">
-                                    💬 Написати менеджеру щодо замовлення
+                            <!-- Action Buttons: Написати менеджеру & Видалити замовлення -->
+                            <div style="display: flex; gap: 8px; margin-top: 10px;">
+                                <button type="button" class="btn-primary" style="flex: 1; justify-content: center; font-size: 0.82rem; padding: 9px 8px; background: #229ED9; border-color: #229ED9; font-weight: 700;" onclick="contactManagerForOrder('${orderId}')">
+                                    💬 Написати менеджеру
                                 </button>
+                                <button type="button" class="btn-secondary" style="color: #EB5757; border-color: rgba(235,87,87,0.35); font-size: 0.82rem; padding: 9px 12px; font-weight: 700; white-space: nowrap;" onclick="promptDeleteCustomerOrder('${cleanId}')" title="Видалити замовлення">
+                                    🗑 Видалити
+                                </button>
+                            </div>
+
+                            <!-- Double Confirmation Dialog for Single Order -->
+                            <div id="delete-confirm-${cleanId}" style="display: none; margin-top: 10px; padding: 10px 12px; background: rgba(235, 87, 87, 0.08); border: 1px solid rgba(235, 87, 87, 0.3); border-radius: 8px; text-align: center;">
+                                <div style="font-size: 0.82rem; font-weight: 700; color: #EB5757; margin-bottom: 8px;">⚠️ Видалити замовлення #${orderId}?</div>
+                                <div style="display: flex; gap: 8px; justify-content: center;">
+                                    <button type="button" class="btn-primary" style="background: #EB5757; border-color: #EB5757; font-size: 0.78rem; padding: 6px 14px; font-weight: 700;" onclick="confirmDeleteCustomerOrder('${orderId}')">Так, видалити</button>
+                                    <button type="button" class="btn-secondary" style="font-size: 0.78rem; padding: 6px 12px;" onclick="cancelDeleteCustomerOrderPrompt('${cleanId}')">Скасувати</button>
+                                </div>
                             </div>
                         </div>
                     `;

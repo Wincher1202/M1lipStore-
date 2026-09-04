@@ -1650,17 +1650,41 @@ export class TelegramBotService {
     // }
 
     const orderIdStr = (order.order_id || '').replace(/^#/, '');
-    const itemsTextForUrl = (order.items || []).map((it, idx) => `🕹 Товар / модель: ${it.title}${it.color ? ` (${it.color})` : ''}\n   Кількість: ${it.qty} шт. × ${it.price} ₴`).join('\n\n');
-    const provNameClean = delivery.provider === 'ukrposhta' ? 'Укрпошта' : 'Нова пошта';
-    const managerText = `Добрий день! Хочу замовити:\n\n` +
-      `${itemsTextForUrl}\n\n` +
-      `💰 Сума: ${order.total} ₴\n` +
-      `👤 Отримувач: ${fullName}\n` +
-      `📞 Телефон: ${customer.phone || ''}\n` +
-      (customer.telegram_username ? `💬 Telegram: @${customer.telegram_username.replace(/^@/, '')}\n` : '') +
-      `📦 Доставка: ${provNameClean}, м. ${delivery.city || ''}, ${delivery.department || delivery.address || ''}\n` +
-      `📋 Номер замовлення: #${orderIdStr}\n\n` +
-      `Хочу замовити! Підкажіть, будь ласка, деталі оплати та відправки.`;
+    const dateStr = formatKyivDateTime(order.created_at || Date.now());
+    const surname = customer.last_name || customer.surname || '';
+    const name = customer.first_name || customer.name || '';
+    const patronymic = customer.middle_name || customer.patronymic || '';
+    const pib = [surname, name, patronymic].filter(Boolean).join(' ') || [name, surname].filter(Boolean).join(' ') || fullName || 'Покупець';
+    const cleanTg = (customer.telegram_username || '').replace(/^@+/, '');
+    const provNameClean = delivery.provider === 'ukrposhta' ? 'Укрпошта' : 'Нова Пошта';
+    const delivPoint = delivery.department || delivery.warehouse_number || delivery.address || 'Відділення';
+
+    let managerText = `👑 ЗАМОВЛЕННЯ #${orderIdStr}\n\n`;
+    managerText += `📊 Статус: 🆕 Нові\n`;
+    managerText += `📅 Дата створення: ${dateStr} (Київ)\n\n`;
+    managerText += `👤 Покупець:\n`;
+    managerText += `• ПІБ: ${pib}\n`;
+    managerText += `• Прізвище: ${surname || '—'}\n`;
+    managerText += `• Ім'я: ${name || '—'}\n`;
+    managerText += `• По батькові: ${patronymic || '—'}\n`;
+    managerText += `• Телефон: ${customer.phone || '—'}\n`;
+    managerText += `• Telegram: ${cleanTg ? `@${cleanTg}` : '—'}\n\n`;
+    managerText += `🏢 Доставка:\n`;
+    managerText += `• Перевізник: ${provNameClean}\n`;
+    managerText += `• Місто: ${delivery.city || '—'}\n`;
+    managerText += `• Відділення / адреса: ${delivPoint}\n\n`;
+    managerText += `💳 Оплата:\n`;
+    managerText += `• Спосіб: Оформлення через менеджера (@milipmanager)\n\n`;
+    managerText += `🛍 Товари в замовленні:\n`;
+    (order.items || []).forEach(it => {
+      const colorStr = it.color ? ` (${it.color})` : '';
+      managerText += `• ${it.title}${colorStr}\n  ${it.qty} шт. × ${it.price} ₴ = ${it.price * it.qty} ₴\n`;
+    });
+    if (order.payment?.comment || order.admin_comment) {
+      managerText += `\n💬 Коментар до замовлення: ${order.payment?.comment || order.admin_comment}\n`;
+    }
+    managerText += `\n💰 ЗАГАЛЬНА СУМА: ${order.total || 0} ₴`;
+
     const managerUrl = `https://t.me/milipmanager?text=${encodeURIComponent(managerText)}`;
 
     // Primary action: Direct chat with manager with prefilled text!
@@ -2474,29 +2498,37 @@ export class TelegramBotService {
 
     const cust = order.customer || {};
     const deliv = order.delivery || {};
-    const itemsList = (order.items || []).map(i => `• ${i.title}${i.color ? ` (${i.color})` : ''} — ${i.qty} шт. × ${i.price} ₴`).join('\n');
-    const isPaid = order.payment?.status === 'PAID';
-    const isCod = order.payment?.is_cod || order.payment?.method === 'cod';
-    const payStatus = isPaid ? '✅ Оплачено онлайн' : (isCod ? '📦 Накладений платіж' : '⏳ Очікує оплати');
-    const fullName = this.formatCustomerFullName(cust);
-    const provName = deliv.provider === 'ukrposhta' ? 'Укрпошта' : 'Нова пошта';
+    const items = order.items || [];
+    const itemsList = items.map(i => `• ${i.title}${i.color ? ` (${i.color})` : ''}\n  ${i.qty} шт. × ${i.price} ₴ = ${i.price * i.qty} ₴`).join('\n');
+    
+    const surname = cust.last_name || cust.surname || '';
+    const name = cust.first_name || cust.name || '';
+    const patronymic = cust.middle_name || cust.patronymic || '';
+    const pib = [surname, name, patronymic].filter(Boolean).join(' ') || [name, surname].filter(Boolean).join(' ') || 'Покупець';
 
-    const adminMsg = `🔔 <b>НОВЕ ЗАМОВЛЕННЯ #${order.order_id}</b>\n\n` +
-      `🛍 <b>Товари:</b>\n${itemsList}\n\n` +
-      `💰 <b>Разом:</b> <b>${order.total} ₴</b> • ${payStatus}\n\n` +
+    const cleanTg = (cust.telegram_username || '').replace(/^@+/, '');
+    const provName = deliv.provider === 'ukrposhta' ? 'Укрпошта' : 'Нова Пошта';
+    const dateStr = formatKyivDateTime(order.created_at || Date.now());
+
+    const adminMsg = `👑 <b>ЗАМОВЛЕННЯ #${order.order_id}</b>\n\n` +
+      `📊 <b>Статус:</b> 🆕 <b>Нові</b>\n` +
+      `📅 <b>Дата створення:</b> ${dateStr} (Київ)\n\n` +
       `👤 <b>Покупець:</b>\n` +
-      `• ПІБ: <b>${fullName}</b>\n` +
+      `• ПІБ: <b>${pib}</b>\n` +
+      `• Прізвище: ${surname || '—'}\n` +
+      `• Ім'я: ${name || '—'}\n` +
+      `• По батькові: ${patronymic || '—'}\n` +
       `• Телефон: <code>${cust.phone || 'не вказано'}</code>\n` +
-      (cust.telegram_username ? `• Telegram: @${cust.telegram_username}\n` : '') +
-      (cust.email ? `• Email: ${cust.email}\n` : '') +
-      `\n` +
-      `📦 <b>Доставка:</b>\n` +
+      `• Telegram: ${cleanTg ? `@${cleanTg}` : '—'}\n\n` +
+      `🏢 <b>Доставка:</b>\n` +
       `• Перевізник: <b>${provName}</b>\n` +
-      `• Місто: <b>${deliv.city || ''}</b>\n` +
-      `• Адреса / відділення: ${deliv.department || deliv.address || ''}\n\n` +
+      `• Місто: <b>${deliv.city || '—'}</b>\n` +
+      `• Відділення / адреса: ${deliv.department || deliv.address || '—'}\n\n` +
       `💳 <b>Оплата:</b>\n` +
-      `• Спосіб: ${order.payment?.provider || (isCod ? 'Накладений платіж' : 'Онлайн')}\n` +
-      `• Статус: <b>${payStatus}</b>`;
+      `• Спосіб: <b>Оформлення через менеджера (@milipmanager)</b>\n\n` +
+      `🛍 <b>Товари в замовленні:</b>\n${itemsList}\n` +
+      (order.payment?.comment || order.admin_comment ? `\n💬 <b>Коментар:</b> ${order.payment?.comment || order.admin_comment}\n` : '') +
+      `\n💰 <b>ЗАГАЛЬНА СУМА: ${order.total} ₴</b>`;
 
     const adminButtons = [
       [

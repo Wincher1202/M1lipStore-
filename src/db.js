@@ -1006,6 +1006,35 @@ class Database {
     return deleted;
   }
 
+  clearAllOrders() {
+    this.data.orders = [];
+    this.save();
+    return true;
+  }
+
+  clearOrdersByFilter({ phone, telegram_id } = {}) {
+    const initLen = this.data.orders.length;
+    if (phone) {
+      const qDigits = phone.toString().replace(/\D/g, '');
+      if (qDigits.length >= 6) {
+        this.data.orders = this.data.orders.filter(o => {
+          const pDigits = (o.customer?.phone || '').replace(/\D/g, '');
+          return !pDigits.includes(qDigits);
+        });
+      }
+    } else if (telegram_id) {
+      const tid = String(telegram_id);
+      this.data.orders = this.data.orders.filter(o => String(o.customer?.telegram_id) !== tid);
+    } else {
+      this.data.orders = [];
+    }
+    const deleted = this.data.orders.length < initLen;
+    if (deleted) {
+      this.save();
+    }
+    return true;
+  }
+
   // Telegram User Linkage
   linkOrderToTelegramUser(telegramId, orderId, customerData = {}) {
     const tid = String(telegramId);

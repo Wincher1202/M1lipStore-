@@ -550,6 +550,17 @@ const handleDeleteOrder = (req, res) => {
 app.delete('/api/admin/orders/:order_id', handleDeleteOrder);
 app.delete('/api/orders/:order_id', handleDeleteOrder);
 
+// Clear orders / history
+app.delete('/api/orders', (req, res) => {
+  const { phone, telegram_id } = req.query;
+  db.clearOrdersByFilter({ phone, telegram_id });
+  res.json({ status: 'success', detail: 'Історію замовлень успішно очищено' });
+});
+app.delete('/api/admin/orders', (req, res) => {
+  db.clearAllOrders();
+  res.json({ status: 'success', detail: 'Всі замовлення очищено' });
+});
+
 app.get('/api/admin/stats', (req, res) => {
   const stats = db.getStats();
   res.json(stats);
