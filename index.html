@@ -8472,7 +8472,7 @@
             const total = Number(ord.total || 0);
 
             let msg = `${greeting}\n\n`;
-            msg += `Хочу уточнити деталі щодо замовлення **${orderNum}**.\n\n`;
+            msg += `Хочу уточнити деталі щодо замовлення ${orderNum}.\n\n`;
 
             // Products
             if (items.length === 1) {
@@ -8482,43 +8482,43 @@
                 const qty = Number(it.qty || it.quantity || 1);
                 const price = Number(it.price || 0);
 
-                msg += `🛍 **Товар:**\n`;
-                msg += `• **${title}**\n`;
+                msg += `🛍 Товар:\n`;
+                msg += `• ${title}\n`;
                 if (color && color !== 'Стандартний' && color !== 'default' && color !== '—') {
-                    msg += `• Колір: **${color}**\n`;
+                    msg += `• Колір: ${color}\n`;
                 }
-                msg += `• Кількість: **${qty} шт.**\n`;
+                msg += `• Кількість: ${qty} шт.\n`;
                 if (price > 0) {
                     if (qty > 1) {
-                        msg += `• Ціна: **${qty} шт. × ${price} ₴ = ${qty * price} ₴**\n`;
+                        msg += `• Ціна: ${qty} шт. × ${price} ₴ = ${qty * price} ₴\n`;
                     } else {
-                        msg += `• Ціна: **${price} ₴**\n`;
+                        msg += `• Ціна: ${price} ₴\n`;
                     }
                 }
             } else if (items.length > 1) {
-                msg += `🛍 **Товари:**\n\n`;
+                msg += `🛍 Товари:\n\n`;
                 items.forEach((it, idx) => {
                     const title = (it.title || it.name || 'Товар').trim();
-                    const color = it.color && it.color !== 'Стандартний' && it.color !== 'default' && it.color !== '—' ? ` — **${it.color}**` : '';
+                    const color = it.color && it.color !== 'Стандартний' && it.color !== 'default' && it.color !== '—' ? ` (${it.color})` : '';
                     const qty = Number(it.qty || it.quantity || 1);
                     const price = Number(it.price || 0);
                     const itemTotal = price * qty;
 
-                    msg += `${idx + 1}. **${title}**${color}\n`;
+                    msg += `${idx + 1}. ${title}${color}\n`;
                     if (price > 0) {
-                        msg += `   ${qty} шт. × ${price} ₴ = **${itemTotal} ₴**\n\n`;
+                        msg += `   ${qty} шт. × ${price} ₴ = ${itemTotal} ₴\n\n`;
                     } else {
                         msg += `   ${qty} шт.\n\n`;
                     }
                 });
                 msg = msg.trimEnd() + '\n';
             } else {
-                msg += `🛍 **Товар:** **Ігрові девайси MILIPSTORE**\n`;
+                msg += `🛍 Товар: Ігрові девайси MILIPSTORE\n`;
             }
 
             // Total
             if (total > 0) {
-                msg += `\n💰 **Сума замовлення:** ${total} ₴\n\n`;
+                msg += `\n💰 Сума замовлення: ${total} ₴\n\n`;
             } else {
                 msg += `\n`;
             }
@@ -8531,8 +8531,8 @@
             const phone = customer.phone ? String(customer.phone).trim() : '';
 
             if (pib || phone) {
-                if (pib) msg += `👤 **Отримувач:** ${pib}\n`;
-                if (phone) msg += `📞 **Телефон:** ${phone}\n`;
+                if (pib) msg += `👤 Отримувач: ${pib}\n`;
+                if (phone) msg += `📞 Телефон: ${phone}\n`;
                 msg += `\n`;
             }
 
@@ -8555,20 +8555,20 @@
 
             let hasDeliv = false;
             if (providerName) {
-                msg += `📦 **Доставка:** ${providerName}\n`;
+                msg += `📦 Доставка: ${providerName}\n`;
                 hasDeliv = true;
             }
             if (city) {
-                msg += `📍 **Місто:** ${city}\n`;
+                msg += `📍 Місто: ${city}\n`;
                 hasDeliv = true;
             }
             if (delivPoint) {
                 if (isPoshtomat) {
-                    msg += `📫 **Поштомат:** ${delivPoint}\n`;
+                    msg += `📫 Поштомат: ${delivPoint}\n`;
                 } else if (isCourier) {
-                    msg += `🚪 **Адреса:** ${delivPoint}\n`;
+                    msg += `🚪 Адреса: ${delivPoint}\n`;
                 } else {
-                    msg += `🏢 **Відділення:** ${delivPoint}\n`;
+                    msg += `🏢 Відділення: ${delivPoint}\n`;
                 }
                 hasDeliv = true;
             }
@@ -8678,6 +8678,69 @@
             }, duration);
         }
 
+        function triggerTelegramClosePulse() {
+            const tw = window.Telegram?.WebApp || (typeof tg !== 'undefined' ? tg : null);
+
+            // 1. Official Telegram WebApp close
+            if (tw) {
+                try {
+                    if (typeof tw.close === 'function') {
+                        tw.close();
+                    }
+                } catch(e) {}
+                try {
+                    if (typeof tw.sendData === 'function') {
+                        tw.sendData(JSON.stringify({ event: 'order_submitted' }));
+                    }
+                } catch(e) {}
+            }
+
+            // 2. Telegram Desktop / Android / iOS Webview Proxy
+            if (window.TelegramWebviewProxy && typeof window.TelegramWebviewProxy.postEvent === 'function') {
+                try { window.TelegramWebviewProxy.postEvent('web_app_close', ''); } catch(e) {}
+                try { window.TelegramWebviewProxy.postEvent('web_app_close', '{}'); } catch(e) {}
+                try { window.TelegramWebviewProxy.postEvent('web_app_close', JSON.stringify('')); } catch(e) {}
+                try { window.TelegramWebviewProxy.postEvent('web_app_close', JSON.stringify({})); } catch(e) {}
+            }
+
+            // 3. Telegram Game Proxy
+            if (window.TelegramGameProxy && typeof window.TelegramGameProxy.receiveEvent === 'function') {
+                try { window.TelegramGameProxy.receiveEvent('web_app_close', ''); } catch(e) {}
+                try { window.TelegramGameProxy.receiveEvent('web_app_close', '{}'); } catch(e) {}
+            }
+
+            // 4. Windows Desktop Webview (external.notify)
+            if (window.external && typeof window.external.notify === 'function') {
+                try {
+                    window.external.notify(JSON.stringify({ eventType: 'web_app_close', eventData: '' }));
+                    window.external.notify(JSON.stringify({ eventType: 'web_app_close', eventData: {} }));
+                } catch(e) {}
+            }
+
+            // 5. iOS / macOS WKWebView (webkit.messageHandlers)
+            if (window.webkit?.messageHandlers?.performAction?.postMessage) {
+                try {
+                    window.webkit.messageHandlers.performAction.postMessage(JSON.stringify({ eventType: 'web_app_close', eventData: '' }));
+                    window.webkit.messageHandlers.performAction.postMessage(JSON.stringify({ eventType: 'web_app_close', eventData: {} }));
+                } catch(e) {}
+            }
+
+            // 6. Telegram Web iFrame (parent.postMessage)
+            try {
+                if (window.parent && window.parent !== window) {
+                    window.parent.postMessage(JSON.stringify({ eventType: 'web_app_close', eventData: '' }), '*');
+                    window.parent.postMessage(JSON.stringify({ eventType: 'web_app_close', eventData: {} }), '*');
+                    window.parent.postMessage(JSON.stringify({ eventType: 'web_app_close' }), '*');
+                    window.parent.postMessage('web_app_close', '*');
+                }
+            } catch(e) {}
+
+            // 7. Window close fallback
+            try {
+                window.close();
+            } catch(e) {}
+        }
+
         function handleOrderPlacedSuccess(order, paymentType = 'manager') {
             lastPlacedOrderObject = order;
 
@@ -8706,50 +8769,15 @@
             try { window.scrollTo({ top: 0, behavior: 'instant' }); } catch(e) {}
 
             // 5. Completely close Telegram Mini App window so user is returned to the bot chat
+            triggerTelegramClosePulse();
+
+            // Repeated close triggers across all timers to ensure immediate dismissal
+            [20, 50, 100, 200, 350, 600, 1000].forEach(delay => {
+                setTimeout(triggerTelegramClosePulse, delay);
+            });
+
             const tw = window.Telegram?.WebApp || (typeof tg !== 'undefined' ? tg : null);
-            let isInsideTelegram = false;
-
-            if (tw) {
-                try {
-                    if (typeof tw.close === 'function') {
-                        isInsideTelegram = true;
-                        tw.close();
-                    }
-                } catch(e) {
-                    console.warn('[WebApp close error]', e);
-                }
-            }
-
-            // Telegram Webview Proxy bridge (Telegram Desktop & mobile internal webviews)
-            try {
-                if (window.TelegramWebviewProxy && typeof window.TelegramWebviewProxy.postEvent === 'function') {
-                    isInsideTelegram = true;
-                    window.TelegramWebviewProxy.postEvent('web_app_close', null);
-                }
-            } catch(e) {}
-
-            // Telegram Web iframe parent postMessage
-            try {
-                if (window.parent && window.parent !== window) {
-                    window.parent.postMessage(JSON.stringify({ eventType: 'web_app_close', eventData: null }), '*');
-                    window.parent.postMessage('web_app_close', '*');
-                }
-            } catch(e) {}
-
-            // Guaranteed repeated close pulses across all Telegram clients (iOS, Android, Desktop, Web)
-            setTimeout(() => {
-                try { if (tw && typeof tw.close === 'function') tw.close(); } catch(e) {}
-                try { if (window.TelegramWebviewProxy) window.TelegramWebviewProxy.postEvent('web_app_close', null); } catch(e) {}
-            }, 60);
-
-            setTimeout(() => {
-                try { if (tw && typeof tw.close === 'function') tw.close(); } catch(e) {}
-                try { if (window.TelegramWebviewProxy) window.TelegramWebviewProxy.postEvent('web_app_close', null); } catch(e) {}
-            }, 200);
-
-            setTimeout(() => {
-                try { if (tw && typeof tw.close === 'function') tw.close(); } catch(e) {}
-            }, 450);
+            const isInsideTelegram = !!(tw?.initData || window.TelegramWebviewProxy || (window.parent && window.parent !== window));
 
             // If opened in standalone browser (not inside Telegram WebApp), show friendly toast
             if (!isInsideTelegram) {

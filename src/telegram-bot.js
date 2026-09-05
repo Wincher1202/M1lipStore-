@@ -106,7 +106,7 @@ export function buildCustomerManagerMessage(order) {
   const total = Number(order.total || 0);
 
   let msg = `${greeting}\n\n`;
-  msg += `Хочу уточнити деталі щодо замовлення **${orderNum}**.\n\n`;
+  msg += `Хочу уточнити деталі щодо замовлення ${orderNum}.\n\n`;
 
   // 🛍 Товар / Товари
   if (items.length === 1) {
@@ -116,43 +116,43 @@ export function buildCustomerManagerMessage(order) {
     const qty = Number(it.qty || it.quantity || 1);
     const price = Number(it.price || 0);
 
-    msg += `🛍 **Товар:**\n`;
-    msg += `• **${title}**\n`;
+    msg += `🛍 Товар:\n`;
+    msg += `• ${title}\n`;
     if (color && color !== 'Стандартний' && color !== 'default' && color !== '—') {
-      msg += `• Колір: **${color}**\n`;
+      msg += `• Колір: ${color}\n`;
     }
-    msg += `• Кількість: **${qty} шт.**\n`;
+    msg += `• Кількість: ${qty} шт.\n`;
     if (price > 0) {
       if (qty > 1) {
-        msg += `• Ціна: **${qty} шт. × ${price} ₴ = ${qty * price} ₴**\n`;
+        msg += `• Ціна: ${qty} шт. × ${price} ₴ = ${qty * price} ₴\n`;
       } else {
-        msg += `• Ціна: **${price} ₴**\n`;
+        msg += `• Ціна: ${price} ₴\n`;
       }
     }
   } else if (items.length > 1) {
-    msg += `🛍 **Товари:**\n\n`;
+    msg += `🛍 Товари:\n\n`;
     items.forEach((it, idx) => {
       const title = (it.title || it.name || 'Товар').trim();
-      const color = it.color && it.color !== 'Стандартний' && it.color !== 'default' && it.color !== '—' ? ` — **${it.color}**` : '';
+      const color = it.color && it.color !== 'Стандартний' && it.color !== 'default' && it.color !== '—' ? ` (${it.color})` : '';
       const qty = Number(it.qty || it.quantity || 1);
       const price = Number(it.price || 0);
       const itemTotal = price * qty;
 
-      msg += `${idx + 1}. **${title}**${color}\n`;
+      msg += `${idx + 1}. ${title}${color}\n`;
       if (price > 0) {
-        msg += `   ${qty} шт. × ${price} ₴ = **${itemTotal} ₴**\n\n`;
+        msg += `   ${qty} шт. × ${price} ₴ = ${itemTotal} ₴\n\n`;
       } else {
         msg += `   ${qty} шт.\n\n`;
       }
     });
     msg = msg.trimEnd() + '\n';
   } else {
-    msg += `🛍 **Товар:** **Ігрові девайси MILIPSTORE**\n`;
+    msg += `🛍 Товар: Ігрові девайси MILIPSTORE\n`;
   }
 
   // 💰 Сума замовлення
   if (total > 0) {
-    msg += `\n💰 **Сума замовлення:** ${total} ₴\n\n`;
+    msg += `\n💰 Сума замовлення: ${total} ₴\n\n`;
   } else {
     msg += `\n`;
   }
@@ -165,8 +165,8 @@ export function buildCustomerManagerMessage(order) {
   const phone = customer.phone ? String(customer.phone).trim() : '';
 
   if (pib || phone) {
-    if (pib) msg += `👤 **Отримувач:** ${pib}\n`;
-    if (phone) msg += `📞 **Телефон:** ${phone}\n`;
+    if (pib) msg += `👤 Отримувач: ${pib}\n`;
+    if (phone) msg += `📞 Телефон: ${phone}\n`;
     msg += `\n`;
   }
 
@@ -189,20 +189,20 @@ export function buildCustomerManagerMessage(order) {
 
   let hasDeliv = false;
   if (providerName) {
-    msg += `📦 **Доставка:** ${providerName}\n`;
+    msg += `📦 Доставка: ${providerName}\n`;
     hasDeliv = true;
   }
   if (city) {
-    msg += `📍 **Місто:** ${city}\n`;
+    msg += `📍 Місто: ${city}\n`;
     hasDeliv = true;
   }
   if (delivPoint) {
     if (isPoshtomat) {
-      msg += `📫 **Поштомат:** ${delivPoint}\n`;
+      msg += `📫 Поштомат: ${delivPoint}\n`;
     } else if (isCourier) {
-      msg += `🚪 **Адреса:** ${delivPoint}\n`;
+      msg += `🚪 Адреса: ${delivPoint}\n`;
     } else {
-      msg += `🏢 **Відділення:** ${delivPoint}\n`;
+      msg += `🏢 Відділення: ${delivPoint}\n`;
     }
     hasDeliv = true;
   }
@@ -1401,8 +1401,8 @@ export class TelegramBotService {
       await this.safeEditOrSend(chatId, msgId, `🗑 <b>Замовлення #${orderId} успішно видалено!</b>\n\nВи завжди можете обрати інші девайси та створити нове замовлення у нашому магазині.`, {
         reply_markup: {
           inline_keyboard: [
-            [{ text: '🚀 Каталог товарів', web_app: { url: appUrl } }],
-            [{ text: '📋 До моїх замовлень', callback_data: `orders_list:${chatId}` }]
+            [{ text: '🚀 До магазину', web_app: { url: appUrl } }],
+            [{ text: '🛍 Мої замовлення', callback_data: `orders_list:${chatId}` }]
           ]
         }
       });
