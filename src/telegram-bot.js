@@ -2920,18 +2920,17 @@ export class TelegramBotService {
     }
 
     const adminChatIds = this.getAllAdminChatIds();
-    for (const adminId of adminChatIds) {
-      try {
-        await this.callApi('sendMessage', {
-          chat_id: adminId,
-          text: adminMsg,
-          parse_mode: 'HTML',
-          reply_markup: { inline_keyboard: adminButtons }
-        });
-      } catch (err) {
+    const sendPromises = Array.from(adminChatIds).map(adminId =>
+      this.callApi('sendMessage', {
+        chat_id: adminId,
+        text: adminMsg,
+        parse_mode: 'HTML',
+        reply_markup: { inline_keyboard: adminButtons }
+      }).catch(err => {
         console.warn(`[TelegramBot] Failed to broadcast order notification to admin ${adminId}:`, err.message);
-      }
-    }
+      })
+    );
+    await Promise.allSettled(sendPromises);
   }
 
   async sendCustomerPaymentSuccess(order, messageId = null) {

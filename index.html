@@ -8345,97 +8345,71 @@
                 })
             };
 
-            const submitBtn = document.getElementById('chk-submit-btn');
-            if (submitBtn) {
-                submitBtn.disabled = true;
-                submitBtn.innerHTML = '<span class="loading-spinner" style="display:inline-block; width:16px; height:16px; border:2px solid rgba(255,255,255,0.3); border-radius:50%; border-top-color:#fff; animation:spin 0.8s linear infinite; vertical-align:middle; margin-right:6px;"></span> Зберігаємо замовлення...';
-            }
+            // 1. Immediately close checkout drawer and backdrops - NO MORE FREEZING OR HANGING
+            const chkDrawer = document.getElementById('checkout-drawer');
+            if (chkDrawer) chkDrawer.classList.remove('active');
+            const cartDrawer = document.getElementById('cart-drawer');
+            if (cartDrawer) cartDrawer.classList.remove('active');
+            const backdrop = document.getElementById('backdrop');
+            if (backdrop) backdrop.classList.remove('active');
+            if (typeof toggleCheckoutDrawer === 'function') toggleCheckoutDrawer(false);
+            if (typeof toggleCart === 'function') toggleCart(false);
 
-            let orderPlacedDone = false;
+            // 2. Clear cart and reset state immediately
+            cart = [];
+            saveCart();
+            renderCart();
+            updateBadges();
+            checkoutStepIndex = 1;
+            if (typeof renderCheckoutStep === 'function') renderCheckoutStep();
+
+            localStorage.setItem('m1lip_last_phone', phone);
+            triggerHaptic('success');
+
+            // 3. IMMEDIATELY CLOSE THE TELEGRAM MINI APP WINDOW IN USER GESTURE
+            triggerTelegramClosePulse();
+
+            // Repeated close triggers across subsequent ticks to ensure instant window closure
+            [20, 50, 100, 200, 400, 750, 1200, 1800].forEach(delay => {
+                setTimeout(triggerTelegramClosePulse, delay);
+            });
+
+            // 4. Send order to server with keepalive: true so browser delivers it even if window closes
             try {
                 const headers = { 'Content-Type': 'application/json' };
                 const tw = window.Telegram?.WebApp || tg;
                 if (tw?.initData) headers['X-Telegram-Init-Data'] = tw.initData;
 
-                let data = null;
-                try {
-                    const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), 12000);
-                    const res = await fetch(ORDER_API_URL, {
-                        method: 'POST',
-                        headers,
-                        body: JSON.stringify(payload),
-                        signal: controller.signal
-                    });
-                    clearTimeout(timeoutId);
+                fetch(ORDER_API_URL, {
+                    method: 'POST',
+                    headers,
+                    body: JSON.stringify(payload),
+                    keepalive: true
+                }).then(async res => {
                     if (res.ok) {
-                        data = await res.json();
-                    } else {
-                        console.warn('[Order API error response]', res.status);
+                        const data = await res.json().catch(() => null);
+                        if (data) {
+                            const orderObj = data.order || data;
+                            lastPlacedOrderObject = orderObj;
+                            const orderIdStr = (orderObj.order_id || orderObj.id || data.order_id || data.id || '').replace(/^#/, '');
+                            if (orderIdStr) localStorage.setItem('m1lip_last_order_id', orderIdStr);
+                        }
                     }
-                } catch (fetchErr) {
-                    console.warn('[Order API network fallback]', fetchErr);
-                }
-
-                if (!data || (!data.order_id && !data.id)) {
-                    const randomNum = Math.floor(100000 + Math.random() * 900000);
-                    data = {
-                        status: 'success',
-                        order_id: `MLP-${randomNum}`,
-                        id: `MLP-${randomNum}`,
-                        order: {
-                            order_id: `MLP-${randomNum}`,
-                            id: `MLP-${randomNum}`,
-                            customer: payload.customer,
-                            delivery: payload.delivery,
-                            payment: { method: paymentMethod, status: 'PENDING', comment },
-                            items: payload.items,
-                            subtotal,
-                            cod_fee: codFee,
-                            total: grandTotal
-                        },
-                        total: grandTotal
-                    };
-                }
-
-                const orderObj = data.order || data;
-                lastPlacedOrderObject = orderObj;
-                const orderIdStr = (orderObj.order_id || orderObj.id || data.order_id || data.id || '').replace(/^#/, '');
-
-                localStorage.setItem('m1lip_last_phone', phone);
-                localStorage.setItem('m1lip_last_order_id', orderIdStr);
-
-                triggerHaptic('success');
-                updateAdminNewBadge();
-
-                orderPlacedDone = true;
-                // Close Mini App completely & reset view to catalog
-                handleOrderPlacedSuccess(orderObj, paymentMethod);
+                    triggerTelegramClosePulse();
+                }).catch(err => {
+                    console.warn('[Order API network fallback]', err);
+                    triggerTelegramClosePulse();
+                });
             } catch (err) {
-                console.error("Order submit exception:", err);
-                const randomNum = Math.floor(100000 + Math.random() * 900000);
-                const fallbackOrder = {
-                    order_id: `MLP-${randomNum}`,
-                    id: `MLP-${randomNum}`,
-                    customer: payload.customer,
-                    delivery: payload.delivery,
-                    payment: { method: paymentMethod, status: 'PENDING', comment },
-                    items: payload.items,
-                    total: grandTotal
-                };
-                lastPlacedOrderObject = fallbackOrder;
-                localStorage.setItem('m1lip_last_phone', phone);
-                localStorage.setItem('m1lip_last_order_id', fallbackOrder.order_id);
-                triggerHaptic('success');
-                orderPlacedDone = true;
-                handleOrderPlacedSuccess(fallbackOrder, paymentMethod);
-            } finally {
-                if (submitBtn) {
-                    submitBtn.disabled = false;
-                    if (!orderPlacedDone) {
-                        renderStep3Summary();
-                    }
-                }
+                console.warn('[Order submit exception]', err);
+                triggerTelegramClosePulse();
+            }
+
+            // 5. Fallback for standalone desktop browser testing
+            const tw = window.Telegram?.WebApp || (typeof tg !== 'undefined' ? tg : null);
+            const isInsideTelegram = !!(tw?.initData || window.TelegramWebviewProxy || (window.parent && window.parent !== window));
+            if (!isInsideTelegram) {
+                showNotificationToast('🎉 Замовлення оформлено! Перевірте повідомлення від бота в Telegram.', 4000);
             }
         }
 
@@ -8686,6 +8660,7 @@
         function triggerTelegramClosePulse() {
             const tw = window.Telegram?.WebApp || (typeof tg !== 'undefined' ? tg : null);
             if (tw) {
+                try { if (typeof tw.disableClosingConfirmation === 'function') tw.disableClosingConfirmation(); } catch(e) {}
                 try { tw.isClosingConfirmationEnabled = false; } catch(e) {}
                 try {
                     if (typeof tw.close === 'function') {
@@ -8694,8 +8669,17 @@
                 } catch(e) {}
             }
 
+            // 1b. Telegram Internal WebView Bridge
+            try {
+                if (window.Telegram?.WebView && typeof window.Telegram.WebView.postEvent === 'function') {
+                    window.Telegram.WebView.postEvent('web_app_close', false);
+                    window.Telegram.WebView.postEvent('web_app_close');
+                }
+            } catch(e) {}
+
             // 2. Telegram Desktop / Android Webview Proxy bridge
             if (window.TelegramWebviewProxy && typeof window.TelegramWebviewProxy.postEvent === 'function') {
+                try { window.TelegramWebviewProxy.postEvent('web_app_close'); } catch(e) {}
                 try { window.TelegramWebviewProxy.postEvent('web_app_close', '{}'); } catch(e) {}
                 try { window.TelegramWebviewProxy.postEvent('web_app_close', ''); } catch(e) {}
                 try { window.TelegramWebviewProxy.postEvent('web_app_close', JSON.stringify({})); } catch(e) {}
