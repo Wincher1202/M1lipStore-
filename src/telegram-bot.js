@@ -418,7 +418,7 @@ export class TelegramBotService {
           await this.callApi('setChatMenuButton', {
             menu_button: {
               type: 'web_app',
-              text: '🛍 До асортименту',
+              text: '🛍 Магазин',
               web_app: {
                 url: getStoreWebUrl()
               }
@@ -515,7 +515,6 @@ export class TelegramBotService {
 
   getReplyKeyboard(from) {
     const isAdminUser = this.isAdmin(from);
-    const storeUrl = getStoreWebUrl();
     const keyboard = [];
 
     if (isAdminUser) {
@@ -523,15 +522,12 @@ export class TelegramBotService {
         { text: '👑 Панель адміністратора' },
         { text: '📦 Каталог товарів' }
       ]);
+    } else {
+      keyboard.push([
+        { text: "💬 Зв'язок з менеджером" },
+        { text: '🛍 Мої замовлення' }
+      ]);
     }
-
-    keyboard.push([
-      { text: '🛍 До асортименту', web_app: { url: storeUrl } },
-      { text: '🛍 Мої замовлення' }
-    ]);
-    keyboard.push([
-      { text: '💬 Менеджер' }
-    ]);
 
     return {
       keyboard,
@@ -808,18 +804,10 @@ export class TelegramBotService {
       return;
     }
 
-    // ORDER TRACKING
-    if (text === '📦 Відстежити замовлення' || text === '/track') {
-      await this.callApi('sendMessage', {
-        chat_id: chatId,
-        text: `🔍 <b>Відстеження замовлення</b>\n\nВведіть номер вашого замовлення (наприклад, <code>MLP-120009</code>) або номер телефону, вказаний при оформленні:`,
-        parse_mode: 'HTML'
-      });
-      return;
-    }
-
     // SUPPORT & MANAGER CONTACT
     if (
+      text === "💬 Зв'язок з менеджером" ||
+      text === "Зв'язок з менеджером" ||
       text === '💬 Підтримка' ||
       text === '/help' ||
       text === '💬 Менеджер (@milipmanager)' ||
@@ -843,6 +831,12 @@ export class TelegramBotService {
           ]
         }
       });
+      return;
+    }
+
+    // ORDER TRACKING / VIEW ORDERS
+    if (text === '📦 Відстежити замовлення' || text === '/track') {
+      await this.sendCustomerOrdersList(chatId, from.id);
       return;
     }
 
@@ -1957,7 +1951,7 @@ export class TelegramBotService {
       await this.safeEditOrSend(chatId, messageId, `🛍 <b>Мої замовлення</b>\n\nУ вас поки немає оформлених замовлень.\nОберіть девайси в нашому магазині та оформлюйте замовлення!`, {
         reply_markup: {
           inline_keyboard: [
-            [{ text: '🚀 Відкрити каталог', web_app: { url: appUrl } }]
+            [{ text: '🛍 До асортименту на сайт', web_app: { url: appUrl } }]
           ]
         }
       });
@@ -2458,65 +2452,86 @@ export class TelegramBotService {
     const orderNum = `#${order.order_id}`;
     let messageText = '';
     const track = ttn || order.tracking_number;
-    const provName = order.delivery?.provider === 'ukrposhta' ? 'Укрпошта' : (order.delivery?.provider_name || 'Нова Пошта');
+    const deliv = order.delivery || {};
+    const provName = deliv.provider === 'ukrposhta' ? 'Укрпошта' : (deliv.provider_name || 'Нова Пошта');
+
+    const items = order.items || [];
+    let itemsSummary = '';
+    if (items.length > 0) {
+      itemsSummary = items.map(it => `• <b>${escapeHtml(it.title || 'Товар')}</b>${it.color ? ` (${escapeHtml(it.color)})` : ''}${it.qty > 1 ? ` — ${it.qty} шт.` : ''}`).join('\n');
+    } else {
+      itemsSummary = '• <b>Ігрові девайси MILIPSTORE</b>';
+    }
+
+    const rawDelivStr = `${deliv.department || ''} ${deliv.address || ''} ${deliv.method || ''}`.toLowerCase();
+    const isPoshtomat = rawDelivStr.includes('поштомат') || rawDelivStr.includes('poshtomat');
+    const isCourier = rawDelivStr.includes('кур') || rawDelivStr.includes('адрес') || deliv.method === 'courier';
+
+    let delivLocationName = '';
+    let delivPointType = 'у відділення';
+    let delivPointEmoji = '🏢';
+
+    if (isPoshtomat) {
+      delivPointType = 'у поштомат';
+      delivPointEmoji = '📫';
+      delivLocationName = `${provName} (Поштомат): ${deliv.city || ''}${deliv.department ? `, ${deliv.department}` : ''}`;
+    } else if (isCourier) {
+      delivPointType = "кур'єром за вашою адресою";
+      delivPointEmoji = '🚪';
+      delivLocationName = `${provName} (Кур'єрська доставка): ${deliv.city || ''}${deliv.address ? `, ${deliv.address}` : ''}`;
+    } else {
+      delivPointType = 'у відділення';
+      delivPointEmoji = '🏢';
+      delivLocationName = `${provName}: ${deliv.city || ''}${deliv.department ? `, ${deliv.department}` : ''}`;
+    }
 
     switch (newStatus) {
       case 'CONFIRMED':
-        messageText = `✅ <b>Ваше замовлення ${orderNum} підтверджено менеджером!</b>\n\nМи вже прийняли замовлення в роботу та розпочали комплектацію на складі.`;
+        messageText = `✅ <b>Ваше замовлення ${orderNum} підтверджено менеджером!</b>\n\n🛍 <b>Товари:</b>\n${itemsSummary}\n\nМи вже прийняли замовлення в роботу та передали на комплектацію нашому складу.`;
         if (order.payment?.method === 'online' && order.payment?.status !== 'PAID') {
           messageText += `\n\n💳 <b>Очікується онлайн-оплата:</b> ${order.total} ₴`;
         }
         break;
       case 'PAID':
-        messageText = `💳 <b>Оплату за замовлення ${orderNum} успішно зараховано!</b>\n\nСума: <b>${order.total} ₴</b>.\nДякуємо! Ваше замовлення передано на склад для пакування.`;
+        messageText = `💳 <b>Оплату за замовлення ${orderNum} успішно зараховано!</b>\n\n🛍 <b>Товари:</b>\n${itemsSummary}\n\nСума: <b>${order.total} ₴</b>.\nДякуємо! Ваше замовлення передано на склад для пакування.`;
         break;
       case 'PACKING_PREP':
       case 'PACKED':
-        messageText = `📦 <b>Ваше замовлення ${orderNum} зараз упаковується на складі!</b>\n\nМи дбайливо перевіряємо та пакуємо ваші девайси перед відправкою.`;
+        messageText = `📦 <b>Ваше замовлення ${orderNum} зараз упаковується на складі!</b>\n\n🛍 <b>Товари:</b>\n${itemsSummary}\n\nМи дбайливо перевіряємо комплектацію та надійно пакуємо ваші девайси перед відправкою.`;
         break;
       case 'DISPATCH_PREP':
-        messageText = `🚚 <b>Ваше замовлення ${orderNum} зібрано та готується до відправки!</b>\n\nНевдовзі посилка буде передана поштовій службі.`;
+        messageText = `🚚 <b>Ваше замовлення ${orderNum} зібрано та готується до відправки!</b>\n\n🛍 <b>Товари:</b>\n${itemsSummary}\n\nНевдовзі посилка буде передана поштовій службі.`;
         break;
       case 'SHIPPED':
-        messageText = `🚚 <b>Ваше замовлення ${orderNum} вже відправлено!</b>\n\n`;
+        messageText = `🚚 <b>Ваше замовлення ${orderNum} вже відправлено!</b>\n\n🛍 <b>Товари:</b>\n${itemsSummary}\n\n`;
         if (track) {
-          messageText += `Номер ТТН: <code>${track}</code>\n`;
+          messageText += `📦 <b>Номер ТТН:</b> <code>${track}</code>\n`;
         }
-        messageText += `Служба доставки: <b>${provName}</b>\n\nВи можете відстежувати рух посилки за номером ТТН у додатку перевізника або на сайті.`;
+        messageText += `🏢 <b>Служба доставки:</b> <b>${provName}</b>\n📍 <b>Пункт призначення:</b> ${delivLocationName}\n\nВи можете відстежувати рух посилки за номером ТТН у додатку перевізника або на сайті.`;
         break;
       case 'DELIVERED':
-        messageText = `🏢 <b>Ваше замовлення ${orderNum} прибуло у відділення / поштомат!</b>\n\nПосилка вже чекає на вас. Будь ласка, отримайте ваше замовлення!`;
+        messageText = `${delivPointEmoji} <b>Ваше замовлення ${orderNum} вже прибуло ${delivPointType}!</b>\n\n` +
+          `🛍 <b>Товари:</b>\n${itemsSummary}\n\n` +
+          `📍 <b>Місце отримання:</b> ${delivLocationName}\n` +
+          (track ? `📦 <b>Номер ТТН:</b> <code>${track}</code>\n\n` : '\n') +
+          `✨ <b>Посилка вже очікує на вас!</b>\n` +
+          `Щиро дякуємо, що обрали <b>MILIPSTORE</b> для оновлення свого сетапу. Будь ласка, заберіть посилку у зручний для вас час та обов'язково перевірте комплектацію при отриманні.\n\n` +
+          `Бажаємо яскравих перемог, максимального комфорту та суцільного задоволення від користування вашими новими девайсами! 🔥🎮`;
         break;
       case 'COMPLETED':
-        messageText = `🎉 <b>Ваше замовлення ${orderNum} успішно виконано!</b>\n\nДякуємо за покупку в MILIPSTORE! Приємного користування девайсами!`;
+        messageText = `🎉 <b>Ваше замовлення ${orderNum} успішно виконано!</b>\n\n🛍 <b>Товари:</b>\n${itemsSummary}\n\nЩиро дякуємо за покупку в MILIPSTORE! Будемо раді бачити вас знову серед наших клієнтів. Приємного користування девайсами! ✨`;
         break;
       case 'CANCELLED':
-        messageText = `❌ <b>Ваше замовлення ${orderNum} було скасовано.</b>\n\nЯкщо у вас виникли будь-які запитання, напишіть нашому менеджеру.`;
+        messageText = `❌ <b>Ваше замовлення ${orderNum} було скасовано.</b>\n\n🛍 <b>Товари:</b>\n${itemsSummary}\n\nЯкщо у вас виникли будь-які запитання або бажаєте оформити замовлення знову, наш менеджер завжди на зв'язку.`;
         break;
       default:
-        messageText = `📦 <b>Оновлено статус вашого замовлення ${orderNum}:</b> <b>${ORDER_STATUSES[newStatus]?.name || newStatus}</b>`;
+        messageText = `📦 <b>Оновлено статус вашого замовлення ${orderNum}:</b> <b>${ORDER_STATUSES[newStatus]?.name || newStatus}</b>\n\n🛍 <b>Товари:</b>\n${itemsSummary}`;
         break;
     }
 
-    const custButtons = [];
-    if (order.payment?.method === 'online' && order.payment?.status !== 'PAID' && (newStatus === 'CONFIRMED' || newStatus === 'NEW')) {
-      custButtons.push([
-        { text: `💳 Оплатити ${order.total} ₴ онлайн`, callback_data: `pay_test:${order.order_id}` }
-      ]);
-    }
-    const orderIdStatStr = (order.order_id || '').replace(/^#/, '');
-    const statusMsgForUrl = `Добрий день! Щодо замовлення #${orderIdStatStr} (статус: ${ORDER_STATUSES[newStatus]?.name || newStatus}): хочу уточнити інформацію.`;
-    const statusManagerUrl = `https://t.me/milipmanager?text=${encodeURIComponent(statusMsgForUrl)}`;
-
-    custButtons.push([
-      { text: '💬 Написати менеджеру', url: statusManagerUrl }
-    ]);
-    custButtons.push([
-      { text: '📄 Повні деталі замовлення', callback_data: `view_order:${order.order_id}` }
-    ]);
-    custButtons.push([
-      { text: '📋 До моїх замовлень', callback_data: `orders_list:${targetChatId}` }
-    ]);
+    const custButtons = [
+      [{ text: '📄 Повні деталі замовлення', callback_data: `view_order:${order.order_id}` }]
+    ];
 
     try {
       await this.callApi('sendMessage', {
