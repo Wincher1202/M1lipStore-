@@ -10,7 +10,7 @@ const BACKUP_FILE = path.join(__dirname, '../data/store_backup.json');
 // Canonical Statuses
 export const ORDER_STATUSES = {
   PENDING_PAYMENT: { id: 'PENDING_PAYMENT', name: 'Очікує оплати', color: '#f59e0b', step: 0 },
-  NEW: { id: 'NEW', name: 'Нові', color: '#3b82f6', step: 1 },
+  NEW: { id: 'NEW', name: 'В обробці', color: '#3b82f6', step: 1 },
   CONFIRMED: { id: 'CONFIRMED', name: 'Підтверджені', color: '#6366f1', step: 2 },
   PACKING_PREP: { id: 'PACKING_PREP', name: 'Готується до пакування', color: '#8b5cf6', step: 3 },
   PACKED: { id: 'PACKED', name: 'Упаковано', color: '#a855f7', step: 4 },

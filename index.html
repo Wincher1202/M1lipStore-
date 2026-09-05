@@ -5031,7 +5031,7 @@
                 </div>
                 <div class="admin-kpi-card" style="border-color: rgba(87,100,226,0.4); background: rgba(87,100,226,0.06);">
                     <div class="admin-kpi-val" id="admin-stat-new" style="color: var(--accent);">0</div>
-                    <div class="admin-kpi-lbl" style="color: var(--accent);">Нові</div>
+                    <div class="admin-kpi-lbl" style="color: var(--accent);">В обробці</div>
                 </div>
                 <div class="admin-kpi-card">
                     <div class="admin-kpi-val" id="admin-stat-revenue">0 ₴</div>
@@ -5046,7 +5046,7 @@
             <!-- Status Filter Tabs -->
             <div class="admin-tabs-scroll" id="admin-status-tabs">
                 <button type="button" class="admin-tab-btn active" data-status="ALL" onclick="setAdminStatusFilter('ALL')">Всі</button>
-                <button type="button" class="admin-tab-btn" data-status="NEW" onclick="setAdminStatusFilter('NEW')">Нові</button>
+                <button type="button" class="admin-tab-btn" data-status="NEW" onclick="setAdminStatusFilter('NEW')">В обробці</button>
                 <button type="button" class="admin-tab-btn" data-status="CONFIRMED" onclick="setAdminStatusFilter('CONFIRMED')">Підтверджені</button>
                 <button type="button" class="admin-tab-btn" data-status="PACKING_PREP" onclick="setAdminStatusFilter('PACKING_PREP')">До пакування</button>
                 <button type="button" class="admin-tab-btn" data-status="PACKED" onclick="setAdminStatusFilter('PACKED')">Упаковано</button>
@@ -8679,63 +8679,48 @@
         }
 
         function triggerTelegramClosePulse() {
-            const tw = window.Telegram?.WebApp || (typeof tg !== 'undefined' ? tg : null);
-
-            // 1. Official Telegram WebApp close
-            if (tw) {
-                try {
-                    if (typeof tw.close === 'function') {
-                        tw.close();
-                    }
-                } catch(e) {}
-                try {
-                    if (typeof tw.sendData === 'function') {
-                        tw.sendData(JSON.stringify({ event: 'order_submitted' }));
-                    }
-                } catch(e) {}
-            }
-
-            // 2. Telegram Desktop / Android / iOS Webview Proxy
-            if (window.TelegramWebviewProxy && typeof window.TelegramWebviewProxy.postEvent === 'function') {
-                try { window.TelegramWebviewProxy.postEvent('web_app_close', ''); } catch(e) {}
-                try { window.TelegramWebviewProxy.postEvent('web_app_close', '{}'); } catch(e) {}
-                try { window.TelegramWebviewProxy.postEvent('web_app_close', JSON.stringify('')); } catch(e) {}
-                try { window.TelegramWebviewProxy.postEvent('web_app_close', JSON.stringify({})); } catch(e) {}
-            }
-
-            // 3. Telegram Game Proxy
-            if (window.TelegramGameProxy && typeof window.TelegramGameProxy.receiveEvent === 'function') {
-                try { window.TelegramGameProxy.receiveEvent('web_app_close', ''); } catch(e) {}
-                try { window.TelegramGameProxy.receiveEvent('web_app_close', '{}'); } catch(e) {}
-            }
-
-            // 4. Windows Desktop Webview (external.notify)
-            if (window.external && typeof window.external.notify === 'function') {
-                try {
-                    window.external.notify(JSON.stringify({ eventType: 'web_app_close', eventData: '' }));
-                    window.external.notify(JSON.stringify({ eventType: 'web_app_close', eventData: {} }));
-                } catch(e) {}
-            }
-
-            // 5. iOS / macOS WKWebView (webkit.messageHandlers)
-            if (window.webkit?.messageHandlers?.performAction?.postMessage) {
-                try {
-                    window.webkit.messageHandlers.performAction.postMessage(JSON.stringify({ eventType: 'web_app_close', eventData: '' }));
-                    window.webkit.messageHandlers.performAction.postMessage(JSON.stringify({ eventType: 'web_app_close', eventData: {} }));
-                } catch(e) {}
-            }
-
-            // 6. Telegram Web iFrame (parent.postMessage)
+            // 1. Official Telegram WebApp close API
             try {
-                if (window.parent && window.parent !== window) {
-                    window.parent.postMessage(JSON.stringify({ eventType: 'web_app_close', eventData: '' }), '*');
-                    window.parent.postMessage(JSON.stringify({ eventType: 'web_app_close', eventData: {} }), '*');
-                    window.parent.postMessage(JSON.stringify({ eventType: 'web_app_close' }), '*');
-                    window.parent.postMessage('web_app_close', '*');
+                if (window.Telegram?.WebApp && typeof window.Telegram.WebApp.close === 'function') {
+                    window.Telegram.WebApp.close();
                 }
             } catch(e) {}
 
-            // 7. Window close fallback
+            try {
+                if (typeof tg !== 'undefined' && tg && typeof tg.close === 'function') {
+                    tg.close();
+                }
+            } catch(e) {}
+
+            // 2. Telegram Desktop / Android Webview Proxy bridge
+            try {
+                if (window.TelegramWebviewProxy && typeof window.TelegramWebviewProxy.postEvent === 'function') {
+                    window.TelegramWebviewProxy.postEvent('web_app_close', '{}');
+                }
+            } catch(e) {}
+
+            // 3. iOS / macOS WKWebView postMessage
+            try {
+                if (window.webkit?.messageHandlers?.performAction?.postMessage) {
+                    window.webkit.messageHandlers.performAction.postMessage(JSON.stringify({ eventType: 'web_app_close', eventData: {} }));
+                }
+            } catch(e) {}
+
+            // 4. Windows Desktop Webview (external.notify)
+            try {
+                if (window.external && typeof window.external.notify === 'function') {
+                    window.external.notify(JSON.stringify({ eventType: 'web_app_close', eventData: {} }));
+                }
+            } catch(e) {}
+
+            // 5. Telegram Web iFrame parent communication
+            try {
+                if (window.parent && window.parent !== window) {
+                    window.parent.postMessage(JSON.stringify({ eventType: 'web_app_close', eventData: {} }), '*');
+                }
+            } catch(e) {}
+
+            // 6. Direct window close fallback
             try {
                 window.close();
             } catch(e) {}
@@ -8751,9 +8736,9 @@
             updateBadges();
 
             // 2. Reset checkout flow back to step 1
-            checkoutStep = 1;
-            if (typeof updateCheckoutStepsUI === 'function') {
-                updateCheckoutStepsUI();
+            checkoutStepIndex = 1;
+            if (typeof renderCheckoutStep === 'function') {
+                renderCheckoutStep();
             }
 
             // 3. Close all open drawers, modals & backdrops
@@ -8772,7 +8757,7 @@
             triggerTelegramClosePulse();
 
             // Repeated close triggers across all timers to ensure immediate dismissal
-            [20, 50, 100, 200, 350, 600, 1000].forEach(delay => {
+            [30, 80, 150, 300, 500, 800, 1200].forEach(delay => {
                 setTimeout(triggerTelegramClosePulse, delay);
             });
 
@@ -8950,7 +8935,7 @@
         let currentActiveAdminOrder = null;
 
         const STATUS_MAP = {
-            NEW: { label: 'Нове', cls: 'status-new' },
+            NEW: { label: 'В обробці', cls: 'status-new' },
             PENDING_PAYMENT: { label: 'Очікує оплати', cls: 'status-pending-payment' },
             CONFIRMED: { label: 'Підтверджено', cls: 'status-confirmed' },
             PACKING_PREP: { label: 'До пакування', cls: 'status-packing' },

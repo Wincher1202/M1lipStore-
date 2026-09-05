@@ -2289,7 +2289,7 @@ export class TelegramBotService {
     text += `📊 <b>Стан замовлень:</b>\n`;
     text += `• ⚡ <b>Активні (в роботі): ${activeOrders.length}</b>\n`;
     if (activeOrders.length > 0) {
-      text += `  └ 🆕 Нові (оплачені): ${newCount} | ✅ Підтверджені: ${confirmedCount} | 📦 Пакування: ${packingCount} | 🚚 Відправлені: ${shippedCount}\n`;
+      text += `  └ ⏳ В обробці: ${newCount} | ✅ Підтверджені: ${confirmedCount} | 📦 Пакування: ${packingCount} | 🚚 Відправлені: ${shippedCount}\n`;
     }
     text += `• 🗄 <b>Архів (доставлені / завершені): ${archiveOrders.length}</b>\n`;
     text += `• 💰 <b>Виторг: ${stats.total_sales.toLocaleString('uk-UA')} ₴</b>\n\n`;
@@ -2856,15 +2856,19 @@ export class TelegramBotService {
       payMethod = 'Накладений платіж (при отриманні)';
     }
 
-    let payStatus = '🆕 Очікує обробки';
+    let payStatus = '⏳ В обробці';
     if (order.payment?.status === 'PAID') {
       payStatus = '✅ ОПЛАЧЕНО';
     } else if (order.payment?.method === 'online') {
       payStatus = '⏳ Очікує оплати';
+    } else if (order.payment?.is_cod || order.payment?.method === 'cod') {
+      payStatus = '⏳ Оплата при отриманні (Накладений платіж)';
+    } else if (order.payment?.method === 'manager') {
+      payStatus = '💬 Очікує зв\'язку з менеджером';
     }
 
-    const statusName = ORDER_STATUSES[order.status]?.name || 'Нові';
-    const statusEmoji = order.status === 'CONFIRMED' ? '✅' : (order.status === 'PENDING_PAYMENT' ? '⏳' : '🆕');
+    const statusName = ORDER_STATUSES[order.status]?.name || 'В обробці';
+    const statusEmoji = order.status === 'CONFIRMED' ? '✅' : (order.status === 'PENDING_PAYMENT' ? '⏳' : (order.status === 'NEW' ? '⏳' : '📦'));
 
     let adminMsg = `👑 <b>ЗАМОВЛЕННЯ #${order.order_id}</b>\n\n` +
       `📊 <b>Статус:</b> ${statusEmoji} <b>${statusName}</b>\n` +
