@@ -8374,7 +8374,7 @@
                 let data = null;
                 try {
                     const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), 15000);
+                    const timeoutId = setTimeout(() => controller.abort(), 6000);
                     const res = await fetch(ORDER_API_URL, {
                         method: 'POST',
                         headers,
@@ -8416,11 +8416,11 @@
                 lastPlacedOrderObject = orderObj;
                 const orderIdStr = (orderObj.order_id || orderObj.id || data.order_id || data.id || '').replace(/^#/, '');
 
-                localStorage.setItem('m1lip_last_phone', phone);
-                if (orderIdStr) localStorage.setItem('m1lip_last_order_id', orderIdStr);
+                try { localStorage.setItem('m1lip_last_phone', phone); } catch(e) {}
+                if (orderIdStr) { try { localStorage.setItem('m1lip_last_order_id', orderIdStr); } catch(e) {} }
 
                 triggerHaptic('success');
-                updateAdminNewBadge();
+                try { updateAdminNewBadge(); } catch(e) {}
 
                 orderPlacedDone = true;
                 handleOrderPlacedSuccess(orderObj, paymentMethod);
@@ -8437,15 +8437,15 @@
                     total: grandTotal
                 };
                 lastPlacedOrderObject = fallbackOrder;
-                localStorage.setItem('m1lip_last_phone', phone);
-                localStorage.setItem('m1lip_last_order_id', fallbackOrder.order_id);
+                try { localStorage.setItem('m1lip_last_phone', phone); } catch(e) {}
+                try { localStorage.setItem('m1lip_last_order_id', fallbackOrder.order_id); } catch(e) {}
                 triggerHaptic('success');
                 orderPlacedDone = true;
                 handleOrderPlacedSuccess(fallbackOrder, paymentMethod);
             } finally {
-                if (submitBtn) {
+                if (submitBtn && !orderPlacedDone) {
                     submitBtn.disabled = false;
-                    if (!orderPlacedDone && typeof renderStep3Summary === 'function') {
+                    if (typeof renderStep3Summary === 'function') {
                         renderStep3Summary();
                     }
                 }
@@ -8786,72 +8786,88 @@
 
         function handleOrderPlacedSuccess(order, paymentType = 'manager') {
             lastPlacedOrderObject = order;
-            const orderIdStr = (order.order_id || order.id || '').replace(/^#/, '');
+            const orderIdStr = (order?.order_id || order?.id || '').replace(/^#/, '');
 
-            // 1. Clear cart completely
-            cart = [];
-            saveCart();
-            renderCart();
-            updateBadges();
+            // 1. TRANSFORM SUBMIT BUTTON IMMEDIATELY INTO "✅ Перейти до бота →"
+            try {
+                const submitBtn = document.getElementById('chk-submit-btn');
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.style.display = 'flex';
+                    submitBtn.style.width = '100%';
+                    submitBtn.style.justifyContent = 'center';
+                    submitBtn.style.alignItems = 'center';
+                    submitBtn.style.gap = '8px';
+                    submitBtn.style.background = '#2E7D32';
+                    submitBtn.style.borderColor = '#2E7D32';
+                    submitBtn.style.color = '#FFFFFF';
+                    submitBtn.style.fontWeight = '900';
+                    submitBtn.style.fontSize = '1.05rem';
+                    submitBtn.style.padding = '14px 18px';
+                    submitBtn.style.borderRadius = '12px';
+                    submitBtn.style.boxShadow = '0 6px 24px rgba(46,125,50,0.45)';
+                    submitBtn.style.cursor = 'pointer';
+                    submitBtn.innerHTML = '✅ Перейти до бота →';
+                    submitBtn.onclick = function() { closeMiniAppToBot(); };
+                }
+            } catch (btnErr) {
+                console.warn('[handleOrderPlacedSuccess btn transform error]', btnErr);
+            }
 
             // 2. Hide Back and Next navigation buttons in checkout
-            const backBtn = document.getElementById('chk-back-btn');
-            if (backBtn) backBtn.style.display = 'none';
-            const nextBtn = document.getElementById('chk-next-btn');
-            if (nextBtn) nextBtn.style.display = 'none';
+            try {
+                const backBtn = document.getElementById('chk-back-btn');
+                if (backBtn) backBtn.style.display = 'none';
+                const nextBtn = document.getElementById('chk-next-btn');
+                if (nextBtn) nextBtn.style.display = 'none';
+            } catch (navErr) {}
 
-            // 3. Transform Submit button directly into "✅ Перейти до бота →"
-            const submitBtn = document.getElementById('chk-submit-btn');
-            if (submitBtn) {
-                submitBtn.disabled = false;
-                submitBtn.style.display = 'flex';
-                submitBtn.style.width = '100%';
-                submitBtn.style.justifyContent = 'center';
-                submitBtn.style.alignItems = 'center';
-                submitBtn.style.gap = '8px';
-                submitBtn.style.background = '#2E7D32';
-                submitBtn.style.borderColor = '#2E7D32';
-                submitBtn.style.color = '#FFFFFF';
-                submitBtn.style.fontWeight = '900';
-                submitBtn.style.fontSize = '1.02rem';
-                submitBtn.style.padding = '14px 18px';
-                submitBtn.style.borderRadius = '12px';
-                submitBtn.style.boxShadow = '0 6px 22px rgba(46,125,50,0.45)';
-                submitBtn.style.cursor = 'pointer';
-                submitBtn.innerHTML = '✅ Перейти до бота →';
-                submitBtn.onclick = function() { closeMiniAppToBot(); };
+            // 3. Clear cart completely and safely
+            try {
+                cart = [];
+                if (typeof saveCart === 'function') saveCart();
+                if (typeof renderCartItems === 'function') renderCartItems();
+                if (typeof updateBadges === 'function') updateBadges();
+            } catch (cartErr) {
+                console.warn('[handleOrderPlacedSuccess cart error]', cartErr);
             }
 
             // 4. In Step 3 summary, show celebratory confirmation banner
-            const summaryContainer = document.getElementById('step3-order-summary');
-            if (summaryContainer) {
-                const oldCard = document.getElementById('chk-order-success-card');
-                if (oldCard) oldCard.remove();
+            try {
+                const summaryContainer = document.getElementById('step3-order-summary');
+                if (summaryContainer) {
+                    const oldCard = document.getElementById('chk-order-success-card');
+                    if (oldCard) oldCard.remove();
 
-                const card = document.createElement('div');
-                card.id = 'chk-order-success-card';
-                card.style.cssText = 'background: rgba(46,125,50,0.1); border: 2px solid #2E7D32; border-radius: 14px; padding: 18px 16px; margin: 16px 0 10px 0; text-align: center; animation: fadeIn 0.3s ease;';
-                card.innerHTML = `
-                    <div style="font-size: 2.2rem; margin-bottom: 6px;">🎉</div>
-                    <div style="font-size: 1.18rem; font-weight: 900; color: #2E7D32; margin-bottom: 4px; letter-spacing: -0.3px;">ДЯКУЄМО ЗА ЗАМОВЛЕННЯ!</div>
-                    <div style="font-family: 'JetBrains Mono', monospace; font-size: 1.05rem; font-weight: 800; color: var(--accent); margin-bottom: 8px;">#MLP-${orderIdStr.replace(/^MLP-/, '')}</div>
-                    <div style="font-size: 0.92rem; color: var(--text-primary); font-weight: 600; line-height: 1.45; margin-bottom: 8px;">
-                        Ваше замовлення успішно створено! Повідомлення вже надіслано в чат бота.
-                    </div>
-                    <div style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.4;">
-                        Натисніть велику зелену кнопку <b>«✅ Перейти до бота →»</b> нижче, щоб повернутися до чату 👇
-                    </div>
-                `;
-                summaryContainer.appendChild(card);
+                    const card = document.createElement('div');
+                    card.id = 'chk-order-success-card';
+                    card.style.cssText = 'background: rgba(46,125,50,0.12); border: 2px solid #2E7D32; border-radius: 14px; padding: 18px 16px; margin: 16px 0 10px 0; text-align: center; animation: fadeIn 0.3s ease;';
+                    card.innerHTML = `
+                        <div style="font-size: 2.2rem; margin-bottom: 6px;">🎉</div>
+                        <div style="font-size: 1.18rem; font-weight: 900; color: #2E7D32; margin-bottom: 4px; letter-spacing: -0.3px;">ДЯКУЄМО ЗА ЗАМОВЛЕННЯ!</div>
+                        <div style="font-family: 'JetBrains Mono', monospace; font-size: 1.05rem; font-weight: 800; color: var(--accent); margin-bottom: 8px;">#MLP-${orderIdStr.replace(/^MLP-/, '')}</div>
+                        <div style="font-size: 0.92rem; color: var(--text-primary); font-weight: 600; line-height: 1.45; margin-bottom: 8px;">
+                            Ваше замовлення успішно створено! Повідомлення вже надіслано в чат бота.
+                        </div>
+                        <div style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.4;">
+                            Натисніть велику зелену кнопку <b>«✅ Перейти до бота →»</b> нижче, щоб повернутися до чату 👇
+                        </div>
+                    `;
+                    summaryContainer.appendChild(card);
+                }
+            } catch (cardErr) {
+                console.warn('[handleOrderPlacedSuccess banner error]', cardErr);
             }
 
             // 5. Scroll drawer body to bring the button into full view
-            const drawerBody = document.querySelector('#checkout-drawer .drawer-body');
-            if (drawerBody) {
-                setTimeout(() => {
-                    drawerBody.scrollTo({ top: drawerBody.scrollHeight, behavior: 'smooth' });
-                }, 60);
-            }
+            try {
+                const drawerBody = document.querySelector('#checkout-drawer .drawer-body');
+                if (drawerBody) {
+                    setTimeout(() => {
+                        drawerBody.scrollTo({ top: drawerBody.scrollHeight, behavior: 'smooth' });
+                    }, 50);
+                }
+            } catch (scrollErr) {}
         }
 
         function handleSuccessOpenManager() {
@@ -8949,7 +8965,7 @@
 
             cart = [];
             saveCart();
-            renderCart();
+            if (typeof renderCartItems === 'function') renderCartItems();
             updateBadges();
 
             const orderIdEl = document.getElementById('success-order-id');
@@ -9664,6 +9680,10 @@
             localStorage.setItem('m1lip_cart', JSON.stringify(cart));
             updateBadges();
             renderCartItems();
+        }
+
+        function renderCart() {
+            if (typeof renderCartItems === 'function') renderCartItems();
         }
 
         function renderCartItems() {
