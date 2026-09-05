@@ -539,7 +539,7 @@ const handleCommentUpdate = (req, res) => {
 app.patch('/api/admin/orders/:order_id/comment', handleCommentUpdate);
 app.patch('/api/orders/:order_id/comment', handleCommentUpdate);
 
-const handleDeleteOrder = (req, res) => {
+const handleDeleteAdminOrder = (req, res) => {
   const deleted = db.deleteOrder(req.params.order_id);
   if (!deleted) {
     return res.status(404).json({ detail: 'Замовлення не знайдено' });
@@ -547,8 +547,24 @@ const handleDeleteOrder = (req, res) => {
   res.json({ status: 'success', detail: 'Замовлення успішно видалено' });
 };
 
-app.delete('/api/admin/orders/:order_id', handleDeleteOrder);
-app.delete('/api/orders/:order_id', handleDeleteOrder);
+const handleDeleteCustomerOrder = (req, res) => {
+  const order = db.getOrderById(req.params.order_id);
+  if (!order) {
+    return res.status(404).json({ detail: 'Замовлення не знайдено' });
+  }
+  const isDeletable = order.status === 'NEW' || order.status === 'PENDING_PAYMENT' || order.status === 'PENDING_MANAGER';
+  if (!isDeletable) {
+    return res.status(403).json({ detail: 'Замовлення вже підтверджено адміністратором і не може бути видалене.' });
+  }
+  const deleted = db.deleteOrder(req.params.order_id);
+  if (!deleted) {
+    return res.status(404).json({ detail: 'Замовлення не знайдено' });
+  }
+  res.json({ status: 'success', detail: 'Замовлення успішно видалено' });
+};
+
+app.delete('/api/admin/orders/:order_id', handleDeleteAdminOrder);
+app.delete('/api/orders/:order_id', handleDeleteCustomerOrder);
 
 // Clear orders / history
 app.delete('/api/orders', (req, res) => {

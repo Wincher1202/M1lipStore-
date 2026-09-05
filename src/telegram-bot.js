@@ -1114,6 +1114,75 @@ export class TelegramBotService {
       return;
     }
 
+    // CUSTOMER: Prompt delete order (check if confirmed)
+    if (data.startsWith('customer_delete_prompt:')) {
+      const orderId = data.replace('customer_delete_prompt:', '').trim();
+      const order = db.getOrderById(orderId);
+      if (!order) {
+        await this.safeEditOrSend(chatId, msgId, `❌ Замовлення #${orderId} не знайдено або вже видалено.`);
+        return;
+      }
+
+      const isDeletable = order.status === 'NEW' || order.status === 'PENDING_PAYMENT' || order.status === 'PENDING_MANAGER';
+      if (!isDeletable) {
+        const statusName = ORDER_STATUSES[order.status]?.name || order.status;
+        const oIdStr = (order.order_id || '').replace(/^#/, '');
+        const managerMsg = `Добрий день! Щодо замовлення #${oIdStr}: хочу скасувати або змінити деталі замовлення.`;
+        const managerUrl = `https://t.me/milipmanager?text=${encodeURIComponent(managerMsg)}`;
+
+        await this.safeEditOrSend(chatId, msgId, `❌ <b>Замовлення #${orderId} не може бути видалене</b>\n\nАдміністратор уже змінив статус замовлення на <b>«${statusName}»</b> і воно передане на склад для комплектації.\n\nЯкщо вам необхідно змінити дані або скасувати доставку, будь ласка, зверніться напряму до нашого менеджера.`, {
+          reply_markup: {
+            inline_keyboard: [
+              [{ text: '💬 Написати менеджеру', url: managerUrl }],
+              [{ text: '📄 Повні деталі замовлення', callback_data: `view_order:${order.order_id}` }],
+              [{ text: '📋 До моїх замовлень', callback_data: `orders_list:${chatId}` }]
+            ]
+          }
+        });
+        return;
+      }
+
+      await this.safeEditOrSend(chatId, msgId, `⚠️ <b>Ви впевнені, що хочете видалити замовлення #${orderId}?</b>\n\nЗамовлення буде повністю видалено з бази даних магазину. Цю дію не можна скасувати.`, {
+        reply_markup: {
+          inline_keyboard: [
+            [{ text: '🗑 Так, видалити замовлення', callback_data: `customer_delete_confirm:${orderId}` }],
+            [{ text: '↩️ Скасувати', callback_data: `view_order:${orderId}` }]
+          ]
+        }
+      });
+      return;
+    }
+
+    // CUSTOMER: Confirm delete order
+    if (data.startsWith('customer_delete_confirm:')) {
+      const orderId = data.replace('customer_delete_confirm:', '').trim();
+      const order = db.getOrderById(orderId);
+      if (!order) {
+        await this.safeEditOrSend(chatId, msgId, `❌ Замовлення #${orderId} вже видалено або не існує.`);
+        return;
+      }
+
+      const isDeletable = order.status === 'NEW' || order.status === 'PENDING_PAYMENT' || order.status === 'PENDING_MANAGER';
+      if (!isDeletable) {
+        const statusName = ORDER_STATUSES[order.status]?.name || order.status;
+        await this.safeEditOrSend(chatId, msgId, `❌ Замовлення #${orderId} уже підтверджено адміністратором (${statusName}) та не може бути видалене.`);
+        return;
+      }
+
+      db.deleteOrder(orderId);
+      const appUrl = getStoreWebUrl();
+
+      await this.safeEditOrSend(chatId, msgId, `🗑 <b>Замовлення #${orderId} успішно видалено!</b>\n\nВи завжди можете обрати інші девайси та створити нове замовлення у нашому магазині.`, {
+        reply_markup: {
+          inline_keyboard: [
+            [{ text: '🚀 Каталог товарів', web_app: { url: appUrl } }],
+            [{ text: '📋 До моїх замовлень', callback_data: `orders_list:${chatId}` }]
+          ]
+        }
+      });
+      return;
+    }
+
     // CUSTOMER: Instant Smart Glocal Test Payment in Bot
     if (data.startsWith('pay_test:')) {
       const orderId = data.replace('pay_test:', '').trim();
@@ -1704,14 +1773,19 @@ export class TelegramBotService {
       { text: '💬 Написати менеджеру', url: managerUrl }
     ]);
 
-    // Required button: «Мої замовлення»
-    buttons.push([
-      { text: '🛍 Мої замовлення', callback_data: `orders_list:${chatId}` }
-    ]);
-
     // Full details view
     buttons.push([
-      { text: '🔍 Повні деталі замовлення', callback_data: `view_order:${order.order_id}` }
+      { text: '📄 Повні деталі замовлення', callback_data: `view_order:${order.order_id}` }
+    ]);
+
+    // Required button: «До моїх замовлень»
+    buttons.push([
+      { text: '📋 До моїх замовлень', callback_data: `orders_list:${chatId}` }
+    ]);
+
+    // Delete order button
+    buttons.push([
+      { text: '🗑 Видалити замовлення', callback_data: `customer_delete_prompt:${order.order_id}` }
     ]);
 
     if (messageId) {
@@ -1721,15 +1795,6 @@ export class TelegramBotService {
     await this.sendPhotoOrMessage(chatId, colorPhoto, text, {
       reply_markup: { inline_keyboard: buttons }
     });
-
-    // [ПРИХОВАНО на майбутнє - для активації інвойсів в Telegram]
-    // if (isOnline && !isPaid) {
-    //   try {
-    //     await this.sendNativeTelegramInvoice(chatId, order);
-    //   } catch (e) {
-    //     console.warn('[TelegramBot] Auto sendNativeTelegramInvoice error:', e);
-    //   }
-    // }
   }
 
   // View full order details with product photo matching chosen color
@@ -1812,14 +1877,6 @@ export class TelegramBotService {
 
     const buttons = [];
 
-    // [ПРИХОВАНО на майбутнє - для активації онлайн-оплати/ФОП]
-    // if (isUnpaid) {
-    //   buttons.push([
-    //     { text: `💳 Оплатити ${order.total} ₴`, callback_data: `send_invoice:${order.order_id}` },
-    //     { text: `⚡ Сплатити (Test)`, callback_data: `pay_test:${order.order_id}` }
-    //   ]);
-    // }
-
     const orderIdDetailStr = (order.order_id || '').replace(/^#/, '');
     const itemsDetailList = (order.items || []).map((it, idx) => `${idx + 1}. ${it.title}${it.color ? ` (${it.color})` : ''} — ${it.qty} шт. × ${it.price} ₴`).join('\n');
     const provDetailClean = delivery.provider === 'ukrposhta' ? 'Укрпошта' : 'Нова пошта';
@@ -1833,12 +1890,15 @@ export class TelegramBotService {
     const managerDetailUrl = `https://t.me/milipmanager?text=${encodeURIComponent(managerDetailMsg)}`;
 
     buttons.push([
-      { text: '💬 Написати менеджеру (@milipmanager)', url: managerDetailUrl }
+      { text: '💬 Написати менеджеру', url: managerDetailUrl }
     ]);
 
     buttons.push([
-      { text: '🛍 До моїх замовлень', callback_data: `orders_list:${chatId}` },
-      { text: '🔄 Оновити', callback_data: `view_order:${order.order_id}` }
+      { text: '📋 До моїх замовлень', callback_data: `orders_list:${chatId}` }
+    ]);
+
+    buttons.push([
+      { text: '🗑 Видалити замовлення', callback_data: `customer_delete_prompt:${order.order_id}` }
     ]);
 
     if (messageId) {
@@ -1972,10 +2032,13 @@ export class TelegramBotService {
       const oManagerUrl = `https://t.me/milipmanager?text=${encodeURIComponent(oManagerMsg)}`;
 
       buttons.push([
-        { text: '💬 Написати менеджеру (@milipmanager)', url: oManagerUrl }
+        { text: '💬 Написати менеджеру', url: oManagerUrl }
       ]);
       buttons.push([
-        { text: '🔍 Повні деталі замовлення', callback_data: `view_order:${o.order_id}` }
+        { text: '📄 Повні деталі замовлення', callback_data: `view_order:${o.order_id}` }
+      ]);
+      buttons.push([
+        { text: '🗑 Видалити замовлення', callback_data: `customer_delete_prompt:${o.order_id}` }
       ]);
 
       await this.sendPhotoOrMessage(chatId, colorPhoto, cardText, {
@@ -2459,11 +2522,13 @@ export class TelegramBotService {
     const statusManagerUrl = `https://t.me/milipmanager?text=${encodeURIComponent(statusMsgForUrl)}`;
 
     custButtons.push([
-      { text: '💬 Написати менеджеру (@milipmanager)', url: statusManagerUrl }
+      { text: '💬 Написати менеджеру', url: statusManagerUrl }
     ]);
     custButtons.push([
-      { text: '🔍 Переглянути замовлення', callback_data: `view_order:${order.order_id}` },
-      { text: '🛍 Мої замовлення', callback_data: `orders_list:${targetChatId}` }
+      { text: '📄 Повні деталі замовлення', callback_data: `view_order:${order.order_id}` }
+    ]);
+    custButtons.push([
+      { text: '📋 До моїх замовлень', callback_data: `orders_list:${targetChatId}` }
     ]);
 
     try {
@@ -2623,9 +2688,9 @@ export class TelegramBotService {
     const paidSupportUrl = `https://t.me/milipmanager?text=${encodeURIComponent(paidSupportMsg)}`;
 
     const buttons = [
-      [{ text: '🛍 Мої замовлення', callback_data: `orders_list:${targetChatId}` }],
-      [{ text: '🔍 Повні деталі замовлення', callback_data: `view_order:${order.order_id}` }],
-      [{ text: '💬 Написати менеджеру (@milipmanager)', url: paidSupportUrl }]
+      [{ text: '💬 Написати менеджеру', url: paidSupportUrl }],
+      [{ text: '📄 Повні деталі замовлення', callback_data: `view_order:${order.order_id}` }],
+      [{ text: '📋 До моїх замовлень', callback_data: `orders_list:${targetChatId}` }]
     ];
 
     if (messageId) {

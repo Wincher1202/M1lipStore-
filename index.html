@@ -7439,31 +7439,14 @@
         function prefillContactsFromProfile() {
             setupPhoneInput();
             const tgUser = getTelegramUser();
-            const nameEl = document.getElementById('chk-name');
-            const surnameEl = document.getElementById('chk-surname');
-            const phoneEl = document.getElementById('chk-phone');
             const userEl = document.getElementById('chk-username');
             const badgeEl = document.getElementById('tg-auto-badge');
-            const badgeTextEl = document.getElementById('tg-auto-badge-text');
 
-            if (tgUser) {
-                if (nameEl && !nameEl.value && tgUser.first_name) nameEl.value = tgUser.first_name;
-                if (surnameEl && !surnameEl.value && tgUser.last_name) surnameEl.value = tgUser.last_name;
-                if (userEl && (!userEl.value || userEl.value === '@') && tgUser.username) {
-                    userEl.value = '@' + tgUser.username.replace(/^@/, '');
-                }
-                if (badgeEl) {
-                    badgeEl.style.display = 'flex';
-                    if (badgeTextEl) {
-                        const tgLabel = tgUser.username ? `@${tgUser.username}` : (tgUser.first_name || 'користувач');
-                        badgeTextEl.innerHTML = `Дані підтягнуто з вашого Telegram: <strong>${tgLabel}</strong>`;
-                    }
-                }
+            if (tgUser && userEl && (!userEl.value || userEl.value === '@') && tgUser.username) {
+                userEl.value = '@' + tgUser.username.replace(/^@/, '');
             }
-
-            const savedPhone = localStorage.getItem('m1lip_last_phone');
-            if (phoneEl && (!phoneEl.value || phoneEl.value === '+380') && savedPhone) {
-                phoneEl.value = normalizePhoneDisplay(savedPhone);
+            if (badgeEl) {
+                badgeEl.style.display = 'none';
             }
         }
 
@@ -9220,6 +9203,12 @@
 
         function promptDeleteCustomerOrder(orderId) {
             const cleanId = String(orderId || '').replace(/[^a-zA-Z0-9_-]/g, '');
+            const order = currentCustomerOrdersList.find(o => String(o.id || o.order_id || '').replace(/^#/, '') === cleanId);
+            if (order && order.status && order.status !== 'NEW' && order.status !== 'PENDING_PAYMENT' && order.status !== 'PENDING_MANAGER') {
+                const statusName = (typeof STATUS_MAP !== 'undefined' && STATUS_MAP[order.status]?.label) || order.status;
+                showNotificationToast(`❌ Замовлення вже підтверджено (${statusName}) та не може бути видалене`);
+                return;
+            }
             const confirmBox = document.getElementById(`delete-confirm-${cleanId}`);
             if (confirmBox) {
                 confirmBox.style.display = confirmBox.style.display === 'none' ? 'block' : 'none';
@@ -9240,6 +9229,11 @@
                 const res = await fetch(`${API_BASE}/orders/${encodeURIComponent(cleanId)}`, {
                     method: 'DELETE'
                 });
+                if (res.status === 403) {
+                    showNotificationToast('❌ Замовлення вже підтверджено адміністратором і не може бути видалене');
+                    cancelDeleteCustomerOrderPrompt(cleanId);
+                    return;
+                }
                 if (!res.ok) throw new Error();
                 
                 if (localStorage.getItem('m1lip_last_order_id') === cleanId) {
