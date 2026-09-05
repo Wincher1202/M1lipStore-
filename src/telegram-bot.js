@@ -1610,13 +1610,27 @@ export class TelegramBotService {
     if (order.status === 'COMPLETED') statusEmoji = '🎉';
     if (order.status === 'CANCELLED') statusEmoji = '❌';
 
-    const itemsSummary = (order.items || []).map((i, idx) => {
-      const color = i.color ? `\n   • Колір: <b>${i.color}</b>` : '';
-      return `${idx + 1}. 🕹 <b>${i.title}</b>${color}\n   • Кількість: ${i.qty} шт. × ${i.price} ₴ = <b>${i.price * i.qty} ₴</b>`;
-    }).join('\n\n');
+    const items = order.items || [];
+    let itemsBlock = '';
+    if (items.length === 1) {
+      const it = items[0];
+      itemsBlock = `• <b>Товари:</b> 🕹 <b>${it.title}</b>\n` +
+        (it.color ? `• <b>Колір:</b> <b>${it.color}</b>\n` : '') +
+        `• <b>Кількість:</b> ${it.qty} шт. × ${it.price} ₴ = <b>${it.price * it.qty} ₴</b>\n`;
+    } else if (items.length > 1) {
+      const list = items.map((it, idx) => {
+        const col = it.color ? ` (${it.color})` : '';
+        return `  ${idx + 1}. 🕹 <b>${it.title}${col}</b>: ${it.qty} шт. × ${it.price} ₴ = <b>${it.price * it.qty} ₴</b>`;
+      }).join('\n');
+      itemsBlock = `• <b>Товари:</b>\n${list}\n`;
+    } else {
+      itemsBlock = `• <b>Товари:</b> <i>Товари не вказані</i>\n`;
+    }
 
     const fullName = this.formatCustomerFullName(customer);
     const provName = delivery.provider === 'ukrposhta' ? 'Укрпошта' : 'Нова Пошта';
+    const delivPoint = delivery.department || delivery.address || delivery.city || 'Відділення';
+    const cleanTg = (customer.telegram_username || '').replace(/^@+/, '');
 
     // Find photo of the 1st ordered item and exact color
     const colorPhoto = this.getOrderColorPhoto(order);
@@ -1627,11 +1641,11 @@ export class TelegramBotService {
       `Для підтвердження наявності товару, уточнення адреси доставки та узгодження зручного способу оплати, будь ласка, напишіть менеджеру <b>@milipmanager</b>.\n\n` +
       `<i>Ми вже підготували готовий текст вашого замовлення — просто натисніть кнопку «💬 Написати менеджеру» нижче!</i>\n\n` +
       `📦 <b>Інформація про замовлення:</b>\n` +
-      `• <b>Товари:</b>\n${itemsSummary}\n` +
+      `${itemsBlock}` +
       `• <b>Сума:</b> <b>${order.total} ₴</b>\n` +
       `• <b>Отримувач:</b> ${fullName} (<code>${customer.phone || 'не вказано'}</code>)\n` +
-      (customer.telegram_username ? `• <b>Telegram:</b> @${customer.telegram_username.replace(/^@/, '')}\n` : '') +
-      `• <b>Доставка:</b> ${provName} (${delivery.department || delivery.address || delivery.city || 'Відділення'})\n` +
+      (cleanTg ? `• <b>Telegram:</b> @${cleanTg}\n` : '') +
+      `• <b>Доставка:</b> ${provName} (${delivPoint})\n` +
       `• <b>Статус:</b> ${statusEmoji} <b>${statusName}</b>\n` +
       `• <b>Спосіб:</b> 💬 <b>Через менеджера (@milipmanager)</b>`;
 
@@ -1655,9 +1669,7 @@ export class TelegramBotService {
     const name = customer.first_name || customer.name || '';
     const patronymic = customer.middle_name || customer.patronymic || '';
     const pib = [surname, name, patronymic].filter(Boolean).join(' ') || [name, surname].filter(Boolean).join(' ') || fullName || 'Покупець';
-    const cleanTg = (customer.telegram_username || '').replace(/^@+/, '');
     const provNameClean = delivery.provider === 'ukrposhta' ? 'Укрпошта' : 'Нова Пошта';
-    const delivPoint = delivery.department || delivery.warehouse_number || delivery.address || 'Відділення';
 
     let managerText = `👑 ЗАМОВЛЕННЯ #${orderIdStr}\n\n`;
     managerText += `📊 Статус: 🆕 Нові\n`;
@@ -1689,7 +1701,7 @@ export class TelegramBotService {
 
     // Primary action: Direct chat with manager with prefilled text!
     buttons.push([
-      { text: '💬 Написати менеджеру (@milipmanager)', url: managerUrl }
+      { text: '💬 Написати менеджеру', url: managerUrl }
     ]);
 
     // Required button: «Мої замовлення»

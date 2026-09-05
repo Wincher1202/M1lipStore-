@@ -8617,6 +8617,9 @@
             if (tw && typeof tw.openTelegramLink === 'function') {
                 try {
                     tw.openTelegramLink(managerUrl);
+                    setTimeout(() => {
+                        try { if (typeof tw.close === 'function') tw.close(); } catch(e) {}
+                    }, 300);
                     return;
                 } catch(e) {
                     console.warn('[openTelegramLink manager error]', e);
@@ -8627,6 +8630,19 @@
             } catch(e) {
                 window.location.href = managerUrl;
             }
+        }
+
+        function closeWebAppAndReturnToChat() {
+            const tw = window.Telegram?.WebApp;
+            if (tw && typeof tw.close === 'function') {
+                try {
+                    tw.close();
+                    return;
+                } catch(e) {
+                    console.warn('[tw.close error]', e);
+                }
+            }
+            closeSuccessModal();
         }
 
         function showOrderSuccessModal(order, paymentType = 'manager') {
