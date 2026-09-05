@@ -1561,10 +1561,11 @@ export class TelegramBotService {
       const orderId = data.replace('admin_delete_confirm:', '').trim();
       const deleted = db.deleteOrder(orderId);
       if (deleted) {
-        await this.safeEditOrSend(chatId, msgId, `🗑 <b>Замовлення #${orderId} успішно видалено з бази.</b>`, {
+        await this.safeEditOrSend(chatId, msgId, `🗑 <b>Замовлення #${orderId} успішно видалено з бази та хмари MILIPSTORE.</b>`, {
           reply_markup: {
             inline_keyboard: [
               [{ text: '⚡ До активних замовлень', callback_data: 'admin_list:ACTIVE' }],
+              [{ text: '🗄 До архіву замовлень', callback_data: 'admin_list:ARCHIVE' }],
               [{ text: '👑 До адмін-панелі', callback_data: 'admin_dashboard' }]
             ]
           }
@@ -1573,7 +1574,8 @@ export class TelegramBotService {
         await this.safeEditOrSend(chatId, msgId, `❌ Замовлення #${orderId} вже було видалене або не знайдене.`, {
           reply_markup: {
             inline_keyboard: [
-              [{ text: '⚡ До списку замовлень', callback_data: 'admin_list:ACTIVE' }],
+              [{ text: '⚡ До активних замовлень', callback_data: 'admin_list:ACTIVE' }],
+              [{ text: '🗄 До архіву замовлень', callback_data: 'admin_list:ARCHIVE' }],
               [{ text: '🔙 До адмін-панелі', callback_data: 'admin_dashboard' }]
             ]
           }

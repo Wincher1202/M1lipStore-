@@ -797,10 +797,10 @@ app.listen(PORT, '0.0.0.0', () => {
     }
   }, 1500);
 
-  // Background sync every 90 seconds
+  // Background sync every 30 seconds
   setInterval(async () => {
     try {
       await db.syncWithCloud('https://m1lipstore.onrender.com');
     } catch(e) {}
-  }, 90000);
+  }, 30000);
 });

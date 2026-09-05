@@ -334,6 +334,7 @@ class Database {
           const deletedProdIds = Array.isArray(parsed.deleted_product_ids) ? parsed.deleted_product_ids : [];
           const deletedBrandIds = Array.isArray(parsed.deleted_brand_ids) ? parsed.deleted_brand_ids : [];
           const deletedCatIds = Array.isArray(parsed.deleted_category_ids) ? parsed.deleted_category_ids : [];
+          const deletedOrderIds = Array.isArray(parsed.deleted_order_ids) ? parsed.deleted_order_ids : [];
 
           // IMPORTANT: Filter out explicitly deleted items
           let existingProducts = Array.isArray(parsed.products) && parsed.products.length > 0
@@ -356,19 +357,24 @@ class Database {
             ? parsed.brands.filter(b => !deletedBrandIds.includes(b.id))
             : INITIAL_BRANDS.filter(b => !deletedBrandIds.includes(b.id));
 
+          let existingOrders = Array.isArray(parsed.orders)
+            ? parsed.orders.filter(o => !deletedOrderIds.includes((o.order_id || o.id || '').toString().replace(/^#/, '')))
+            : [];
+
           this.data = {
             ...this.data,
             ...parsed,
             products: existingProducts,
             categories: existingCategories,
             brands: existingBrands,
-            orders: Array.isArray(parsed.orders) ? parsed.orders : [],
+            orders: existingOrders,
             telegram_users: parsed.telegram_users || {},
             admin_ids: combinedAdmins,
             notifications: parsed.notifications || [],
             deleted_product_ids: deletedProdIds,
             deleted_brand_ids: deletedBrandIds,
             deleted_category_ids: deletedCatIds,
+            deleted_order_ids: deletedOrderIds,
             last_cloud_sync: parsed.last_cloud_sync || null
           };
           this.save();
@@ -384,7 +390,7 @@ class Database {
     }
   }
 
-  save() {
+  save(skipCloudSchedule = false) {
     try {
       const serialized = JSON.stringify(this.data, null, 2);
       fs.writeFileSync(DB_FILE, serialized, 'utf8');
@@ -393,6 +399,47 @@ class Database {
       } catch (e) {}
     } catch (err) {
       console.error('[DB] Failed to save store.json:', err.message);
+    }
+    if (!skipCloudSchedule) {
+      this.scheduleCloudPush();
+    }
+  }
+
+  scheduleCloudPush() {
+    if (this._pushTimer) clearTimeout(this._pushTimer);
+    this._pushTimer = setTimeout(() => {
+      this.pushToCloud().catch(err => {
+        console.warn('[DB] Automatic cloud push notice:', err.message);
+      });
+    }, 1500);
+  }
+
+  async pushToCloud(cloudBaseUrl = 'https://m1lipstore.onrender.com') {
+    const cleanBase = (process.env.CLOUD_SYNC_URL || cloudBaseUrl || 'https://m1lipstore.onrender.com').replace(/\/$/, '');
+    const currentHost = (process.env.APP_URL || '').toLowerCase();
+    if (currentHost.includes('m1lipstore.onrender.com') && cleanBase.includes('m1lipstore.onrender.com')) {
+      return { ok: true, skipped: true, reason: 'Running directly on cloud production node' };
+    }
+
+    try {
+      const payload = this.exportBackup();
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 12000);
+      const res = await fetch(`${cleanBase}/api/sync/restore`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
+
+      if (res.ok) {
+        this.data.last_cloud_sync = new Date().toISOString();
+        return { ok: true, pushed_at: this.data.last_cloud_sync };
+      }
+      return { ok: false, status: res.status };
+    } catch (err) {
+      return { ok: false, reason: err.message };
     }
   }
 
@@ -414,8 +461,15 @@ class Database {
       throw new Error('Не знайдено даних для відновлення');
     }
 
-    const deletedProds = Array.isArray(payload.deleted_product_ids) ? payload.deleted_product_ids : (this.data.deleted_product_ids || []);
+    const deletedProds = Array.isArray(payload.deleted_product_ids)
+      ? Array.from(new Set([...(this.data.deleted_product_ids || []), ...payload.deleted_product_ids]))
+      : (this.data.deleted_product_ids || []);
     this.data.deleted_product_ids = deletedProds;
+
+    const deletedOrders = Array.isArray(payload.deleted_order_ids)
+      ? Array.from(new Set([...(this.data.deleted_order_ids || []), ...payload.deleted_order_ids]))
+      : (this.data.deleted_order_ids || []);
+    this.data.deleted_order_ids = deletedOrders;
 
     if (Array.isArray(payload.products)) {
       this.data.products = payload.products.filter(p => !deletedProds.includes(p.id));
@@ -427,16 +481,19 @@ class Database {
       this.data.brands = payload.brands;
     }
     if (Array.isArray(payload.orders)) {
-      this.data.orders = payload.orders;
+      this.data.orders = payload.orders.filter(o => {
+        const idClean = (o.order_id || o.id || '').toString().replace(/^#/, '');
+        return !deletedOrders.includes(idClean) && !deletedOrders.includes(`#${idClean}`);
+      });
     }
     if (payload.telegram_users && typeof payload.telegram_users === 'object') {
-      this.data.telegram_users = payload.telegram_users;
+      this.data.telegram_users = { ...this.data.telegram_users, ...payload.telegram_users };
     }
     if (Array.isArray(payload.admin_ids) && payload.admin_ids.length > 0) {
       this.data.admin_ids = Array.from(new Set([...this.data.admin_ids, ...payload.admin_ids]));
     }
     this.data.last_cloud_sync = new Date().toISOString();
-    this.save();
+    this.save(true);
     return true;
   }
 
@@ -450,7 +507,7 @@ class Database {
 
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 8000);
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
 
       const endpoints = [
         `${cleanBase}/api/sync/backup`,
@@ -478,23 +535,33 @@ class Database {
 
       if (pulledData.store_data) {
         const payload = pulledData.store_data;
+        
+        // 1. Sync deleted sets bidirectionally
         const deletedProds = new Set([...(this.data.deleted_product_ids || []), ...(payload.deleted_product_ids || [])]);
         this.data.deleted_product_ids = Array.from(deletedProds);
 
+        const deletedOrders = new Set([...(this.data.deleted_order_ids || []), ...(payload.deleted_order_ids || [])]);
+        this.data.deleted_order_ids = Array.from(deletedOrders);
+
+        // 2. Sync Products (both active and inactive)
         if (Array.isArray(payload.products) && payload.products.length > 0) {
-          // Merge products preserving local overrides and remote products
           const localMap = new Map((this.data.products || []).map(p => [p.id, p]));
           for (const remoteProd of payload.products) {
             if (!deletedProds.has(remoteProd.id)) {
               normalizeProductPhotoUrls(remoteProd);
               if (!localMap.has(remoteProd.id)) {
                 localMap.set(remoteProd.id, remoteProd);
+              } else {
+                // If remote is newer or has updated fields
+                const local = localMap.get(remoteProd.id);
+                localMap.set(remoteProd.id, { ...local, ...remoteProd });
               }
             }
           }
           this.data.products = Array.from(localMap.values()).filter(p => !deletedProds.has(p.id));
         }
 
+        // 3. Sync Categories
         if (Array.isArray(payload.categories) && payload.categories.length > 0) {
           const localCatMap = new Map((this.data.categories || []).map(c => [c.id || c.name, c]));
           for (const c of payload.categories) {
@@ -503,6 +570,7 @@ class Database {
           this.data.categories = Array.from(localCatMap.values());
         }
 
+        // 4. Sync Brands
         if (Array.isArray(payload.brands) && payload.brands.length > 0) {
           const localBrandMap = new Map((this.data.brands || []).map(b => [b.id || b.name, b]));
           for (const b of payload.brands) {
@@ -511,19 +579,44 @@ class Database {
           this.data.brands = Array.from(localBrandMap.values());
         }
 
-        if (Array.isArray(payload.orders) && payload.orders.length > 0) {
-          const orderMap = new Map((this.data.orders || []).map(o => [o.order_id || o.id, o]));
+        // 5. Sync Orders (merge active & archived, filter deleted)
+        const orderMap = new Map((this.data.orders || []).map(o => [(o.order_id || o.id || '').replace(/^#/, ''), o]));
+        if (Array.isArray(payload.orders)) {
           for (const o of payload.orders) {
-            const key = o.order_id || o.id;
-            if (!orderMap.has(key)) {
-              orderMap.set(key, o);
+            const key = (o.order_id || o.id || '').replace(/^#/, '');
+            if (!deletedOrders.has(key)) {
+              if (!orderMap.has(key)) {
+                orderMap.set(key, o);
+              } else {
+                // Keep the one with latest activity/history
+                const localOrder = orderMap.get(key);
+                const localTime = new Date(localOrder.updated_at || localOrder.created_at || 0).getTime();
+                const remoteTime = new Date(o.updated_at || o.created_at || 0).getTime();
+                if (remoteTime > localTime) {
+                  orderMap.set(key, o);
+                }
+              }
             }
           }
-          this.data.orders = Array.from(orderMap.values()).sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+        }
+        this.data.orders = Array.from(orderMap.values())
+          .filter(o => !deletedOrders.has((o.order_id || o.id || '').replace(/^#/, '')))
+          .sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+
+        // 6. Telegram users & admins
+        if (payload.telegram_users && typeof payload.telegram_users === 'object') {
+          this.data.telegram_users = { ...this.data.telegram_users, ...payload.telegram_users };
+        }
+        if (Array.isArray(payload.admin_ids) && payload.admin_ids.length > 0) {
+          this.data.admin_ids = Array.from(new Set([...this.data.admin_ids, ...payload.admin_ids]));
         }
 
         this.data.last_cloud_sync = new Date().toISOString();
-        this.save();
+        this.save(true);
+
+        // Bi-directional propagation: Push our combined complete dataset back to the cloud
+        await this.pushToCloud(cleanBase);
+
         return {
           ok: true,
           source: cleanBase,
@@ -545,7 +638,8 @@ class Database {
         }
         this.data.products = Array.from(localMap.values()).filter(p => !deletedProds.has(p.id));
         this.data.last_cloud_sync = new Date().toISOString();
-        this.save();
+        this.save(true);
+        await this.pushToCloud(cleanBase);
         return {
           ok: true,
           source: cleanBase,
@@ -992,31 +1086,51 @@ class Database {
   deleteOrder(orderId) {
     if (!orderId) return false;
     const cleanId = orderId.toString().replace(/^#/, '').trim();
+    if (!this.data.deleted_order_ids) this.data.deleted_order_ids = [];
+    if (!this.data.deleted_order_ids.includes(cleanId)) {
+      this.data.deleted_order_ids.push(cleanId);
+    }
     const initLen = this.data.orders.length;
     this.data.orders = this.data.orders.filter(o => 
-      o.order_id !== cleanId && 
-      o.id !== cleanId && 
-      o.order_id !== `#${cleanId}` &&
+      (o.order_id || '').toString().replace(/^#/, '') !== cleanId && 
+      (o.id || '').toString().replace(/^#/, '') !== cleanId && 
       o.order_id !== orderId
     );
     const deleted = this.data.orders.length < initLen;
-    if (deleted) {
-      this.save();
-    }
-    return deleted;
+    this.save();
+    // Immediate cloud push for order deletion
+    this.pushToCloud().catch(() => {});
+    return deleted || true;
   }
 
   clearAllOrders() {
+    if (!this.data.deleted_order_ids) this.data.deleted_order_ids = [];
+    for (const o of this.data.orders) {
+      const cleanId = (o.order_id || o.id || '').toString().replace(/^#/, '');
+      if (cleanId && !this.data.deleted_order_ids.includes(cleanId)) {
+        this.data.deleted_order_ids.push(cleanId);
+      }
+    }
     this.data.orders = [];
     this.save();
+    this.pushToCloud().catch(() => {});
     return true;
   }
 
   clearOrdersByFilter({ phone, telegram_id } = {}) {
+    if (!this.data.deleted_order_ids) this.data.deleted_order_ids = [];
     const initLen = this.data.orders.length;
     if (phone) {
       const qDigits = phone.toString().replace(/\D/g, '');
       if (qDigits.length >= 6) {
+        const removed = this.data.orders.filter(o => {
+          const pDigits = (o.customer?.phone || '').replace(/\D/g, '');
+          return pDigits.includes(qDigits);
+        });
+        removed.forEach(o => {
+          const cId = (o.order_id || o.id || '').toString().replace(/^#/, '');
+          if (cId && !this.data.deleted_order_ids.includes(cId)) this.data.deleted_order_ids.push(cId);
+        });
         this.data.orders = this.data.orders.filter(o => {
           const pDigits = (o.customer?.phone || '').replace(/\D/g, '');
           return !pDigits.includes(qDigits);
@@ -1024,14 +1138,21 @@ class Database {
       }
     } else if (telegram_id) {
       const tid = String(telegram_id);
+      const removed = this.data.orders.filter(o => String(o.customer?.telegram_id) === tid);
+      removed.forEach(o => {
+        const cId = (o.order_id || o.id || '').toString().replace(/^#/, '');
+        if (cId && !this.data.deleted_order_ids.includes(cId)) this.data.deleted_order_ids.push(cId);
+      });
       this.data.orders = this.data.orders.filter(o => String(o.customer?.telegram_id) !== tid);
     } else {
+      this.data.orders.forEach(o => {
+        const cId = (o.order_id || o.id || '').toString().replace(/^#/, '');
+        if (cId && !this.data.deleted_order_ids.includes(cId)) this.data.deleted_order_ids.push(cId);
+      });
       this.data.orders = [];
     }
-    const deleted = this.data.orders.length < initLen;
-    if (deleted) {
-      this.save();
-    }
+    this.save();
+    this.pushToCloud().catch(() => {});
     return true;
   }
 
