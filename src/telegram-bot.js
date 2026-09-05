@@ -712,15 +712,22 @@ export class TelegramBotService {
     const storeUrl = getStoreWebUrl();
     const keyboard = [];
 
+    // Modern, aesthetic store open button without joystick emoji
+    const storeBtn = { text: '🛍️ Відкрити магазин ✨', web_app: { url: storeUrl } };
+
     if (isAdminUser) {
+      // Admins now have the exact same store open button at the top/bottom of keyboard
+      keyboard.push([storeBtn]);
       keyboard.push([
         { text: '👑 Панель адміністратора' },
         { text: '📦 Каталог товарів' }
       ]);
-    } else {
       keyboard.push([
-        { text: '🎮 Відкрити магазин', web_app: { url: storeUrl } }
+        { text: "💬 Зв'язок з менеджером" },
+        { text: '🛍 Мої замовлення' }
       ]);
+    } else {
+      keyboard.push([storeBtn]);
       keyboard.push([
         { text: "💬 Зв'язок з менеджером" },
         { text: '🛍 Мої замовлення' }
@@ -841,16 +848,16 @@ export class TelegramBotService {
         }
       }
 
-      const welcomeText = `👋 <b>Вітаємо в офіційному боті MILIPSTORE!</b>\n\n` +
-        `🎮 <b>MILIPSTORE</b> — преміальні ігрові девайси та техніка для сетапу:\n` +
-        `• Ультралегкі бездротові мишки\n` +
-        `• Кастомні механічні клавіатури з Gasket Mount\n` +
-        `• Професійні ігрові поверхні Cordura Control\n\n` +
-        `У цьому боті ви можете:\n` +
-        `🛍 Переглядати девайси та оформлювати замовлення\n` +
-        `📦 Слідкувати за статусом замовлень та ТТН\n` +
-        `💬 Консультуватися з менеджером\n\n` +
-        `👇 <i>Оберіть потрібну дію на панелі кнопок внизу:</i>`;
+      const welcomeText = `✨ <b>Ласкаво просимо до офіційного бота MILIPSTORE!</b>\n\n` +
+        `🔥 <b>Топові ігрові девайси для твого ідеального сетапу:</b>\n` +
+        `⚡ <b>Бездротові мишки:</b> ультралегкі корпуси та сенсори PAW3395 / PAW3950\n` +
+        `⌨️ <b>Механічні клавіатури:</b> кастомний звук, Gasket Mount та Hot-Swap\n` +
+        `🎯 <b>Ігрові поверхні:</b> Cordura & Control килимки для ідеального аіму\n` +
+        `🎧 <b>Аксесуари:</b> скляні глайди, ергономічні гріпси, кабелі\n\n` +
+        `🛍 <b>Каталог:</b> швидкий перегляд та онлайн-замовлення в 1 клік\n` +
+        `📦 <b>Замовлення:</b> миттєве відстеження статусу та ТТН\n` +
+        `💬 <b>Підтримка:</b> персональна консультація та допомога з вибором\n\n` +
+        `👇 <i>Натисніть кнопку <b>«🛍️ Відкрити магазин ✨»</b> на панелі внизу:</i>`;
 
       const sendRes = await this.callApi('sendMessage', {
         chat_id: chatId,
@@ -955,6 +962,9 @@ export class TelegramBotService {
 
     // OPEN WEB STORE / CATALOG MANAGEMENT
     if (
+      text === '🛍️ Відкрити магазин ✨' ||
+      text === '✨ Відкрити магазин 🛍️' ||
+      text === '🛍️ Відкрити магазин' ||
       text === '🎮 Відкрити магазин' ||
       text === 'Відкрити магазин' ||
       text === '🎮 Магазин' ||
@@ -1911,13 +1921,13 @@ export class TelegramBotService {
     let itemsBlock = '';
     if (items.length === 1) {
       const it = items[0];
-      itemsBlock = `• <b>Товари:</b> 🕹 <b>${it.title}</b>\n` +
+      itemsBlock = `• <b>Товари:</b> ⚡ <b>${it.title}</b>\n` +
         (it.color ? `• <b>Колір:</b> <b>${it.color}</b>\n` : '') +
         `• <b>Кількість:</b> ${it.qty} шт. × ${it.price} ₴ = <b>${it.price * it.qty} ₴</b>\n`;
     } else if (items.length > 1) {
       const list = items.map((it, idx) => {
         const col = it.color ? ` (${it.color})` : '';
-        return `  ${idx + 1}. 🕹 <b>${it.title}${col}</b>: ${it.qty} шт. × ${it.price} ₴ = <b>${it.price * it.qty} ₴</b>`;
+        return `  ${idx + 1}. ⚡ <b>${it.title}${col}</b>: ${it.qty} шт. × ${it.price} ₴ = <b>${it.price * it.qty} ₴</b>`;
       }).join('\n');
       itemsBlock = `• <b>Товари:</b>\n${list}\n`;
     } else {
@@ -2012,7 +2022,7 @@ export class TelegramBotService {
 
     let detailsText = `🔍 <b>Деталі замовлення #${order.order_id}</b>\n\n`;
 
-    detailsText += `🕹 <b>Головний товар:</b>\n`;
+    detailsText += `⚡ <b>Головний товар:</b>\n`;
     detailsText += `• Назва: <b>${firstItem.title || 'Товар'}</b>\n`;
     detailsText += `• Обраний колір: 🎨 <b>${orderedColor || 'Стандартний'}</b>\n`;
     detailsText += `• Кількість: ${firstItem.qty || 1} шт. × ${firstItem.price || order.total} ₴ = <b>${(firstItem.price || order.total) * (firstItem.qty || 1)} ₴</b>\n`;
@@ -2148,7 +2158,7 @@ export class TelegramBotService {
       await this.safeEditOrSend(chatId, messageId, `🛍 <b>Мої замовлення</b>\n\nУ вас поки немає оформлених замовлень.\nОберіть девайси в нашому магазині та оформлюйте замовлення!`, {
         reply_markup: {
           inline_keyboard: [
-            [{ text: '🎮 До асортименту на сайт', web_app: { url: appUrl } }]
+            [{ text: '🛍️ Відкрити магазин ✨', web_app: { url: appUrl } }]
           ]
         }
       });
@@ -2172,7 +2182,7 @@ export class TelegramBotService {
         { text: !isShowingActive ? `🔘 ${deliveredLabel}` : deliveredLabel, callback_data: `orders_list:${chatId}:DELIVERED` }
       ],
       [
-        { text: '🎮 Відкрити магазин', web_app: { url: appUrl } }
+        { text: '🛍️ Відкрити магазин ✨', web_app: { url: appUrl } }
       ]
     ];
 
@@ -2231,7 +2241,7 @@ export class TelegramBotService {
       const colorPhoto = this.getOrderColorPhoto(o);
 
       let cardText = `🛍 <b>Замовлення #${o.order_id}</b>\n\n`;
-      cardText += `🕹 <b>${firstItem.title || 'Товар'}</b>\n`;
+      cardText += `⚡ <b>${firstItem.title || 'Товар'}</b>\n`;
       cardText += `🎨 Колір: <b>${itemColor || 'Стандартний'}</b>${firstItem.qty > 1 ? ` (×${firstItem.qty} шт.)` : ''}\n`;
       if (o.items && o.items.length > 1) {
         cardText += `<i>+ ще ${o.items.length - 1} поз. у замовленні</i>\n`;
@@ -2937,7 +2947,7 @@ export class TelegramBotService {
       `Кошти за замовлення <b>#${order.order_id}</b> успішно зараховано.\n` +
       `Ми щиро вдячні за ваш вибір магазину <b>M1lipStore</b> та високу довіру! 💙💛\n\n` +
       `📦 <b>Інформація про замовлення:</b>\n` +
-      `• <b>Головний товар:</b> 🕹 <b>${firstItem.title || 'Товар'}</b>\n` +
+      `• <b>Головний товар:</b> ⚡ <b>${firstItem.title || 'Товар'}</b>\n` +
       (orderedColor ? `• <b>Обраний колір:</b> 🎨 <b>${orderedColor}</b>\n` : '') +
       `• <b>Кількість:</b> ${firstItem.qty || 1} шт.\n` +
       `• <b>Сума до сплати:</b> <b>${order.total} ₴</b> (Сплачено ✅)\n` +
