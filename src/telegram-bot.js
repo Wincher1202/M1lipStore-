@@ -610,7 +610,7 @@ export class TelegramBotService {
     const fromId = String(from.id || '');
     const username = (from.username || '').toLowerCase().replace(/^@/, '');
 
-    const configured = [...ADMIN_IDS, ...db.getAdminIds()].map(s => s.toLowerCase().replace(/^@/, ''));
+    const configured = [...ADMIN_IDS, ...db.getAdminIds()].map(s => String(s).toLowerCase().replace(/^@/, ''));
     if (configured.includes(fromId)) return true;
     if (username && configured.includes(username)) return true;
 
@@ -618,9 +618,40 @@ export class TelegramBotService {
   }
 
   getAllAdminChatIds() {
-    const list = [...ADMIN_IDS, ...db.getAdminIds()];
-    // Deduplicate and only return numeric chat IDs
-    return Array.from(new Set(list.map(s => String(s).trim()))).filter(id => /^\d+$/.test(id));
+    const configured = [...ADMIN_IDS, ...db.getAdminIds()];
+    const result = new Set();
+    
+    // 1. Add all purely numeric IDs from configuration
+    for (const item of configured) {
+      const clean = String(item).trim();
+      if (/^\d+$/.test(clean)) {
+        result.add(clean);
+      }
+    }
+
+    // 2. Match configured usernames with known telegram_users in db
+    const adminUsernames = configured
+      .map(s => String(s).toLowerCase().replace(/^@/, ''))
+      .filter(s => !/^\d+$/.test(s));
+
+    for (const [tid, u] of Object.entries(db.data.telegram_users || {})) {
+      const uName = (u.username || '').toLowerCase().replace(/^@/, '');
+      if (adminUsernames.includes(uName) && /^\d+$/.test(String(tid))) {
+        result.add(String(tid));
+      }
+    }
+
+    // 3. Include any stored admin_chat_ids
+    if (Array.isArray(db.data.admin_chat_ids)) {
+      for (const cid of db.data.admin_chat_ids) {
+        const cleanCid = String(cid).trim();
+        if (/^\d+$/.test(cleanCid)) {
+          result.add(cleanCid);
+        }
+      }
+    }
+
+    return Array.from(result);
   }
 
   async startPolling() {
@@ -717,6 +748,16 @@ export class TelegramBotService {
         last_name: from.last_name || '',
         telegram_username: from.username || ''
       });
+    }
+
+    // Auto-register admin chat ID for broadcasts
+    if (this.isAdmin(from) && chatId && /^\d+$/.test(String(chatId))) {
+      if (!db.data.admin_chat_ids) db.data.admin_chat_ids = [];
+      const strChatId = String(chatId);
+      if (!db.data.admin_chat_ids.includes(strChatId)) {
+        db.data.admin_chat_ids.push(strChatId);
+        db.save();
+      }
     }
 
     // WebApp Data from Telegram Mini App sendData
@@ -1261,6 +1302,16 @@ export class TelegramBotService {
     const msgId = cb.message?.message_id;
     const from = cb.from || {};
 
+    // Auto-register admin chat ID for broadcasts
+    if (this.isAdmin(from) && chatId && /^\d+$/.test(String(chatId))) {
+      if (!db.data.admin_chat_ids) db.data.admin_chat_ids = [];
+      const strChatId = String(chatId);
+      if (!db.data.admin_chat_ids.includes(strChatId)) {
+        db.data.admin_chat_ids.push(strChatId);
+        db.save();
+      }
+    }
+
     await this.callApi('answerCallbackQuery', { callback_query_id: cb.id });
 
     // CUSTOMER: View single order
@@ -1275,9 +1326,18 @@ export class TelegramBotService {
       return;
     }
 
-    // CUSTOMER: Orders list
-    if (data.startsWith('orders_list:')) {
-      await this.sendCustomerOrdersList(chatId, from.id, msgId);
+    // CUSTOMER: Orders list (Active / Delivered)
+    if (data.startsWith('orders_list:') || data.startsWith('orders_active:') || data.startsWith('orders_delivered:')) {
+      let filterType = 'ACTIVE';
+      if (data.startsWith('orders_delivered:')) {
+        filterType = 'DELIVERED';
+      } else if (data.startsWith('orders_active:')) {
+        filterType = 'ACTIVE';
+      } else if (data.startsWith('orders_list:')) {
+        const parts = data.split(':');
+        filterType = (parts[2] || 'ACTIVE').toUpperCase();
+      }
+      await this.sendCustomerOrdersList(chatId, from.id, msgId, filterType);
       return;
     }
 
@@ -1999,17 +2059,23 @@ export class TelegramBotService {
     const managerDetailMsg = buildCustomerManagerMessage(order);
     const managerDetailUrl = `https://t.me/milipmanager?text=${encodeURIComponent(managerDetailMsg)}`;
 
+    const isDeliveredOrCompleted = ['DELIVERED', 'COMPLETED'].includes(order.status);
+    const returnCallback = isDeliveredOrCompleted ? `orders_list:${chatId}:DELIVERED` : `orders_list:${chatId}:ACTIVE`;
+
     buttons.push([
       { text: '💬 Написати менеджеру', url: managerDetailUrl }
     ]);
 
     buttons.push([
-      { text: '📋 До моїх замовлень', callback_data: `orders_list:${chatId}` }
+      { text: isDeliveredOrCompleted ? '📦 До доставлених замовлень' : '⚡ До активних замовлень', callback_data: returnCallback }
     ]);
 
-    buttons.push([
-      { text: '🗑 Видалити замовлення', callback_data: `customer_delete_prompt:${order.order_id}` }
-    ]);
+    const isDeletable = ['NEW', 'PENDING_PAYMENT', 'PENDING_MANAGER'].includes(order.status);
+    if (isDeletable) {
+      buttons.push([
+        { text: '🗑 Видалити замовлення', callback_data: `customer_delete_prompt:${order.order_id}` }
+      ]);
+    }
 
     if (messageId) {
       await this.safeDeleteMessage(chatId, messageId);
@@ -2072,22 +2138,71 @@ export class TelegramBotService {
     }
   }
 
-  async sendCustomerOrdersList(chatId, telegramUserId, messageId = null) {
-    const orders = db.getOrdersByTelegramId(telegramUserId || chatId);
+  async sendCustomerOrdersList(chatId, telegramUserId, messageId = null, filterType = 'ACTIVE') {
+    const allOrders = db.getOrdersByTelegramId(telegramUserId || chatId);
 
-    if (!orders || orders.length === 0) {
+    if (!allOrders || allOrders.length === 0) {
       const appUrl = getStoreWebUrl();
       await this.safeEditOrSend(chatId, messageId, `🛍 <b>Мої замовлення</b>\n\nУ вас поки немає оформлених замовлень.\nОберіть девайси в нашому магазині та оформлюйте замовлення!`, {
         reply_markup: {
           inline_keyboard: [
-            [{ text: '🛍 До асортименту на сайт', web_app: { url: appUrl } }]
+            [{ text: '🎮 До асортименту на сайт', web_app: { url: appUrl } }]
           ]
         }
       });
       return;
     }
 
-    const recentOrders = orders.slice(0, 5);
+    const activeOrders = allOrders.filter(o => !['DELIVERED', 'COMPLETED', 'CANCELLED'].includes(o.status));
+    const deliveredOrders = allOrders.filter(o => ['DELIVERED', 'COMPLETED'].includes(o.status));
+
+    const isShowingActive = filterType !== 'DELIVERED';
+    const currentOrders = isShowingActive ? activeOrders : deliveredOrders;
+    const appUrl = getStoreWebUrl();
+
+    // Top Category Switcher Tabs
+    const activeLabel = `⚡ Активні (${activeOrders.length})`;
+    const deliveredLabel = `📦 Доставлені (${deliveredOrders.length})`;
+
+    const tabButtons = [
+      [
+        { text: isShowingActive ? `🔘 ${activeLabel}` : activeLabel, callback_data: `orders_list:${chatId}:ACTIVE` },
+        { text: !isShowingActive ? `🔘 ${deliveredLabel}` : deliveredLabel, callback_data: `orders_list:${chatId}:DELIVERED` }
+      ],
+      [
+        { text: '🎮 Відкрити магазин', web_app: { url: appUrl } }
+      ]
+    ];
+
+    let headerText = '';
+    if (isShowingActive) {
+      headerText = `⚡ <b>АКТИВНІ ЗАМОВЛЕННЯ (${activeOrders.length})</b>\n\n`;
+      if (activeOrders.length === 0) {
+        headerText += `У вас наразі немає активних замовлень у роботі.\n`;
+        if (deliveredOrders.length > 0) {
+          headerText += `\n📦 Ваші попередні успішно доставлені замовлення (${deliveredOrders.length}) збережені в окремій папці <b>«Доставлені»</b>.`;
+        } else {
+          headerText += `\nОберіть бажані девайси в магазині та створіть замовлення!`;
+        }
+      } else {
+        headerText += `<i>Замовлення, які зараз знаходяться в обробці, комплектуються на складі або прямують до вас:</i>`;
+      }
+    } else {
+      headerText = `📦 <b>ДОСТАВЛЕНІ ЗАМОВЛЕННЯ (${deliveredOrders.length})</b>\n\n`;
+      if (deliveredOrders.length === 0) {
+        headerText += `У вас поки немає доставлених замовлень.\n\nКоли адміністратор підтвердить вручення та переведе статус на «Доставлено», воно автоматично з'явиться тут у вашому особистому архіві.`;
+      } else {
+        headerText += `<i>Історія ваших успішно отриманих та виконаних замовлень:</i>`;
+      }
+    }
+
+    // Send or edit the folder panel header
+    await this.safeEditOrSend(chatId, messageId, headerText, {
+      reply_markup: { inline_keyboard: tabButtons }
+    });
+
+    // Send individual order cards for current folder (up to 5 most recent)
+    const recentOrders = currentOrders.slice(0, 5);
 
     for (const o of recentOrders) {
       const isPaid = o.payment?.status === 'PAID';
@@ -2129,14 +2244,6 @@ export class TelegramBotService {
 
       const buttons = [];
 
-      // [ПРИХОВАНО на майбутнє - для активації онлайн-оплати/ФОП]
-      // if (isUnpaid) {
-      //   buttons.push([
-      //     { text: `💳 Оплатити #${o.order_id} (${o.total} ₴)`, callback_data: `send_invoice:${o.order_id}` },
-      //     { text: `⚡ Сплатити (Test)`, callback_data: `pay_test:${o.order_id}` }
-      //   ]);
-      // }
-
       const oManagerMsg = buildCustomerManagerMessage(o);
       const oManagerUrl = `https://t.me/milipmanager?text=${encodeURIComponent(oManagerMsg)}`;
 
@@ -2146,9 +2253,13 @@ export class TelegramBotService {
       buttons.push([
         { text: '🔍 Деталі замовлення', callback_data: `view_order:${o.order_id}` }
       ]);
-      buttons.push([
-        { text: '🗑 Видалити замовлення', callback_data: `customer_delete_prompt:${o.order_id}` }
-      ]);
+
+      // Only allow delete for active unconfirmed orders
+      if (['NEW', 'PENDING_PAYMENT', 'PENDING_MANAGER'].includes(o.status)) {
+        buttons.push([
+          { text: '🗑 Видалити замовлення', callback_data: `customer_delete_prompt:${o.order_id}` }
+        ]);
+      }
 
       await this.sendPhotoOrMessage(chatId, colorPhoto, cardText, {
         reply_markup: { inline_keyboard: buttons }
@@ -2706,19 +2817,57 @@ export class TelegramBotService {
     const cust = order.customer || {};
     const deliv = order.delivery || {};
     const items = order.items || [];
-    const itemsList = items.map(i => `• ${i.title}${i.color ? ` (${i.color})` : ''}\n  ${i.qty} шт. × ${i.price} ₴ = ${i.price * i.qty} ₴`).join('\n');
     
-    const surname = cust.last_name || cust.surname || '';
-    const name = cust.first_name || cust.name || '';
-    const patronymic = cust.middle_name || cust.patronymic || '';
-    const pib = [surname, name, patronymic].filter(Boolean).join(' ') || [name, surname].filter(Boolean).join(' ') || 'Покупець';
+    let itemsList = '';
+    if (items.length > 0) {
+      itemsList = items.map(i => {
+        const colorStr = i.color ? ` (${i.color})` : '';
+        const qty = Number(i.qty || i.quantity || 1);
+        const price = Number(i.price || 0);
+        return `• <b>${i.title || 'Товар'}</b>${colorStr}\n  ${qty} шт. × ${price} ₴ = <b>${price * qty} ₴</b>`;
+      }).join('\n\n');
+    } else {
+      itemsList = '• <b>Ігрові девайси MILIPSTORE</b>\n  1 шт.';
+    }
+    
+    const surname = (cust.last_name || cust.surname || '').trim();
+    const name = (cust.first_name || cust.name || '').trim();
+    const patronymic = (cust.middle_name || cust.patronymic || '').trim();
+    const pib = [surname, name, patronymic].filter(Boolean).join(' ') || [name, surname].filter(Boolean).join(' ') || cust.fullName || 'Покупець';
 
     const cleanTg = (cust.telegram_username || '').replace(/^@+/, '');
-    const provName = deliv.provider === 'ukrposhta' ? 'Укрпошта' : 'Нова Пошта';
+    const provName = deliv.provider === 'ukrposhta' ? 'Укрпошта' : (deliv.provider_name || 'Нова Пошта');
     const dateStr = formatKyivDateTime(order.created_at || Date.now());
 
-    const adminMsg = `👑 <b>ЗАМОВЛЕННЯ #${order.order_id}</b>\n\n` +
-      `📊 <b>Статус:</b> 🆕 <b>Нові</b>\n` +
+    let delivPoint = deliv.department || deliv.address || deliv.warehouse_number || '';
+    const rawDelivStr = `${delivPoint} ${deliv.method || ''}`.toLowerCase();
+    const isPoshtomat = rawDelivStr.includes('поштомат') || rawDelivStr.includes('poshtomat');
+    const isCourier = rawDelivStr.includes('кур') || rawDelivStr.includes('адрес') || deliv.method === 'courier';
+    let delivLabel = 'Відділення / адреса';
+    if (isPoshtomat) delivLabel = 'Поштомат';
+    else if (isCourier) delivLabel = "Адреса (кур'єр)";
+    else delivLabel = 'Відділення';
+
+    // Payment method & state
+    let payMethod = 'Оформлення через менеджера (@milipmanager)';
+    if (order.payment?.method === 'online') {
+      payMethod = 'Онлайн у Telegram-боті';
+    } else if (order.payment?.is_cod || order.payment?.method === 'cod') {
+      payMethod = 'Накладений платіж (при отриманні)';
+    }
+
+    let payStatus = '🆕 Очікує обробки';
+    if (order.payment?.status === 'PAID') {
+      payStatus = '✅ ОПЛАЧЕНО';
+    } else if (order.payment?.method === 'online') {
+      payStatus = '⏳ Очікує оплати';
+    }
+
+    const statusName = ORDER_STATUSES[order.status]?.name || 'Нові';
+    const statusEmoji = order.status === 'CONFIRMED' ? '✅' : (order.status === 'PENDING_PAYMENT' ? '⏳' : '🆕');
+
+    let adminMsg = `👑 <b>ЗАМОВЛЕННЯ #${order.order_id}</b>\n\n` +
+      `📊 <b>Статус:</b> ${statusEmoji} <b>${statusName}</b>\n` +
       `📅 <b>Дата створення:</b> ${dateStr} (Київ)\n\n` +
       `👤 <b>Покупець:</b>\n` +
       `• ПІБ: <b>${pib}</b>\n` +
@@ -2730,12 +2879,15 @@ export class TelegramBotService {
       `🏢 <b>Доставка:</b>\n` +
       `• Перевізник: <b>${provName}</b>\n` +
       `• Місто: <b>${deliv.city || '—'}</b>\n` +
-      `• Відділення / адреса: ${deliv.department || deliv.address || '—'}\n\n` +
+      `• ${delivLabel}: <b>${delivPoint || '—'}</b>\n\n` +
       `💳 <b>Оплата:</b>\n` +
-      `• Спосіб: <b>Оформлення через менеджера (@milipmanager)</b>\n\n` +
-      `🛍 <b>Товари в замовленні:</b>\n${itemsList}\n` +
-      (order.payment?.comment || order.admin_comment ? `\n💬 <b>Коментар:</b> ${order.payment?.comment || order.admin_comment}\n` : '') +
-      `\n💰 <b>ЗАГАЛЬНА СУМА: ${order.total} ₴</b>`;
+      `• Спосіб: <b>${payMethod}</b>\n` +
+      `• Стан: <b>${payStatus}</b>\n` +
+      (order.payment?.transaction_id ? `• ID транзакції: <code>${order.payment.transaction_id}</code>\n` : '') +
+      `\n` +
+      `🛍 <b>Товари в замовленні:</b>\n${itemsList}\n\n` +
+      `💰 <b>ЗАГАЛЬНА СУМА: ${order.total} ₴</b>` +
+      (order.payment?.comment || order.admin_comment || order.comment ? `\n\n📝 <b>Примітка:</b> ${order.payment?.comment || order.admin_comment || order.comment}` : '');
 
     const adminButtons = [
       [
@@ -2763,12 +2915,16 @@ export class TelegramBotService {
 
     const adminChatIds = this.getAllAdminChatIds();
     for (const adminId of adminChatIds) {
-      await this.callApi('sendMessage', {
-        chat_id: adminId,
-        text: adminMsg,
-        parse_mode: 'HTML',
-        reply_markup: { inline_keyboard: adminButtons }
-      });
+      try {
+        await this.callApi('sendMessage', {
+          chat_id: adminId,
+          text: adminMsg,
+          parse_mode: 'HTML',
+          reply_markup: { inline_keyboard: adminButtons }
+        });
+      } catch (err) {
+        console.warn(`[TelegramBot] Failed to broadcast order notification to admin ${adminId}:`, err.message);
+      }
     }
   }
 

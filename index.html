@@ -8401,23 +8401,14 @@
                 lastPlacedOrderObject = orderObj;
                 const orderIdStr = (orderObj.order_id || orderObj.id || data.order_id || data.id || '').replace(/^#/, '');
 
-                // Clear cart immediately
-                cart = [];
-                saveCart();
-                renderCart();
-                updateBadges();
-
                 localStorage.setItem('m1lip_last_phone', phone);
                 localStorage.setItem('m1lip_last_order_id', orderIdStr);
 
-                // Hide checkout drawer
-                toggleCheckoutDrawer(false);
-
-                // Show success confirmation screen
-                showOrderSuccessModal(orderObj, paymentMethod);
-
                 triggerHaptic('success');
                 updateAdminNewBadge();
+
+                // Close Mini App completely & reset view to catalog
+                handleOrderPlacedSuccess(orderObj, paymentMethod);
             } catch (err) {
                 console.error("Order submit exception:", err);
                 const randomNum = Math.floor(100000 + Math.random() * 900000);
@@ -8433,9 +8424,8 @@
                 lastPlacedOrderObject = fallbackOrder;
                 localStorage.setItem('m1lip_last_phone', phone);
                 localStorage.setItem('m1lip_last_order_id', fallbackOrder.order_id);
-                toggleCheckoutDrawer(false);
-                showOrderSuccessModal(fallbackOrder, paymentMethod);
                 triggerHaptic('success');
+                handleOrderPlacedSuccess(fallbackOrder, paymentMethod);
             } finally {
                 if (submitBtn) {
                     submitBtn.disabled = false;
@@ -8686,6 +8676,85 @@
                 toast.style.opacity = '0';
                 toast.style.transform = 'translateX(-50%) translateY(20px)';
             }, duration);
+        }
+
+        function handleOrderPlacedSuccess(order, paymentType = 'manager') {
+            lastPlacedOrderObject = order;
+
+            // 1. Clear cart completely
+            cart = [];
+            saveCart();
+            renderCart();
+            updateBadges();
+
+            // 2. Reset checkout flow back to step 1
+            checkoutStep = 1;
+            if (typeof updateCheckoutStepsUI === 'function') {
+                updateCheckoutStepsUI();
+            }
+
+            // 3. Close all open drawers, modals & backdrops
+            if (typeof closeAllDrawers === 'function') closeAllDrawers();
+            if (typeof closeSuccessModal === 'function') closeSuccessModal();
+            if (typeof toggleCheckoutDrawer === 'function') toggleCheckoutDrawer(false);
+            if (typeof toggleCart === 'function') toggleCart(false);
+
+            // 4. Return the Mini App view cleanly to the main Home/Catalog page
+            if (typeof handleBottomTabClick === 'function') {
+                try { handleBottomTabClick('home'); } catch(e) {}
+            }
+            try { window.scrollTo({ top: 0, behavior: 'instant' }); } catch(e) {}
+
+            // 5. Completely close Telegram Mini App window so user is returned to the bot chat
+            const tw = window.Telegram?.WebApp || (typeof tg !== 'undefined' ? tg : null);
+            let isInsideTelegram = false;
+
+            if (tw) {
+                try {
+                    if (typeof tw.close === 'function') {
+                        isInsideTelegram = true;
+                        tw.close();
+                    }
+                } catch(e) {
+                    console.warn('[WebApp close error]', e);
+                }
+            }
+
+            // Telegram Webview Proxy bridge (Telegram Desktop & mobile internal webviews)
+            try {
+                if (window.TelegramWebviewProxy && typeof window.TelegramWebviewProxy.postEvent === 'function') {
+                    isInsideTelegram = true;
+                    window.TelegramWebviewProxy.postEvent('web_app_close', null);
+                }
+            } catch(e) {}
+
+            // Telegram Web iframe parent postMessage
+            try {
+                if (window.parent && window.parent !== window) {
+                    window.parent.postMessage(JSON.stringify({ eventType: 'web_app_close', eventData: null }), '*');
+                    window.parent.postMessage('web_app_close', '*');
+                }
+            } catch(e) {}
+
+            // Guaranteed repeated close pulses across all Telegram clients (iOS, Android, Desktop, Web)
+            setTimeout(() => {
+                try { if (tw && typeof tw.close === 'function') tw.close(); } catch(e) {}
+                try { if (window.TelegramWebviewProxy) window.TelegramWebviewProxy.postEvent('web_app_close', null); } catch(e) {}
+            }, 60);
+
+            setTimeout(() => {
+                try { if (tw && typeof tw.close === 'function') tw.close(); } catch(e) {}
+                try { if (window.TelegramWebviewProxy) window.TelegramWebviewProxy.postEvent('web_app_close', null); } catch(e) {}
+            }, 200);
+
+            setTimeout(() => {
+                try { if (tw && typeof tw.close === 'function') tw.close(); } catch(e) {}
+            }, 450);
+
+            // If opened in standalone browser (not inside Telegram WebApp), show friendly toast
+            if (!isInsideTelegram) {
+                showNotificationToast('🎉 Замовлення успішно оформлено! Деталі надіслано в Telegram.', 4000);
+            }
         }
 
         function handleSuccessOpenManager() {
