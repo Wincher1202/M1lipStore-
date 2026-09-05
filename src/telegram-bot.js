@@ -418,7 +418,7 @@ export class TelegramBotService {
           await this.callApi('setChatMenuButton', {
             menu_button: {
               type: 'web_app',
-              text: '🚀 Відкрити каталог',
+              text: '🛍 До асортименту',
               web_app: {
                 url: getStoreWebUrl()
               }
@@ -526,12 +526,11 @@ export class TelegramBotService {
     }
 
     keyboard.push([
-      { text: '🚀 Відкрити каталог', web_app: { url: storeUrl } },
+      { text: '🛍 До асортименту', web_app: { url: storeUrl } },
       { text: '🛍 Мої замовлення' }
     ]);
     keyboard.push([
-      { text: '📦 Відстежити замовлення' },
-      { text: '💬 Менеджер (@milipmanager)' }
+      { text: '💬 Менеджер' }
     ]);
 
     return {
@@ -644,10 +643,10 @@ export class TelegramBotService {
         `• Кастомні механічні клавіатури з Gasket Mount\n` +
         `• Професійні ігрові поверхні Cordura Control\n\n` +
         `У цьому боті ви можете:\n` +
-        `💳 Оплачувати замовлення онлайн безпосередньо в чаті\n` +
-        `📦 Відстежувати статус замовлення та номер ТТН\n` +
-        `🛍 Переглядати історію покупок\n\n` +
-        `👇 <i>Оберіть потрібну дію на панелі кнопок внизу екрана:</i>`;
+        `🛍 Переглядати девайси та оформлювати замовлення\n` +
+        `📦 Слідкувати за статусом замовлень та ТТН\n` +
+        `💬 Консультуватися з менеджером\n\n` +
+        `👇 <i>Оберіть потрібну дію на панелі кнопок внизу:</i>`;
 
       const sendRes = await this.callApi('sendMessage', {
         chat_id: chatId,
@@ -752,6 +751,8 @@ export class TelegramBotService {
 
     // OPEN WEB STORE / CATALOG MANAGEMENT
     if (
+      text === '🛍 До асортименту' ||
+      text === 'До асортименту' ||
       text === '📦 Каталог товарів' ||
       text === 'Каталог товарів' ||
       text === '🌐 Відкрити магазин' || 
@@ -770,11 +771,11 @@ export class TelegramBotService {
       const appUrl = getStoreWebUrl();
       await this.callApi('sendMessage', {
         chat_id: chatId,
-        text: `🛒 <b>Каталог MILIPSTORE</b>\n\nОбирайте найкращі ігрові девайси зі швидкою доставкою по всій Україні:\n👉 <a href="${appUrl}">${appUrl}</a>`,
+        text: `🛒 <b>Асортимент MILIPSTORE</b>\n\nОбирайте найкращі ігрові девайси зі швидкою доставкою по всій Україні:\n👉 <a href="${appUrl}">${appUrl}</a>`,
         parse_mode: 'HTML',
         reply_markup: {
           inline_keyboard: [
-            [{ text: '🚀 Відкрити магазин (Web App)', web_app: { url: appUrl } }],
+            [{ text: '🛍 До асортименту на сайт', web_app: { url: appUrl } }],
             [{ text: '🌐 Відкрити в браузері', url: appUrl }]
           ]
         }
@@ -837,7 +838,7 @@ export class TelegramBotService {
         parse_mode: 'HTML',
         reply_markup: {
           inline_keyboard: [
-            [{ text: '💬 Написати менеджеру (@milipmanager)', url: 'https://t.me/milipmanager' }],
+            [{ text: '💬 Написати менеджеру', url: 'https://t.me/milipmanager' }],
             [{ text: '📢 Канал магазину', url: 'https://t.me/m1lipstore' }]
           ]
         }
@@ -1707,8 +1708,7 @@ export class TelegramBotService {
     let text = `🎉 <b>Дякуємо за замовлення в MILIPSTORE!</b>\n\n` +
       `Ваше замовлення <b>#${order.order_id}</b> успішно зареєстровано!\n\n` +
       `💬 <b>Оформлення через менеджера:</b>\n` +
-      `Для підтвердження наявності товару, уточнення адреси доставки та узгодження зручного способу оплати, будь ласка, напишіть менеджеру <b>@milipmanager</b>.\n\n` +
-      `<i>Ми вже підготували готовий текст вашого замовлення — просто натисніть кнопку «💬 Написати менеджеру» нижче!</i>\n\n` +
+      `Для підтвердження наявності товару та узгодження оплати напишіть менеджеру за кнопкою нижче.\n\n` +
       `📦 <b>Інформація про замовлення:</b>\n` +
       `${itemsBlock}` +
       `• <b>Сума:</b> <b>${order.total} ₴</b>\n` +
@@ -1716,21 +1716,13 @@ export class TelegramBotService {
       (cleanTg ? `• <b>Telegram:</b> @${cleanTg}\n` : '') +
       `• <b>Доставка:</b> ${provName} (${delivPoint})\n` +
       `• <b>Статус:</b> ${statusEmoji} <b>${statusName}</b>\n` +
-      `• <b>Спосіб:</b> 💬 <b>Через менеджера (@milipmanager)</b>`;
+      `• <b>Спосіб:</b> 💬 <b>Через менеджера</b>`;
 
     if (order.tracking_number) {
       text += `\n• <b>ТТН:</b> <code>${order.tracking_number}</code>`;
     }
 
     const buttons = [];
-
-    // [ПРИХОВАНО на майбутнє - для активації онлайн-оплати/ФОП]
-    // if (isOnline && !isPaid) {
-    //   buttons.push([
-    //     { text: `💳 Оплатити ${order.total} ₴`, callback_data: `send_invoice:${order.order_id}` },
-    //     { text: `⚡ Сплатити (Smart Glocal Test)`, callback_data: `pay_test:${order.order_id}` }
-    //   ]);
-    // }
 
     const orderIdStr = (order.order_id || '').replace(/^#/, '');
     const dateStr = formatKyivDateTime(order.created_at || Date.now());
@@ -1755,7 +1747,7 @@ export class TelegramBotService {
     managerText += `• Місто: ${delivery.city || '—'}\n`;
     managerText += `• Відділення / адреса: ${delivPoint}\n\n`;
     managerText += `💳 Оплата:\n`;
-    managerText += `• Спосіб: Оформлення через менеджера (@milipmanager)\n\n`;
+    managerText += `• Спосіб: Оформлення через менеджера\n\n`;
     managerText += `🛍 Товари в замовленні:\n`;
     (order.items || []).forEach(it => {
       const colorStr = it.color ? ` (${it.color})` : '';
@@ -1776,11 +1768,6 @@ export class TelegramBotService {
     // Full details view
     buttons.push([
       { text: '📄 Повні деталі замовлення', callback_data: `view_order:${order.order_id}` }
-    ]);
-
-    // Required button: «До моїх замовлень»
-    buttons.push([
-      { text: '📋 До моїх замовлень', callback_data: `orders_list:${chatId}` }
     ]);
 
     // Delete order button
@@ -2504,7 +2491,7 @@ export class TelegramBotService {
         messageText = `🎉 <b>Ваше замовлення ${orderNum} успішно виконано!</b>\n\nДякуємо за покупку в MILIPSTORE! Приємного користування девайсами!`;
         break;
       case 'CANCELLED':
-        messageText = `❌ <b>Ваше замовлення ${orderNum} було скасовано.</b>\n\nЯкщо у вас виникли будь-які запитання, звертайтеся до нашої служби підтримки @milipmanager.`;
+        messageText = `❌ <b>Ваше замовлення ${orderNum} було скасовано.</b>\n\nЯкщо у вас виникли будь-які запитання, напишіть нашому менеджеру.`;
         break;
       default:
         messageText = `📦 <b>Оновлено статус вашого замовлення ${orderNum}:</b> <b>${ORDER_STATUSES[newStatus]?.name || newStatus}</b>`;
