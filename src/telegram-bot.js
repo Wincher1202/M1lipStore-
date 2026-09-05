@@ -712,25 +712,21 @@ export class TelegramBotService {
     const storeUrl = getStoreWebUrl();
     const keyboard = [];
 
-    // Modern, aesthetic store open button without joystick emoji
-    const storeBtn = { text: '🛍️ Відкрити магазин ✨', web_app: { url: storeUrl } };
+    // Prominent, high-priority primary action button (all uppercase + gaming fire and lightning accents)
+    const storeBtn = { text: '🔥 ВІДКРИТИ МАГАЗИН ⚡', web_app: { url: storeUrl } };
 
     if (isAdminUser) {
-      // Admins now have the exact same store open button at the top/bottom of keyboard
+      // Admins only have the prominent Store button and Admin controls (no manager / orders buttons)
       keyboard.push([storeBtn]);
       keyboard.push([
         { text: '👑 Панель адміністратора' },
         { text: '📦 Каталог товарів' }
       ]);
-      keyboard.push([
-        { text: "💬 Зв'язок з менеджером" },
-        { text: '🛍 Мої замовлення' }
-      ]);
     } else {
       keyboard.push([storeBtn]);
       keyboard.push([
         { text: "💬 Зв'язок з менеджером" },
-        { text: '🛍 Мої замовлення' }
+        { text: '📦 Мої замовлення' }
       ]);
     }
 
@@ -857,7 +853,7 @@ export class TelegramBotService {
         `🛍 <b>Каталог:</b> швидкий перегляд та онлайн-замовлення в 1 клік\n` +
         `📦 <b>Замовлення:</b> миттєве відстеження статусу та ТТН\n` +
         `💬 <b>Підтримка:</b> персональна консультація та допомога з вибором\n\n` +
-        `👇 <i>Натисніть кнопку <b>«🛍️ Відкрити магазин ✨»</b> на панелі внизу:</i>`;
+        `👇 <i>Натисніть кнопку <b>«🔥 ВІДКРИТИ МАГАЗИН ⚡»</b> на панелі внизу:</i>`;
 
       const sendRes = await this.callApi('sendMessage', {
         chat_id: chatId,
@@ -962,6 +958,9 @@ export class TelegramBotService {
 
     // OPEN WEB STORE / CATALOG MANAGEMENT
     if (
+      text === '🔥 ВІДКРИТИ МАГАЗИН ⚡' ||
+      text === '⚡ ВІДКРИТИ МАГАЗИН ⚡' ||
+      text === 'ВІДКРИТИ МАГАЗИН' ||
       text === '🛍️ Відкрити магазин ✨' ||
       text === '✨ Відкрити магазин 🛍️' ||
       text === '🛍️ Відкрити магазин' ||
@@ -1018,7 +1017,7 @@ export class TelegramBotService {
     }
 
     // CUSTOMER ORDERS
-    if (text === '🛍 Мої замовлення' || text === 'Мої замовлення' || text === '/orders' || text === '/myorders') {
+    if (text === '📦 Мої замовлення' || text === '🛍 Мої замовлення' || text === 'Мої замовлення' || text === '/orders' || text === '/myorders') {
       if (this.isAdmin(from) && text === '/orders') {
         await this.sendAdminOrdersList(chatId, 'ALL');
       } else {
@@ -2155,10 +2154,10 @@ export class TelegramBotService {
 
     if (!allOrders || allOrders.length === 0) {
       const appUrl = getStoreWebUrl();
-      await this.safeEditOrSend(chatId, messageId, `🛍 <b>Мої замовлення</b>\n\nУ вас поки немає оформлених замовлень.\nОберіть девайси в нашому магазині та оформлюйте замовлення!`, {
+      await this.safeEditOrSend(chatId, messageId, `📦 <b>Мої замовлення</b>\n\nУ вас поки немає оформлених замовлень.\nОберіть девайси в нашому магазині та оформлюйте замовлення!`, {
         reply_markup: {
           inline_keyboard: [
-            [{ text: '🛍️ Відкрити магазин ✨', web_app: { url: appUrl } }]
+            [{ text: '🔥 ВІДКРИТИ МАГАЗИН ⚡', web_app: { url: appUrl } }]
           ]
         }
       });
@@ -2182,7 +2181,7 @@ export class TelegramBotService {
         { text: !isShowingActive ? `🔘 ${deliveredLabel}` : deliveredLabel, callback_data: `orders_list:${chatId}:DELIVERED` }
       ],
       [
-        { text: '🛍️ Відкрити магазин ✨', web_app: { url: appUrl } }
+        { text: '🔥 ВІДКРИТИ МАГАЗИН ⚡', web_app: { url: appUrl } }
       ]
     ];
 
