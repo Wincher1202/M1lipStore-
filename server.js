@@ -305,9 +305,12 @@ app.post('/api/orders', async (req, res) => {
       db.linkOrderToPhone(phone, order.order_id);
     }
 
-    // Send notifications to Admin and Customer
+    // Send notifications to Admin and Customer (fast-await with background completion fallback)
     try {
-      await botService.sendOrderCreatedNotifications(order);
+      await Promise.race([
+        botService.sendOrderCreatedNotifications(order),
+        new Promise(resolve => setTimeout(resolve, 1500))
+      ]);
     } catch (notifErr) {
       console.warn('[Orders] Order notification error:', notifErr.message);
     }

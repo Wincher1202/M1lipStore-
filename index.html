@@ -4969,8 +4969,8 @@
             </div>
 
             <div style="display: flex; flex-direction: column; gap: 9px;">
-                <button class="btn-primary" id="success-close-app-btn" style="width: 100%; justify-content: center; background: #10B981; border-color: #10B981; color: #FFFFFF; font-weight: 800; padding: 13px; font-size: 0.96rem; box-shadow: 0 4px 15px rgba(16,185,129,0.35);" onclick="closeWebAppAndReturnToChat()">
-                    ✕ Закрити вікно та повернутися до бота
+                <button class="btn-primary" id="success-close-app-btn" style="width: 100%; justify-content: center; background: #2E7D32; border-color: #2E7D32; color: #FFFFFF; font-weight: 800; padding: 13px; font-size: 0.98rem; box-shadow: 0 4px 18px rgba(46,125,50,0.4);" onclick="closeMiniAppToBot()">
+                    ✅ Перейти до бота →
                 </button>
                 <button class="btn-primary" id="success-manager-btn" style="width: 100%; justify-content: center; background: #229ED9; border-color: #229ED9; font-weight: 800; padding: 12px; font-size: 0.92rem;" onclick="handleSuccessOpenManager()">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="m20.665 3.717-17.73 6.837c-1.21.486-1.203 1.161-.222 1.462l4.552 1.42 10.532-6.645c.498-.303.953-.14.579.192l-8.533 7.701h-.002l-.313 4.674c.457 0 .66-.21.916-.457l2.199-2.138 4.574 3.379c.843.465 1.452.226 1.662-.782l3-14.131c.307-1.23-.47-1.787-1.284-1.424z"/></svg>
@@ -7380,6 +7380,8 @@
             if (cart.length === 0) return;
             checkoutStepIndex = 1;
             checkoutDelivery = { provider: 'nova_poshta', city: '', cityRef: '', department: '', warehouseRef: '' };
+            const oldCard = document.getElementById('chk-order-success-card');
+            if (oldCard) oldCard.remove();
             renderCheckoutStep();
             toggleCheckoutDrawer(true);
 
@@ -7405,7 +7407,19 @@
             document.getElementById('chk-back-btn').style.display = checkoutStepIndex > 1 ? '' : 'none';
             const isLast = checkoutStepIndex === CHECKOUT_STEP_COUNT;
             document.getElementById('chk-next-btn').style.display = isLast ? 'none' : '';
-            document.getElementById('chk-submit-btn').style.display = isLast ? '' : 'none';
+            const submitBtn = document.getElementById('chk-submit-btn');
+            if (submitBtn) {
+                submitBtn.style.display = isLast ? '' : 'none';
+                if (isLast && !document.getElementById('chk-order-success-card')) {
+                    submitBtn.disabled = false;
+                    submitBtn.style.background = '';
+                    submitBtn.style.borderColor = '';
+                    submitBtn.style.color = '';
+                    submitBtn.style.boxShadow = '';
+                    submitBtn.style.width = '';
+                    submitBtn.onclick = function() { submitOrder(); };
+                }
+            }
             if (checkoutStepIndex === 3) {
                 renderStep3Summary();
             }
@@ -8739,8 +8753,40 @@
             try { window.close(); } catch(e) {}
         }
 
+        function closeMiniAppToBot() {
+            triggerHaptic('success');
+            triggerTelegramClosePulse();
+
+            const tw = window.Telegram?.WebApp || (typeof tg !== 'undefined' ? tg : null);
+            if (tw && typeof tw.close === 'function') {
+                try { tw.close(); } catch(e) {}
+            }
+            if (window.TelegramWebviewProxy && typeof window.TelegramWebviewProxy.postEvent === 'function') {
+                try { window.TelegramWebviewProxy.postEvent('web_app_close'); } catch(e) {}
+            }
+            try {
+                if (window.Telegram?.WebView && typeof window.Telegram.WebView.postEvent === 'function') {
+                    window.Telegram.WebView.postEvent('web_app_close');
+                }
+            } catch(e) {}
+
+            // Fallback for desktop browser preview or when tw.close does not immediately dismiss window
+            setTimeout(() => {
+                const chkDrawer = document.getElementById('checkout-drawer');
+                if (chkDrawer) chkDrawer.classList.remove('active');
+                const cartDrawer = document.getElementById('cart-drawer');
+                if (cartDrawer) cartDrawer.classList.remove('active');
+                const backdrop = document.getElementById('backdrop');
+                if (backdrop) backdrop.classList.remove('active');
+                if (typeof closeSuccessModal === 'function') closeSuccessModal();
+                checkoutStepIndex = 1;
+                if (typeof renderCheckoutStep === 'function') renderCheckoutStep();
+            }, 120);
+        }
+
         function handleOrderPlacedSuccess(order, paymentType = 'manager') {
             lastPlacedOrderObject = order;
+            const orderIdStr = (order.order_id || order.id || '').replace(/^#/, '');
 
             // 1. Clear cart completely
             cart = [];
@@ -8748,27 +8794,63 @@
             renderCart();
             updateBadges();
 
-            // 2. Reset checkout flow back to step 1
-            checkoutStepIndex = 1;
-            if (typeof renderCheckoutStep === 'function') {
-                renderCheckoutStep();
+            // 2. Hide Back and Next navigation buttons in checkout
+            const backBtn = document.getElementById('chk-back-btn');
+            if (backBtn) backBtn.style.display = 'none';
+            const nextBtn = document.getElementById('chk-next-btn');
+            if (nextBtn) nextBtn.style.display = 'none';
+
+            // 3. Transform Submit button directly into "✅ Перейти до бота →"
+            const submitBtn = document.getElementById('chk-submit-btn');
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.style.display = 'flex';
+                submitBtn.style.width = '100%';
+                submitBtn.style.justifyContent = 'center';
+                submitBtn.style.alignItems = 'center';
+                submitBtn.style.gap = '8px';
+                submitBtn.style.background = '#2E7D32';
+                submitBtn.style.borderColor = '#2E7D32';
+                submitBtn.style.color = '#FFFFFF';
+                submitBtn.style.fontWeight = '900';
+                submitBtn.style.fontSize = '1.02rem';
+                submitBtn.style.padding = '14px 18px';
+                submitBtn.style.borderRadius = '12px';
+                submitBtn.style.boxShadow = '0 6px 22px rgba(46,125,50,0.45)';
+                submitBtn.style.cursor = 'pointer';
+                submitBtn.innerHTML = '✅ Перейти до бота →';
+                submitBtn.onclick = function() { closeMiniAppToBot(); };
             }
 
-            // 3. Close checkout drawer and cart drawer immediately
-            const chkDrawer = document.getElementById('checkout-drawer');
-            if (chkDrawer) {
-                chkDrawer.classList.remove('active');
-            }
-            const cartDrawer = document.getElementById('cart-drawer');
-            if (cartDrawer) {
-                cartDrawer.classList.remove('active');
-            }
-            if (typeof toggleCheckoutDrawer === 'function') toggleCheckoutDrawer(false);
-            if (typeof toggleCart === 'function') toggleCart(false);
+            // 4. In Step 3 summary, show celebratory confirmation banner
+            const summaryContainer = document.getElementById('step3-order-summary');
+            if (summaryContainer) {
+                const oldCard = document.getElementById('chk-order-success-card');
+                if (oldCard) oldCard.remove();
 
-            // 4. Show success confirmation modal
-            if (typeof showOrderSuccessModal === 'function') {
-                showOrderSuccessModal(order, paymentType);
+                const card = document.createElement('div');
+                card.id = 'chk-order-success-card';
+                card.style.cssText = 'background: rgba(46,125,50,0.1); border: 2px solid #2E7D32; border-radius: 14px; padding: 18px 16px; margin: 16px 0 10px 0; text-align: center; animation: fadeIn 0.3s ease;';
+                card.innerHTML = `
+                    <div style="font-size: 2.2rem; margin-bottom: 6px;">🎉</div>
+                    <div style="font-size: 1.18rem; font-weight: 900; color: #2E7D32; margin-bottom: 4px; letter-spacing: -0.3px;">ДЯКУЄМО ЗА ЗАМОВЛЕННЯ!</div>
+                    <div style="font-family: 'JetBrains Mono', monospace; font-size: 1.05rem; font-weight: 800; color: var(--accent); margin-bottom: 8px;">#MLP-${orderIdStr.replace(/^MLP-/, '')}</div>
+                    <div style="font-size: 0.92rem; color: var(--text-primary); font-weight: 600; line-height: 1.45; margin-bottom: 8px;">
+                        Ваше замовлення успішно створено! Повідомлення вже надіслано в чат бота.
+                    </div>
+                    <div style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.4;">
+                        Натисніть велику зелену кнопку <b>«✅ Перейти до бота →»</b> нижче, щоб повернутися до чату 👇
+                    </div>
+                `;
+                summaryContainer.appendChild(card);
+            }
+
+            // 5. Scroll drawer body to bring the button into full view
+            const drawerBody = document.querySelector('#checkout-drawer .drawer-body');
+            if (drawerBody) {
+                setTimeout(() => {
+                    drawerBody.scrollTo({ top: drawerBody.scrollHeight, behavior: 'smooth' });
+                }, 60);
             }
         }
 
@@ -8795,16 +8877,7 @@
         }
 
         function closeWebAppAndReturnToChat() {
-            const tw = window.Telegram?.WebApp;
-            if (tw && typeof tw.close === 'function') {
-                try {
-                    tw.close();
-                    return;
-                } catch(e) {
-                    console.warn('[tw.close error]', e);
-                }
-            }
-            closeSuccessModal();
+            closeMiniAppToBot();
         }
 
         function showOrderSuccessModal(order, paymentType = 'manager') {
