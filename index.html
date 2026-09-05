@@ -8444,58 +8444,153 @@
             }
         }
 
+        function getKyivGreeting() {
+            try {
+                const formatter = new Intl.DateTimeFormat('uk-UA', {
+                    timeZone: 'Europe/Kyiv',
+                    hour: 'numeric',
+                    hour12: false
+                });
+                const hour = parseInt(formatter.format(new Date()), 10);
+                if (hour >= 5 && hour < 12) {
+                    return 'Добрий ранок! 👋';
+                } else if (hour >= 12 && hour < 18) {
+                    return 'Добрий день! 👋';
+                } else {
+                    return 'Добрий вечір! 👋';
+                }
+            } catch (e) {
+                const now = new Date();
+                const utcHour = now.getUTCHours();
+                const kyivHour = (utcHour + 3) % 24;
+                if (kyivHour >= 5 && kyivHour < 12) return 'Добрий ранок! 👋';
+                if (kyivHour >= 12 && kyivHour < 18) return 'Добрий день! 👋';
+                return 'Добрий вечір! 👋';
+            }
+        }
+
         function formatManagerOrderText(order) {
             const ord = order || lastPlacedOrderObject || {};
+            const greeting = getKyivGreeting();
+            const rawId = String(ord.order_id || ord.id || localStorage.getItem('m1lip_last_order_id') || '').trim();
+            const cleanId = rawId.replace(/^#/, '');
+            const orderNum = cleanId ? `#${cleanId}` : '#Замовлення';
+
             const customer = ord.customer || {};
             const delivery = ord.delivery || {};
-            const items = ord.items || [];
-            const provName = delivery.provider === 'ukrposhta' ? 'Укрпошта' : 'Нова Пошта';
-            const delivPoint = delivery.department || delivery.warehouse_number || delivery.address || 'Відділення';
-            
+            const items = Array.isArray(ord.items) ? ord.items : [];
+            const total = Number(ord.total || 0);
+
+            let msg = `${greeting}\n\n`;
+            msg += `Хочу уточнити деталі щодо замовлення **${orderNum}**.\n\n`;
+
+            // Products
+            if (items.length === 1) {
+                const it = items[0] || {};
+                const title = (it.title || it.name || 'Товар').trim();
+                const color = it.color ? String(it.color).trim() : '';
+                const qty = Number(it.qty || it.quantity || 1);
+                const price = Number(it.price || 0);
+
+                msg += `🛍 **Товар:**\n`;
+                msg += `• **${title}**\n`;
+                if (color && color !== 'Стандартний' && color !== 'default' && color !== '—') {
+                    msg += `• Колір: **${color}**\n`;
+                }
+                msg += `• Кількість: **${qty} шт.**\n`;
+                if (price > 0) {
+                    if (qty > 1) {
+                        msg += `• Ціна: **${qty} шт. × ${price} ₴ = ${qty * price} ₴**\n`;
+                    } else {
+                        msg += `• Ціна: **${price} ₴**\n`;
+                    }
+                }
+            } else if (items.length > 1) {
+                msg += `🛍 **Товари:**\n\n`;
+                items.forEach((it, idx) => {
+                    const title = (it.title || it.name || 'Товар').trim();
+                    const color = it.color && it.color !== 'Стандартний' && it.color !== 'default' && it.color !== '—' ? ` — **${it.color}**` : '';
+                    const qty = Number(it.qty || it.quantity || 1);
+                    const price = Number(it.price || 0);
+                    const itemTotal = price * qty;
+
+                    msg += `${idx + 1}. **${title}**${color}\n`;
+                    if (price > 0) {
+                        msg += `   ${qty} шт. × ${price} ₴ = **${itemTotal} ₴**\n\n`;
+                    } else {
+                        msg += `   ${qty} шт.\n\n`;
+                    }
+                });
+                msg = msg.trimEnd() + '\n';
+            } else {
+                msg += `🛍 **Товар:** **Ігрові девайси MILIPSTORE**\n`;
+            }
+
+            // Total
+            if (total > 0) {
+                msg += `\n💰 **Сума замовлення:** ${total} ₴\n\n`;
+            } else {
+                msg += `\n`;
+            }
+
+            // Customer
             const surname = customer.last_name || customer.surname || '';
             const name = customer.first_name || customer.name || '';
             const patronymic = customer.middle_name || customer.patronymic || '';
-            const pib = [surname, name, patronymic].filter(Boolean).join(' ') || [name, surname].filter(Boolean).join(' ') || 'Покупець';
-            
-            const cleanTg = (customer.telegram_username || '').replace(/^@+/, '');
-            const tgDisplay = cleanTg ? `@${cleanTg}` : '—';
-            const phoneDisplay = customer.phone || '—';
-            const patDisplay = patronymic || '—';
+            const pib = [surname, name, patronymic].filter(Boolean).join(' ') || customer.fullName || customer.name || '';
+            const phone = customer.phone ? String(customer.phone).trim() : '';
 
-            const orderIdStr = (ord.order_id || ord.id || localStorage.getItem('m1lip_last_order_id') || '').replace(/^#/, '');
-            const dateStr = ord.created_at ? formatKyivDateTime(ord.created_at, { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : formatKyivDateTime(new Date(), { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-
-            let text = `👑 ЗАМОВЛЕННЯ #${orderIdStr}\n\n`;
-            text += `📊 Статус: 🆕 Нові\n`;
-            text += `📅 Дата створення: ${dateStr} (Київ)\n\n`;
-            text += `👤 Покупець:\n`;
-            text += `• ПІБ: ${pib}\n`;
-            text += `• Прізвище: ${surname || '—'}\n`;
-            text += `• Ім'я: ${name || '—'}\n`;
-            text += `• По батькові: ${patDisplay}\n`;
-            text += `• Телефон: ${phoneDisplay}\n`;
-            text += `• Telegram: ${tgDisplay}\n\n`;
-            text += `🏢 Доставка:\n`;
-            text += `• Перевізник: ${provName}\n`;
-            text += `• Місто: ${delivery.city || '—'}\n`;
-            text += `• Відділення / адреса: ${delivPoint}\n\n`;
-            text += `💳 Оплата:\n`;
-            text += `• Спосіб: Оформлення через менеджера\n\n`;
-            text += `🛍 Товари в замовленні:\n`;
-            if (items.length > 0) {
-                items.forEach(it => {
-                    const colorStr = it.color ? ` (${it.color})` : '';
-                    text += `• ${it.title}${colorStr}\n  ${it.qty} шт. × ${it.price} ₴ = ${it.price * it.qty} ₴\n`;
-                });
-            } else {
-                text += `• Товар з каталогу MILIPSTORE\n`;
+            if (pib || phone) {
+                if (pib) msg += `👤 **Отримувач:** ${pib}\n`;
+                if (phone) msg += `📞 **Телефон:** ${phone}\n`;
+                msg += `\n`;
             }
-            if (ord.payment?.comment || ord.comment) {
-                text += `\n💬 Коментар до замовлення: ${ord.payment?.comment || ord.comment}\n`;
-            }
-            text += `\n💰 ЗАГАЛЬНА СУМА: ${ord.total || 0} ₴`;
 
-            return text;
+            // Delivery
+            let providerName = 'Нова Пошта';
+            if (delivery.provider === 'ukrposhta' || String(delivery.provider_name || '').toLowerCase().includes('укрпошта')) {
+                providerName = 'Укрпошта';
+            } else if (delivery.provider === 'meest' || String(delivery.provider_name || '').toLowerCase().includes('meest')) {
+                providerName = 'Meest Пошта';
+            } else if (delivery.provider_name) {
+                providerName = delivery.provider_name;
+            }
+
+            const city = delivery.city ? String(delivery.city).trim() : '';
+            const delivPointRaw = delivery.department || delivery.address || delivery.warehouse_number || '';
+            const delivPoint = String(delivPointRaw).trim();
+
+            const isPoshtomat = delivPoint.toLowerCase().includes('поштомат') || delivPoint.toLowerCase().includes('poshtomat') || delivery.method === 'poshtomat';
+            const isCourier = delivPoint.toLowerCase().includes('кур') || delivPoint.toLowerCase().includes('адрес') || delivery.method === 'courier';
+
+            let hasDeliv = false;
+            if (providerName) {
+                msg += `📦 **Доставка:** ${providerName}\n`;
+                hasDeliv = true;
+            }
+            if (city) {
+                msg += `📍 **Місто:** ${city}\n`;
+                hasDeliv = true;
+            }
+            if (delivPoint) {
+                if (isPoshtomat) {
+                    msg += `📫 **Поштомат:** ${delivPoint}\n`;
+                } else if (isCourier) {
+                    msg += `🚪 **Адреса:** ${delivPoint}\n`;
+                } else {
+                    msg += `🏢 **Відділення:** ${delivPoint}\n`;
+                }
+                hasDeliv = true;
+            }
+
+            if (hasDeliv) {
+                msg += `\n`;
+            }
+
+            // Final phrase
+            msg += `Хочу уточнити деталі щодо цього замовлення. Дякую! 😊`;
+
+            return msg;
         }
 
         function copyManagerOrderText() {

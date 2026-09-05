@@ -64,6 +64,159 @@ export function formatKyivTime(dateInput = new Date()) {
   }
 }
 
+export function getKyivGreeting() {
+  try {
+    const formatter = new Intl.DateTimeFormat('uk-UA', {
+      timeZone: 'Europe/Kyiv',
+      hour: 'numeric',
+      hour12: false
+    });
+    const hour = parseInt(formatter.format(new Date()), 10);
+    if (hour >= 5 && hour < 12) {
+      return 'Добрий ранок! 👋';
+    } else if (hour >= 12 && hour < 18) {
+      return 'Добрий день! 👋';
+    } else {
+      return 'Добрий вечір! 👋';
+    }
+  } catch (e) {
+    const now = new Date();
+    const utcHour = now.getUTCHours();
+    const kyivHour = (utcHour + 3) % 24;
+    if (kyivHour >= 5 && kyivHour < 12) return 'Добрий ранок! 👋';
+    if (kyivHour >= 12 && kyivHour < 18) return 'Добрий день! 👋';
+    return 'Добрий вечір! 👋';
+  }
+}
+
+export function buildCustomerManagerMessage(order) {
+  if (!order) {
+    const greeting = getKyivGreeting();
+    return `${greeting}\n\nХочу уточнити деталі щодо замовлення. Дякую! 😊`;
+  }
+
+  const greeting = getKyivGreeting();
+  const rawId = String(order.order_id || order.id || '').trim();
+  const cleanId = rawId.replace(/^#/, '');
+  const orderNum = cleanId ? `#${cleanId}` : '#Замовлення';
+
+  const customer = order.customer || {};
+  const delivery = order.delivery || {};
+  const items = Array.isArray(order.items) ? order.items : [];
+  const total = Number(order.total || 0);
+
+  let msg = `${greeting}\n\n`;
+  msg += `Хочу уточнити деталі щодо замовлення **${orderNum}**.\n\n`;
+
+  // 🛍 Товар / Товари
+  if (items.length === 1) {
+    const it = items[0] || {};
+    const title = (it.title || it.name || 'Товар').trim();
+    const color = it.color ? String(it.color).trim() : '';
+    const qty = Number(it.qty || it.quantity || 1);
+    const price = Number(it.price || 0);
+
+    msg += `🛍 **Товар:**\n`;
+    msg += `• **${title}**\n`;
+    if (color && color !== 'Стандартний' && color !== 'default' && color !== '—') {
+      msg += `• Колір: **${color}**\n`;
+    }
+    msg += `• Кількість: **${qty} шт.**\n`;
+    if (price > 0) {
+      if (qty > 1) {
+        msg += `• Ціна: **${qty} шт. × ${price} ₴ = ${qty * price} ₴**\n`;
+      } else {
+        msg += `• Ціна: **${price} ₴**\n`;
+      }
+    }
+  } else if (items.length > 1) {
+    msg += `🛍 **Товари:**\n\n`;
+    items.forEach((it, idx) => {
+      const title = (it.title || it.name || 'Товар').trim();
+      const color = it.color && it.color !== 'Стандартний' && it.color !== 'default' && it.color !== '—' ? ` — **${it.color}**` : '';
+      const qty = Number(it.qty || it.quantity || 1);
+      const price = Number(it.price || 0);
+      const itemTotal = price * qty;
+
+      msg += `${idx + 1}. **${title}**${color}\n`;
+      if (price > 0) {
+        msg += `   ${qty} шт. × ${price} ₴ = **${itemTotal} ₴**\n\n`;
+      } else {
+        msg += `   ${qty} шт.\n\n`;
+      }
+    });
+    msg = msg.trimEnd() + '\n';
+  } else {
+    msg += `🛍 **Товар:** **Ігрові девайси MILIPSTORE**\n`;
+  }
+
+  // 💰 Сума замовлення
+  if (total > 0) {
+    msg += `\n💰 **Сума замовлення:** ${total} ₴\n\n`;
+  } else {
+    msg += `\n`;
+  }
+
+  // 👤 Отримувач & 📞 Телефон
+  const surname = customer.last_name || customer.surname || '';
+  const name = customer.first_name || customer.name || '';
+  const patronymic = customer.middle_name || customer.patronymic || '';
+  const pib = [surname, name, patronymic].filter(Boolean).join(' ') || customer.fullName || customer.name || '';
+  const phone = customer.phone ? String(customer.phone).trim() : '';
+
+  if (pib || phone) {
+    if (pib) msg += `👤 **Отримувач:** ${pib}\n`;
+    if (phone) msg += `📞 **Телефон:** ${phone}\n`;
+    msg += `\n`;
+  }
+
+  // 📦 Доставка
+  let providerName = 'Нова Пошта';
+  if (delivery.provider === 'ukrposhta' || String(delivery.provider_name || '').toLowerCase().includes('укрпошта')) {
+    providerName = 'Укрпошта';
+  } else if (delivery.provider === 'meest' || String(delivery.provider_name || '').toLowerCase().includes('meest')) {
+    providerName = 'Meest Пошта';
+  } else if (delivery.provider_name) {
+    providerName = delivery.provider_name;
+  }
+
+  const city = delivery.city ? String(delivery.city).trim() : '';
+  const delivPointRaw = delivery.department || delivery.address || delivery.warehouse_number || '';
+  const delivPoint = String(delivPointRaw).trim();
+
+  const isPoshtomat = delivPoint.toLowerCase().includes('поштомат') || delivPoint.toLowerCase().includes('poshtomat') || delivery.method === 'poshtomat';
+  const isCourier = delivPoint.toLowerCase().includes('кур') || delivPoint.toLowerCase().includes('адрес') || delivery.method === 'courier';
+
+  let hasDeliv = false;
+  if (providerName) {
+    msg += `📦 **Доставка:** ${providerName}\n`;
+    hasDeliv = true;
+  }
+  if (city) {
+    msg += `📍 **Місто:** ${city}\n`;
+    hasDeliv = true;
+  }
+  if (delivPoint) {
+    if (isPoshtomat) {
+      msg += `📫 **Поштомат:** ${delivPoint}\n`;
+    } else if (isCourier) {
+      msg += `🚪 **Адреса:** ${delivPoint}\n`;
+    } else {
+      msg += `🏢 **Відділення:** ${delivPoint}\n`;
+    }
+    hasDeliv = true;
+  }
+
+  if (hasDeliv) {
+    msg += `\n`;
+  }
+
+  // Final mandatory phrase
+  msg += `Хочу уточнити деталі щодо цього замовлення. Дякую! 😊`;
+
+  return msg;
+}
+
 function escapeHtml(str) {
   if (str === null || str === undefined) return '';
   return String(str)
@@ -413,19 +566,29 @@ export class TelegramBotService {
         this.botInfo = me.result;
         console.log(`[TelegramBot] Connected as @${me.result.username} (${me.result.first_name})`);
 
-        // Set default Chat Menu Button to open public catalog without Google login
+        // Remove custom web_app menu button to free up space in the mobile text input area
         try {
           await this.callApi('setChatMenuButton', {
             menu_button: {
-              type: 'web_app',
-              text: '🎮 Магазин',
-              web_app: {
-                url: getStoreWebUrl()
-              }
+              type: 'default'
             }
           });
         } catch (menuErr) {
           console.warn('[TelegramBot] setChatMenuButton error:', menuErr.message);
+        }
+
+        // Set standard bot commands
+        try {
+          await this.callApi('setMyCommands', {
+            commands: [
+              { command: 'start', description: 'Головне меню та оновлення інтерфейсу' },
+              { command: 'shop', description: 'Відкрити магазин девайсів' },
+              { command: 'orders', description: 'Мої замовлення' },
+              { command: 'manager', description: "Зв'язок з менеджером" }
+            ]
+          });
+        } catch (cmdErr) {
+          console.warn('[TelegramBot] setMyCommands error:', cmdErr.message);
         }
 
         this.startPolling();
@@ -515,6 +678,7 @@ export class TelegramBotService {
 
   getReplyKeyboard(from) {
     const isAdminUser = this.isAdmin(from);
+    const storeUrl = getStoreWebUrl();
     const keyboard = [];
 
     if (isAdminUser) {
@@ -523,6 +687,9 @@ export class TelegramBotService {
         { text: '📦 Каталог товарів' }
       ]);
     } else {
+      keyboard.push([
+        { text: '🎮 Відкрити магазин', web_app: { url: storeUrl } }
+      ]);
       keyboard.push([
         { text: "💬 Зв'язок з менеджером" },
         { text: '🛍 Мої замовлення' }
@@ -747,6 +914,11 @@ export class TelegramBotService {
 
     // OPEN WEB STORE / CATALOG MANAGEMENT
     if (
+      text === '🎮 Відкрити магазин' ||
+      text === 'Відкрити магазин' ||
+      text === '🎮 Магазин' ||
+      text === 'Магазин' ||
+      text === '🛍 Магазин' ||
       text === '🛍 До асортименту' ||
       text === 'До асортименту' ||
       text === '📦 Каталог товарів' ||
@@ -1121,8 +1293,7 @@ export class TelegramBotService {
       const isDeletable = order.status === 'NEW' || order.status === 'PENDING_PAYMENT' || order.status === 'PENDING_MANAGER';
       if (!isDeletable) {
         const statusName = ORDER_STATUSES[order.status]?.name || order.status;
-        const oIdStr = (order.order_id || '').replace(/^#/, '');
-        const managerMsg = `Добрий день! Щодо замовлення #${oIdStr}: хочу скасувати або змінити деталі замовлення.`;
+        const managerMsg = buildCustomerManagerMessage(order);
         const managerUrl = `https://t.me/milipmanager?text=${encodeURIComponent(managerMsg)}`;
 
         await this.safeEditOrSend(chatId, msgId, `❌ <b>Замовлення #${orderId} не може бути видалене</b>\n\nАдміністратор уже змінив статус замовлення на <b>«${statusName}»</b> і воно передане на склад для комплектації.\n\nЯкщо вам необхідно змінити дані або скасувати доставку, будь ласка, зверніться напряму до нашого менеджера.`, {
@@ -1718,40 +1889,7 @@ export class TelegramBotService {
 
     const buttons = [];
 
-    const orderIdStr = (order.order_id || '').replace(/^#/, '');
-    const dateStr = formatKyivDateTime(order.created_at || Date.now());
-    const surname = customer.last_name || customer.surname || '';
-    const name = customer.first_name || customer.name || '';
-    const patronymic = customer.middle_name || customer.patronymic || '';
-    const pib = [surname, name, patronymic].filter(Boolean).join(' ') || [name, surname].filter(Boolean).join(' ') || fullName || 'Покупець';
-    const provNameClean = delivery.provider === 'ukrposhta' ? 'Укрпошта' : 'Нова Пошта';
-
-    let managerText = `👑 ЗАМОВЛЕННЯ #${orderIdStr}\n\n`;
-    managerText += `📊 Статус: 🆕 Нові\n`;
-    managerText += `📅 Дата створення: ${dateStr} (Київ)\n\n`;
-    managerText += `👤 Покупець:\n`;
-    managerText += `• ПІБ: ${pib}\n`;
-    managerText += `• Прізвище: ${surname || '—'}\n`;
-    managerText += `• Ім'я: ${name || '—'}\n`;
-    managerText += `• По батькові: ${patronymic || '—'}\n`;
-    managerText += `• Телефон: ${customer.phone || '—'}\n`;
-    managerText += `• Telegram: ${cleanTg ? `@${cleanTg}` : '—'}\n\n`;
-    managerText += `🏢 Доставка:\n`;
-    managerText += `• Перевізник: ${provNameClean}\n`;
-    managerText += `• Місто: ${delivery.city || '—'}\n`;
-    managerText += `• Відділення / адреса: ${delivPoint}\n\n`;
-    managerText += `💳 Оплата:\n`;
-    managerText += `• Спосіб: Оформлення через менеджера\n\n`;
-    managerText += `🛍 Товари в замовленні:\n`;
-    (order.items || []).forEach(it => {
-      const colorStr = it.color ? ` (${it.color})` : '';
-      managerText += `• ${it.title}${colorStr}\n  ${it.qty} шт. × ${it.price} ₴ = ${it.price * it.qty} ₴\n`;
-    });
-    if (order.payment?.comment || order.admin_comment) {
-      managerText += `\n💬 Коментар до замовлення: ${order.payment?.comment || order.admin_comment}\n`;
-    }
-    managerText += `\n💰 ЗАГАЛЬНА СУМА: ${order.total || 0} ₴`;
-
+    const managerText = buildCustomerManagerMessage(order);
     const managerUrl = `https://t.me/milipmanager?text=${encodeURIComponent(managerText)}`;
 
     // Primary action: Direct chat with manager with prefilled text!
@@ -1858,16 +1996,7 @@ export class TelegramBotService {
 
     const buttons = [];
 
-    const orderIdDetailStr = (order.order_id || '').replace(/^#/, '');
-    const itemsDetailList = (order.items || []).map((it, idx) => `${idx + 1}. ${it.title}${it.color ? ` (${it.color})` : ''} — ${it.qty} шт. × ${it.price} ₴`).join('\n');
-    const provDetailClean = delivery.provider === 'ukrposhta' ? 'Укрпошта' : 'Нова пошта';
-    const managerDetailMsg = `Добрий день! Щодо замовлення #${orderIdDetailStr}:\n\n` +
-      `🎮 Товари:\n${itemsDetailList}\n\n` +
-      `💰 Сума: ${order.total} ₴\n` +
-      `👤 Отримувач: ${fullName}\n` +
-      `📞 Телефон: ${customer.phone || ''}\n` +
-      (customer.telegram_username ? `💬 Telegram: @${customer.telegram_username.replace(/^@/, '')}\n` : '') +
-      `📦 Доставка: ${provDetailClean}, м. ${delivery.city || ''}, ${delivery.department || delivery.address || ''}`;
+    const managerDetailMsg = buildCustomerManagerMessage(order);
     const managerDetailUrl = `https://t.me/milipmanager?text=${encodeURIComponent(managerDetailMsg)}`;
 
     buttons.push([
@@ -2008,8 +2137,7 @@ export class TelegramBotService {
       //   ]);
       // }
 
-      const oIdStr = (o.order_id || '').replace(/^#/, '');
-      const oManagerMsg = `Добрий день! Щодо мого замовлення #${oIdStr} (${firstItem.title || 'Товар'}, ${o.total} ₴): хочу уточнити статус та деталі.`;
+      const oManagerMsg = buildCustomerManagerMessage(o);
       const oManagerUrl = `https://t.me/milipmanager?text=${encodeURIComponent(oManagerMsg)}`;
 
       buttons.push([
