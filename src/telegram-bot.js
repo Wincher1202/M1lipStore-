@@ -2462,6 +2462,22 @@ export class TelegramBotService {
     const buttons = [];
     const isArchived = ['DELIVERED', 'COMPLETED', 'CANCELLED'].includes(order.status);
 
+    // Direct Customer Contact Row
+    const contactRow = [];
+    if (cust.telegram_username) {
+      const cleanUsername = cust.telegram_username.replace(/^@/, '');
+      contactRow.push({ text: `💬 Написати (@${cleanUsername})`, url: `https://t.me/${cleanUsername}` });
+    } else if (cust.telegram_id) {
+      contactRow.push({ text: `💬 Написати в Telegram`, url: `tg://user?id=${cust.telegram_id}` });
+    }
+    if (cust.phone) {
+      const cleanPhone = cust.phone.replace(/[^\d+]/g, '');
+      contactRow.push({ text: `📞 Подзвонити (${cust.phone})`, url: `tel:${cleanPhone}` });
+    }
+    if (contactRow.length > 0) {
+      buttons.push(contactRow);
+    }
+
     if (!isArchived) {
       // Row 1: Quick Actions (Підтвердити / Скасувати)
       const actionRow = [];
@@ -2820,16 +2836,16 @@ export class TelegramBotService {
     const deliv = order.delivery || {};
     const items = order.items || [];
     
-    let itemsList = '';
+    // Short concise item description
+    let shortItems = '';
     if (items.length > 0) {
-      itemsList = items.map(i => {
+      shortItems = items.map(i => {
         const colorStr = i.color ? ` (${i.color})` : '';
         const qty = Number(i.qty || i.quantity || 1);
-        const price = Number(i.price || 0);
-        return `• <b>${i.title || 'Товар'}</b>${colorStr}\n  ${qty} шт. × ${price} ₴ = <b>${price * qty} ₴</b>`;
-      }).join('\n\n');
+        return `• ${i.title || 'Товар'}${colorStr} — <b>${qty} шт.</b>`;
+      }).join('\n');
     } else {
-      itemsList = '• <b>Ігрові девайси MILIPSTORE</b>\n  1 шт.';
+      shortItems = '• Товари MILIPSTORE';
     }
     
     const surname = (cust.last_name || cust.surname || '').trim();
@@ -2841,83 +2857,53 @@ export class TelegramBotService {
     const provName = deliv.provider === 'ukrposhta' ? 'Укрпошта' : (deliv.provider_name || 'Нова Пошта');
     const dateStr = formatKyivDateTime(order.created_at || Date.now());
 
-    let delivPoint = deliv.department || deliv.address || deliv.warehouse_number || '';
-    const rawDelivStr = `${delivPoint} ${deliv.method || ''}`.toLowerCase();
-    const isPoshtomat = rawDelivStr.includes('поштомат') || rawDelivStr.includes('poshtomat');
-    const isCourier = rawDelivStr.includes('кур') || rawDelivStr.includes('адрес') || deliv.method === 'courier';
-    let delivLabel = 'Відділення / адреса';
-    if (isPoshtomat) delivLabel = 'Поштомат';
-    else if (isCourier) delivLabel = "Адреса (кур'єр)";
-    else delivLabel = 'Відділення';
-
-    // Payment method & state
-    let payMethod = 'Оформлення через менеджера (@milipmanager)';
+    let payMethodShort = 'Менеджер';
     if (order.payment?.method === 'online') {
-      payMethod = 'Онлайн у Telegram-боті';
+      payMethodShort = 'Онлайн оплата';
     } else if (order.payment?.is_cod || order.payment?.method === 'cod') {
-      payMethod = 'Накладений платіж (при отриманні)';
+      payMethodShort = 'Накладений платіж';
     }
 
-    let payStatus = '⏳ В обробці';
-    if (order.payment?.status === 'PAID') {
-      payStatus = '✅ ОПЛАЧЕНО';
-    } else if (order.payment?.method === 'online') {
-      payStatus = '⏳ Очікує оплати';
-    } else if (order.payment?.is_cod || order.payment?.method === 'cod') {
-      payStatus = '⏳ Оплата при отриманні (Накладений платіж)';
-    } else if (order.payment?.method === 'manager') {
-      payStatus = '💬 Очікує зв\'язку з менеджером';
-    }
-
-    const statusName = ORDER_STATUSES[order.status]?.name || 'В обробці';
-    const statusEmoji = order.status === 'CONFIRMED' ? '✅' : (order.status === 'PENDING_PAYMENT' ? '⏳' : (order.status === 'NEW' ? '⏳' : '📦'));
-
-    let adminMsg = `👑 <b>ЗАМОВЛЕННЯ #${order.order_id}</b>\n\n` +
-      `📊 <b>Статус:</b> ${statusEmoji} <b>${statusName}</b>\n` +
-      `📅 <b>Дата створення:</b> ${dateStr} (Київ)\n\n` +
+    let adminMsg = `🔔 <b>НОВЕ ЗАМОВЛЕННЯ #${order.order_id}</b>\n\n` +
+      `📊 <b>Статус:</b> 🆕 <b>В обробці</b> <i>(очікує зв'язку з покупцем)</i>\n` +
+      `📅 <b>Час:</b> ${dateStr} (Київ)\n` +
+      `💰 <b>Сума:</b> <b>${order.total} ₴</b> (${payMethodShort})\n\n` +
       `👤 <b>Покупець:</b>\n` +
       `• ПІБ: <b>${pib}</b>\n` +
-      `• Прізвище: ${surname || '—'}\n` +
-      `• Ім'я: ${name || '—'}\n` +
-      `• По батькові: ${patronymic || '—'}\n` +
       `• Телефон: <code>${cust.phone || 'не вказано'}</code>\n` +
-      `• Telegram: ${cleanTg ? `@${cleanTg}` : '—'}\n\n` +
-      `🏢 <b>Доставка:</b>\n` +
-      `• Перевізник: <b>${provName}</b>\n` +
-      `• Місто: <b>${deliv.city || '—'}</b>\n` +
-      `• ${delivLabel}: <b>${delivPoint || '—'}</b>\n\n` +
-      `💳 <b>Оплата:</b>\n` +
-      `• Спосіб: <b>${payMethod}</b>\n` +
-      `• Стан: <b>${payStatus}</b>\n` +
-      (order.payment?.transaction_id ? `• ID транзакції: <code>${order.payment.transaction_id}</code>\n` : '') +
+      (cleanTg ? `• Telegram: @${cleanTg}\n` : (cust.telegram_id ? `• Telegram ID: <code>${cust.telegram_id}</code>\n` : '')) +
       `\n` +
-      `🛍 <b>Товари в замовленні:</b>\n${itemsList}\n\n` +
-      `💰 <b>ЗАГАЛЬНА СУМА: ${order.total} ₴</b>` +
-      (order.payment?.comment || order.admin_comment || order.comment ? `\n\n📝 <b>Примітка:</b> ${order.payment?.comment || order.admin_comment || order.comment}` : '');
+      `🏢 <b>Доставка:</b> ${provName}, ${deliv.city ? `м. ${deliv.city}` : ''}\n` +
+      `🛍 <b>Товари:</b>\n${shortItems}\n` +
+      (order.payment?.comment || order.admin_comment || order.comment ? `\n📝 <b>Примітка:</b> <i>${order.payment?.comment || order.admin_comment || order.comment}</i>\n` : '') +
+      `\n<i>Натисніть кнопку «Деталі замовлення» для повного перегляду та дій 👇</i>`;
 
     const adminButtons = [
       [
-        { text: '🔍 Переглянути замовлення', callback_data: `admin_view:${order.order_id}` }
+        { text: '📋 Деталі замовлення', callback_data: `admin_view:${order.order_id}` }
       ]
     ];
 
+    const contactRow = [];
     if (cust.telegram_username) {
       const cleanUsername = cust.telegram_username.replace(/^@/, '');
-      adminButtons.push([
-        { text: `💬 Написати покупцю (@${cleanUsername})`, url: `https://t.me/${cleanUsername}` }
-      ]);
+      contactRow.push({ text: `💬 Написати (@${cleanUsername})`, url: `https://t.me/${cleanUsername}` });
     } else if (cust.telegram_id) {
-      adminButtons.push([
-        { text: `💬 Написати покупцю в Telegram`, url: `tg://user?id=${cust.telegram_id}` }
-      ]);
+      contactRow.push({ text: `💬 Написати в Telegram`, url: `tg://user?id=${cust.telegram_id}` });
     }
 
     if (cust.phone) {
       const cleanPhone = cust.phone.replace(/[^\d+]/g, '');
-      adminButtons.push([
-        { text: `📞 Зателефонувати (${cust.phone})`, url: `tel:${cleanPhone}` }
-      ]);
+      contactRow.push({ text: `📞 Подзвонити (${cust.phone})`, url: `tel:${cleanPhone}` });
     }
+    if (contactRow.length > 0) {
+      adminButtons.push(contactRow);
+    }
+
+    adminButtons.push([
+      { text: '⚡ До активних', callback_data: 'admin_list:ACTIVE' },
+      { text: '👑 До адмін-панелі', callback_data: 'admin_dashboard' }
+    ]);
 
     const adminChatIds = this.getAllAdminChatIds();
     const sendPromises = Array.from(adminChatIds).map(adminId =>
