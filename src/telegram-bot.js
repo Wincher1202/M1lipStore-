@@ -418,7 +418,7 @@ export class TelegramBotService {
           await this.callApi('setChatMenuButton', {
             menu_button: {
               type: 'web_app',
-              text: '🛍 Магазин',
+              text: '🎮 Магазин',
               web_app: {
                 url: getStoreWebUrl()
               }
@@ -1129,7 +1129,7 @@ export class TelegramBotService {
           reply_markup: {
             inline_keyboard: [
               [{ text: '💬 Написати менеджеру', url: managerUrl }],
-              [{ text: '📄 Повні деталі замовлення', callback_data: `view_order:${order.order_id}` }],
+              [{ text: '🔍 Деталі замовлення', callback_data: `view_order:${order.order_id}` }],
               [{ text: '📋 До моїх замовлень', callback_data: `orders_list:${chatId}` }]
             ]
           }
@@ -1759,9 +1759,9 @@ export class TelegramBotService {
       { text: '💬 Написати менеджеру', url: managerUrl }
     ]);
 
-    // Full details view
+    // Details view
     buttons.push([
-      { text: '📄 Повні деталі замовлення', callback_data: `view_order:${order.order_id}` }
+      { text: '🔍 Деталі замовлення', callback_data: `view_order:${order.order_id}` }
     ]);
 
     // Delete order button
@@ -1810,7 +1810,7 @@ export class TelegramBotService {
     const provName = delivery.provider === 'ukrposhta' ? 'Укрпошта' : (delivery.provider_name || 'Нова Пошта');
     const delivPoint = delivery.department || delivery.address || delivery.city || 'Відділення';
 
-    let detailsText = `📄 <b>Повні деталі замовлення #${order.order_id}</b>\n\n`;
+    let detailsText = `🔍 <b>Деталі замовлення #${order.order_id}</b>\n\n`;
 
     detailsText += `🕹 <b>Головний товар:</b>\n`;
     detailsText += `• Назва: <b>${firstItem.title || 'Товар'}</b>\n`;
@@ -1827,7 +1827,7 @@ export class TelegramBotService {
 
     const isManagerOrder = payment.method === 'manager' || !payment.method;
     const paymentLabel = isManagerOrder
-      ? 'Через менеджера (@milipmanager) 💬'
+      ? 'Через менеджера 💬'
       : (isPaid ? 'Оплачено ✅' : (isUnpaid ? 'Очікує оплати ⏳' : 'При отриманні (накладений платіж) 📦'));
 
     detailsText += `\n📊 <b>Стан замовлення:</b>\n`;
@@ -2016,7 +2016,7 @@ export class TelegramBotService {
         { text: '💬 Написати менеджеру', url: oManagerUrl }
       ]);
       buttons.push([
-        { text: '📄 Повні деталі замовлення', callback_data: `view_order:${o.order_id}` }
+        { text: '🔍 Деталі замовлення', callback_data: `view_order:${o.order_id}` }
       ]);
       buttons.push([
         { text: '🗑 Видалити замовлення', callback_data: `customer_delete_prompt:${o.order_id}` }
@@ -2530,7 +2530,7 @@ export class TelegramBotService {
     }
 
     const custButtons = [
-      [{ text: '📄 Повні деталі замовлення', callback_data: `view_order:${order.order_id}` }]
+      [{ text: '🔍 Деталі замовлення', callback_data: `view_order:${order.order_id}` }]
     ];
 
     try {
@@ -2691,7 +2691,7 @@ export class TelegramBotService {
 
     const buttons = [
       [{ text: '💬 Написати менеджеру', url: paidSupportUrl }],
-      [{ text: '📄 Повні деталі замовлення', callback_data: `view_order:${order.order_id}` }],
+      [{ text: '🔍 Деталі замовлення', callback_data: `view_order:${order.order_id}` }],
       [{ text: '📋 До моїх замовлень', callback_data: `orders_list:${targetChatId}` }]
     ];
 
