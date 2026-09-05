@@ -305,10 +305,12 @@ app.post('/api/orders', async (req, res) => {
       db.linkOrderToPhone(phone, order.order_id);
     }
 
-    // Send notifications to Admin and Customer asynchronously so response returns instantly
-    botService.sendOrderCreatedNotifications(order).catch(err => {
-      console.warn('[Orders] Background order notification error:', err.message);
-    });
+    // Send notifications to Admin and Customer
+    try {
+      await botService.sendOrderCreatedNotifications(order);
+    } catch (notifErr) {
+      console.warn('[Orders] Order notification error:', notifErr.message);
+    }
 
     res.json({
       status: 'success',

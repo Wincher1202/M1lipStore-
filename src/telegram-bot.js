@@ -2466,13 +2466,9 @@ export class TelegramBotService {
     const contactRow = [];
     if (cust.telegram_username) {
       const cleanUsername = cust.telegram_username.replace(/^@/, '');
-      contactRow.push({ text: `💬 Написати (@${cleanUsername})`, url: `https://t.me/${cleanUsername}` });
+      contactRow.push({ text: `💬 Написати покупцю (@${cleanUsername})`, url: `https://t.me/${cleanUsername}` });
     } else if (cust.telegram_id) {
-      contactRow.push({ text: `💬 Написати в Telegram`, url: `tg://user?id=${cust.telegram_id}` });
-    }
-    if (cust.phone) {
-      const cleanPhone = cust.phone.replace(/[^\d+]/g, '');
-      contactRow.push({ text: `📞 Подзвонити (${cust.phone})`, url: `tel:${cleanPhone}` });
+      contactRow.push({ text: `💬 Написати покупцю в Telegram`, url: `tg://user?id=${cust.telegram_id}` });
     }
     if (contactRow.length > 0) {
       buttons.push(contactRow);
@@ -2887,14 +2883,9 @@ export class TelegramBotService {
     const contactRow = [];
     if (cust.telegram_username) {
       const cleanUsername = cust.telegram_username.replace(/^@/, '');
-      contactRow.push({ text: `💬 Написати (@${cleanUsername})`, url: `https://t.me/${cleanUsername}` });
+      contactRow.push({ text: `💬 Написати покупцю (@${cleanUsername})`, url: `https://t.me/${cleanUsername}` });
     } else if (cust.telegram_id) {
-      contactRow.push({ text: `💬 Написати в Telegram`, url: `tg://user?id=${cust.telegram_id}` });
-    }
-
-    if (cust.phone) {
-      const cleanPhone = cust.phone.replace(/[^\d+]/g, '');
-      contactRow.push({ text: `📞 Подзвонити (${cust.phone})`, url: `tel:${cleanPhone}` });
+      contactRow.push({ text: `💬 Написати покупцю в Telegram`, url: `tg://user?id=${cust.telegram_id}` });
     }
     if (contactRow.length > 0) {
       adminButtons.push(contactRow);

@@ -538,32 +538,32 @@
   ],
   "orders": [
     {
-      "order_id": "MLP-547368",
-      "id": "MLP-547368",
+      "order_id": "MLP-324551",
+      "id": "MLP-324551",
       "status": "NEW",
-      "status_name": "Нові",
+      "status_name": "В обробці",
       "tracking_number": null,
-      "subtotal": 2499,
+      "subtotal": 2799,
       "delivery_fee": 0,
       "cod_fee": 0,
-      "total": 2499,
+      "total": 2799,
       "dispatch_timeline": "1-2 дні",
       "shipping_note": "Відправлення замовлення протягом 1-2 робочих днів з моменту оформлення",
-      "created_at": "2026-09-03T16:43:45.392Z",
-      "updated_at": "2026-09-03T16:43:45.392Z",
+      "created_at": "2026-09-05T11:40:51.162Z",
+      "updated_at": "2026-09-05T11:40:51.162Z",
       "customer": {
-        "first_name": "Олександр",
-        "last_name": "Шевченко",
+        "first_name": "Тест2",
+        "last_name": "Тестовий2",
         "middle_name": "",
-        "phone": "+380501234567",
+        "phone": "+380991112244",
         "email": "",
-        "telegram_id": null,
-        "telegram_username": "@alex_test"
+        "telegram_id": 999999999,
+        "telegram_username": null
       },
       "delivery": {
-        "provider": "novaposhta",
+        "provider": "nova_poshta",
         "provider_name": "Нова Пошта",
-        "type": "warehouse",
+        "type": "branch",
         "type_name": "Відділення",
         "city": "Київ",
         "city_ref": "",
@@ -584,22 +584,244 @@
       },
       "items": [
         {
-          "id": "1",
-          "title": "Mchose AX5",
+          "id": "p_irok_nd81_v98",
+          "title": "IROK HEG Ultra",
           "brand": "MILIPSTORE",
-          "sku": "SKU-1",
-          "color": "Чорний",
+          "sku": "SKU-p_irok_nd81_v98",
+          "color": "",
           "img": "/images.png",
-          "price": 2499,
+          "price": 2799,
           "qty": 1,
-          "total": 2499
+          "total": 2799
         }
       ],
       "history": [
         {
           "status": "NEW",
-          "status_name": "Нові",
-          "timestamp": "2026-09-03T16:43:45.392Z",
+          "status_name": "В обробці",
+          "timestamp": "2026-09-05T11:40:51.162Z",
+          "note": "Замовлення оформлено (передано менеджеру)",
+          "actor": "Customer"
+        }
+      ],
+      "admin_comment": ""
+    },
+    {
+      "order_id": "MLP-842437",
+      "id": "MLP-842437",
+      "status": "NEW",
+      "status_name": "В обробці",
+      "tracking_number": null,
+      "subtotal": 2799,
+      "delivery_fee": 0,
+      "cod_fee": 0,
+      "total": 2799,
+      "dispatch_timeline": "1-2 дні",
+      "shipping_note": "Відправлення замовлення протягом 1-2 робочих днів з моменту оформлення",
+      "created_at": "2026-09-05T11:40:47.642Z",
+      "updated_at": "2026-09-05T11:40:47.642Z",
+      "customer": {
+        "first_name": "Тест",
+        "last_name": "Тестовий",
+        "middle_name": "",
+        "phone": "+380991112233",
+        "email": "",
+        "telegram_id": null,
+        "telegram_username": null
+      },
+      "delivery": {
+        "provider": "nova_poshta",
+        "provider_name": "Нова Пошта",
+        "type": "branch",
+        "type_name": "Відділення",
+        "city": "Київ",
+        "city_ref": "",
+        "warehouse_ref": "",
+        "warehouse_number": "Відділення №1",
+        "department": "Відділення №1",
+        "address": "Відділення №1"
+      },
+      "payment": {
+        "method": "manager",
+        "provider": "Через менеджера (@milipmanager)",
+        "status": "PENDING_MANAGER",
+        "transaction_id": null,
+        "paid_at": null,
+        "is_cod": false,
+        "cod_fee": 0,
+        "comment": ""
+      },
+      "items": [
+        {
+          "id": "p_irok_nd81_v98",
+          "title": "IROK HEG Ultra",
+          "brand": "MILIPSTORE",
+          "sku": "SKU-p_irok_nd81_v98",
+          "color": "",
+          "img": "/images.png",
+          "price": 2799,
+          "qty": 1,
+          "total": 2799
+        }
+      ],
+      "history": [
+        {
+          "status": "NEW",
+          "status_name": "В обробці",
+          "timestamp": "2026-09-05T11:40:47.642Z",
+          "note": "Замовлення оформлено (передано менеджеру)",
+          "actor": "Customer"
+        }
+      ],
+      "admin_comment": "",
+      "_admin_notified": true,
+      "_admin_paid_notified": true
+    },
+    {
+      "order_id": "MLP-946685",
+      "id": "MLP-946685",
+      "status": "NEW",
+      "status_name": "В обробці",
+      "tracking_number": null,
+      "subtotal": 5744,
+      "delivery_fee": 0,
+      "cod_fee": 0,
+      "total": 5744,
+      "dispatch_timeline": "1-2 дні",
+      "shipping_note": "Відправлення замовлення протягом 1-2 робочих днів з моменту оформлення",
+      "created_at": "2026-09-05T11:32:30.027Z",
+      "updated_at": "2026-09-05T11:32:30.027Z",
+      "customer": {
+        "first_name": "афафа",
+        "last_name": "афафа",
+        "middle_name": "фапфа",
+        "phone": "+380 31 313 13 01",
+        "email": "",
+        "telegram_id": 5941640336,
+        "telegram_username": "Prorabeer"
+      },
+      "delivery": {
+        "provider": "nova_poshta",
+        "provider_name": "Нова Пошта",
+        "type": "branch",
+        "type_name": "Відділення",
+        "city": "Львів",
+        "city_ref": "db5c88f5-391c-11dd-90d9-001a92567626",
+        "warehouse_ref": "47402e72-e1c2-11e3-8c4a-0050568002cf",
+        "warehouse_number": "Відділення №8 (до 30 кг на одне місце): вул. Грінченка, 2а",
+        "department": "Відділення №8 (до 30 кг на одне місце): вул. Грінченка, 2а",
+        "address": "Відділення №8 (до 30 кг на одне місце): вул. Грінченка, 2а"
+      },
+      "payment": {
+        "method": "manager",
+        "provider": "Через менеджера (@milipmanager)",
+        "status": "PENDING_MANAGER",
+        "transaction_id": null,
+        "paid_at": null,
+        "is_cod": false,
+        "cod_fee": 0,
+        "comment": ""
+      },
+      "items": [
+        {
+          "id": "p_att_v0b2_btia",
+          "title": "Attack Shark ATTACK SHARK R5 ULTRA",
+          "brand": "Attack Shark",
+          "sku": "ATT-RU7YB",
+          "color": "White",
+          "img": "attack-shark-r5-ultra-box-bundle-contents.jpg",
+          "price": 2945,
+          "qty": 1,
+          "total": 2945
+        },
+        {
+          "id": "p_iro_ohx6_jmc3",
+          "title": "IROK IROK HE6 Ultra",
+          "brand": "IROK",
+          "sku": "IRO-51O6V",
+          "color": "Black",
+          "img": "photo_2026-08-25_15-32-42.jpg",
+          "price": 2799,
+          "qty": 1,
+          "total": 2799
+        }
+      ],
+      "history": [
+        {
+          "status": "NEW",
+          "status_name": "В обробці",
+          "timestamp": "2026-09-05T11:32:30.027Z",
+          "note": "Замовлення оформлено (передано менеджеру)",
+          "actor": "Customer"
+        }
+      ],
+      "admin_comment": "",
+      "_admin_notified": true,
+      "_admin_paid_notified": true
+    },
+    {
+      "order_id": "MLP-528704",
+      "id": "MLP-528704",
+      "status": "NEW",
+      "status_name": "В обробці",
+      "tracking_number": null,
+      "subtotal": 2799,
+      "delivery_fee": 0,
+      "cod_fee": 0,
+      "total": 2799,
+      "dispatch_timeline": "1-2 дні",
+      "shipping_note": "Відправлення замовлення протягом 1-2 робочих днів з моменту оформлення",
+      "created_at": "2026-09-05T11:24:03.651Z",
+      "updated_at": "2026-09-05T11:24:03.651Z",
+      "customer": {
+        "first_name": "gsfsf",
+        "last_name": "fsdfsf",
+        "middle_name": "fsfdsf",
+        "phone": "+380 43 324 24 24",
+        "email": "",
+        "telegram_id": 5941640336,
+        "telegram_username": "Prorabeer"
+      },
+      "delivery": {
+        "provider": "nova_poshta",
+        "provider_name": "Нова Пошта",
+        "type": "branch",
+        "type_name": "Відділення",
+        "city": "Івано-Франківськ",
+        "city_ref": "db5c88ec-391c-11dd-90d9-001a92567626",
+        "warehouse_ref": "01ae2643-e1c2-11e3-8c4a-0050568002cf",
+        "warehouse_number": "Відділення №10 (до 30 кг на одне місце): вул. Степана Бандери, 10Б",
+        "department": "Відділення №10 (до 30 кг на одне місце): вул. Степана Бандери, 10Б",
+        "address": "Відділення №10 (до 30 кг на одне місце): вул. Степана Бандери, 10Б"
+      },
+      "payment": {
+        "method": "manager",
+        "provider": "Через менеджера (@milipmanager)",
+        "status": "PENDING_MANAGER",
+        "transaction_id": null,
+        "paid_at": null,
+        "is_cod": false,
+        "cod_fee": 0,
+        "comment": "ffffff"
+      },
+      "items": [
+        {
+          "id": "p_mch_7t3i_9viu",
+          "title": "Mchose MCHOSE V9 PRO",
+          "brand": "Mchose",
+          "sku": "MCH-RHE5W",
+          "color": "Red",
+          "img": "photo_2026-08-25_15-32-13.jpg",
+          "price": 2799,
+          "qty": 1,
+          "total": 2799
+        }
+      ],
+      "history": [
+        {
+          "status": "NEW",
+          "status_name": "В обробці",
+          "timestamp": "2026-09-05T11:24:03.651Z",
           "note": "Замовлення оформлено (передано менеджеру)",
           "actor": "Customer"
         }
@@ -1240,105 +1462,6 @@
         }
       ],
       "admin_comment": ""
-    },
-    {
-      "order_id": "MLP-554753",
-      "id": "MLP-554753",
-      "status": "CONFIRMED",
-      "status_name": "Підтверджені",
-      "tracking_number": null,
-      "subtotal": 2799,
-      "delivery_fee": 0,
-      "cod_fee": 0,
-      "total": 2799,
-      "dispatch_timeline": "1-2 дні",
-      "shipping_note": "Відправлення замовлення протягом 1-2 робочих днів з моменту оформлення",
-      "created_at": "2026-09-02T20:20:41.393Z",
-      "updated_at": "2026-09-02T20:41:46.533Z",
-      "customer": {
-        "first_name": "Ле",
-        "last_name": "Но",
-        "middle_name": "Авл",
-        "phone": "+380 32 683 51 89",
-        "email": "",
-        "telegram_id": 5941640336,
-        "telegram_username": "Prorabeer"
-      },
-      "delivery": {
-        "provider": "nova_poshta",
-        "provider_name": "Нова Пошта",
-        "type": "branch",
-        "type_name": "Відділення",
-        "city": "Кривий Ріг",
-        "city_ref": "db5c88b9-391c-11dd-90d9-001a92567626",
-        "warehouse_ref": "644de30b-e1c2-11e3-8c4a-0050568002cf",
-        "warehouse_number": "Відділення №3 (до 30 кг на одне місце): вул. Кропивницького, 29в",
-        "department": "Відділення №3 (до 30 кг на одне місце): вул. Кропивницького, 29в",
-        "address": "Відділення №3 (до 30 кг на одне місце): вул. Кропивницького, 29в"
-      },
-      "payment": {
-        "method": "online",
-        "provider": "Smart Glocal Test (Telegram Bot)",
-        "status": "PAID",
-        "transaction_id": "SG_TG_1788380535189_8233",
-        "paid_at": "2026-09-02T20:22:15.189Z",
-        "is_cod": false,
-        "cod_fee": 0,
-        "comment": "....."
-      },
-      "items": [
-        {
-          "id": "p_iro_ohx6_jmc3",
-          "title": "IROK IROK HE6 Ultra",
-          "brand": "IROK",
-          "sku": "IRO-51O6V",
-          "color": "Black",
-          "img": "/photo_2026-08-25_15-31-22.jpg",
-          "price": 2799,
-          "qty": 1,
-          "total": 2799
-        }
-      ],
-      "history": [
-        {
-          "status": "PENDING_PAYMENT",
-          "status_name": "Очікує оплати",
-          "timestamp": "2026-09-02T20:20:41.393Z",
-          "note": "Замовлення створено (очікує оплати)",
-          "actor": "Customer"
-        },
-        {
-          "status": "PAID",
-          "status_name": "Оплата підтверджена",
-          "timestamp": "2026-09-02T20:22:15.189Z",
-          "note": "Оплату успішно отримано (Smart Glocal Test (Telegram Bot), сума: 2799 ₴)",
-          "actor": "PaymentSystem"
-        },
-        {
-          "status": "CONFIRMED",
-          "status_name": "Підтверджені",
-          "timestamp": "2026-09-02T20:23:44.496Z",
-          "note": "Підтверджено адміністратором у Telegram-боті",
-          "actor": "Admin"
-        },
-        {
-          "status": "PACKING_PREP",
-          "status_name": "Готується до пакування",
-          "timestamp": "2026-09-02T20:26:37.349Z",
-          "note": "Статус змінено адміністратором у боті",
-          "actor": "Admin"
-        },
-        {
-          "status": "CONFIRMED",
-          "status_name": "Підтверджені",
-          "timestamp": "2026-09-02T20:41:46.533Z",
-          "note": "Підтверджено адміністратором у Telegram-боті",
-          "actor": "Admin"
-        }
-      ],
-      "admin_comment": "",
-      "_admin_paid_notified": true,
-      "_admin_notified": true
     },
     {
       "order_id": "MLP-461195",
@@ -2652,7 +2775,40 @@
       "admin_comment": ""
     }
   ],
-  "telegram_users": {},
+  "telegram_users": {
+    "999999999": {
+      "telegram_id": "999999999",
+      "first_name": "Тест2",
+      "last_name": "Тестовий2",
+      "username": "",
+      "phone": "+380991112244",
+      "order_ids": [
+        "MLP-324551"
+      ]
+    },
+    "1929165295": {
+      "telegram_id": "1929165295",
+      "first_name": "Wincher",
+      "last_name": "",
+      "username": "lnvinciblee",
+      "phone": "",
+      "order_ids": [
+        ""
+      ]
+    },
+    "5941640336": {
+      "telegram_id": "5941640336",
+      "first_name": ".",
+      "last_name": "",
+      "username": "Prorabeer",
+      "phone": "+380 43 324 24 24",
+      "order_ids": [
+        "",
+        "MLP-528704",
+        "MLP-946685"
+      ]
+    }
+  },
   "admin_ids": [
     "1929165295",
     "1248134309",
@@ -2662,6 +2818,24 @@
     "Wincher"
   ],
   "notifications": [
+    {
+      "id": "notif-1788608451170-676",
+      "timestamp": "2026-09-05T11:40:51.170Z",
+      "type": "ORDER_CREATED",
+      "order_id": "MLP-324551",
+      "total": 2799,
+      "customer": "Тестовий2 Тест2",
+      "status": "NEW"
+    },
+    {
+      "id": "notif-1788608447648-458",
+      "timestamp": "2026-09-05T11:40:47.648Z",
+      "type": "ORDER_CREATED",
+      "order_id": "MLP-842437",
+      "total": 2799,
+      "customer": "Тестовий Тест",
+      "status": "NEW"
+    },
     {
       "id": "notif-1788453825399-83",
       "timestamp": "2026-09-03T16:43:45.400Z",
@@ -2702,5 +2876,19 @@
   ],
   "deleted_brand_ids": [],
   "deleted_category_ids": [],
-  "last_cloud_sync": "2026-09-03T16:43:44.522Z"
+  "last_cloud_sync": "2026-09-05T11:40:49.814Z",
+  "deleted_order_ids": [
+    "MLP-912003",
+    "MLP-532855",
+    "MLP-547368",
+    "MLP-493008",
+    "MLP-489896",
+    "MLP-554753",
+    "MLP-696117",
+    "MLP-844066",
+    "MLP-203516",
+    "MLP-717958",
+    "MLP-747974",
+    "MLP-329634"
+  ]
 }
