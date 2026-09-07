@@ -538,79 +538,8 @@
   ],
   "orders": [
     {
-      "order_id": "MLP-938175",
-      "id": "MLP-938175",
-      "status": "NEW",
-      "status_name": "В обробці",
-      "tracking_number": null,
-      "subtotal": 1499,
-      "delivery_fee": 0,
-      "cod_fee": 0,
-      "total": 1499,
-      "dispatch_timeline": "1-2 дні",
-      "shipping_note": "Відправлення замовлення протягом 1-2 робочих днів з моменту оформлення",
-      "created_at": "2026-09-05T12:09:21.150Z",
-      "updated_at": "2026-09-05T12:09:21.150Z",
-      "customer": {
-        "first_name": "Тест",
-        "last_name": "Тестовий",
-        "middle_name": "",
-        "phone": "+380991234567",
-        "email": "",
-        "telegram_id": null,
-        "telegram_username": null
-      },
-      "delivery": {
-        "provider": "nova_poshta",
-        "provider_name": "Нова Пошта",
-        "type": "branch",
-        "type_name": "Відділення",
-        "city": "Київ",
-        "city_ref": "",
-        "warehouse_ref": "",
-        "warehouse_number": "Відділення №1",
-        "department": "Відділення №1",
-        "address": "Відділення №1"
-      },
-      "payment": {
-        "method": "manager",
-        "provider": "Через менеджера (@milipmanager)",
-        "status": "PENDING_MANAGER",
-        "transaction_id": null,
-        "paid_at": null,
-        "is_cod": false,
-        "cod_fee": 0,
-        "comment": ""
-      },
-      "items": [
-        {
-          "id": 1,
-          "title": "Attack Shark X3",
-          "brand": "MILIPSTORE",
-          "sku": "SKU-1",
-          "color": "",
-          "img": "/images.png",
-          "price": 1499,
-          "qty": 1,
-          "total": 1499
-        }
-      ],
-      "history": [
-        {
-          "status": "NEW",
-          "status_name": "В обробці",
-          "timestamp": "2026-09-05T12:09:21.150Z",
-          "note": "Замовлення оформлено (передано менеджеру)",
-          "actor": "Customer"
-        }
-      ],
-      "admin_comment": "",
-      "_admin_notified": true,
-      "_admin_paid_notified": true
-    },
-    {
-      "order_id": "MLP-682316",
-      "id": "MLP-682316",
+      "order_id": "MLP-240575",
+      "id": "MLP-240575",
       "status": "NEW",
       "status_name": "В обробці",
       "tracking_number": null,
@@ -620,13 +549,13 @@
       "total": 2799,
       "dispatch_timeline": "1-2 дні",
       "shipping_note": "Відправлення замовлення протягом 1-2 робочих днів з моменту оформлення",
-      "created_at": "2026-09-05T12:05:49.077Z",
-      "updated_at": "2026-09-05T12:05:49.077Z",
+      "created_at": "2026-09-07T05:54:07.210Z",
+      "updated_at": "2026-09-07T05:54:07.210Z",
       "customer": {
-        "first_name": "Тест",
-        "last_name": "Тест",
-        "middle_name": "",
-        "phone": "+380990000000",
+        "first_name": "Денис",
+        "last_name": "Аникієнко",
+        "middle_name": "Юрійович",
+        "phone": "+380 96 370 76 31",
         "email": "",
         "telegram_id": null,
         "telegram_username": null
@@ -636,83 +565,12 @@
         "provider_name": "Нова Пошта",
         "type": "branch",
         "type_name": "Відділення",
-        "city": "Київ",
-        "city_ref": "",
-        "warehouse_ref": "",
-        "warehouse_number": "Відділення №1",
-        "department": "Відділення №1",
-        "address": "Відділення №1"
-      },
-      "payment": {
-        "method": "manager",
-        "provider": "Через менеджера (@milipmanager)",
-        "status": "PENDING_MANAGER",
-        "transaction_id": null,
-        "paid_at": null,
-        "is_cod": false,
-        "cod_fee": 0,
-        "comment": ""
-      },
-      "items": [
-        {
-          "id": "p_mch_7t3i_9viu",
-          "title": "Mchose MCHOSE V9 PRO",
-          "brand": "Mchose",
-          "sku": "MCH-RHE5W",
-          "color": "",
-          "img": "photo_2026-08-25_15-31-22.jpg",
-          "price": 2799,
-          "qty": 1,
-          "total": 2799
-        }
-      ],
-      "history": [
-        {
-          "status": "NEW",
-          "status_name": "В обробці",
-          "timestamp": "2026-09-05T12:05:49.077Z",
-          "note": "Замовлення оформлено (передано менеджеру)",
-          "actor": "Customer"
-        }
-      ],
-      "admin_comment": "",
-      "_admin_notified": true,
-      "_admin_paid_notified": true
-    },
-    {
-      "order_id": "MLP-760148",
-      "id": "MLP-760148",
-      "status": "NEW",
-      "status_name": "В обробці",
-      "tracking_number": null,
-      "subtotal": 2799,
-      "delivery_fee": 0,
-      "cod_fee": 0,
-      "total": 2799,
-      "dispatch_timeline": "1-2 дні",
-      "shipping_note": "Відправлення замовлення протягом 1-2 робочих днів з моменту оформлення",
-      "created_at": "2026-09-05T12:03:32.346Z",
-      "updated_at": "2026-09-05T12:03:32.346Z",
-      "customer": {
-        "first_name": "аіа",
-        "last_name": "аіа",
-        "middle_name": "вв",
-        "phone": "+380 23 414 14 41",
-        "email": "",
-        "telegram_id": 5941640336,
-        "telegram_username": "Prorabeer"
-      },
-      "delivery": {
-        "provider": "nova_poshta",
-        "provider_name": "Нова Пошта",
-        "type": "branch",
-        "type_name": "Відділення",
-        "city": "Львів",
-        "city_ref": "db5c88f5-391c-11dd-90d9-001a92567626",
-        "warehouse_ref": "1ec09d2e-e1c2-11e3-8c4a-0050568002cf",
-        "warehouse_number": "Відділення №1: вул. Городоцька, 359",
-        "department": "Відділення №1: вул. Городоцька, 359",
-        "address": "Відділення №1: вул. Городоцька, 359"
+        "city": "Чернігів",
+        "city_ref": "db5c897c-391c-11dd-90d9-001a92567626",
+        "warehouse_ref": "eab850c8-2ba0-11e9-acea-005056b24375",
+        "warehouse_number": "Відділення №19 (до 30 кг на одне місце): вул. Всіхсвятська, 5",
+        "department": "Відділення №19 (до 30 кг на одне місце): вул. Всіхсвятська, 5",
+        "address": "Відділення №19 (до 30 кг на одне місце): вул. Всіхсвятська, 5"
       },
       "payment": {
         "method": "manager",
@@ -741,229 +599,9 @@
         {
           "status": "NEW",
           "status_name": "В обробці",
-          "timestamp": "2026-09-05T12:03:32.346Z",
+          "timestamp": "2026-09-07T05:54:07.210Z",
           "note": "Замовлення оформлено (передано менеджеру)",
           "actor": "Customer"
-        }
-      ],
-      "admin_comment": "",
-      "_admin_notified": true,
-      "_admin_paid_notified": true
-    },
-    {
-      "order_id": "MLP-381606",
-      "id": "MLP-381606",
-      "status": "NEW",
-      "status_name": "В обробці",
-      "tracking_number": null,
-      "subtotal": 2449,
-      "delivery_fee": 0,
-      "cod_fee": 0,
-      "total": 2449,
-      "dispatch_timeline": "1-2 дні",
-      "shipping_note": "Відправлення замовлення протягом 1-2 робочих днів з моменту оформлення",
-      "created_at": "2026-09-05T12:03:01.239Z",
-      "updated_at": "2026-09-05T12:03:01.239Z",
-      "customer": {
-        "first_name": "ddd",
-        "last_name": "fff",
-        "middle_name": "афафа",
-        "phone": "+380 23 414 14 41",
-        "email": "",
-        "telegram_id": 5941640336,
-        "telegram_username": "Prorabeer"
-      },
-      "delivery": {
-        "provider": "nova_poshta",
-        "provider_name": "Нова Пошта",
-        "type": "branch",
-        "type_name": "Відділення",
-        "city": "Львів",
-        "city_ref": "db5c88f5-391c-11dd-90d9-001a92567626",
-        "warehouse_ref": "5a39e577-e1c2-11e3-8c4a-0050568002cf",
-        "warehouse_number": "Відділення №7 (до 30 кг): вул. Личаківська, 15",
-        "department": "Відділення №7 (до 30 кг): вул. Личаківська, 15",
-        "address": "Відділення №7 (до 30 кг): вул. Личаківська, 15"
-      },
-      "payment": {
-        "method": "manager",
-        "provider": "Через менеджера (@milipmanager)",
-        "status": "PENDING_MANAGER",
-        "transaction_id": null,
-        "paid_at": null,
-        "is_cod": false,
-        "cod_fee": 0,
-        "comment": ""
-      },
-      "items": [
-        {
-          "id": "p_mch_i851_nnxq",
-          "title": "Mchose MCHOSE A7 V2 PRO",
-          "brand": "Mchose",
-          "sku": "MCH-5AGXK",
-          "color": "White",
-          "img": "photo_2026-08-25_15-32-57.jpg",
-          "price": 2449,
-          "qty": 1,
-          "total": 2449
-        }
-      ],
-      "history": [
-        {
-          "status": "NEW",
-          "status_name": "В обробці",
-          "timestamp": "2026-09-05T12:03:01.239Z",
-          "note": "Замовлення оформлено (передано менеджеру)",
-          "actor": "Customer"
-        }
-      ],
-      "admin_comment": "",
-      "_admin_notified": true,
-      "_admin_paid_notified": true
-    },
-    {
-      "order_id": "MLP-372429",
-      "id": "MLP-372429",
-      "status": "NEW",
-      "status_name": "В обробці",
-      "tracking_number": null,
-      "subtotal": 2799,
-      "delivery_fee": 0,
-      "cod_fee": 0,
-      "total": 2799,
-      "dispatch_timeline": "1-2 дні",
-      "shipping_note": "Відправлення замовлення протягом 1-2 робочих днів з моменту оформлення",
-      "created_at": "2026-09-05T11:58:18.060Z",
-      "updated_at": "2026-09-05T11:58:18.060Z",
-      "customer": {
-        "first_name": "лохматий",
-        "last_name": "дід",
-        "middle_name": "шкурка",
-        "phone": "+380 63 754 54 56",
-        "email": "",
-        "telegram_id": null,
-        "telegram_username": null
-      },
-      "delivery": {
-        "provider": "nova_poshta",
-        "provider_name": "Нова Пошта",
-        "type": "branch",
-        "type_name": "Відділення",
-        "city": "Одеса",
-        "city_ref": "db5c88d0-391c-11dd-90d9-001a92567626",
-        "warehouse_ref": "7b422fc4-e1b8-11e3-8c4a-0050568002cf",
-        "warehouse_number": "Відділення №2: вул. Базова, 16 (Промринок, 7 км)",
-        "department": "Відділення №2: вул. Базова, 16 (Промринок, 7 км)",
-        "address": "Відділення №2: вул. Базова, 16 (Промринок, 7 км)"
-      },
-      "payment": {
-        "method": "manager",
-        "provider": "Через менеджера (@milipmanager)",
-        "status": "PENDING_MANAGER",
-        "transaction_id": null,
-        "paid_at": null,
-        "is_cod": false,
-        "cod_fee": 0,
-        "comment": ""
-      },
-      "items": [
-        {
-          "id": "p_mch_7t3i_9viu",
-          "title": "Mchose MCHOSE V9 PRO",
-          "brand": "Mchose",
-          "sku": "MCH-RHE5W",
-          "color": "Black",
-          "img": "photo_2026-08-25_15-32-17.jpg",
-          "price": 2799,
-          "qty": 1,
-          "total": 2799
-        }
-      ],
-      "history": [
-        {
-          "status": "NEW",
-          "status_name": "В обробці",
-          "timestamp": "2026-09-05T11:58:18.060Z",
-          "note": "Замовлення оформлено (передано менеджеру)",
-          "actor": "Customer"
-        }
-      ],
-      "admin_comment": "",
-      "_admin_notified": true,
-      "_admin_paid_notified": true
-    },
-    {
-      "order_id": "MLP-493101",
-      "id": "MLP-493101",
-      "status": "CONFIRMED",
-      "status_name": "Підтверджені",
-      "tracking_number": null,
-      "subtotal": 2945,
-      "delivery_fee": 0,
-      "cod_fee": 0,
-      "total": 2945,
-      "dispatch_timeline": "1-2 дні",
-      "shipping_note": "Відправлення замовлення протягом 1-2 робочих днів з моменту оформлення",
-      "created_at": "2026-09-05T11:45:51.981Z",
-      "updated_at": "2026-09-05T11:48:33.049Z",
-      "customer": {
-        "first_name": "Мдада",
-        "last_name": "Аьалала",
-        "middle_name": "Плалпа",
-        "phone": "+380 23 232 32 32",
-        "email": "",
-        "telegram_id": 5941640336,
-        "telegram_username": "Prorabeer"
-      },
-      "delivery": {
-        "provider": "nova_poshta",
-        "provider_name": "Нова Пошта",
-        "type": "branch",
-        "type_name": "Відділення",
-        "city": "Харків",
-        "city_ref": "db5c88e0-391c-11dd-90d9-001a92567626",
-        "warehouse_ref": "7b422fbb-e1b8-11e3-8c4a-0050568002cf",
-        "warehouse_number": "Відділення №3: вул. Тюрінська (ран. Якіра), 124",
-        "department": "Відділення №3: вул. Тюрінська (ран. Якіра), 124",
-        "address": "Відділення №3: вул. Тюрінська (ран. Якіра), 124"
-      },
-      "payment": {
-        "method": "manager",
-        "provider": "Через менеджера (@milipmanager)",
-        "status": "PENDING_MANAGER",
-        "transaction_id": null,
-        "paid_at": null,
-        "is_cod": false,
-        "cod_fee": 0,
-        "comment": ""
-      },
-      "items": [
-        {
-          "id": "p_att_v0b2_btia",
-          "title": "Attack Shark ATTACK SHARK R5 ULTRA",
-          "brand": "Attack Shark",
-          "sku": "ATT-RU7YB",
-          "color": "Black",
-          "img": "attack-shark-r5-ultra-colors-price.jpg",
-          "price": 2945,
-          "qty": 1,
-          "total": 2945
-        }
-      ],
-      "history": [
-        {
-          "status": "NEW",
-          "status_name": "В обробці",
-          "timestamp": "2026-09-05T11:45:51.981Z",
-          "note": "Замовлення оформлено (передано менеджеру)",
-          "actor": "Customer"
-        },
-        {
-          "status": "CONFIRMED",
-          "status_name": "Підтверджені",
-          "timestamp": "2026-09-05T11:48:33.049Z",
-          "note": "Підтверджено адміністратором у Telegram-боті",
-          "actor": "Admin"
         }
       ],
       "admin_comment": "",
@@ -2890,6 +2528,26 @@
         "MLP-381606",
         "MLP-760148"
       ]
+    },
+    "7629477996": {
+      "telegram_id": "7629477996",
+      "first_name": "Максим",
+      "last_name": "Бурбицкий",
+      "username": "",
+      "phone": "",
+      "order_ids": [
+        ""
+      ]
+    },
+    "5437768983": {
+      "telegram_id": "5437768983",
+      "first_name": "Mj",
+      "last_name": "Jie",
+      "username": "ipfwcyol",
+      "phone": "",
+      "order_ids": [
+        ""
+      ]
     }
   },
   "admin_ids": [
@@ -2968,7 +2626,7 @@
   ],
   "deleted_brand_ids": [],
   "deleted_category_ids": [],
-  "last_cloud_sync": "2026-09-05T12:08:59.429Z",
+  "last_cloud_sync": "2026-09-07T07:44:23.775Z",
   "deleted_order_ids": [
     "MLP-912003",
     "MLP-532855",
@@ -2987,6 +2645,14 @@
     "MLP-528704",
     "MLP-842437",
     "MLP-461195",
-    "MLP-446571"
+    "MLP-446571",
+    "MLP-493101",
+    "MLP-372429",
+    "MLP-381606",
+    "MLP-760148",
+    "MLP-682316",
+    "MLP-938175",
+    "MLP-529985",
+    "MLP-989411"
   ]
 }
