@@ -3059,6 +3059,12 @@
             overflow: hidden;
             box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
             flex-shrink: 0;
+            font-size: 1.15rem;
+        }
+        [data-theme="dark"] .modal-delivery-badge-icon {
+            background: #ffffff;
+            border-color: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
         }
         .modal-delivery-badge-icon img {
             width: 100%;
@@ -3301,6 +3307,7 @@
             padding: 5px;
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
             overflow: hidden;
+            font-size: 1.35rem;
         }
         [data-theme="dark"] .delivery-provider-icon {
             background: #ffffff;
@@ -5385,10 +5392,10 @@
 
                     <!-- NOVA POSHTA FLOW -->
                     <div id="delivery-np-flow" style="display: flex; flex-direction: column; gap: 14px; margin-top: 6px;">
-                        <!-- Nova Poshta Brand & Premium Setup Info Banner -->
+                        <!-- Nova Poshta Delivery Info Banner -->
                         <div class="delivery-brand-info-banner" style="display: flex; align-items: flex-start; gap: 12px; background: rgba(218, 41, 28, 0.06); border: 1.5px solid rgba(218, 41, 28, 0.22); border-radius: var(--radius-sm); padding: 12px 14px;">
                             <div style="width: 42px; height: 42px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: #ffffff; border-radius: 10px; border: 1.5px solid rgba(218, 41, 28, 0.25); box-shadow: 0 2px 6px rgba(218, 41, 28, 0.08); padding: 5px; overflow: hidden;">
-                                <img src="unnamed44.png" alt="Нова Пошта" style="width: 100%; height: 100%; object-fit: contain; display: block; image-rendering: -webkit-optimize-contrast; image-rendering: high-quality;">
+                                <img src="unnamed52.png" alt="Нова Пошта" style="width: 100%; height: 100%; object-fit: contain; display: block; image-rendering: -webkit-optimize-contrast; image-rendering: high-quality;">
                             </div>
                             <div style="flex: 1; font-size: 0.8rem; color: var(--text-primary); line-height: 1.45;">
                                 <div style="font-weight: 800; color: #DA291C; margin-bottom: 2px; font-size: 0.85rem;">⚡ M1lipStore × Нова Пошта • Преміальна доставка девайсів</div>
@@ -5435,7 +5442,7 @@
                     <div id="delivery-up-flow" style="display: none; flex-direction: column; gap: 14px; margin-top: 6px;">
                         <div class="delivery-brand-info-banner" style="display: flex; align-items: flex-start; gap: 12px; background: rgba(245, 186, 24, 0.08); border: 1.5px solid rgba(245, 186, 24, 0.35); border-radius: var(--radius-sm); padding: 12px 14px;">
                             <div style="width: 42px; height: 42px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: #ffffff; border-radius: 10px; border: 1.5px solid rgba(245, 186, 24, 0.4); box-shadow: 0 2px 6px rgba(245, 186, 24, 0.12); padding: 5px; overflow: hidden;">
-                                <img src="90fd17b5b96113e0860a4f4279c50868777.jpg" alt="Укрпошта" style="width: 100%; height: 100%; object-fit: contain; display: block; image-rendering: -webkit-optimize-contrast; image-rendering: high-quality;">
+                                <img src="90fd17b5b96113e0860a4f4279c50868112.jpg?v=1080" alt="Укрпошта" style="width: 100%; height: 100%; object-fit: contain; display: block; image-rendering: -webkit-optimize-contrast; image-rendering: high-quality;">
                             </div>
                             <div style="flex: 1; font-size: 0.8rem; color: var(--text-primary); line-height: 1.45;">
                                 <div style="font-weight: 800; color: #b45309; margin-bottom: 2px; font-size: 0.85rem;">📮 Доставка Укрпоштою по всій Україні</div>
@@ -5936,7 +5943,7 @@
                         <div class="modal-delivery-badges">
                             <div class="modal-delivery-badge-item">
                                 <div class="modal-delivery-badge-icon">
-                                    <img src="unnamed44.png" id="modal-delivery-np-img" alt="Нова Пошта">
+                                    <img src="unnamed52.png" id="modal-delivery-np-img" alt="Нова Пошта">
                                 </div>
                                 <div class="modal-delivery-badge-text">
                                     <strong>Нова Пошта</strong>
@@ -5945,7 +5952,7 @@
                             </div>
                             <div class="modal-delivery-badge-item">
                                 <div class="modal-delivery-badge-icon">
-                                    <img src="90fd17b5b96113e0860a4f4279c50868777.jpg" id="modal-delivery-up-img" alt="Укрпошта">
+                                    <img src="90fd17b5b96113e0860a4f4279c50868112.jpg?v=1080" id="modal-delivery-up-img" alt="Укрпошта">
                                 </div>
                                 <div class="modal-delivery-badge-text">
                                     <strong>Укрпошта</strong>
@@ -6027,12 +6034,11 @@
 
     <script>
         // =========================================================================
-        // 📦 НАЛАШТУВАННЯ ЛОГОТИПІВ ПЕРЕВІЗНИКІВ (НОВА ПОШТА / УКРПОШТА)
-        // Щоб замінити логотипи на власні, просто змініть шляхи або URL нижче:
+        // 📦 НАЛАШТУВАННЯ ДОСТАВКИ (НОВА ПОШТА / УКРПОШТА)
         // =========================================================================
         const CARRIER_LOGOS = {
-            novaPoshta: 'unnamed44.png',                     // <-- Шлях/URL для логотипу Нової Пошти
-            ukrposhta: '90fd17b5b96113e0860a4f4279c50868777.jpg' // <-- Шлях/URL для логотипу Укрпошти
+            novaPoshta: 'unnamed52.png?v=2',
+            ukrposhta: '90fd17b5b96113e0860a4f4279c50868112.jpg?v=1080'
         };
 
         function syncCarrierLogosDOM() {
