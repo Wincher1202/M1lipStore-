@@ -170,8 +170,9 @@ export const INITIAL_PRODUCTS = [
 export const INITIAL_CATEGORIES = [
   { id: 'mice', name: 'Мишки', image: '', position: 0, hidden: false },
   { id: 'keyboards', name: 'Клавіатури', image: '', position: 1, hidden: false },
-  { id: 'accessories', name: 'Аксесуари', image: '', position: 2, hidden: false },
-  { id: 'audio', name: 'Аудіо', image: '', position: 3, hidden: false }
+  { id: 'headphones', name: 'Навушники', image: '', position: 2, hidden: false },
+  { id: 'mousepads', name: 'Килимки', image: '', position: 3, hidden: false },
+  { id: 'keycaps', name: 'Кейкапи', image: '', position: 4, hidden: false }
 ];
 
 export const INITIAL_BRANDS = [
@@ -349,9 +350,26 @@ class Database {
             normalizeProductPhotoUrls(p);
           });
           
-          let existingCategories = Array.isArray(parsed.categories) && parsed.categories.length > 0
-            ? parsed.categories.filter(c => !deletedCatIds.includes(c.id))
-            : INITIAL_CATEGORIES.filter(c => !deletedCatIds.includes(c.id));
+          const OBSOLETE_CAT_KEYS = ['аксесуари', 'аудіо', 'геймпади', 'accessories', 'audio', 'gamepads'];
+          let rawCats = Array.isArray(parsed.categories) && parsed.categories.length > 0
+            ? parsed.categories
+            : INITIAL_CATEGORIES;
+
+          // Filter out deleted and obsolete categories
+          let existingCategories = rawCats.filter(c => {
+            const nameLower = (c.name || '').toLowerCase().trim();
+            const idLower = (c.id || '').toLowerCase().trim();
+            return !deletedCatIds.includes(c.id) && !OBSOLETE_CAT_KEYS.includes(nameLower) && !OBSOLETE_CAT_KEYS.includes(idLower);
+          });
+
+          // Ensure standard categories exist
+          for (const initCat of INITIAL_CATEGORIES) {
+            if (!existingCategories.some(c => (c.name || '').toLowerCase() === initCat.name.toLowerCase() || c.id === initCat.id)) {
+              existingCategories.push(initCat);
+            }
+          }
+          // Sort by position
+          existingCategories.sort((a, b) => (a.position ?? 99) - (b.position ?? 99));
 
           let existingBrands = Array.isArray(parsed.brands) && parsed.brands.length > 0
             ? parsed.brands.filter(b => !deletedBrandIds.includes(b.id))
@@ -770,7 +788,22 @@ class Database {
   }
 
   getCategories() {
-    return this.data.categories.filter(c => !c.hidden).sort((a, b) => a.position - b.position);
+    const CANONICAL_CAT_ORDER = {
+      'мишки': 1, 'mice': 1,
+      'клавіатури': 2, 'keyboards': 2,
+      'навушники': 3, 'headphones': 3,
+      'килимки': 4, 'mousepads': 4, 'deskmats': 4,
+      'кейкапи': 5, 'keycaps': 5
+    };
+    return (this.data.categories || [])
+      .filter(c => !c.hidden)
+      .sort((a, b) => {
+        const keyA = (a.name || a.id || '').toLowerCase().trim();
+        const keyB = (b.name || b.id || '').toLowerCase().trim();
+        const posA = keyA in CANONICAL_CAT_ORDER ? CANONICAL_CAT_ORDER[keyA] : (10 + (a.position ?? 0));
+        const posB = keyB in CANONICAL_CAT_ORDER ? CANONICAL_CAT_ORDER[keyB] : (10 + (b.position ?? 0));
+        return posA - posB;
+      });
   }
 
   addCategory(category) {

@@ -1,9 +1,12 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="100%" height="100%">
-  <rect width="240" height="240" rx="48" fill="#DA291C"/>
-  <g fill="#FFFFFF">
-    <path d="M120 42 L160 82 L142 82 L142 110 L98 110 L98 82 L80 82 Z"/>
-    <path d="M120 198 L80 158 L98 158 L98 130 L142 130 L142 158 L160 158 Z"/>
-    <path d="M42 120 L82 80 L82 98 L110 98 L110 142 L82 142 L82 160 Z"/>
-    <path d="M198 120 L158 160 L158 142 L130 142 L130 98 L158 98 L158 80 Z"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <g fill="#DA291C">
+    <!-- Top & Bottom Arrows + Central Crossbar -->
+    <path d="M 256 64 L 352 168 L 298 168 L 298 220 L 214 220 L 214 168 L 160 168 Z" />
+    <path d="M 256 448 L 160 344 L 214 344 L 214 292 L 298 292 L 298 344 L 352 344 Z" />
+    <rect x="214" y="220" width="84" height="72" />
+    <!-- Left Chevron < -->
+    <path d="M 80 256 L 184 152 L 184 206 L 134 256 L 184 306 L 184 360 Z" />
+    <!-- Right Chevron > -->
+    <path d="M 432 256 L 328 152 L 328 206 L 378 256 L 328 306 L 328 360 Z" />
   </g>
 </svg>

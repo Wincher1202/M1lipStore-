@@ -220,7 +220,7 @@
         }
 
         .icon-btn {
-            background: transparent;
+            background: var(--bg-surface);
             border: 1px solid var(--border-light);
             cursor: pointer;
             color: var(--text-primary);
@@ -228,7 +228,9 @@
             position: relative;
             width: 38px;
             height: 38px;
-            border-radius: 50%;
+            min-width: 38px;
+            min-height: 38px;
+            border-radius: 50% !important;
             display: inline-flex;
             align-items: center;
             justify-content: center;
@@ -237,31 +239,68 @@
             padding: 0;
             vertical-align: middle;
             box-sizing: border-box;
+            overflow: visible !important;
             -webkit-tap-highlight-color: transparent;
             transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
             transform: translateZ(0);
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+        }
+
+        #theme-toggle-btn {
+            border-radius: 50% !important;
+            overflow: hidden !important;
+            contain: paint;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            width: 38px !important;
+            height: 38px !important;
+            padding: 0 !important;
+            position: relative;
+            isolation: isolate;
+            background: var(--bg-surface) !important;
+            border: 1px solid var(--border-light) !important;
+        }
+
+        [data-theme="dark"] .icon-btn {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(255, 255, 255, 0.12);
+        }
+
+        [data-theme="dark"] #theme-toggle-btn {
+            background: rgba(255, 255, 255, 0.08) !important;
+            border: 1px solid rgba(245, 158, 11, 0.35) !important;
+            box-shadow: 0 0 12px rgba(245, 158, 11, 0.2), inset 0 0 8px rgba(245, 158, 11, 0.08) !important;
         }
 
         @media(hover: hover) and (pointer: fine) {
             .icon-btn:hover {
                 background: var(--bg-tertiary);
                 border-color: var(--border-hover);
+                transform: translateY(-1px);
+            }
+            [data-theme="dark"] #theme-toggle-btn:hover {
+                border-color: rgba(245, 158, 11, 0.6) !important;
+                box-shadow: 0 0 16px rgba(245, 158, 11, 0.35) !important;
             }
         }
 
         .icon-btn:active {
-            transform: scale(0.92);
+            transform: scale(0.92) translateZ(0);
         }
 
-        /* Smooth Theme Toggle animation */
+        /* Smooth Theme Toggle animation - Locked strictly inside circular bounds */
         .theme-toggle-icon-wrap {
             position: relative;
-            width: 18px;
-            height: 18px;
+            width: 20px;
+            height: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
             pointer-events: none;
+            overflow: visible;
         }
 
         .theme-icon-moon,
@@ -271,51 +310,68 @@
             left: 50%;
             width: 18px;
             height: 18px;
-            margin-top: -9px;
-            margin-left: -9px;
-            transition: transform 0.38s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+            margin: 0;
+            display: block;
+            transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
             transform-origin: center center;
+            will-change: transform, opacity;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
         }
 
         [data-theme="light"] .theme-icon-moon {
             opacity: 1;
-            transform: rotate(0deg) scale(1);
+            transform: translate(-50%, -50%) rotate(0deg) scale(1);
             pointer-events: auto;
+            color: var(--text-primary);
         }
         [data-theme="light"] .theme-icon-sun {
             opacity: 0;
-            transform: rotate(90deg) scale(0.3);
+            transform: translate(-50%, -50%) rotate(90deg) scale(0.2);
             pointer-events: none;
         }
 
         [data-theme="dark"] .theme-icon-moon {
             opacity: 0;
-            transform: rotate(-90deg) scale(0.3);
+            transform: translate(-50%, -50%) rotate(-90deg) scale(0.2);
             pointer-events: none;
         }
         [data-theme="dark"] .theme-icon-sun {
             opacity: 1;
-            transform: rotate(0deg) scale(1);
+            transform: translate(-50%, -50%) rotate(0deg) scale(1);
             pointer-events: auto;
-            color: #F59E0B;
+            color: #FBBF24;
+            filter: drop-shadow(0 0 4px rgba(251, 191, 36, 0.5));
         }
 
         .badge-count {
             position: absolute;
-            top: -2px;
-            right: -2px;
-            background: var(--accent);
-            color: white;
-            font-size: 0.6rem;
-            font-weight: 700;
-            width: 17px;
-            height: 17px;
-            border-radius: 50%;
-            display: flex;
+            top: -4px;
+            right: -4px;
+            background: linear-gradient(135deg, #6366F1 0%, #4F46E5 100%);
+            color: #ffffff;
+            font-size: 0.68rem;
+            font-weight: 800;
+            min-width: 19px;
+            height: 19px;
+            padding: 0 4px;
+            border-radius: 999px;
+            display: inline-flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+            line-height: 1;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.28), 0 0 8px rgba(99, 102, 241, 0.45);
+            border: 2px solid var(--bg-surface);
             pointer-events: none;
+            z-index: 10;
+            box-sizing: border-box;
+            transition: transform 0.2s ease;
+        }
+
+        [data-theme="dark"] .badge-count {
+            background: linear-gradient(135deg, #6366F1 0%, #4338CA 100%);
+            border: 2px solid #0f172a;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5), 0 0 10px rgba(99, 102, 241, 0.55);
         }
 
         .hero {
@@ -1030,19 +1086,19 @@
         }
 
         .filter-btn {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-light);
-            padding: 10px 22px;
-            border-radius: 30px;
+            background: #F1F5F9;
+            border: 1px solid #E2E8F0;
+            padding: 9px 20px;
+            border-radius: 999px;
             font-size: 0.88rem;
-            font-weight: 700;
-            color: var(--text-secondary);
+            font-weight: 600;
+            color: #475569;
             cursor: pointer;
             white-space: nowrap;
             flex-shrink: 0;
             scroll-snap-align: center;
-            box-shadow: var(--shadow-subtle);
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
             position: relative;
             user-select: none;
             -webkit-tap-highlight-color: transparent;
@@ -1054,18 +1110,44 @@
         }
 
         .filter-btn:hover {
-            border-color: var(--accent);
-            color: var(--accent);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(87, 100, 226, 0.15);
+            background: #E2E8F0;
+            border-color: #CBD5E1;
+            color: #0F172A;
+            transform: translateY(-1px);
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.06);
         }
 
         .filter-btn.active {
-            background: var(--accent);
-            color: #ffffff;
-            border-color: var(--accent);
-            transform: translateY(-2px) scale(1.02);
-            box-shadow: 0 6px 16px rgba(87, 100, 226, 0.35);
+            background: #4F46E5;
+            color: #FFFFFF !important;
+            border-color: #4338CA !important;
+            font-weight: 700;
+            transform: translateY(-1px);
+            box-shadow: 0 3px 10px rgba(79, 70, 229, 0.3) !important;
+        }
+
+        [data-theme="dark"] .filter-btn {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: #94A3B8;
+            box-shadow: none;
+        }
+
+        [data-theme="dark"] .filter-btn:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.18);
+            color: #F8FAFC;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        [data-theme="dark"] .filter-btn.active {
+            background: #5B64E8;
+            color: #FFFFFF !important;
+            border-color: #727AF2 !important;
+            font-weight: 700;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45) !important;
         }
 
         .brands-section {
@@ -1297,57 +1379,77 @@
         #modal-brand {
             background: #FFFFFF !important;
             border: 1.5px solid var(--border-light);
-            border-radius: 999px;
-            padding: 4px 14px;
-            min-height: 32px;
+            border-radius: 14px;
+            padding: 6px 18px;
+            min-height: 44px;
+            height: 44px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
             margin: 0;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-            transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            box-sizing: border-box;
+            cursor: default;
+            user-select: none;
+            -webkit-user-select: none;
         }
 
         #modal-brand:hover {
-            transform: scale(1.03);
-            border-color: var(--accent);
+            transform: none !important;
+            border-color: rgba(99, 102, 241, 0.45);
+            box-shadow: 0 3px 10px rgba(99, 102, 241, 0.15);
         }
 
         #modal-brand img {
-            max-height: 22px !important;
-            max-width: 105px !important;
+            max-height: 28px !important;
+            max-width: 120px !important;
+            width: auto;
+            height: auto;
             object-fit: contain;
             display: block;
-            image-rendering: -webkit-optimize-contrast;
-            image-rendering: high-quality;
+            image-rendering: auto;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            user-select: none;
+            -webkit-user-drag: none;
+            pointer-events: none;
+            transform: none !important;
         }
 
         .modal-warranty-pill-top {
             display: inline-flex;
             align-items: center;
-            gap: 5px;
-            padding: 4px 10px;
+            gap: 7px;
+            padding: 0 16px;
+            height: 44px;
+            min-height: 44px;
             background: rgba(99, 102, 241, 0.08);
-            border: 1px solid rgba(99, 102, 241, 0.22);
-            border-radius: 999px;
-            font-size: 0.78rem;
+            border: 1.5px solid rgba(99, 102, 241, 0.22);
+            border-radius: 14px;
+            font-size: 0.84rem;
             font-weight: 700;
             color: var(--accent);
             white-space: nowrap;
             letter-spacing: -0.01em;
-            transition: all 0.2s ease;
+            transition: border-color 0.2s ease, background-color 0.2s ease;
             flex-shrink: 0;
+            box-sizing: border-box;
+            cursor: default;
+            user-select: none;
         }
 
         .modal-warranty-pill-top svg {
             color: var(--accent);
             flex-shrink: 0;
+            width: 15px;
+            height: 15px;
         }
 
         .modal-warranty-pill-top:hover {
-            background: rgba(99, 102, 241, 0.13);
-            border-color: rgba(99, 102, 241, 0.38);
+            background: rgba(99, 102, 241, 0.12);
+            border-color: rgba(99, 102, 241, 0.35);
         }
 
         [data-theme="dark"] .modal-warranty-pill-top {
@@ -1359,7 +1461,7 @@
         [data-theme="dark"] #modal-brand {
             background: #FFFFFF !important;
             border: 1.5px solid rgba(87, 100, 226, 0.45);
-            box-shadow: 0 0 16px rgba(87, 100, 226, 0.28), 0 2px 8px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 0 16px rgba(87, 100, 226, 0.25), 0 3px 10px rgba(0, 0, 0, 0.35);
         }
 
         [data-theme="dark"] #modal-brand img {
@@ -1367,28 +1469,28 @@
         }
 
         #modal-brand .logo-vgn {
-            max-height: 16px !important;
-            max-width: 65px !important;
+            max-height: 22px !important;
+            max-width: 85px !important;
         }
 
         #modal-brand .logo-attack-shark {
-            max-height: 22px !important;
-            max-width: 105px !important;
+            max-height: 28px !important;
+            max-width: 125px !important;
         }
 
         #modal-brand .logo-ajazz {
-            max-height: 22px !important;
-            max-width: 100px !important;
+            max-height: 28px !important;
+            max-width: 120px !important;
         }
 
         #modal-brand .logo-aula {
-            max-height: 22px !important;
-            max-width: 95px !important;
+            max-height: 28px !important;
+            max-width: 115px !important;
         }
 
         #modal-brand .logo-mchose {
-            max-height: 26px !important;
-            max-width: 110px !important;
+            max-height: 30px !important;
+            max-width: 125px !important;
         }
 
         .partner-brand-tile:hover {
@@ -1800,16 +1902,22 @@
 
         .color-picker-preview {
             display: inline-flex;
-            gap: 4px;
+            gap: 5px;
             margin: 2px 0 5px 0;
             align-items: center;
-            min-height: 15px;
-            padding: 2px 6px;
-            background: rgba(15, 23, 42, 0.04);
-            border: 1px solid rgba(15, 23, 42, 0.08);
+            min-height: 18px;
+            padding: 2.5px 8px;
+            background: rgba(15, 23, 42, 0.05);
+            border: 1px solid rgba(15, 23, 42, 0.1);
             border-radius: 999px;
             width: fit-content;
             transition: all 0.2s ease;
+        }
+
+        [data-theme="dark"] .color-picker-preview {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.25);
         }
 
         .color-picker-preview:empty {
@@ -1820,12 +1928,13 @@
             width: 8px;
             height: 8px;
             border-radius: 50%;
-            border: 1.2px solid rgba(0, 0, 0, 0.16);
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+            border: 1.2px solid rgba(0, 0, 0, 0.2);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
             display: inline-block;
             cursor: pointer;
             flex-shrink: 0;
             transition: transform 0.15s ease;
+            box-sizing: border-box;
         }
         .color-dot:hover {
             transform: scale(1.25);
@@ -1837,6 +1946,31 @@
             background-color: #ffffff !important;
             border: 1.5px solid #94a3b8 !important;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.22), inset 0 0 0 1px rgba(0, 0, 0, 0.06) !important;
+        }
+        .color-dot.color-dot-black,
+        .color-dot[style*="#181818"],
+        .color-dot[style*="#000000"],
+        .color-dot[style*="#111827"],
+        .color-dot[style*="#1a1a1a"],
+        .color-dot[style*="#0a0a0a"],
+        .color-dot[style*="black"] {
+            background-color: #14161b !important;
+            border: 1.2px solid #475569 !important;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), inset 0 0 0 0.5px rgba(255, 255, 255, 0.2) !important;
+        }
+        [data-theme="dark"] .color-dot {
+            border: 1.2px solid rgba(255, 255, 255, 0.35);
+        }
+        [data-theme="dark"] .color-dot.color-dot-black,
+        [data-theme="dark"] .color-dot[style*="#181818"],
+        [data-theme="dark"] .color-dot[style*="#000000"],
+        [data-theme="dark"] .color-dot[style*="#111827"],
+        [data-theme="dark"] .color-dot[style*="#1a1a1a"],
+        [data-theme="dark"] .color-dot[style*="#0a0a0a"],
+        [data-theme="dark"] .color-dot[style*="black"] {
+            background-color: #12141a !important;
+            border: 1.5px solid #64748b !important;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5), inset 0 0 0 0.5px rgba(255, 255, 255, 0.3) !important;
         }
         .color-dot.out-of-stock { 
             background-color: #9ca3af !important; 
@@ -2547,13 +2681,20 @@
         .color-selector-clean {
             display: inline-flex;
             align-items: center;
-            gap: 8px;
+            gap: 9px;
             flex-wrap: wrap;
-            padding: 4px 10px;
-            background: rgba(15, 23, 42, 0.04);
-            border: 1px solid rgba(15, 23, 42, 0.08);
+            padding: 4.5px 12px;
+            background: rgba(15, 23, 42, 0.05);
+            border: 1px solid rgba(15, 23, 42, 0.12);
             border-radius: 999px;
             width: fit-content;
+            transition: all 0.2s ease;
+        }
+
+        [data-theme="dark"] .color-selector-clean {
+            background: rgba(255, 255, 255, 0.09) !important;
+            border: 1px solid rgba(255, 255, 255, 0.2) !important;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3) !important;
         }
 
         .color-option-item {
@@ -2570,13 +2711,20 @@
         }
 
         .color-circle-big {
-            width: 18px;
-            height: 18px;
+            width: 20px;
+            height: 20px;
             border-radius: 50%;
-            border: 1.2px solid rgba(0, 0, 0, 0.16);
+            border: 1.5px solid rgba(0, 0, 0, 0.2);
             transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
             display: inline-block;
-            box-shadow: 0 1.5px 4px rgba(0, 0, 0, 0.08);
+            box-shadow: 0 1.5px 4px rgba(0, 0, 0, 0.1);
+            box-sizing: border-box;
+            cursor: pointer;
+        }
+
+        [data-theme="dark"] .color-circle-big {
+            border: 1.5px solid rgba(255, 255, 255, 0.35);
+            box-shadow: 0 1.5px 4px rgba(0, 0, 0, 0.4);
         }
 
         .color-circle-big.color-white,
@@ -2584,8 +2732,32 @@
         .color-circle-big[style*="#fff"],
         .color-circle-big[style*="white"] {
             background-color: #ffffff !important;
-            border: 1.2px solid #94a3b8 !important;
+            border: 1.5px solid #94a3b8 !important;
             box-shadow: 0 1.5px 4px rgba(0, 0, 0, 0.15), inset 0 0 0 1px rgba(0, 0, 0, 0.06) !important;
+        }
+
+        .color-circle-big.color-black,
+        .color-circle-big[style*="#181818"],
+        .color-circle-big[style*="#000000"],
+        .color-circle-big[style*="#111827"],
+        .color-circle-big[style*="#1a1a1a"],
+        .color-circle-big[style*="#0a0a0a"],
+        .color-circle-big[style*="black"] {
+            background-color: #14161b !important;
+            border: 1.5px solid #475569 !important;
+            box-shadow: 0 1.5px 4px rgba(0, 0, 0, 0.25), inset 0 0 0 1px rgba(255, 255, 255, 0.15) !important;
+        }
+
+        [data-theme="dark"] .color-circle-big.color-black,
+        [data-theme="dark"] .color-circle-big[style*="#181818"],
+        [data-theme="dark"] .color-circle-big[style*="#000000"],
+        [data-theme="dark"] .color-circle-big[style*="#111827"],
+        [data-theme="dark"] .color-circle-big[style*="#1a1a1a"],
+        [data-theme="dark"] .color-circle-big[style*="#0a0a0a"],
+        [data-theme="dark"] .color-circle-big[style*="black"] {
+            background-color: #12141a !important;
+            border: 1.8px solid #64748b !important;
+            box-shadow: 0 0 8px rgba(255, 255, 255, 0.18), inset 0 0 0 1px rgba(255, 255, 255, 0.28) !important;
         }
 
         .color-circle-big:hover { transform: scale(1.15); }
@@ -2821,6 +2993,72 @@
             border-radius: 14px;
         }
 
+        /* Delivery Badges in Product Modal (Mobile & Desktop) */
+        .modal-delivery-section {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: 14px 16px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-light);
+            border-radius: 14px;
+        }
+        .modal-delivery-badges {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 10px;
+        }
+        .modal-delivery-badge-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 12px;
+            background: var(--bg-surface);
+            border: 1px solid var(--border-light);
+            border-radius: 10px;
+            transition: border-color 0.2s ease, transform 0.2s ease;
+        }
+        .modal-delivery-badge-item:hover {
+            border-color: var(--border-hover);
+        }
+        .modal-delivery-badge-icon {
+            width: 34px;
+            height: 34px;
+            min-width: 34px;
+            min-height: 34px;
+            border-radius: 8px;
+            background: #ffffff;
+            border: 1px solid var(--border-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4px;
+            overflow: hidden;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+            flex-shrink: 0;
+        }
+        .modal-delivery-badge-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: high-quality;
+        }
+        .modal-delivery-badge-text {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            font-size: 0.74rem;
+            color: var(--text-secondary);
+            line-height: 1.25;
+        }
+        .modal-delivery-badge-text strong {
+            font-size: 0.82rem;
+            color: var(--text-primary);
+            font-weight: 700;
+        }
+
         .modal-close-circle {
             position: absolute;
             top: 12px;
@@ -3031,24 +3269,28 @@
             width: 44px;
             height: 44px;
             border-radius: 11px;
-            background: #f1f5f9;
-            border: 1px solid rgba(0, 0, 0, 0.08);
+            background: #ffffff;
+            border: 1.5px solid var(--border-light);
             display: flex;
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
-            padding: 6px;
-            box-shadow: 0 1.5px 4px rgba(0, 0, 0, 0.04);
+            padding: 5px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
         }
         [data-theme="dark"] .delivery-provider-icon {
-            background: #1e293b;
-            border-color: rgba(255, 255, 255, 0.12);
+            background: #ffffff;
+            border-color: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
         }
         .delivery-provider-icon img {
             width: 100%;
             height: 100%;
             object-fit: contain;
             display: block;
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: high-quality;
         }
         .delivery-provider-info {
             flex: 1;
@@ -3984,11 +4226,13 @@
                 height: 16px !important;
             }
             .badge-count {
-                width: 15px !important;
-                height: 15px !important;
-                font-size: 0.6rem !important;
-                top: 0px !important;
-                right: 0px !important;
+                min-width: 17px !important;
+                height: 17px !important;
+                font-size: 0.62rem !important;
+                top: -3px !important;
+                right: -3px !important;
+                padding: 0 3px !important;
+                border-width: 1.5px !important;
             }
              .hero {
                 height: calc(100vh - 112px) !important;
@@ -4392,37 +4636,58 @@
                 display: inline-flex !important;
                 align-items: center !important;
                 justify-content: flex-start !important;
-                gap: 14px !important;
+                gap: 10px !important;
                 margin-left: 0 !important;
                 flex-shrink: 0 !important;
+                flex-wrap: wrap !important;
             }
             #modal-brand {
                 display: inline-flex !important;
                 align-items: center !important;
                 justify-content: center !important;
-                background: transparent !important;
-                border: none !important;
-                box-shadow: none !important;
-                padding: 0 !important;
+                background: #FFFFFF !important;
+                border: 1.5px solid var(--border-light) !important;
+                box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04) !important;
+                padding: 4px 14px !important;
+                min-height: 38px !important;
+                height: 38px !important;
+                border-radius: 12px !important;
                 flex: 0 0 auto !important;
                 margin: 0 !important;
+                cursor: default !important;
+                transform: none !important;
+                user-select: none !important;
+            }
+            #modal-brand:hover {
+                transform: none !important;
             }
             #modal-brand img {
                 max-height: 22px !important;
-                max-width: 90px !important;
+                max-width: 105px !important;
                 object-fit: contain !important;
                 display: block !important;
+                image-rendering: auto !important;
+                transform: none !important;
+                user-select: none !important;
+                -webkit-user-drag: none !important;
+                pointer-events: none !important;
             }
             .modal-warranty-pill-top {
-                font-size: 0.72rem !important;
-                padding: 3px 8px !important;
-                gap: 4px !important;
-                border-radius: 999px !important;
+                font-size: 0.78rem !important;
+                padding: 0 12px !important;
+                height: 38px !important;
+                min-height: 38px !important;
+                gap: 6px !important;
+                border-radius: 12px !important;
                 white-space: nowrap !important;
+                display: inline-flex !important;
+                align-items: center !important;
+                cursor: default !important;
+                user-select: none !important;
             }
             .modal-warranty-pill-top svg {
-                width: 12px !important;
-                height: 12px !important;
+                width: 13px !important;
+                height: 13px !important;
             }
             .modal-price-stock-row {
                 order: 3 !important;
@@ -4513,6 +4778,16 @@
                 margin-top: 4px !important;
                 padding: 12px 14px !important;
                 border-radius: 12px !important;
+            }
+            .modal-delivery-section {
+                order: 8 !important;
+                margin-top: 4px !important;
+                padding: 12px 14px !important;
+                border-radius: 12px !important;
+            }
+            .modal-delivery-badges {
+                grid-template-columns: 1fr !important;
+                gap: 8px !important;
             }
             .modal-specs-list {
                 gap: 0 !important;
@@ -5092,8 +5367,8 @@
                     <div id="delivery-np-flow" style="display: flex; flex-direction: column; gap: 14px; margin-top: 6px;">
                         <!-- Nova Poshta Brand & Premium Setup Info Banner -->
                         <div class="delivery-brand-info-banner" style="display: flex; align-items: flex-start; gap: 12px; background: rgba(218, 41, 28, 0.06); border: 1.5px solid rgba(218, 41, 28, 0.22); border-radius: var(--radius-sm); padding: 12px 14px;">
-                            <div style="width: 38px; height: 38px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: #f1f5f9; border-radius: 10px; border: 1.5px solid rgba(218, 41, 28, 0.25); box-shadow: 0 2px 6px rgba(218, 41, 28, 0.08); padding: 5px;">
-                                <img src="unnamed.png" alt="Нова Пошта" style="width: 100%; height: 100%; object-fit: contain; display: block;">
+                            <div style="width: 42px; height: 42px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: #ffffff; border-radius: 10px; border: 1.5px solid rgba(218, 41, 28, 0.25); box-shadow: 0 2px 6px rgba(218, 41, 28, 0.08); padding: 5px; overflow: hidden;">
+                                <img src="unnamed44.png" alt="Нова Пошта" style="width: 100%; height: 100%; object-fit: contain; display: block; image-rendering: -webkit-optimize-contrast; image-rendering: high-quality;">
                             </div>
                             <div style="flex: 1; font-size: 0.8rem; color: var(--text-primary); line-height: 1.45;">
                                 <div style="font-weight: 800; color: #DA291C; margin-bottom: 2px; font-size: 0.85rem;">⚡ M1lipStore × Нова Пошта • Преміальна доставка девайсів</div>
@@ -5139,8 +5414,8 @@
                     <!-- UKRPOSHTA MANUAL FLOW -->
                     <div id="delivery-up-flow" style="display: none; flex-direction: column; gap: 14px; margin-top: 6px;">
                         <div class="delivery-brand-info-banner" style="display: flex; align-items: flex-start; gap: 12px; background: rgba(245, 186, 24, 0.08); border: 1.5px solid rgba(245, 186, 24, 0.35); border-radius: var(--radius-sm); padding: 12px 14px;">
-                            <div style="width: 38px; height: 38px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: #f1f5f9; border-radius: 10px; border: 1.5px solid rgba(245, 186, 24, 0.4); box-shadow: 0 2px 6px rgba(245, 186, 24, 0.12); padding: 5px;">
-                                <img src="90fd17b5b96113e0860a4f4279c50868.jpg" alt="Укрпошта" style="width: 100%; height: 100%; object-fit: contain; display: block;">
+                            <div style="width: 42px; height: 42px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: #ffffff; border-radius: 10px; border: 1.5px solid rgba(245, 186, 24, 0.4); box-shadow: 0 2px 6px rgba(245, 186, 24, 0.12); padding: 5px; overflow: hidden;">
+                                <img src="90fd17b5b96113e0860a4f4279c50868777.jpg" alt="Укрпошта" style="width: 100%; height: 100%; object-fit: contain; display: block; image-rendering: -webkit-optimize-contrast; image-rendering: high-quality;">
                             </div>
                             <div style="flex: 1; font-size: 0.8rem; color: var(--text-primary); line-height: 1.45;">
                                 <div style="font-weight: 800; color: #b45309; margin-bottom: 2px; font-size: 0.85rem;">📮 Доставка Укрпоштою по всій Україні</div>
@@ -5634,6 +5909,31 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- 8. Delivery Providers (Nova Poshta & Ukrposhta) -->
+                    <div class="modal-delivery-section">
+                        <div class="modal-section-heading">Доставка по Україні</div>
+                        <div class="modal-delivery-badges">
+                            <div class="modal-delivery-badge-item">
+                                <div class="modal-delivery-badge-icon">
+                                    <img src="unnamed44.png" id="modal-delivery-np-img" alt="Нова Пошта">
+                                </div>
+                                <div class="modal-delivery-badge-text">
+                                    <strong>Нова Пошта</strong>
+                                    <span>Відділення та поштомати • 1–2 дні</span>
+                                </div>
+                            </div>
+                            <div class="modal-delivery-badge-item">
+                                <div class="modal-delivery-badge-icon">
+                                    <img src="90fd17b5b96113e0860a4f4279c50868777.jpg" id="modal-delivery-up-img" alt="Укрпошта">
+                                </div>
+                                <div class="modal-delivery-badge-text">
+                                    <strong>Укрпошта</strong>
+                                    <span>Експрес доставка по всій Україні</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -5706,6 +6006,33 @@
     </div>
 
     <script>
+        // =========================================================================
+        // 📦 НАЛАШТУВАННЯ ЛОГОТИПІВ ПЕРЕВІЗНИКІВ (НОВА ПОШТА / УКРПОШТА)
+        // Щоб замінити логотипи на власні, просто змініть шляхи або URL нижче:
+        // =========================================================================
+        const CARRIER_LOGOS = {
+            novaPoshta: 'unnamed44.png',                     // <-- Шлях/URL для логотипу Нової Пошти
+            ukrposhta: '90fd17b5b96113e0860a4f4279c50868777.jpg' // <-- Шлях/URL для логотипу Укрпошти
+        };
+
+        function syncCarrierLogosDOM() {
+            try {
+                // Product Modal Badges
+                const npModal = document.getElementById('modal-delivery-np-img');
+                if (npModal) npModal.src = CARRIER_LOGOS.novaPoshta;
+                const upModal = document.getElementById('modal-delivery-up-img');
+                if (upModal) upModal.src = CARRIER_LOGOS.ukrposhta;
+
+                // Delivery flow banners
+                const npBannerImg = document.querySelector('#delivery-np-flow .delivery-brand-info-banner img');
+                if (npBannerImg) npBannerImg.src = CARRIER_LOGOS.novaPoshta;
+                const upBannerImg = document.querySelector('#delivery-up-flow .delivery-brand-info-banner img');
+                if (upBannerImg) upBannerImg.src = CARRIER_LOGOS.ukrposhta;
+            } catch (e) {
+                console.warn('[syncCarrierLogosDOM]', e);
+            }
+        }
+
         let tg = window.Telegram?.WebApp;
         let botUsername = 'payments_jobbot';
 
@@ -6186,8 +6513,9 @@
         let categories = [
             { id: 'mice', name: 'Мишки' },
             { id: 'keyboards', name: 'Клавіатури' },
-            { id: 'accessories', name: 'Аксесуари' },
-            { id: 'audio', name: 'Аудіо' }
+            { id: 'headphones', name: 'Навушники' },
+            { id: 'mousepads', name: 'Килимки' },
+            { id: 'keycaps', name: 'Кейкапи' }
         ];
         let brands = [
             { id: 'attack-shark', name: 'Attack Shark', logo: 'attack-shark2.jpg' },
@@ -6337,13 +6665,24 @@
         }
 
         async function fetchCategories() {
+            const OBSOLETE = ['аксесуари', 'аудіо', 'геймпади', 'accessories', 'audio', 'gamepads'];
+            const sanitizeCats = (list) => {
+                if (!Array.isArray(list)) return [];
+                return list.filter(c => {
+                    const name = (c.name || '').toLowerCase().trim();
+                    const id = (c.id || '').toLowerCase().trim();
+                    return !OBSOLETE.includes(name) && !OBSOLETE.includes(id);
+                });
+            };
+
             // Load from cache first
             try {
                 const cached = localStorage.getItem('m1lip_cached_categories');
                 if (cached) {
                     const parsed = JSON.parse(cached);
-                    if (Array.isArray(parsed) && parsed.length > 0) {
-                        categories = parsed;
+                    const clean = sanitizeCats(parsed);
+                    if (clean.length > 0) {
+                        categories = clean;
                         renderCategoryFilters();
                     }
                 }
@@ -6363,12 +6702,15 @@
                     if (!contentType || !contentType.includes("application/json")) continue;
                     const data = await response.json();
                     if (Array.isArray(data) && data.length > 0) {
-                        categories = data;
-                        try {
-                            localStorage.setItem('m1lip_cached_categories', JSON.stringify(data));
-                        } catch(e) {}
-                        renderCategoryFilters();
-                        break;
+                        const clean = sanitizeCats(data);
+                        if (clean.length > 0) {
+                            categories = clean;
+                            try {
+                                localStorage.setItem('m1lip_cached_categories', JSON.stringify(clean));
+                            } catch(e) {}
+                            renderCategoryFilters();
+                            break;
+                        }
                     }
                 } catch (e) {}
             }
@@ -6459,10 +6801,36 @@
             track.innerHTML = tilesHtml;
         }
 
+        const CANONICAL_CAT_ORDER = {
+            'all': 0,
+            'всі товари': 0,
+            'мишки': 1,
+            'mice': 1,
+            'клавіатури': 2,
+            'keyboards': 2,
+            'навушники': 3,
+            'headphones': 3,
+            'килимки': 4,
+            'mousepads': 4,
+            'deskmats': 4,
+            'кейкапи': 5,
+            'keycaps': 5
+        };
+
         function renderCategoryFilters() {
             const container = document.getElementById('catalog-filters');
             if (!container) return;
-            const items = [{ id: 'All', name: 'Всі товари' }, ...categories];
+
+            // Sort categories strictly according to canonical order
+            const sortedCats = [...categories].sort((a, b) => {
+                const keyA = (a.name || a.id || '').toLowerCase().trim();
+                const keyB = (b.name || b.id || '').toLowerCase().trim();
+                const orderA = keyA in CANONICAL_CAT_ORDER ? CANONICAL_CAT_ORDER[keyA] : (10 + (a.position || 0));
+                const orderB = keyB in CANONICAL_CAT_ORDER ? CANONICAL_CAT_ORDER[keyB] : (10 + (b.position || 0));
+                return orderA - orderB;
+            });
+
+            const items = [{ id: 'All', name: 'Всі товари' }, ...sortedCats];
             container.innerHTML = items.map(cat => {
                 const catVal = cat.id === 'All' ? 'All' : cat.name;
                 const isActive = (currentCategoryFilter === 'All' && cat.id === 'All') || currentCategoryFilter.toLowerCase() === catVal.toLowerCase();
@@ -6714,13 +7082,24 @@
                 setHeroProduct(products[0]);
             }
             restartHeroTimer();
+            syncCarrierLogosDOM();
 
+            let scrollTicking = false;
             window.addEventListener('scroll', () => {
-                const header = document.getElementById('site-header');
-                if (header) {
-                    header.classList.toggle('scrolled', window.scrollY > 30);
+                if (!scrollTicking) {
+                    window.requestAnimationFrame(() => {
+                        const header = document.getElementById('site-header');
+                        if (header) {
+                            header.classList.toggle('scrolled', window.scrollY > 30);
+                        }
+                        if (typeof updateActiveBottomTab === 'function') {
+                            updateActiveBottomTab();
+                        }
+                        scrollTicking = false;
+                    });
+                    scrollTicking = true;
                 }
-            });
+            }, { passive: true });
 
             document.getElementById('logo-scroll-btn')?.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -6831,9 +7210,11 @@
                     const bgHex = getColorHex(c.name);
                     const isOut = c.isOut;
                     const isWhite = (c.name || '').toLowerCase().includes('біл') || (c.name || '').toLowerCase().includes('white') || bgHex === '#ffffff' || bgHex === '#fff';
+                    const isBlack = (c.name || '').toLowerCase().includes('чорн') || (c.name || '').toLowerCase().includes('black') || bgHex === '#181818' || bgHex === '#000000' || bgHex === '#111827' || bgHex === '#1a1a1a';
                     const dotClass = [
                         isOut ? 'out-of-stock' : '',
-                        isWhite ? 'color-dot-white' : ''
+                        isWhite ? 'color-dot-white' : '',
+                        isBlack ? 'color-dot-black' : ''
                     ].filter(Boolean).join(' ');
                     const styleAttr = isOut ? '' : `background-color: ${bgHex};`;
                     return `<span class="color-dot ${dotClass}" style="${styleAttr}" title="${c.name}" ${isOut ? '' : `onclick="event.stopPropagation(); openProductModal(products.find(x => x.id === '${p.id}'), ${idx})"`}></span>`;
@@ -7372,10 +7753,12 @@
                     const bgHex = getColorHex(c.name);
                     const isOut = c.isOut;
                     const isWhite = (c.name || '').toLowerCase().includes('біл') || (c.name || '').toLowerCase().includes('white') || bgHex === '#ffffff' || bgHex === '#fff';
+                    const isBlack = (c.name || '').toLowerCase().includes('чорн') || (c.name || '').toLowerCase().includes('black') || bgHex === '#181818' || bgHex === '#000000' || bgHex === '#111827' || bgHex === '#1a1a1a';
                     const circleClass = [
                         isOut ? 'out-of-stock' : '',
                         idx === selectedColorIndex ? 'active' : '',
-                        isWhite ? 'color-white' : ''
+                        isWhite ? 'color-white' : '',
+                        isBlack ? 'color-black' : ''
                     ].filter(Boolean).join(' ');
                     const styleAttr = isOut ? '' : `background-color: ${bgHex};`;
                     return `
@@ -7900,7 +8283,7 @@
                 method: 'branch',
                 name: 'Відділення Нової Пошти',
                 sub: 'До 30 кг та вантажні • швидка доставка 1–2 дні',
-                icon: '<img src="unnamed.png" alt="Нова Пошта" style="width: 28px; height: 28px; object-fit: contain; display: block;">'
+                get icon() { return `<img src="${CARRIER_LOGOS.novaPoshta}" alt="Нова Пошта" style="width: 28px; height: 28px; object-fit: contain; display: block;">`; }
             },
             {
                 id: 'nova_poshta_postomat',
@@ -7908,7 +8291,7 @@
                 method: 'postomat',
                 name: 'Поштомат Нової Пошти',
                 sub: 'Цілодобово 24/7 біля дому • до 20 кг',
-                icon: '<img src="unnamed.png" alt="Нова Пошта" style="width: 28px; height: 28px; object-fit: contain; display: block;">'
+                get icon() { return `<img src="${CARRIER_LOGOS.novaPoshta}" alt="Нова Пошта" style="width: 28px; height: 28px; object-fit: contain; display: block;">`; }
             },
             {
                 id: 'ukrposhta_branch',
@@ -7916,7 +8299,7 @@
                 method: 'branch',
                 name: 'Відділення Укрпошти',
                 sub: 'Ручне введення адреси та індексу • по всій Україні',
-                icon: '<img src="90fd17b5b96113e0860a4f4279c50868.jpg" alt="Укрпошта" style="width: 28px; height: 28px; object-fit: contain; display: block;">'
+                get icon() { return `<img src="${CARRIER_LOGOS.ukrposhta}" alt="Укрпошта" style="width: 28px; height: 28px; object-fit: contain; display: block;">`; }
             }
         ];
 
@@ -10049,15 +10432,25 @@
             let total = 0;
             container.innerHTML = cart.map((item, index) => {
                 total += item.price * item.qty;
-                const displayColor = formatColorEnglish(item.color).toUpperCase();
+                const isWhite = (item.color || '').toLowerCase().includes('біл') || (item.color || '').toLowerCase().includes('white');
+                const isBlack = (item.color || '').toLowerCase().includes('чорн') || (item.color || '').toLowerCase().includes('black') || getColorHex(item.color) === '#181818';
+                const displayColor = (formatColorEnglish(item.color) || item.color || '').toUpperCase();
+                const dotClass = isWhite ? 'color-dot-white' : (isBlack ? 'color-dot-black' : '');
+                const colorHtml = item.color ? `
+                    <div style="font-size: 0.76rem; color: var(--text-muted); margin-top: 3px; display: flex; align-items: center; gap: 5px;">
+                        <span class="color-dot ${dotClass}" style="background-color: ${getColorHex(item.color)}; width: 10px; height: 10px; border-radius: 50%; display: inline-block; flex-shrink: 0;"></span>
+                        <span>Колір: <strong style="color: var(--text-primary); font-weight: 700; text-transform: uppercase;">${displayColor}</strong></span>
+                    </div>
+                ` : '';
+
                 return `
                     <div class="cart-item">
                         <img src="${resolveImgUrl(item.img, item.brand)}" alt="${item.title}" onerror="handleImgError(this, '${(item.img || '').replace(/'/g, "\\'")}', '${(item.brand || '').replace(/'/g, "\\'")}')" onclick="openProductModal(products.find(x => x.id === '${item.id}'))">
                         <div style="flex-grow: 1; overflow: hidden;">
-                            <h4 style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase;">${item.brand}</h4>
-                            <h3 style="font-size: 0.9rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${item.title}</h3>
-                            <div style="font-size: 0.72rem; color: var(--text-secondary);">Колір: ${displayColor}</div>
-                            <div class="product-price" style="font-size: 0.85rem; margin-top: 2px;">${formatPrice(item.price)}</div>
+                            <h4 style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.03em;">${item.brand}</h4>
+                            <h3 style="font-size: 0.9rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-primary);">${item.title}</h3>
+                            <div class="product-price" style="font-size: 0.88rem; font-weight: 800; color: var(--accent); margin-top: 2px;">${formatPrice(item.price)}</div>
+                            ${colorHtml}
                         </div>
                         <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
                             <button class="close-drawer" style="font-size: 0.85rem;" onclick="removeFromCart(${index})">✕</button>
@@ -10303,10 +10696,13 @@
 
             container.innerHTML = wishlist.map((item) => {
                 const isWhite = (item.color || '').toLowerCase().includes('біл') || (item.color || '').toLowerCase().includes('white');
+                const isBlack = (item.color || '').toLowerCase().includes('чорн') || (item.color || '').toLowerCase().includes('black') || getColorHex(item.color) === '#181818';
+                const displayColor = (formatColorEnglish(item.color) || item.color || '').toUpperCase();
+                const dotClass = isWhite ? 'color-dot-white' : (isBlack ? 'color-dot-black' : '');
                 const colorHtml = item.color ? `
                     <div style="font-size: 0.76rem; color: var(--text-muted); margin-top: 3px; display: flex; align-items: center; gap: 5px;">
-                        <span class="color-dot ${isWhite ? 'color-dot-white' : ''}" style="background-color: ${getColorHex(item.color)}; width: 10px; height: 10px; border-radius: 50%; display: inline-block; flex-shrink: 0; border: 1.5px solid ${isWhite ? '#94a3b8' : 'rgba(0,0,0,0.18)'};"></span>
-                        <span>Колір: <strong style="color: var(--text-primary); font-weight: 600;">${formatColorEnglish(item.color)}</strong></span>
+                        <span class="color-dot ${dotClass}" style="background-color: ${getColorHex(item.color)}; width: 10px; height: 10px; border-radius: 50%; display: inline-block; flex-shrink: 0;"></span>
+                        <span>Колір: <strong style="color: var(--text-primary); font-weight: 700; text-transform: uppercase;">${displayColor}</strong></span>
                     </div>
                 ` : '';
 
@@ -10505,7 +10901,6 @@
             }
         }
 
-        window.addEventListener('scroll', updateActiveBottomTab, { passive: true });
         document.addEventListener('DOMContentLoaded', () => {
             setTimeout(updateActiveBottomTab, 300);
         });

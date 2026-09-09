@@ -3909,8 +3909,7 @@ export class TelegramBotService {
     const catButtons = [
       [{ text: '🖱 Мишки', callback_data: 'wiz_cat:Мишки' }, { text: '⌨️ Клавіатури', callback_data: 'wiz_cat:Клавіатури' }],
       [{ text: '🎧 Навушники', callback_data: 'wiz_cat:Навушники' }, { text: '⬛ Килимки', callback_data: 'wiz_cat:Килимки' }],
-      [{ text: '🎮 Геймпади', callback_data: 'wiz_cat:Геймпади' }, { text: '🔌 Аксесуари', callback_data: 'wiz_cat:Аксесуари' }],
-      [{ text: '➕ Ввести нову категорію', callback_data: 'wiz_cat:CUSTOM' }],
+      [{ text: '🔤 Кейкапи', callback_data: 'wiz_cat:Кейкапи' }, { text: '➕ Ввести іншу', callback_data: 'wiz_cat:CUSTOM' }],
       [{ text: '❌ Скасувати', callback_data: 'wiz_cancel' }]
     ];
 
@@ -4201,7 +4200,7 @@ export class TelegramBotService {
     const brand = d.brand || 'MILIP';
     const title = d.title || 'Ігровий девайс';
     const price = Number(d.price) || 999;
-    const category = d.category || 'Аксесуари';
+    const category = d.category || 'Мишки';
     const colors = (d.colors && d.colors.length) ? d.colors : ['Black'];
     
     // Fill color quantities ensuring none are 0 when unspecified/skipped
