@@ -471,15 +471,8 @@
       "hidden": false
     },
     {
-      "id": "accessories",
-      "name": "Аксесуари",
-      "image": "",
-      "position": 2,
-      "hidden": false
-    },
-    {
-      "id": "audio",
-      "name": "Аудіо",
+      "id": "mousepads",
+      "name": "Килимки",
       "image": "",
       "position": 3,
       "hidden": false
@@ -487,6 +480,13 @@
     {
       "id": "навушники",
       "name": "Навушники",
+      "image": "",
+      "position": 4,
+      "hidden": false
+    },
+    {
+      "id": "keycaps",
+      "name": "Кейкапи",
       "image": "",
       "position": 4,
       "hidden": false
@@ -537,77 +537,6 @@
     }
   ],
   "orders": [
-    {
-      "order_id": "MLP-240575",
-      "id": "MLP-240575",
-      "status": "NEW",
-      "status_name": "В обробці",
-      "tracking_number": null,
-      "subtotal": 2799,
-      "delivery_fee": 0,
-      "cod_fee": 0,
-      "total": 2799,
-      "dispatch_timeline": "1-2 дні",
-      "shipping_note": "Відправлення замовлення протягом 1-2 робочих днів з моменту оформлення",
-      "created_at": "2026-09-07T05:54:07.210Z",
-      "updated_at": "2026-09-07T05:54:07.210Z",
-      "customer": {
-        "first_name": "Денис",
-        "last_name": "Аникієнко",
-        "middle_name": "Юрійович",
-        "phone": "+380 96 370 76 31",
-        "email": "",
-        "telegram_id": null,
-        "telegram_username": null
-      },
-      "delivery": {
-        "provider": "nova_poshta",
-        "provider_name": "Нова Пошта",
-        "type": "branch",
-        "type_name": "Відділення",
-        "city": "Чернігів",
-        "city_ref": "db5c897c-391c-11dd-90d9-001a92567626",
-        "warehouse_ref": "eab850c8-2ba0-11e9-acea-005056b24375",
-        "warehouse_number": "Відділення №19 (до 30 кг на одне місце): вул. Всіхсвятська, 5",
-        "department": "Відділення №19 (до 30 кг на одне місце): вул. Всіхсвятська, 5",
-        "address": "Відділення №19 (до 30 кг на одне місце): вул. Всіхсвятська, 5"
-      },
-      "payment": {
-        "method": "manager",
-        "provider": "Через менеджера (@milipmanager)",
-        "status": "PENDING_MANAGER",
-        "transaction_id": null,
-        "paid_at": null,
-        "is_cod": false,
-        "cod_fee": 0,
-        "comment": ""
-      },
-      "items": [
-        {
-          "id": "p_mch_7t3i_9viu",
-          "title": "Mchose MCHOSE V9 PRO",
-          "brand": "Mchose",
-          "sku": "MCH-RHE5W",
-          "color": "Blue",
-          "img": "photo_2026-08-25_15-31-28.jpg",
-          "price": 2799,
-          "qty": 1,
-          "total": 2799
-        }
-      ],
-      "history": [
-        {
-          "status": "NEW",
-          "status_name": "В обробці",
-          "timestamp": "2026-09-07T05:54:07.210Z",
-          "note": "Замовлення оформлено (передано менеджеру)",
-          "actor": "Customer"
-        }
-      ],
-      "admin_comment": "",
-      "_admin_notified": true,
-      "_admin_paid_notified": true
-    },
     {
       "order_id": "MLP-820117",
       "id": "MLP-820117",
@@ -2548,6 +2477,16 @@
       "order_ids": [
         ""
       ]
+    },
+    "7241341140": {
+      "telegram_id": "7241341140",
+      "first_name": "ANDKOP",
+      "last_name": "",
+      "username": "AnatAnd",
+      "phone": "",
+      "order_ids": [
+        ""
+      ]
     }
   },
   "admin_ids": [
@@ -2626,7 +2565,7 @@
   ],
   "deleted_brand_ids": [],
   "deleted_category_ids": [],
-  "last_cloud_sync": "2026-09-07T07:44:23.775Z",
+  "last_cloud_sync": "2026-09-09T17:54:22.511Z",
   "deleted_order_ids": [
     "MLP-912003",
     "MLP-532855",
@@ -2653,6 +2592,7 @@
     "MLP-682316",
     "MLP-938175",
     "MLP-529985",
-    "MLP-989411"
+    "MLP-989411",
+    "MLP-240575"
   ]
 }
